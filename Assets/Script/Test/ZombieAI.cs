@@ -19,16 +19,30 @@ public class ZombieAI : MonoBehaviour
     public float rotationSpeed = 7f;
     public float animationDamping = 0.2f;
 
+    [Header("Hit Stun")]
+    public float hitStunDuration = 2f;
+
+    private bool isHit;
+
+    [Header("Health")]
+    public int maxHealth = 100;
+
+    private int currentHealth;
+
     private Animator animator;
 
     private float currentSpeed;
     private float targetSpeed;
 
     private float attackTimer;
+
     private bool isAttacking;
+    private bool isDead;
 
     private void Start()
     {
+        currentHealth = maxHealth;
+
         // lấy animator ở child luôn cho chắc
         animator = GetComponentInChildren<Animator>();
 
@@ -49,10 +63,29 @@ public class ZombieAI : MonoBehaviour
 
     private void Update()
     {
-        if (target == null)
+        if (target == null || isDead)
             return;
 
         attackTimer += Time.deltaTime;
+        if (isHit)
+        {
+            targetSpeed = 0f;
+
+            currentSpeed = Mathf.Lerp(
+                currentSpeed,
+                0f,
+                acceleration * Time.deltaTime
+            );
+
+            animator.SetFloat(
+                "Speed",
+                0f,
+                animationDamping,
+                Time.deltaTime
+            );
+
+            return;
+        }
 
         float distance =
             Vector3.Distance(
@@ -140,5 +173,72 @@ public class ZombieAI : MonoBehaviour
     private void ResetAttack()
     {
         isAttacking = false;
+    }
+    private void ResetHit()
+    {
+        isHit = false;
+    }
+
+    // TEST DAMAGE
+    private void OnTriggerEnter(Collider other)
+    {
+        // bất kỳ trigger nào chạm zombie đều nhận damage
+        if (other.isTrigger && !isDead)
+        {
+            TakeDamage(25);
+        }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (isDead)
+            return;
+
+        currentHealth -= damage;
+
+        // hit animation
+        animator.SetTrigger("Hit");
+
+        isHit = true;
+
+        Invoke(nameof(ResetHit), hitStunDuration);
+
+        Debug.Log("Zombie HP: " + currentHealth);
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        isDead = true;
+
+        currentSpeed = 0f;
+
+        // lock animator states
+        animator.SetBool("isDeath", true);
+
+        // play death animation
+        animator.SetTrigger("Death");
+
+        // collider không còn interact vật lý
+        GetComponent<Collider>().isTrigger = true;
+
+        // freeze rigidbody
+        Rigidbody rb = GetComponent<Rigidbody>();
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            rb.useGravity = false;
+            rb.isKinematic = true;
+        }
+
+        // destroy sau vài giây
+        Destroy(gameObject, 5f);
     }
 }
