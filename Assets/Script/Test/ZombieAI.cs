@@ -10,7 +10,7 @@ public class ZombieAI : MonoBehaviour
     public float walkSpeed = 1.5f;
     public float runSpeed = 3.5f;
     public float detectDistance = 20f;
-    public float stopDistance = 1.8f;
+    public float stopDistance = 1f;
 
     [Header("Wander")]
     public float wanderRadius = 15f;
