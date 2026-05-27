@@ -2,16 +2,16 @@
 
 public class Spawm : MonoBehaviour
 {
-    [Header("Zombie")]
-    public GameObject zombiePrefab;
+    [Header("Zombies")]
+    // Đổi thành mảng (array) để chứa nhiều loại prefab khác nhau
+    public GameObject[] zombiePrefabs;
 
     [Header("Spawn Settings")]
     public int maxZombie = 10;
     public float spawnInterval = 3f;
 
     [Header("Spawn Area")]
-    public Vector3 spawnAreaSize =
-        new Vector3(50f, 0f, 50f);
+    public Vector3 spawnAreaSize = new Vector3(50f, 0f, 50f);
 
     private float timer;
     private int currentZombie;
@@ -33,6 +33,13 @@ public class Spawm : MonoBehaviour
 
     private void SpawnZombie()
     {
+        // Kiểm tra an toàn: Nếu chưa gán prefab nào vào mảng thì bỏ qua để tránh lỗi
+        if (zombiePrefabs == null || zombiePrefabs.Length == 0)
+        {
+            Debug.LogWarning("Chưa gán Zombie Prefab nào trong mảng zombiePrefabs!");
+            return;
+        }
+
         Vector3 randomPos =
             transform.position +
             new Vector3(
@@ -47,8 +54,14 @@ public class Spawm : MonoBehaviour
                 )
             );
 
+        // Chọn ngẫu nhiên 1 index từ 0 đến (độ dài mảng - 1)
+        int randomIndex = Random.Range(0, zombiePrefabs.Length);
+
+        // Lấy prefab ngẫu nhiên dựa trên index vừa chọn
+        GameObject selectedPrefab = zombiePrefabs[randomIndex];
+
         Instantiate(
-            zombiePrefab,
+            selectedPrefab,
             randomPos,
             Quaternion.identity
         );
@@ -62,7 +75,7 @@ public class Spawm : MonoBehaviour
         currentZombie--;
     }
 
-    // Vẽ vùng spawn
+    // Vẽ vùng spawn trên Scene để dễ căn chỉnh
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
