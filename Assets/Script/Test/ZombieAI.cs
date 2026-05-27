@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 
 public class ZombieAI : MonoBehaviour
 {
@@ -16,13 +17,10 @@ public class ZombieAI : MonoBehaviour
 
     [Header("Smoothing")]
     public float acceleration = 6f;
-    public float rotationSpeed = 7f;
     public float animationDamping = 0.2f;
 
     [Header("Hit Stun")]
     public float hitStunDuration = 2f;
-
-    private bool isHit;
 
     [Header("Health")]
     public int maxHealth = 100;
@@ -30,6 +28,7 @@ public class ZombieAI : MonoBehaviour
     private int currentHealth;
 
     private Animator animator;
+    private NavMeshAgent agent;
 
     private float currentSpeed;
     private float targetSpeed;
@@ -38,6 +37,7 @@ public class ZombieAI : MonoBehaviour
 
     private bool isAttacking;
     private bool isDead;
+    private bool isHit;
 
     // RANDOM ATTACK
     private int attackIndex;
@@ -46,13 +46,22 @@ public class ZombieAI : MonoBehaviour
     {
         currentHealth = maxHealth;
 
-        // lấy animator ở child luôn cho chắc
+        // Animator
         animator = GetComponentInChildren<Animator>();
 
-        // Auto find player by tag
+        // NavMeshAgent
+        agent = GetComponent<NavMeshAgent>();
+
+        agent.speed = runSpeed;
+        agent.acceleration = 20f;
+        agent.angularSpeed = 120f;
+        agent.stoppingDistance = stopDistance;
+
+        // Auto find player
         if (target == null)
         {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            GameObject player =
+                GameObject.FindGameObjectWithTag("Player");
 
             if (player != null)
             {
@@ -60,7 +69,7 @@ public class ZombieAI : MonoBehaviour
             }
         }
 
-        // Small random speed variation
+        // Small random animation speed
         animator.speed = Random.Range(0.95f, 1.05f);
     }
 
@@ -82,6 +91,8 @@ public class ZombieAI : MonoBehaviour
                 acceleration * Time.deltaTime
             );
 
+            agent.isStopped = true;
+
             animator.SetFloat(
                 "Speed",
                 0f,
@@ -98,33 +109,15 @@ public class ZombieAI : MonoBehaviour
                 target.position
             );
 
-        // Direction tới player
-        Vector3 direction =
-            (target.position - transform.position).normalized;
-
-        direction.y = 0;
-
-        // Smooth rotation
-        if (direction != Vector3.zero)
-        {
-            Quaternion targetRotation =
-                Quaternion.LookRotation(direction);
-
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRotation,
-                rotationSpeed * Time.deltaTime
-            );
-        }
-
         // ATTACK
         if (distance <= stopDistance)
         {
             targetSpeed = 0f;
 
+            agent.isStopped = true;
+
             if (!isAttacking && attackTimer >= attackCooldown)
             {
-                // RANDOM ATTACK
                 attackIndex = Random.Range(0, 2);
 
                 animator.SetInteger(
@@ -144,6 +137,8 @@ public class ZombieAI : MonoBehaviour
         else
         {
             // CHASE
+            agent.isStopped = false;
+
             if (distance <= chaseDistance)
             {
                 targetSpeed = runSpeed;
@@ -152,29 +147,23 @@ public class ZombieAI : MonoBehaviour
             {
                 targetSpeed = walkSpeed;
             }
+
+            agent.speed = targetSpeed;
+
+            agent.SetDestination(target.position);
         }
 
-        // Smooth acceleration
+        // Smooth animation speed
         currentSpeed = Mathf.Lerp(
             currentSpeed,
             targetSpeed,
             acceleration * Time.deltaTime
         );
 
-        // Move toward player
-        if (currentSpeed > 0.05f)
-        {
-            transform.position +=
-                transform.forward *
-                currentSpeed *
-                Time.deltaTime;
-        }
-
         // Normalize speed for Blend Tree
         float normalizedSpeed =
             Mathf.Clamp01(currentSpeed / runSpeed);
 
-        // Smooth animation blending
         animator.SetFloat(
             "Speed",
             normalizedSpeed,
@@ -193,12 +182,16 @@ public class ZombieAI : MonoBehaviour
     private void ResetHit()
     {
         isHit = false;
+
+        if (!isDead)
+        {
+            agent.isStopped = false;
+        }
     }
 
     // TEST DAMAGE
     private void OnTriggerEnter(Collider other)
     {
-        // bất kỳ trigger nào chạm zombie đều nhận damage
         if (other.isTrigger && !isDead)
         {
             TakeDamage(25);
@@ -212,14 +205,14 @@ public class ZombieAI : MonoBehaviour
 
         currentHealth -= damage;
 
-        // hit animation
         animator.SetTrigger("Hit");
 
         isHit = true;
 
+        agent.isStopped = true;
+
         CancelInvoke(nameof(ResetHit));
 
-        // RANDOM HIT STUN
         float randomHitStun =
             Random.Range(0.3f, 0.8f);
 
@@ -239,16 +232,18 @@ public class ZombieAI : MonoBehaviour
 
         currentSpeed = 0f;
 
-        // lock animator states
-        animator.SetBool("isDeath", true);
+        // Stop NavMesh
+        agent.isStopped = true;
+        agent.enabled = false;
 
-        // play death animation
+        // Death animation
+        animator.SetBool("isDeath", true);
         animator.SetTrigger("Death");
 
-        // collider không còn interact vật lý
+        // Disable collider interaction
         GetComponent<Collider>().isTrigger = true;
 
-        // freeze rigidbody
+        // Freeze rigidbody
         Rigidbody rb = GetComponent<Rigidbody>();
 
         if (rb != null)
@@ -260,7 +255,6 @@ public class ZombieAI : MonoBehaviour
             rb.isKinematic = true;
         }
 
-        // destroy sau vài giây
         Destroy(gameObject, 5f);
     }
 }
