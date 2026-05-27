@@ -7067,6 +7067,8 @@ GameObject:
   - component: {fileID: 95776517833340188}
   - component: {fileID: -531211846447587564}
   - component: {fileID: -9022747769788499285}
+  - component: {fileID: 2839652588596342275}
+  - component: {fileID: -8557014218306445995}
   m_Layer: 0
   m_Name: Zombie_Grandpa_Male_01
   m_TagString: Untagged
@@ -7150,7 +7152,7 @@ Animator:
   m_GameObject: {fileID: 1785411793677078}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: b20a3c10714a6ac439af479e3273de65, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 2d4709eadfc3dcc4e87846cd43a63694, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 1
@@ -7212,6 +7214,53 @@ CapsuleCollider:
   m_Height: 1.6271296
   m_Direction: 1
   m_Center: {x: 0.0013861656, y: 0.73907113, z: 0}
+--- !u!195 &2839652588596342275
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1785411793677078}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &-8557014218306445995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1785411793677078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1e28ed3790c85e4bb5cf41289fb9830, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZombieAI
+  target: {fileID: 0}
+  walkSpeed: 1.3
+  runSpeed: 3.2
+  detectDistance: 20
+  stopDistance: 1.8
+  wanderRadius: 15
+  wanderTimer: 5
+  idleTimeMin: 2
+  idleTimeMax: 5
+  attackCooldown: 2
+  acceleration: 5
+  animationDamping: 0.15
+  maxHealth: 100
 --- !u!1 &1831603496716468
 GameObject:
   m_ObjectHideFlags: 0
