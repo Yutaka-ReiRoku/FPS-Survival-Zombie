@@ -39,6 +39,9 @@ public class ZombieAI : MonoBehaviour
     private bool isAttacking;
     private bool isDead;
 
+    // RANDOM ATTACK
+    private int attackIndex;
+
     private void Start()
     {
         currentHealth = maxHealth;
@@ -67,6 +70,8 @@ public class ZombieAI : MonoBehaviour
             return;
 
         attackTimer += Time.deltaTime;
+
+        // HIT STUN
         if (isHit)
         {
             targetSpeed = 0f;
@@ -119,6 +124,14 @@ public class ZombieAI : MonoBehaviour
 
             if (!isAttacking && attackTimer >= attackCooldown)
             {
+                // RANDOM ATTACK
+                attackIndex = Random.Range(0, 2);
+
+                animator.SetInteger(
+                    "AttackIndex",
+                    attackIndex
+                );
+
                 animator.SetTrigger("Attack");
 
                 isAttacking = true;
@@ -173,7 +186,10 @@ public class ZombieAI : MonoBehaviour
     private void ResetAttack()
     {
         isAttacking = false;
+
+        animator.ResetTrigger("Attack");
     }
+
     private void ResetHit()
     {
         isHit = false;
@@ -201,7 +217,13 @@ public class ZombieAI : MonoBehaviour
 
         isHit = true;
 
-        Invoke(nameof(ResetHit), hitStunDuration);
+        CancelInvoke(nameof(ResetHit));
+
+        // RANDOM HIT STUN
+        float randomHitStun =
+            Random.Range(0.3f, 0.8f);
+
+        Invoke(nameof(ResetHit), randomHitStun);
 
         Debug.Log("Zombie HP: " + currentHealth);
 
