@@ -8,6 +8,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5898154939529675990, guid: 2165f6a67f710bc47a7cfc0882e7e964, type: 3}
+      propertyPath: runSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: -5898154939529675990, guid: 2165f6a67f710bc47a7cfc0882e7e964, type: 3}
+      propertyPath: walkSpeed
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1418193975600942, guid: 2165f6a67f710bc47a7cfc0882e7e964, type: 3}
       propertyPath: m_Name
       value: Zombie_Bellboy_Male_01 Variant
