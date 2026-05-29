@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
-
-public class ZombieAI : MonoBehaviour
+using cowsins;
+public class ZombieAI : MonoBehaviour, IDamageable
 {
     [Header("Target")]
     public Transform target;
@@ -52,6 +52,8 @@ public class ZombieAI : MonoBehaviour
     // RANDOM ATTACK
     private int attackIndex;
 
+
+
     private void Start()
     {
         currentHealth = maxHealth;
@@ -59,7 +61,7 @@ public class ZombieAI : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
 
         agent = GetComponent<NavMeshAgent>();
-
+    
         agent.speed = walkSpeed;
         agent.acceleration = 20f;
         agent.angularSpeed = 120f;
@@ -294,10 +296,6 @@ public class ZombieAI : MonoBehaviour
     // TEST DAMAGE
     private void OnTriggerEnter(Collider other)
     {
-        if (other.isTrigger && !isDead)
-        {
-            TakeDamage(25);
-        }
     }
 
     public void TakeDamage(int damage)
@@ -355,4 +353,11 @@ public class ZombieAI : MonoBehaviour
 
         Destroy(gameObject, 5f);
     }
+    public void Damage(float damage, bool isHeadshot)
+    {
+        Debug.Log("FPS Engine Hit: " + damage);
+        TakeDamage(Mathf.RoundToInt(damage));
+    }
+
+
 }
