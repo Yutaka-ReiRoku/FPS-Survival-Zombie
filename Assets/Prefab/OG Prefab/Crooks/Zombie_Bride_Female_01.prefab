@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: -1046001307840555280}
   - component: {fileID: 1855511137970893440}
   - component: {fileID: 7124773836973351214}
+  - component: {fileID: 7193775153747733131}
   m_Layer: 0
   m_Name: Zombie_Bride_Female_01
   m_TagString: Untagged
@@ -238,6 +239,44 @@ MonoBehaviour:
   acceleration: 5
   animationDamping: 0.15
   maxHealth: 100
+--- !u!114 &7193775153747733131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1017123011376438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
+  uniqueID: 86203099-7fbe-4069-aacf-291003046830
+  _name: 
+  health: 0
+  shield: 0
+  maxHealth: 0
+  maxShield: 0
+  destroyOnDie: 0
+  destroyComponentOnDie: 0
+  deathEffect: {fileID: 0}
+  enemyStatusContainer: {fileID: 0}
+  healthBar: {fileID: 0}
+  shieldBar: {fileID: 0}
+  showUI: 0
+  showDamagePopUps: 0
+  showKillFeed: 0
+  dieSFX: {fileID: 0}
+  events:
+    OnSpawn:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDamaged:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeath:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!1 &1019278611430954
 GameObject:
   m_ObjectHideFlags: 0

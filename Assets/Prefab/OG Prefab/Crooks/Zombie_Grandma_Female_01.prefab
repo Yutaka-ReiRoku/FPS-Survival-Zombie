@@ -600,6 +600,7 @@ GameObject:
   - component: {fileID: 7523764504477546626}
   - component: {fileID: -28740309886655310}
   - component: {fileID: 870259241402366968}
+  - component: {fileID: 7016903146102451643}
   m_Layer: 0
   m_Name: Zombie_Grandma_Female_01
   m_TagString: Untagged
@@ -792,6 +793,44 @@ MonoBehaviour:
   acceleration: 5
   animationDamping: 0.15
   maxHealth: 100
+--- !u!114 &7016903146102451643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1134484993998496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
+  uniqueID: 1b477653-8d6d-4c33-b293-03359ac55d44
+  _name: 
+  health: 0
+  shield: 0
+  maxHealth: 0
+  maxShield: 0
+  destroyOnDie: 0
+  destroyComponentOnDie: 0
+  deathEffect: {fileID: 0}
+  enemyStatusContainer: {fileID: 0}
+  healthBar: {fileID: 0}
+  shieldBar: {fileID: 0}
+  showUI: 0
+  showDamagePopUps: 0
+  showKillFeed: 0
+  dieSFX: {fileID: 0}
+  events:
+    OnSpawn:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDamaged:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeath:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!1 &1150643132783686
 GameObject:
   m_ObjectHideFlags: 0

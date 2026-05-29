@@ -8476,6 +8476,7 @@ GameObject:
   - component: {fileID: 7674764523436425087}
   - component: {fileID: 1396112251967597721}
   - component: {fileID: -364635528743703257}
+  - component: {fileID: 6087423548941979048}
   m_Layer: 0
   m_Name: Zombie_Police_Female_01
   m_TagString: Untagged
@@ -8668,6 +8669,44 @@ MonoBehaviour:
   acceleration: 5
   animationDamping: 0.15
   maxHealth: 100
+--- !u!114 &6087423548941979048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1922703142909278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
+  uniqueID: e880051e-9d9b-4840-9c6e-5ec69a14411a
+  _name: 
+  health: 0
+  shield: 0
+  maxHealth: 0
+  maxShield: 0
+  destroyOnDie: 0
+  destroyComponentOnDie: 0
+  deathEffect: {fileID: 0}
+  enemyStatusContainer: {fileID: 0}
+  healthBar: {fileID: 0}
+  shieldBar: {fileID: 0}
+  showUI: 0
+  showDamagePopUps: 0
+  showKillFeed: 0
+  dieSFX: {fileID: 0}
+  events:
+    OnSpawn:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDamaged:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeath:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!1 &1934420352407756
 GameObject:
   m_ObjectHideFlags: 0

@@ -1103,6 +1103,7 @@ GameObject:
   - component: {fileID: -4340461688026145624}
   - component: {fileID: -1794780067074205709}
   - component: {fileID: -481666326454983024}
+  - component: {fileID: -7074776079672146140}
   m_Layer: 0
   m_Name: Zombie_Patient_Female_01
   m_TagString: Untagged
@@ -1295,6 +1296,44 @@ MonoBehaviour:
   acceleration: 5
   animationDamping: 0.15
   maxHealth: 100
+--- !u!114 &-7074776079672146140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1172417875531008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
+  uniqueID: 882dfcf0-4cd0-4fb6-8550-f713598ea39d
+  _name: 
+  health: 0
+  shield: 0
+  maxHealth: 0
+  maxShield: 0
+  destroyOnDie: 0
+  destroyComponentOnDie: 0
+  deathEffect: {fileID: 0}
+  enemyStatusContainer: {fileID: 0}
+  healthBar: {fileID: 0}
+  shieldBar: {fileID: 0}
+  showUI: 0
+  showDamagePopUps: 0
+  showKillFeed: 0
+  dieSFX: {fileID: 0}
+  events:
+    OnSpawn:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDamaged:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeath:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!1 &1178209399669858
 GameObject:
   m_ObjectHideFlags: 0

@@ -3495,6 +3495,7 @@ GameObject:
   - component: {fileID: 8920998819645808277}
   - component: {fileID: -7901613669677384849}
   - component: {fileID: -5898154939529675990}
+  - component: {fileID: -2886372021611903564}
   m_Layer: 0
   m_Name: Zombie_Bellboy_Male_01
   m_TagString: Untagged
@@ -3687,6 +3688,44 @@ MonoBehaviour:
   acceleration: 5
   animationDamping: 0.15
   maxHealth: 100
+--- !u!114 &-2886372021611903564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1418193975600942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
+  uniqueID: 27546834-0221-4315-91e1-d5676dccaa8a
+  _name: 1
+  health: 0
+  shield: 0
+  maxHealth: 100
+  maxShield: 100
+  destroyOnDie: 0
+  destroyComponentOnDie: 1
+  deathEffect: {fileID: 0}
+  enemyStatusContainer: {fileID: 0}
+  healthBar: {fileID: 0}
+  shieldBar: {fileID: 0}
+  showUI: 0
+  showDamagePopUps: 1
+  showKillFeed: 0
+  dieSFX: {fileID: 0}
+  events:
+    OnSpawn:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDamaged:
+      m_PersistentCalls:
+        m_Calls: []
+    OnDeath:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!1 &1423411692011380
 GameObject:
   m_ObjectHideFlags: 0
