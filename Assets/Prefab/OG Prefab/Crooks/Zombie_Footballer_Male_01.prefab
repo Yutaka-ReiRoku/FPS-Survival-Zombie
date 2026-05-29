@@ -8022,6 +8022,9 @@ MonoBehaviour:
   acceleration: 5
   animationDamping: 0.15
   maxHealth: 100
+  dropPrefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
+  dropChance: 50
+  dropOffset: {x: 0, y: 0.5, z: 0}
 --- !u!114 &2518676980129225793
 MonoBehaviour:
   m_ObjectHideFlags: 0

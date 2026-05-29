@@ -3688,6 +3688,9 @@ MonoBehaviour:
   acceleration: 5
   animationDamping: 0.15
   maxHealth: 100
+  dropPrefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
+  dropChance: 50
+  dropOffset: {x: 0, y: 0.5, z: 0}
 --- !u!114 &-2886372021611903564
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3700,7 +3703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
-  uniqueID: 8dd75a84-4402-4060-bf6f-6c9b913a2f61
+  uniqueID: 20c94a98-9fa1-4a9d-a3f0-cca8535d5a26
   _name: 1
   health: 0
   shield: 0
@@ -3725,7 +3728,19 @@ MonoBehaviour:
         m_Calls: []
     OnDeath:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: -5898154939529675990}
+          m_TargetAssemblyTypeName: ZombieAI, Assembly-CSharp
+          m_MethodName: DropLoot
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &1423411692011380
 GameObject:
   m_ObjectHideFlags: 0

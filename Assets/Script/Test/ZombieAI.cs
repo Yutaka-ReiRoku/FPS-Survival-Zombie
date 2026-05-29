@@ -1,363 +1,406 @@
-﻿using UnityEngine;
-using UnityEngine.AI;
-using cowsins;
-public class ZombieAI : MonoBehaviour, IDamageable
-{
-    [Header("Target")]
-    public Transform target;
+﻿    using UnityEngine;
+    using UnityEngine.AI;
+    using cowsins;
+    public class ZombieAI : MonoBehaviour, IDamageable
+    {
+        [Header("Target")]
+        public Transform target;
 
-    [Header("Movement")]
-    public float walkSpeed = 1.5f;
-    public float runSpeed = 3.5f;
-    public float detectDistance = 20f;
-    public float stopDistance = 1f;
+        [Header("Movement")]
+        public float walkSpeed = 1.5f;
+        public float runSpeed = 3.5f;
+        public float detectDistance = 20f;
+        public float stopDistance = 1f;
 
-    [Header("Wander")]
-    public float wanderRadius = 15f;
-    public float wanderTimer = 5f;
+        [Header("Wander")]
+        public float wanderRadius = 15f;
+        public float wanderTimer = 5f;
 
-    [Header("Idle Wander")]
-    public float idleTimeMin = 2f;
-    public float idleTimeMax = 5f;
+        [Header("Idle Wander")]
+        public float idleTimeMin = 2f;
+        public float idleTimeMax = 5f;
 
-    [Header("Attack")]
-    public float attackCooldown = 2f;
+        [Header("Attack")]
+        public float attackCooldown = 2f;
 
-    [Header("Animation")]
-    public float acceleration = 6f;
-    public float animationDamping = 0.2f;
+        [Header("Animation")]
+        public float acceleration = 6f;
+        public float animationDamping = 0.2f;
 
-    [Header("Health")]
-    public int maxHealth = 100;
+        [Header("Health")]
+        public int maxHealth = 100;
 
-    private int currentHealth;
+        private int currentHealth;
+
+        [Header("Loot Drop")]
+        public GameObject dropPrefab;
+        [Range(1, 100)]
+        public float dropChance = 100f;
+        public Vector3 dropOffset = new Vector3(0, 0.5f, 0);
+
 
     private Animator animator;
-    private NavMeshAgent agent;
+        private NavMeshAgent agent;
 
-    private float currentSpeed;
-    private float targetSpeed;
+        private float currentSpeed;
+        private float targetSpeed;
 
-    private float attackTimer;
-    private float wanderCounter;
+        private float attackTimer;
+        private float wanderCounter;
 
-    private bool isAttacking;
-    private bool isDead;
-    private bool isHit;
+        private bool isAttacking;
+        private bool isDead;
+        private bool isHit;
 
-    // IDLE WANDER
-    private bool isIdleWander;
-    private float idleTimer;
+        // IDLE WANDER
+        private bool isIdleWander;
+        private float idleTimer;
 
-    // RANDOM ATTACK
-    private int attackIndex;
+        // RANDOM ATTACK
+        private int attackIndex;
 
 
 
-    private void Start()
-    {
-        currentHealth = maxHealth;
+        private void Start()
+        {
+            currentHealth = maxHealth;
 
-        animator = GetComponentInChildren<Animator>();
+            animator = GetComponentInChildren<Animator>();
 
-        agent = GetComponent<NavMeshAgent>();
+            agent = GetComponent<NavMeshAgent>();
     
-        agent.speed = walkSpeed;
-        agent.acceleration = 20f;
-        agent.angularSpeed = 120f;
-        agent.stoppingDistance = stopDistance;
+            agent.speed = walkSpeed;
+            agent.acceleration = 20f;
+            agent.angularSpeed = 120f;
+            agent.stoppingDistance = stopDistance;
 
-        // Auto find player
-        if (target == null)
-        {
-            GameObject player =
-                GameObject.FindGameObjectWithTag("Player");
-
-            if (player != null)
+            // Auto find player
+            if (target == null)
             {
-                target = player.transform;
+                GameObject player =
+                    GameObject.FindGameObjectWithTag("Player");
+
+                if (player != null)
+                {
+                    target = player.transform;
+                }
             }
+
+            // Random animation speed
+            animator.speed = Random.Range(0.95f, 1.05f);
+
+            wanderCounter = wanderTimer;
         }
 
-        // Random animation speed
-        animator.speed = Random.Range(0.95f, 1.05f);
-
-        wanderCounter = wanderTimer;
-    }
-
-    private void Update()
-    {
-        if (target == null || isDead)
-            return;
-
-        attackTimer += Time.deltaTime;
-        wanderCounter += Time.deltaTime;
-
-        // HIT STUN
-        if (isHit)
+        private void Update()
         {
-            targetSpeed = 0f;
+            if (target == null || isDead)
+                return;
 
-            currentSpeed = Mathf.Lerp(
-                currentSpeed,
-                0f,
-                acceleration * Time.deltaTime
-            );
+            attackTimer += Time.deltaTime;
+            wanderCounter += Time.deltaTime;
 
-            agent.isStopped = true;
-
-            animator.SetFloat(
-                "Speed",
-                0f,
-                animationDamping,
-                Time.deltaTime
-            );
-
-            return;
-        }
-
-        float distance =
-            Vector3.Distance(
-                transform.position,
-                target.position
-            );
-
-        // PLAYER DETECTED
-        if (distance <= detectDistance)
-        {
-            isIdleWander = false;
-
-            // ATTACK
-            if (distance <= stopDistance)
+            // HIT STUN
+            if (isHit)
             {
                 targetSpeed = 0f;
 
+                currentSpeed = Mathf.Lerp(
+                    currentSpeed,
+                    0f,
+                    acceleration * Time.deltaTime
+                );
+
                 agent.isStopped = true;
 
-                if (!isAttacking &&
-                    attackTimer >= attackCooldown)
-                {
-                    attackIndex = Random.Range(0, 2);
+                animator.SetFloat(
+                    "Speed",
+                    0f,
+                    animationDamping,
+                    Time.deltaTime
+                );
 
-                    animator.SetInteger(
-                        "AttackIndex",
-                        attackIndex
-                    );
-
-                    animator.SetTrigger("Attack");
-
-                    isAttacking = true;
-
-                    attackTimer = 0f;
-
-                    Invoke(
-                        nameof(ResetAttack),
-                        attackCooldown
-                    );
-                }
+                return;
             }
-            else
-            {
-                // CHASE
-                targetSpeed = runSpeed;
 
-                agent.isStopped = false;
-
-                agent.speed = runSpeed;
-
-                agent.SetDestination(
+            float distance =
+                Vector3.Distance(
+                    transform.position,
                     target.position
                 );
-            }
-        }
-        else
-        {
-            // IDLE WANDER
-            if (isIdleWander)
+
+            // PLAYER DETECTED
+            if (distance <= detectDistance)
             {
-                targetSpeed = 0f;
+                isIdleWander = false;
 
-                idleTimer -= Time.deltaTime;
-
-                agent.isStopped = true;
-
-                if (idleTimer <= 0f)
+                // ATTACK
+                if (distance <= stopDistance)
                 {
-                    isIdleWander = false;
+                    targetSpeed = 0f;
 
-                    wanderCounter = wanderTimer;
+                    agent.isStopped = true;
+
+                    if (!isAttacking &&
+                        attackTimer >= attackCooldown)
+                    {
+                        attackIndex = Random.Range(0, 2);
+
+                        animator.SetInteger(
+                            "AttackIndex",
+                            attackIndex
+                        );
+
+                        animator.SetTrigger("Attack");
+
+                        isAttacking = true;
+
+                        attackTimer = 0f;
+                        DamagePlayer(20);
+                        Invoke(
+                            nameof(ResetAttack),
+                            attackCooldown
+                        );
+                    }
+                }
+                else
+                {
+                    // CHASE
+                    targetSpeed = runSpeed;
+
+                    agent.isStopped = false;
+
+                    agent.speed = runSpeed;
+
+                    agent.SetDestination(
+                        target.position
+                    );
                 }
             }
             else
             {
-                // NORMAL WANDER
-                targetSpeed = walkSpeed;
-
-                agent.isStopped = false;
-
-                agent.speed = walkSpeed;
-
-                if (wanderCounter >= wanderTimer)
+                // IDLE WANDER
+                if (isIdleWander)
                 {
-                    Vector3 newPos =
-                        RandomNavSphere(
-                            transform.position,
-                            wanderRadius,
-                            -1
-                        );
+                    targetSpeed = 0f;
 
-                    agent.SetDestination(newPos);
+                    idleTimer -= Time.deltaTime;
 
-                    wanderCounter = 0;
+                    agent.isStopped = true;
 
-                    // RANDOM IDLE
-                    if (Random.value > 0.5f)
+                    if (idleTimer <= 0f)
                     {
-                        StartIdle();
+                        isIdleWander = false;
+
+                        wanderCounter = wanderTimer;
+                    }
+                }
+                else
+                {
+                    // NORMAL WANDER
+                    targetSpeed = walkSpeed;
+
+                    agent.isStopped = false;
+
+                    agent.speed = walkSpeed;
+
+                    if (wanderCounter >= wanderTimer)
+                    {
+                        Vector3 newPos =
+                            RandomNavSphere(
+                                transform.position,
+                                wanderRadius,
+                                -1
+                            );
+
+                        agent.SetDestination(newPos);
+
+                        wanderCounter = 0;
+
+                        // RANDOM IDLE
+                        if (Random.value > 0.5f)
+                        {
+                            StartIdle();
+                        }
                     }
                 }
             }
-        }
 
-        // Smooth animation
-        currentSpeed = Mathf.Lerp(
-            currentSpeed,
-            targetSpeed,
-            acceleration * Time.deltaTime
-        );
-
-        float normalizedSpeed =
-            Mathf.Clamp01(
-                currentSpeed / runSpeed
+            // Smooth animation
+            currentSpeed = Mathf.Lerp(
+                currentSpeed,
+                targetSpeed,
+                acceleration * Time.deltaTime
             );
 
-        animator.SetFloat(
-            "Speed",
-            normalizedSpeed,
-            animationDamping,
-            Time.deltaTime
-        );
-    }
+            float normalizedSpeed =
+                Mathf.Clamp01(
+                    currentSpeed / runSpeed
+                );
 
-    // RANDOM POSITION
-    public static Vector3 RandomNavSphere(
-        Vector3 origin,
-        float distance,
-        int layermask
-    )
-    {
-        Vector3 randomDirection =
-            Random.insideUnitSphere * distance;
-
-        randomDirection += origin;
-
-        NavMeshHit navHit;
-
-        NavMesh.SamplePosition(
-            randomDirection,
-            out navHit,
-            distance,
-            layermask
-        );
-
-        return navHit.position;
-    }
-
-    // START IDLE
-    private void StartIdle()
-    {
-        isIdleWander = true;
-
-        idleTimer = Random.Range(
-            idleTimeMin,
-            idleTimeMax
-        );
-
-        agent.isStopped = true;
-    }
-
-    private void ResetAttack()
-    {
-        isAttacking = false;
-
-        animator.ResetTrigger("Attack");
-    }
-
-    private void ResetHit()
-    {
-        isHit = false;
-
-        if (!isDead)
-        {
-            agent.isStopped = false;
-        }
-    }
-
-    // TEST DAMAGE
-    private void OnTriggerEnter(Collider other)
-    {
-    }
-
-    public void TakeDamage(int damage)
-    {
-        if (isDead)
-            return;
-
-        currentHealth -= damage;
-
-        animator.SetTrigger("Hit");
-
-        isHit = true;
-
-        agent.isStopped = true;
-
-        CancelInvoke(nameof(ResetHit));
-
-        float randomHitStun =
-            Random.Range(0.3f, 0.8f);
-
-        Invoke(nameof(ResetHit), randomHitStun);
-
-        Debug.Log("Zombie HP: " + currentHealth);
-
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
-    }
-
-    private void Die()
-    {
-        isDead = true;
-
-        currentSpeed = 0f;
-
-        agent.isStopped = true;
-        agent.enabled = false;
-
-        animator.SetBool("isDeath", true);
-        animator.SetTrigger("Death");
-
-        GetComponent<Collider>().isTrigger = true;
-
-        Rigidbody rb = GetComponent<Rigidbody>();
-
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-
-            rb.useGravity = false;
-            rb.isKinematic = true;
+            animator.SetFloat(
+                "Speed",
+                normalizedSpeed,
+                animationDamping,
+                Time.deltaTime
+            );
         }
 
-        Destroy(gameObject, 5f);
-    }
-    public void Damage(float damage, bool isHeadshot)
-    {
-        Debug.Log("FPS Engine Hit: " + damage);
-        TakeDamage(Mathf.RoundToInt(damage));
+        // RANDOM POSITION
+        public static Vector3 RandomNavSphere(
+            Vector3 origin,
+            float distance,
+            int layermask
+        )
+        {
+            Vector3 randomDirection =
+                Random.insideUnitSphere * distance;
+
+            randomDirection += origin;
+
+            NavMeshHit navHit;
+
+            NavMesh.SamplePosition(
+                randomDirection,
+                out navHit,
+                distance,
+                layermask
+            );
+
+            return navHit.position;
+        }
+
+        // START IDLE
+        private void StartIdle()
+        {
+            isIdleWander = true;
+
+            idleTimer = Random.Range(
+                idleTimeMin,
+                idleTimeMax
+            );
+
+            agent.isStopped = true;
+        }
+
+        private void ResetAttack()
+        {
+            isAttacking = false;
+
+            animator.ResetTrigger("Attack");
+        }
+
+        private void ResetHit()
+        {
+            isHit = false;
+
+            if (!isDead)
+            {
+                agent.isStopped = false;
+            }
+        }
+
+        // TEST DAMAGE
+        private void OnTriggerEnter(Collider other)
+        {
+        }
+
+        public void TakeDamage(int damage)
+        {
+            if (isDead)
+                return;
+
+            currentHealth -= damage;
+
+            animator.SetTrigger("Hit");
+
+            isHit = true;
+
+            agent.isStopped = true;
+
+            CancelInvoke(nameof(ResetHit));
+
+            float randomHitStun =
+                Random.Range(0.3f, 0.8f);
+
+            Invoke(nameof(ResetHit), randomHitStun);
+
+            Debug.Log("Zombie HP: " + currentHealth);
+
+            if (currentHealth <= 0)
+            {
+                Die();
+            }
+        }
+
+        private void Die()
+        {
+            isDead = true;
+
+            currentSpeed = 0f;
+
+            agent.isStopped = true;
+            agent.enabled = false;
+            TestDrop();
+            animator.SetBool("isDeath", true);
+            animator.SetTrigger("Death");
+
+            GetComponent<Collider>().isTrigger = true;
+
+            Rigidbody rb = GetComponent<Rigidbody>();
+
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+
+                rb.useGravity = false;
+                rb.isKinematic = true;
+            }
+
+            Destroy(gameObject, 5f);
+        }
+        public void Damage(float damage, bool isHeadshot)
+        {
+            Debug.Log("FPS Engine Hit: " + damage);
+            TakeDamage(Mathf.RoundToInt(damage));
+        }
+
+        private void DamagePlayer(float damage)
+        {
+            if (target == null) return;
+
+            IDamageable player =
+                target.GetComponent<IDamageable>();
+
+            if (player != null)
+            {
+                player.Damage(damage, false);
+            }
+        }
+
+        public void DropLoot()
+        {
+            if (dropPrefab == null)
+            {
+                Debug.LogWarning("Drop Prefab NULL");
+                return;
+            }
+
+            Debug.Log("DROP TEST");
+
+            Instantiate(
+                dropPrefab,
+                transform.position + dropOffset,
+                Quaternion.identity
+            );
     }
 
+
+    [ContextMenu("TEST DROP")]
+    public void TestDrop()
+    {
+        DropLoot();
+    }
 
 }
