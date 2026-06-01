@@ -160,8 +160,8 @@
         {
                 isIdleWander = false;
 
-                // ATTACK
-                if (distance <= stopDistance)
+            // ATTACK
+                if (distance <= attackDistance)
                 {
                     targetSpeed = 0f;
                 agent.isStopped = true;
@@ -231,8 +231,22 @@
                     agent.isStopped = false;
 
                     agent.speed = walkSpeed;
+                if (agent.velocity.sqrMagnitude > 0.1f)
+                {
+                    Vector3 lookDir =
+                        agent.velocity.normalized;
 
-                    if (wanderCounter >= wanderTimer)
+                    lookDir.y = 0f;
+
+                    transform.rotation =
+                        Quaternion.Slerp(
+                            transform.rotation,
+                            Quaternion.LookRotation(lookDir),
+                            Time.deltaTime * 5f
+                        );
+                }
+
+                if (wanderCounter >= wanderTimer)
                     {
                         Vector3 newPos =
                             RandomNavSphere(
