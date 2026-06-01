@@ -11,6 +11,8 @@
         public float runSpeed = 3.5f;
         public float detectDistance = 20f;
         public float stopDistance = 1f;
+        public float attackDistance = 1.8f;
+
 
         [Header("Wander")]
         public float wanderRadius = 15f;
@@ -21,11 +23,11 @@
         public float idleTimeMax = 5f;
 
         [Header("Attack")]
-        public float attackCooldown = 2f;
+        public float attackCooldown = 1.5f;
 
         [Header("Animation")]
         public float acceleration = 6f;
-        public float animationDamping = 0.2f;
+        public float animationDamping = 0.4f;
 
         [Header("Health")]
         public int maxHealth = 100;
@@ -68,14 +70,17 @@
             animator = GetComponentInChildren<Animator>();
 
             agent = GetComponent<NavMeshAgent>();
-    
-            agent.speed = walkSpeed;
-            agent.acceleration = 20f;
-            agent.angularSpeed = 120f;
-            agent.stoppingDistance = stopDistance;
 
-            // Auto find player
-            if (target == null)
+            agent.speed = walkSpeed;
+            agent.acceleration = 15f;
+            agent.angularSpeed = 300f;
+            agent.autoBraking = false;
+            agent.stoppingDistance = attackDistance;
+
+            agent.updateRotation = false;
+
+        // Auto find player
+        if (target == null)
             {
                 GameObject player =
                     GameObject.FindGameObjectWithTag("Player");
@@ -96,6 +101,21 @@
                 AIDirector.Instance
                     .RegisterZombie(this);
             }
+
+        NavMeshHit navHit;
+
+        if (
+            NavMesh.SamplePosition(
+                transform.position,
+                out navHit,
+                3f,
+                NavMesh.AllAreas
+            )
+        )
+        {
+            transform.position =
+                navHit.position;
+        }
     }
 
         private void Update()
@@ -135,20 +155,19 @@
                     target.position
                 );
 
-            // PLAYER DETECTED
-            if (distance <= detectDistance)
-            {
+        // PLAYER DETECTED
+        if (distance <= detectDistance)
+        {
                 isIdleWander = false;
 
                 // ATTACK
                 if (distance <= stopDistance)
                 {
                     targetSpeed = 0f;
-
-                    agent.isStopped = true;
+                agent.isStopped = true;
 
                     if (!isAttacking &&
-                        attackTimer >= attackCooldown)
+                    attackTimer >= attackCooldown)
                     {
                         attackIndex = Random.Range(0, 2);
 
@@ -162,7 +181,9 @@
                         isAttacking = true;
 
                         attackTimer = 0f;
-                        DamagePlayer(20);
+
+                        DamagePlayer(10);
+
                         Invoke(
                             nameof(ResetAttack),
                             attackCooldown
@@ -181,6 +202,7 @@
                     agent.SetDestination(
                         target.position
                     );
+                    FaceTarget();
                 }
             }
             else
@@ -231,8 +253,8 @@
                     }
                 }
             }
-
-            // Smooth animation
+            
+        // Smooth animation
             currentSpeed = Mathf.Lerp(
                 currentSpeed,
                 targetSpeed,
@@ -240,18 +262,19 @@
             );
 
             float normalizedSpeed =
-                Mathf.Clamp01(
-                    currentSpeed / runSpeed
-                );
+            Mathf.Clamp01(
+                agent.velocity.magnitude /
+                runSpeed
+            );
 
-            animator.SetFloat(
+        animator.SetFloat(
                 "Speed",
                 normalizedSpeed,
                 animationDamping,
                 Time.deltaTime
             );
-        }
-
+    }
+        
         // RANDOM POSITION
         public static Vector3 RandomNavSphere(
             Vector3 origin,
@@ -345,6 +368,7 @@
             {
                 AIDirector.Instance
                     .UnregisterZombie(this);
+                ScoreManager.Instance?.AddKill();
             }
             WaveManager.Instance?.
             RegisterZombieKill();
@@ -375,11 +399,16 @@
         }
         public void Damage(float damage, bool isHeadshot)
         {
-            Debug.Log("FPS Engine Hit: " + damage);
+            if (isHeadshot)
+            {
+                ScoreManager.Instance?.
+                    AddHeadshot();
+            }
+
             TakeDamage(Mathf.RoundToInt(damage));
         }
 
-        private void DamagePlayer(float damage)
+    private void DamagePlayer(float damage)
         {
             if (target == null) return;
 
@@ -415,5 +444,38 @@
     {
         DropLoot();
     }
+
+    private void FaceTarget()
+    {
+        if (target == null)
+            return;
+
+        Vector3 lookDir =
+            target.position -
+            transform.position;
+
+        lookDir.y = 0f;
+
+        if (lookDir.sqrMagnitude < 0.01f)
+            return;
+
+        Quaternion targetRotation =
+            Quaternion.LookRotation(
+                lookDir
+            );
+
+        transform.rotation =
+            Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                Time.deltaTime * 12f
+            );
+    }
+
+    public void AttackHit()
+    {
+        DamagePlayer(20);
+    }
+
 
 }

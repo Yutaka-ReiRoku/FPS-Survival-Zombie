@@ -3680,6 +3680,7 @@ MonoBehaviour:
   runSpeed: 3.2
   detectDistance: 20
   stopDistance: 1.8
+  attackDistance: 1.8
   wanderRadius: 15
   wanderTimer: 5
   idleTimeMin: 2
@@ -3703,7 +3704,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
-  uniqueID: 20c94a98-9fa1-4a9d-a3f0-cca8535d5a26
+  uniqueID: b4d09af7-e2bb-45fb-a54a-fa4cc108350e
   _name: 1
   health: 0
   shield: 0

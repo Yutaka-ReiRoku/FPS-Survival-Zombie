@@ -68,6 +68,10 @@ public class WaveManager : MonoBehaviour
     private void NextWave()
     {
         currentWave++;
+        ScoreManager.Instance?.
+        AddWaveBonus(
+            currentWave * 500
+        );
 
         StartWave();
 
