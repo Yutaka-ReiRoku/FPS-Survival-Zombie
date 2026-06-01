@@ -3,79 +3,197 @@
 public class Spawm : MonoBehaviour
 {
     [Header("Zombies")]
-    // Đổi thành mảng (array) để chứa nhiều loại prefab khác nhau
     public GameObject[] zombiePrefabs;
 
     [Header("Spawn Settings")]
-    public int maxZombie = 10;
+    public int maxZombie = 30;
     public float spawnInterval = 3f;
 
     [Header("Spawn Area")]
-    public Vector3 spawnAreaSize = new Vector3(50f, 0f, 50f);
+    public Vector3 spawnAreaSize =
+        new Vector3(50f, 0f, 50f);
+
+    [Header("Player")]
+    public Transform player;
 
     private float timer;
-    private int currentZombie;
 
     private void Update()
     {
+        UpdateDirectorSettings();
+
         timer += Time.deltaTime;
 
         if (timer >= spawnInterval)
         {
             timer = 0f;
 
-            if (currentZombie < maxZombie)
-            {
-                SpawnZombie();
-            }
+            SpawnWave();
         }
+
+        CheckCamperPunishment();
+    }
+
+    private void UpdateDirectorSettings()
+    {
+        if (AIDirector.Instance == null)
+            return;
+
+        switch (AIDirector.Instance.currentState)
+        {
+            case AIDirector.DirectorState.Calm:
+                spawnInterval = 5f;
+                break;
+
+            case AIDirector.DirectorState.BuildUp:
+                spawnInterval = 3f;
+                break;
+
+            case AIDirector.DirectorState.Attack:
+                spawnInterval = 1f;
+                break;
+
+            case AIDirector.DirectorState.Recovery:
+                spawnInterval = 8f;
+                break;
+        }
+    }
+
+    private void SpawnWave()
+    {
+        if (zombiePrefabs == null ||
+            zombiePrefabs.Length == 0)
+        {
+            Debug.LogWarning(
+                "Chưa gán Zombie Prefab!"
+            );
+
+            return;
+        }
+
+        int currentZombie =
+            AIDirector.Instance != null
+            ? AIDirector.Instance.GetZombieCount()
+            : 0;
+
+        if (currentZombie >= maxZombie)
+            return;
+
+        int spawnAmount = 1;
+
+        if (AIDirector.Instance != null)
+        {
+            spawnAmount =
+                AIDirector.Instance
+                .GetRecommendedSpawnCount();
+        }
+
+        for (int i = 0; i < spawnAmount; i++)
+        {
+            currentZombie =
+                AIDirector.Instance != null
+                ? AIDirector.Instance.GetZombieCount()
+                : currentZombie;
+
+            if (currentZombie >= maxZombie)
+                break;
+
+            SpawnZombie();
+        }
+        Debug.Log(
+            "Director State = " +
+            AIDirector.Instance.currentState
+        );
+        Debug.Log(
+            "Spawn Amount = " +
+            spawnAmount
+        );
     }
 
     private void SpawnZombie()
     {
-        // Kiểm tra an toàn: Nếu chưa gán prefab nào vào mảng thì bỏ qua để tránh lỗi
-        if (zombiePrefabs == null || zombiePrefabs.Length == 0)
-        {
-            Debug.LogWarning("Chưa gán Zombie Prefab nào trong mảng zombiePrefabs!");
-            return;
-        }
-
         Vector3 randomPos =
             transform.position +
             new Vector3(
                 Random.Range(
-                    -spawnAreaSize.x / 2,
-                    spawnAreaSize.x / 2
+                    -spawnAreaSize.x / 2f,
+                    spawnAreaSize.x / 2f
                 ),
                 0f,
                 Random.Range(
-                    -spawnAreaSize.z / 2,
-                    spawnAreaSize.z / 2
+                    -spawnAreaSize.z / 2f,
+                    spawnAreaSize.z / 2f
                 )
             );
 
-        // Chọn ngẫu nhiên 1 index từ 0 đến (độ dài mảng - 1)
-        int randomIndex = Random.Range(0, zombiePrefabs.Length);
+        int randomIndex =
+            Random.Range(
+                0,
+                zombiePrefabs.Length
+            );
 
-        // Lấy prefab ngẫu nhiên dựa trên index vừa chọn
-        GameObject selectedPrefab = zombiePrefabs[randomIndex];
+        GameObject selectedPrefab =
+            zombiePrefabs[randomIndex];
 
         Instantiate(
             selectedPrefab,
             randomPos,
             Quaternion.identity
         );
-
-        currentZombie++;
     }
 
-    // Gọi khi zombie chết
-    public void ZombieDead()
+    private void CheckCamperPunishment()
     {
-        currentZombie--;
+        if (AIDirector.Instance == null)
+            return;
+
+        if (!AIDirector.Instance.ShouldPunishCamper())
+            return;
+
+        if (player == null)
+            return;
+
+        if (AIDirector.Instance.GetZombieCount()
+            >= maxZombie)
+            return;
+
+        SpawnBehindPlayer();
     }
 
-    // Vẽ vùng spawn trên Scene để dễ căn chỉnh
+    private void SpawnBehindPlayer()
+    {
+        if (zombiePrefabs == null ||
+            zombiePrefabs.Length == 0)
+            return;
+
+        Vector3 spawnPos =
+            player.position -
+            player.forward * 8f;
+
+        spawnPos +=
+            new Vector3(
+                Random.Range(-3f, 3f),
+                0f,
+                Random.Range(-3f, 3f)
+            );
+
+        int randomIndex =
+            Random.Range(
+                0,
+                zombiePrefabs.Length
+            );
+
+        Instantiate(
+            zombiePrefabs[randomIndex],
+            spawnPos,
+            Quaternion.identity
+        );
+
+        Debug.Log(
+            "[DIRECTOR] Camper Punishment Spawn!"
+        );
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;

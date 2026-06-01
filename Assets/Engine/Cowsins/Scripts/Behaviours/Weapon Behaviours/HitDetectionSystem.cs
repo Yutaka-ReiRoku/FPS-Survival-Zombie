@@ -60,6 +60,7 @@ namespace cowsins
                 settings.userEvents.OnCriticalHit?.Invoke();
                 var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
                 damageable?.Damage(finalDamage * weapon.criticalDamageMultiplier, true);
+                AIDirector.Instance?.RegisterHit();
             }
             else if (hitTransform.CompareTag("BodyShot"))
             {
@@ -70,6 +71,7 @@ namespace cowsins
             {
                 var damageable = h.collider.GetComponent<IDamageable>();
                 damageable?.Damage(finalDamage, false);
+                AIDirector.Instance?.RegisterHit();
             }
         }
 

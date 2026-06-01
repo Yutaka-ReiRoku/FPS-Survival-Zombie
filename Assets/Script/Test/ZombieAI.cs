@@ -90,7 +90,13 @@
             animator.speed = Random.Range(0.95f, 1.05f);
 
             wanderCounter = wanderTimer;
-        }
+
+            if (AIDirector.Instance != null)
+            {
+                AIDirector.Instance
+                    .RegisterZombie(this);
+            }
+    }
 
         private void Update()
         {
@@ -335,6 +341,12 @@
 
         private void Die()
         {
+            if (AIDirector.Instance != null)
+            {
+                AIDirector.Instance
+                    .UnregisterZombie(this);
+            }
+
             isDead = true;
 
             currentSpeed = 0f;

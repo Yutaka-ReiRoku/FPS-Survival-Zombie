@@ -89,12 +89,16 @@ namespace cowsins
 
         private void OnShoot()
         {
+
+            AIDirector.Instance?.RegisterShot();
+
             settings.userEvents.OnShoot?.Invoke();
 
             // Determine if we want to add an effect for FOV
             if (weapon.applyFOVEffectOnShooting) weaponEvents.Events.OnShootApplyFOV?.Invoke(-weapon.FOVValueToSubtract);
 
             weaponEvents.Events.OnShootShake?.Invoke(weapon.camShakeAmount * weaponBehaviour.AimingCamShakeMultiplier * weaponBehaviour.CrouchingCamShakeMultiplier);
+
         }
 
         private void OnShootHitscanProjectile()

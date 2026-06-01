@@ -1,0 +1,264 @@
+using System.Collections.Generic;
+using UnityEngine;
+using cowsins;
+
+public class AIDirector : MonoBehaviour
+{
+    public static AIDirector Instance;
+
+    [Header("Player")]
+    public PlayerStats player;
+
+    [Header("Threat")]
+    [Range(0, 100)]
+    public float threatLevel;
+
+    [Header("Difficulty")]
+    public int minSpawnCount = 2;
+    public int maxSpawnCount = 20;
+
+    [Header("Player Tracking")]
+    public float survivalTime;
+    public float playerHealthPercent;
+
+    [Header("Accuracy")]
+    public int shotsFired;
+    public int shotsHit;
+
+    [Header("Kills")]
+    public int zombiesKilled;
+
+    [Header("Movement")]
+    public float distanceMoved;
+    public float camperTime;
+
+    [Header("Debug")]
+    public DirectorState currentState;
+
+    private Vector3 lastPlayerPosition;
+
+    private readonly List<ZombieAI> activeZombies =
+        new List<ZombieAI>();
+
+    public enum DirectorState
+    {
+        Calm,
+        BuildUp,
+        Attack,
+        Recovery
+    }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void Start()
+    {
+        if (player == null)
+            player = FindObjectOfType<PlayerStats>();
+
+        if (player != null)
+            lastPlayerPosition = player.transform.position;
+    }
+
+    private void Update()
+    {
+        if (player == null)
+            return;
+
+        survivalTime += Time.deltaTime;
+
+        TrackMovement();
+
+        UpdatePlayerHealth();
+
+        CalculateThreat();
+
+        UpdateState();
+    }
+
+    #region Tracking
+
+    private void TrackMovement()
+    {
+        float moved =
+            Vector3.Distance(
+                player.transform.position,
+                lastPlayerPosition
+            );
+
+        distanceMoved += moved;
+
+        if (moved < 0.05f)
+            camperTime += Time.deltaTime;
+        else
+            camperTime = 0f;
+
+        lastPlayerPosition =
+            player.transform.position;
+    }
+
+    private void UpdatePlayerHealth()
+    {
+        playerHealthPercent =
+            player.health /
+            player.maxHealth;
+    }
+
+    #endregion
+
+    #region Threat
+
+    private void CalculateThreat()
+    {
+        float threat = 0f;
+
+        threat += activeZombies.Count * 4f;
+
+        threat += GetKillRate() * 2f;
+
+        threat += GetAccuracy() * 30f;
+
+        threat -= playerHealthPercent * 40f;
+
+        if (camperTime > 10f)
+            threat += 20f;
+
+        threat += Mathf.Clamp(
+            survivalTime / 60f,
+            0f,
+            25f
+        );
+
+        threatLevel =
+            Mathf.Clamp(
+                threat,
+                0f,
+                100f
+            );
+    }
+
+    private void UpdateState()
+    {
+        if (threatLevel < 25)
+        {
+            currentState =
+                DirectorState.Calm;
+        }
+        else if (threatLevel < 50)
+        {
+            currentState =
+                DirectorState.BuildUp;
+        }
+        else if (threatLevel < 80)
+        {
+            currentState =
+                DirectorState.Attack;
+        }
+        else
+        {
+            currentState =
+                DirectorState.Recovery;
+        }
+    }
+
+    #endregion
+
+    #region Public Metrics
+
+    public float GetAccuracy()
+    {
+        if (shotsFired == 0)
+            return 0;
+
+        return (float)shotsHit /
+               shotsFired;
+    }
+
+    public float GetKillRate()
+    {
+        if (survivalTime <= 0)
+            return 0;
+
+        return zombiesKilled /
+               (survivalTime / 60f);
+    }
+
+    #endregion
+
+    #region Zombie Registry
+
+    public void RegisterZombie(
+        ZombieAI zombie)
+    {
+        if (!activeZombies.Contains(zombie))
+        {
+            activeZombies.Add(zombie);
+        }
+    }
+
+    public void UnregisterZombie(
+        ZombieAI zombie)
+    {
+        activeZombies.Remove(zombie);
+        zombiesKilled++;
+    }
+
+    public int GetZombieCount()
+    {
+        return activeZombies.Count;
+    }
+
+    #endregion
+
+    #region Combat Events
+
+    public void RegisterShot()
+    {
+        shotsFired++;
+    }
+
+    public void RegisterHit()
+    {
+        shotsHit++;
+    }
+
+    #endregion
+
+    #region Spawning
+
+    public int GetRecommendedSpawnCount()
+    {
+        switch (currentState)
+        {
+            case DirectorState.Calm:
+                return Random.Range(2, 4);
+
+            case DirectorState.BuildUp:
+                return Random.Range(4, 8);
+
+            case DirectorState.Attack:
+                return Random.Range(8, 15);
+
+            case DirectorState.Recovery:
+                return Random.Range(0, 2);
+        }
+
+        return minSpawnCount;
+    }
+
+    public bool ShouldSpawnRunner()
+    {
+        return
+            currentState ==
+            DirectorState.Attack;
+    }
+
+    public bool ShouldPunishCamper()
+    {
+        return camperTime > 10f;
+    }
+
+    #endregion
+}
