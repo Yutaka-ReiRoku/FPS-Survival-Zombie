@@ -76,7 +76,7 @@ public class Spawm : MonoBehaviour
             ? AIDirector.Instance.GetZombieCount()
             : 0;
 
-        if (currentZombie >= maxZombie)
+        if (currentZombie >= GetWaveLimit())
             return;
 
         int spawnAmount = 1;
@@ -203,4 +203,15 @@ public class Spawm : MonoBehaviour
             spawnAreaSize
         );
     }
+
+    private int GetWaveLimit()
+    {
+        if (WaveManager.Instance == null)
+            return maxZombie;
+
+        return
+            WaveManager.Instance.baseZombieCount +
+            (WaveManager.Instance.currentWave * 5);
+    }
+
 }

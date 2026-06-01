@@ -346,8 +346,9 @@
                 AIDirector.Instance
                     .UnregisterZombie(this);
             }
-
-            isDead = true;
+            WaveManager.Instance?.
+            RegisterZombieKill();
+        isDead = true;
 
             currentSpeed = 0f;
 
