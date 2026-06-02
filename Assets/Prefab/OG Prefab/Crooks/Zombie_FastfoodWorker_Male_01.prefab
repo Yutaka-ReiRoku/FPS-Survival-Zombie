@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4273467372851796}
   - component: {fileID: 137930576778846800}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Firefighter_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -152,7 +152,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4015772059120032}
   - component: {fileID: 137965361507088534}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_SummerGirl_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -294,7 +294,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4093965069732792}
   - component: {fileID: 137498449662139846}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Footballer_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -436,7 +436,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4523746469026546}
   - component: {fileID: 137076306580854662}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Business_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -578,7 +578,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4440946068418674}
   - component: {fileID: 137835912181253214}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Jacket_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -720,7 +720,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4783412321575932}
   - component: {fileID: 137137772690315904}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Bride_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -862,7 +862,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4371868893640652}
   - component: {fileID: 137595700851026088}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_ShopKeeper_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1003,7 +1003,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4741251348446610}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Ankle_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1035,7 +1035,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4995853791881058}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Eyebrows
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1067,7 +1067,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4324069201229700}
   - component: {fileID: 137768989181978960}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Businessman_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1209,7 +1209,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4796513949123846}
   - component: {fileID: 137136482825280240}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_ShopKeeper_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1350,7 +1350,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4283885131235592}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Finger_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1383,7 +1383,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4328929769851110}
   - component: {fileID: 137405445599015330}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Prisinor_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1525,7 +1525,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4553849451686306}
   - component: {fileID: 137291811577519338}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_SchoolGirl_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1666,7 +1666,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4882035154381064}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Root
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1699,7 +1699,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4506563963659388}
   - component: {fileID: 137991449003267250}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Clown_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1840,7 +1840,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4305827214368516}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: IndexFinger_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1873,7 +1873,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4238271338641396}
   - component: {fileID: 137341401058620628}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Bellboy_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2015,7 +2015,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4907917989073288}
   - component: {fileID: 137266254332665238}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Father_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2157,7 +2157,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4361040911191468}
   - component: {fileID: 137339350167897708}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_SchoolBoy_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2298,7 +2298,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4560895711600266}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Ball_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2331,7 +2331,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4434682870663394}
   - component: {fileID: 137248919129449106}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Police_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2472,7 +2472,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4665971030667682}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Spine_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2505,7 +2505,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4220165903381510}
   - component: {fileID: 137046953479972914}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_GamerGirl_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2646,7 +2646,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4151454301370952}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: LowerLeg_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2678,7 +2678,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4892420952186310}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Thumb_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2711,7 +2711,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4863572790407862}
   - component: {fileID: 137011835290588012}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Police_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2852,7 +2852,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4778074032033084}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: IndexFinger_03 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2884,7 +2884,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4578225748522988}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: IndexFinger_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2917,7 +2917,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4818972802377994}
   - component: {fileID: 137661775671011426}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Mother_Female_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3058,7 +3058,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4500043743108274}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Finger_04 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3090,7 +3090,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4535396002642412}
   - component: {fileID: 137419573519330736}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Grandpa_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3232,7 +3232,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4932234272670186}
   - component: {fileID: 137800275675251218}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Hipster_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3373,7 +3373,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4714940476289420}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Eyes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3405,7 +3405,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4833579306970070}
   - component: {fileID: 137296036266682596}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Son_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3546,7 +3546,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4113606188794622}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Shoulder_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3578,7 +3578,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4072679834003776}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Thumb_02 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3610,7 +3610,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4831483050290800}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Toes_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3642,7 +3642,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4838600960909526}
   - component: {fileID: 137700391184815590}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Grandma_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3784,7 +3784,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4812394509413222}
   - component: {fileID: 137454338932743702}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Mother_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3926,7 +3926,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4379793235052010}
   - component: {fileID: 137755915603288292}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Hipster_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4067,7 +4067,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4574259361248680}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: IndexFinger_01 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4099,7 +4099,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4692877826536434}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hips
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4134,7 +4134,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4040319220235680}
   - component: {fileID: 137001933962844144}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Patient_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4275,7 +4275,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4859222810087558}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Finger_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4307,7 +4307,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4346901454033750}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Ball_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4340,7 +4340,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4135377109358154}
   - component: {fileID: 137605661710545040}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Biker_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4481,7 +4481,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4108784238527988}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Thumb_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4514,7 +4514,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4970700924155810}
   - component: {fileID: 137648759148984884}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Military_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4655,7 +4655,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4649577220067244}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Jaw
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4686,7 +4686,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4284658634153958}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: IndexFinger_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4718,7 +4718,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4070267233297080}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Neck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4751,7 +4751,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4759200901193326}
   - component: {fileID: 137381371000417604}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Diver_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4892,7 +4892,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4797726882863672}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Clavicle_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4924,7 +4924,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4083210758422812}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Shoulder_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4957,7 +4957,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4204963426890444}
   - component: {fileID: 137521849978464218}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Jock_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5098,7 +5098,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4595894714979384}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Thumb_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5129,7 +5129,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4990498370089496}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Ankle_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5162,7 +5162,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4370233855170614}
   - component: {fileID: 137103713123902192}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Cheerleader_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5304,7 +5304,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4053111475065536}
   - component: {fileID: 137802538472611734}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Underwear_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5446,7 +5446,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4688114087102340}
   - component: {fileID: 137773389180711566}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Hobo_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5588,7 +5588,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4307722341105938}
   - component: {fileID: 137696462960406330}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Punk_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5730,7 +5730,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4078976075931540}
   - component: {fileID: 137013163466471410}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_RiotCop_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5872,7 +5872,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4557604672006096}
   - component: {fileID: 137764139131701392}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Daughter_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6019,9 +6019,9 @@ GameObject:
   - component: {fileID: 702302089114985001}
   - component: {fileID: 1590950829675031500}
   - component: {fileID: -4569627937639608200}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_FastfoodWorker_Male_01
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6263,7 +6263,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4365578945862792}
   - component: {fileID: 137230373348668476}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_FastfoodWorker_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6404,7 +6404,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4211293318717226}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Toes_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6435,7 +6435,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4317701435199182}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: IndexFinger_02 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6468,7 +6468,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4880110487545440}
   - component: {fileID: 137021850885739530}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Paramedic_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6610,7 +6610,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4479642793475182}
   - component: {fileID: 137071579568386074}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Punk_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6752,7 +6752,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4414168106111822}
   - component: {fileID: 137698527798854364}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_BioHazardSuit_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6893,7 +6893,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4248315567838948}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Thumb_03 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6924,7 +6924,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4985297892133694}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Spine_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6958,7 +6958,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4210873259905004}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Elbow_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6990,7 +6990,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4554673296061242}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Finger_04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7022,7 +7022,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4485183202370076}
   - component: {fileID: 137912844695432886}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Roadworker_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7163,7 +7163,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4365031087347382}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: UpperLeg_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7195,7 +7195,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4992815652065144}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: UpperLeg_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7228,7 +7228,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4094736602301206}
   - component: {fileID: 137274587814118842}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Coat_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7370,7 +7370,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4891340707379762}
   - component: {fileID: 137156708158955054}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Underwear_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7511,7 +7511,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4785964362297260}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hand_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7546,7 +7546,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4444519171396624}
   - component: {fileID: 137317465899487208}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Gangster_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7687,7 +7687,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4980038047255318}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7721,7 +7721,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4728700462271644}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Finger_03 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7753,7 +7753,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4869506485341042}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Finger_01 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7786,7 +7786,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4862581775814276}
   - component: {fileID: 137425129510349146}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Jacket_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7927,7 +7927,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4201292605575978}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: IndexFinger_04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7958,7 +7958,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4655717743121620}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Spine_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7990,7 +7990,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4823801406035966}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: LowerLeg_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8023,7 +8023,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4811682264217010}
   - component: {fileID: 137956914023896014}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_HotDogSuit_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8164,7 +8164,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4736400235202860}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Elbow_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8197,7 +8197,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4548702110949120}
   - component: {fileID: 137336550571080902}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_BusinessShirt_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8338,7 +8338,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4571675474711290}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Thumb_01 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8370,7 +8370,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4538782905334088}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Finger_02 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8402,7 +8402,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4608301093171900}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: IndexFinger_04 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8434,7 +8434,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4702432554518242}
   - component: {fileID: 137206915176420486}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Tourist_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8575,7 +8575,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4547541604675240}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Finger_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8608,7 +8608,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4985134822706136}
   - component: {fileID: 137890600769995794}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Hoodie_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8749,7 +8749,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4708035106309342}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hand_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8783,7 +8783,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4822284171599506}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Clavicle_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8816,7 +8816,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4203728082697976}
   - component: {fileID: 137700180392572962}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zombie_Father_Male_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
