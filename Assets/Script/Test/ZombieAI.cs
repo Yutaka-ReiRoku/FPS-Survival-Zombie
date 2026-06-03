@@ -181,8 +181,13 @@
                         isAttacking = true;
 
                         attackTimer = 0f;
+                        animator.SetTrigger("Attack");
 
-                        DamagePlayer(10);
+                        isAttacking = true;
+                        attackTimer = 0f;
+
+                        Invoke(nameof(ResetAttack), attackCooldown);
+
 
                         Invoke(
                             nameof(ResetAttack),
@@ -488,8 +493,18 @@
 
     public void AttackHit()
     {
-        DamagePlayer(20);
-    }
+        if (isDead || target == null)
+            return;
 
+        float distance = Vector3.Distance(
+            transform.position,
+            target.position
+        );
+
+        if (distance <= attackDistance + 0.5f)
+        {
+            DamagePlayer(20);
+        }
+    }
 
 }
