@@ -1,103 +1,100 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
+using cowsins;
 
-public class TankAI : MonoBehaviour
+public class TankBossAI : MonoBehaviour, IDamageable
 {
-    [Header("Target")]
+    [Header("Player")]
     public Transform target;
 
+    [Header("Health")]
+    public int maxHealth = 500;
+
+    [Header("Detection")]
+    public float detectRange = 20f;
+
     [Header("Movement")]
-    public float runSpeed = 5f;
-    public float chaseDistance = 25f;
+    public float runSpeed = 3.5f;
+    public float rotationSpeed = 10f;
 
-    [Header("Attack Range")]
+    [Header("Attack")]
     public float meleeRange = 3f;
-    public float jumpAttackRange = 12f;
+    public float jumpAttackRange = 10f;
 
-    [Header("Cooldown")]
-    public float jumpAttackCooldown = 12f;
+    public float attackCooldown = 2f;
+    public float jumpAttackCooldown = 10f;
 
-    [Header("Rotation")]
-    public float rotationSpeed = 8f;
+    [Header("Damage")]
+    public float punchDamage = 30f;
+    public float swipeDamage = 40f;
+    public float jumpDamage = 60f;
+    public float jumpRadius = 5f;
 
     [Header("Scream")]
     public float screamDuration = 2.5f;
 
     [Header("Lifetime")]
-    public float lifeTime = 40f;
+    public float lifeTime = 60f;
 
     private Animator animator;
+    private NavMeshAgent agent;
     private Rigidbody rb;
     private Collider col;
 
+    private int currentHealth;
+
+    private float attackTimer;
     private float jumpTimer;
 
     private bool isDead;
+    private bool isHit;
     private bool isAttacking;
     private bool isJumpAttacking;
-    private bool isScreaming;
+
     private bool hasScreamed;
-    private bool introJumpUsed;
+    private bool isScreaming;
 
     private int attackIndex;
 
     private void Start()
     {
-        animator = GetComponent<Animator>();
+        currentHealth = maxHealth;
+
+        animator = GetComponentInChildren<Animator>();
+        agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
 
-        if (target == null)
-        {
-            GameObject player =
-                GameObject.FindGameObjectWithTag("Player");
+        FindPlayer();
 
-            if (player != null)
-            {
-                target = player.transform;
-            }
+        if (agent != null)
+        {
+            agent.speed = runSpeed;
+            agent.acceleration = 20f;
+            agent.angularSpeed = 300f;
+            agent.stoppingDistance = meleeRange;
+            agent.updateRotation = false;
         }
 
-        animator.speed = Random.Range(0.95f, 1.05f);
+        animator.speed =
+            Random.Range(0.95f, 1.05f);
 
         Invoke(nameof(StartDeath), lifeTime);
     }
 
     private void Update()
     {
-        if (target == null || isDead)
+        if (isDead)
             return;
 
-        jumpTimer += Time.deltaTime;
-
-        // =====================
-        // AUTO END JUMP ATTACK
-        // =====================
-
-        AnimatorStateInfo state =
-            animator.GetCurrentAnimatorStateInfo(0);
-
-        if (
-            isJumpAttacking &&
-            !state.IsName("Mutant Jump Attack")
-        )
+        if (target == null)
         {
-            Debug.Log("Jump Finished");
-
-            isJumpAttacking = false;
-            isAttacking = false;
-
-            if (rb != null)
-            {
-                rb.useGravity = true;
-            }
+            FindPlayer();
+            return;
         }
 
-        // =====================
-        // SCREAM LOCK
-        // =====================
-
-        if (isScreaming)
-            return;
+        attackTimer += Time.deltaTime;
+        jumpTimer += Time.deltaTime;
 
         float distance =
             Vector3.Distance(
@@ -105,158 +102,154 @@ public class TankAI : MonoBehaviour
                 target.position
             );
 
-        // =====================
+        HandleJumpState();
+
+        if (isHit)
+            return;
+
+        //------------------------------------------------
         // FIRST SCREAM
-        // =====================
+        //------------------------------------------------
 
-        if (
-            !hasScreamed &&
-            distance <= chaseDistance
-        )
+        if (!hasScreamed &&
+            distance <= detectRange)
         {
-            hasScreamed = true;
-            isScreaming = true;
-
-            animator.Play("Zombie Scream");
-
-            Invoke(
-                nameof(EndScream),
-                screamDuration
-            );
-
+            StartScream();
             return;
         }
 
-        // =====================
-        // LOCK DURING JUMP
-        // =====================
-
-        if (isJumpAttacking)
+        if (isScreaming)
             return;
 
-        // =====================
-        // ROTATION
-        // =====================
+        FaceTarget();
 
-        Vector3 direction =
-            (target.position - transform.position).normalized;
-
-        direction.y = 0;
-
-        if (direction != Vector3.zero)
-        {
-            Quaternion targetRotation =
-                Quaternion.LookRotation(direction);
-
-            transform.rotation =
-                Quaternion.Slerp(
-                    transform.rotation,
-                    targetRotation,
-                    rotationSpeed * Time.deltaTime
-                );
-        }
-
-        // =====================
+        //------------------------------------------------
         // CHASE
-        // =====================
+        //------------------------------------------------
 
-        if (!isAttacking)
+        if (!isAttacking &&
+            !isJumpAttacking)
         {
-            transform.position +=
-                transform.forward *
-                runSpeed *
-                Time.deltaTime;
+            agent.isStopped = false;
+
+            agent.SetDestination(
+                target.position
+            );
         }
 
-        // =====================
-        // INTRO JUMP ATTACK
-        // =====================
+        //------------------------------------------------
+        // JUMP ATTACK
+        //------------------------------------------------
 
-        if (
-            hasScreamed &&
-            !introJumpUsed &&
-            distance <= jumpAttackRange
-        )
-        {
-            introJumpUsed = true;
-
-            StartJumpAttack();
-
-            return;
-        }
-
-        // =====================
-        // NORMAL JUMP ATTACK
-        // =====================
-
-        if (
+        if (!isJumpAttacking &&
+            !isAttacking &&
             distance > meleeRange &&
             distance <= jumpAttackRange &&
-            jumpTimer >= jumpAttackCooldown
-        )
+            jumpTimer >= jumpAttackCooldown)
         {
             StartJumpAttack();
-
             return;
         }
 
-        // =====================
+        //------------------------------------------------
         // MELEE ATTACK
-        // =====================
+        //------------------------------------------------
 
-        if (
+        if (!isAttacking &&
             distance <= meleeRange &&
-            !isAttacking
-        )
+            attackTimer >= attackCooldown)
         {
-            MeleeAttack();
+            StartMeleeAttack();
         }
 
-        // =====================
-        // DEBUG
-        // =====================
+        //------------------------------------------------
+        // ANIMATION SPEED
+        //------------------------------------------------
 
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            Debug.Log(
-                $"Jump:{isJumpAttacking} " +
-                $"Attack:{isAttacking}"
+        float speed =
+            agent.velocity.magnitude /
+            runSpeed;
+
+        animator.SetFloat(
+            "Speed",
+            speed,
+            0.2f,
+            Time.deltaTime
+        );
+    }
+
+    private void FindPlayer()
+    {
+        GameObject player =
+            GameObject.FindGameObjectWithTag(
+                "Player"
             );
+
+        if (player != null)
+        {
+            target = player.transform;
         }
     }
 
-    // =====================
-    // ROOT MOTION
-    // =====================
-
-    private void OnAnimatorMove()
+    private void FaceTarget()
     {
-        if (!isJumpAttacking)
+        if (target == null)
             return;
 
-        transform.position +=
-            animator.deltaPosition;
+        Vector3 dir =
+            target.position -
+            transform.position;
 
-        transform.rotation *=
-            animator.deltaRotation;
+        dir.y = 0;
+
+        if (dir.sqrMagnitude < 0.01f)
+            return;
+
+        Quaternion rot =
+            Quaternion.LookRotation(dir);
+
+        transform.rotation =
+            Quaternion.Slerp(
+                transform.rotation,
+                rot,
+                rotationSpeed *
+                Time.deltaTime
+            );
     }
 
-    // =====================
-    // SCREAM END
-    // =====================
+    //==================================================
+    // SCREAM
+    //==================================================
+
+    private void StartScream()
+    {
+        hasScreamed = true;
+        isScreaming = true;
+
+        agent.isStopped = true;
+
+        animator.SetTrigger("Scream");
+
+        Invoke(
+            nameof(EndScream),
+            screamDuration
+        );
+    }
 
     private void EndScream()
     {
         isScreaming = false;
     }
 
-    // =====================
+    //==================================================
     // MELEE ATTACK
-    // =====================
+    //==================================================
 
-    private void MeleeAttack()
+    private void StartMeleeAttack()
     {
         isAttacking = true;
+
+        attackTimer = 0;
 
         attackIndex =
             Random.Range(0, 2);
@@ -270,7 +263,7 @@ public class TankAI : MonoBehaviour
 
         Invoke(
             nameof(ResetAttack),
-            1f
+            attackCooldown
         );
     }
 
@@ -279,23 +272,25 @@ public class TankAI : MonoBehaviour
         isAttacking = false;
     }
 
-    // =====================
+    //==================================================
     // JUMP ATTACK
-    // =====================
+    //==================================================
 
     private void StartJumpAttack()
     {
         isJumpAttacking = true;
         isAttacking = true;
 
-        jumpTimer = 0f;
+        jumpTimer = 0;
+
+        agent.isStopped = true;
 
         if (rb != null)
         {
+            rb.useGravity = false;
+
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-
-            rb.useGravity = false;
         }
 
         animator.Play(
@@ -303,9 +298,147 @@ public class TankAI : MonoBehaviour
         );
     }
 
-    // =====================
+    private void HandleJumpState()
+    {
+        AnimatorStateInfo state =
+            animator.GetCurrentAnimatorStateInfo(0);
+
+        if (
+            isJumpAttacking &&
+            !state.IsName("Mutant Jump Attack")
+        )
+        {
+            isJumpAttacking = false;
+            isAttacking = false;
+
+            if (rb != null)
+            {
+                rb.useGravity = true;
+            }
+        }
+    }
+
+    //==================================================
+    // ANIMATION EVENTS
+    //==================================================
+
+    public void AttackHit()
+    {
+        DamagePlayer(punchDamage);
+    }
+
+    public void SwipeHit()
+    {
+        DamagePlayer(swipeDamage);
+    }
+
+    public void JumpLand()
+    {
+        Collider[] hits =
+            Physics.OverlapSphere(
+                transform.position,
+                jumpRadius
+            );
+
+        foreach (Collider hit in hits)
+        {
+            // DAMAGE
+
+            IDamageable damageable =
+                hit.GetComponent<IDamageable>();
+
+            if (damageable != null)
+            {
+                damageable.Damage(
+                    jumpDamage,
+                    false
+                );
+            }
+
+            // CAMERA SHAKE
+
+            IPlayerMovementStateProvider player =
+                hit.GetComponent<IPlayerMovementStateProvider>();
+
+            if (player != null)
+            {
+                CameraEffects cameraEffects =
+                    hit.GetComponent<CameraEffects>();
+
+                if (cameraEffects != null)
+                {
+                    float distance =
+                        Vector3.Distance(
+                            cameraEffects.transform.position,
+                            transform.position
+                        );
+
+                    cameraEffects.ExplosionShake(
+                        distance
+                    );
+                }
+            }
+        }
+    }
+
+    private void DamagePlayer(float damage)
+    {
+        if (target == null)
+            return;
+
+        float distance =
+            Vector3.Distance(
+                transform.position,
+                target.position
+            );
+
+        if (distance > meleeRange + 1f)
+            return;
+
+        IDamageable player =
+            target.GetComponent<IDamageable>();
+
+        if (player != null)
+        {
+            player.Damage(
+                damage,
+                false
+            );
+        }
+    }
+
+    //==================================================
+    // DAMAGE
+    //==================================================
+
+    public void Damage(
+        float damage,
+        bool isHeadshot
+    )
+    {
+        TakeDamage(
+            Mathf.RoundToInt(damage)
+        );
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (isDead)
+            return;
+
+        currentHealth -= damage;
+
+        animator.SetTrigger("Hit");
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    //==================================================
     // DEATH
-    // =====================
+    //==================================================
 
     private void StartDeath()
     {
@@ -324,6 +457,8 @@ public class TankAI : MonoBehaviour
 
         CancelInvoke();
 
+        agent.enabled = false;
+
         animator.SetBool(
             "isDeath",
             true
@@ -340,12 +475,6 @@ public class TankAI : MonoBehaviour
 
         if (rb != null)
         {
-            rb.linearVelocity =
-                Vector3.zero;
-
-            rb.angularVelocity =
-                Vector3.zero;
-
             rb.isKinematic = true;
             rb.useGravity = false;
         }
@@ -353,6 +482,27 @@ public class TankAI : MonoBehaviour
         Destroy(
             gameObject,
             6f
+        );
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(
+            transform.position,
+            detectRange
+        );
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(
+            transform.position,
+            meleeRange
+        );
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(
+            transform.position,
+            jumpAttackRange
         );
     }
 }
