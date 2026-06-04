@@ -1,46 +1,103 @@
-﻿using cowsins;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class TankAI : ZombieAI
+public class TankAI : MonoBehaviour
 {
-    [Header("Tank Stats")]
-    public int tankMaxHealth = 150;
+    [Header("Target")]
+    public Transform target;
 
-    [Header("Jump Attack")]
+    [Header("Movement")]
+    public float runSpeed = 5f;
+    public float chaseDistance = 25f;
+
+    [Header("Attack Range")]
+    public float meleeRange = 3f;
     public float jumpAttackRange = 12f;
-    public float jumpCooldown = 12f;
-    public float shockwaveRadius = 4f;
-    public float shockwaveDamage = 35f;
+
+    [Header("Cooldown")]
+    public float jumpAttackCooldown = 12f;
+
+    [Header("Rotation")]
+    public float rotationSpeed = 8f;
 
     [Header("Scream")]
     public float screamDuration = 2.5f;
 
+    [Header("Lifetime")]
+    public float lifeTime = 40f;
+
+    private Animator animator;
+    private Rigidbody rb;
+    private Collider col;
+
     private float jumpTimer;
 
+    private bool isDead;
+    private bool isAttacking;
     private bool isJumpAttacking;
     private bool isScreaming;
     private bool hasScreamed;
     private bool introJumpUsed;
-    private bool enraged;
 
-    protected override void Start()
+    private int attackIndex;
+
+    private void Start()
     {
-        maxHealth = tankMaxHealth;
+        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>();
+        col = GetComponent<Collider>();
 
-        walkSpeed *= 0.8f;
-        runSpeed *= 0.8f;
+        if (target == null)
+        {
+            GameObject player =
+                GameObject.FindGameObjectWithTag("Player");
 
-        base.Start();
+            if (player != null)
+            {
+                target = player.transform;
+            }
+        }
 
-        jumpTimer = jumpCooldown;
+        animator.speed = Random.Range(0.95f, 1.05f);
+
+        Invoke(nameof(StartDeath), lifeTime);
     }
 
-    protected override void Update()
+    private void Update()
     {
         if (target == null || isDead)
             return;
 
         jumpTimer += Time.deltaTime;
+
+        // =====================
+        // AUTO END JUMP ATTACK
+        // =====================
+
+        AnimatorStateInfo state =
+            animator.GetCurrentAnimatorStateInfo(0);
+
+        if (
+            isJumpAttacking &&
+            !state.IsName("Mutant Jump Attack")
+        )
+        {
+            Debug.Log("Jump Finished");
+
+            isJumpAttacking = false;
+            isAttacking = false;
+
+            if (rb != null)
+            {
+                rb.useGravity = true;
+            }
+        }
+
+        // =====================
+        // SCREAM LOCK
+        // =====================
+
+        if (isScreaming)
+            return;
 
         float distance =
             Vector3.Distance(
@@ -48,24 +105,73 @@ public class TankAI : ZombieAI
                 target.position
             );
 
+        // =====================
         // FIRST SCREAM
+        // =====================
+
         if (
             !hasScreamed &&
-            distance <= detectDistance
+            distance <= chaseDistance
         )
         {
-            StartScream();
+            hasScreamed = true;
+            isScreaming = true;
+
+            animator.Play("Zombie Scream");
+
+            Invoke(
+                nameof(EndScream),
+                screamDuration
+            );
+
             return;
         }
 
-        // LOCK AI DURING SCREAM
-        if (isScreaming)
+        // =====================
+        // LOCK DURING JUMP
+        // =====================
+
+        if (isJumpAttacking)
             return;
 
-        // ENRAGE
-        CheckEnrage();
+        // =====================
+        // ROTATION
+        // =====================
 
-        // INTRO JUMP
+        Vector3 direction =
+            (target.position - transform.position).normalized;
+
+        direction.y = 0;
+
+        if (direction != Vector3.zero)
+        {
+            Quaternion targetRotation =
+                Quaternion.LookRotation(direction);
+
+            transform.rotation =
+                Quaternion.Slerp(
+                    transform.rotation,
+                    targetRotation,
+                    rotationSpeed * Time.deltaTime
+                );
+        }
+
+        // =====================
+        // CHASE
+        // =====================
+
+        if (!isAttacking)
+        {
+            transform.position +=
+                transform.forward *
+                runSpeed *
+                Time.deltaTime;
+        }
+
+        // =====================
+        // INTRO JUMP ATTACK
+        // =====================
+
         if (
             hasScreamed &&
             !introJumpUsed &&
@@ -79,12 +185,14 @@ public class TankAI : ZombieAI
             return;
         }
 
-        // NORMAL JUMP
+        // =====================
+        // NORMAL JUMP ATTACK
+        // =====================
+
         if (
-            distance > attackDistance &&
+            distance > meleeRange &&
             distance <= jumpAttackRange &&
-            jumpTimer >= jumpCooldown &&
-            !isJumpAttacking
+            jumpTimer >= jumpAttackCooldown
         )
         {
             StartJumpAttack();
@@ -92,154 +200,159 @@ public class TankAI : ZombieAI
             return;
         }
 
-        // LOCK DURING JUMP
-        if (isJumpAttacking)
+        // =====================
+        // MELEE ATTACK
+        // =====================
+
+        if (
+            distance <= meleeRange &&
+            !isAttacking
+        )
+        {
+            MeleeAttack();
+        }
+
+        // =====================
+        // DEBUG
+        // =====================
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Debug.Log(
+                $"Jump:{isJumpAttacking} " +
+                $"Attack:{isAttacking}"
+            );
+        }
+    }
+
+    // =====================
+    // ROOT MOTION
+    // =====================
+
+    private void OnAnimatorMove()
+    {
+        if (!isJumpAttacking)
             return;
 
-        base.Update();
+        transform.position +=
+            animator.deltaPosition;
+
+        transform.rotation *=
+            animator.deltaRotation;
     }
 
-    private void StartScream()
-    {
-        hasScreamed = true;
-        isScreaming = true;
-
-        agent.isStopped = true;
-
-        animator.SetTrigger("Scream");
-
-        Invoke(
-            nameof(EndScream),
-            screamDuration
-        );
-    }
+    // =====================
+    // SCREAM END
+    // =====================
 
     private void EndScream()
     {
         isScreaming = false;
+    }
 
+    // =====================
+    // MELEE ATTACK
+    // =====================
+
+    private void MeleeAttack()
+    {
+        isAttacking = true;
+
+        attackIndex =
+            Random.Range(0, 2);
+
+        animator.SetInteger(
+            "AttackIndex",
+            attackIndex
+        );
+
+        animator.SetTrigger("Attack");
+
+        Invoke(
+            nameof(ResetAttack),
+            1f
+        );
+    }
+
+    private void ResetAttack()
+    {
+        isAttacking = false;
+    }
+
+    // =====================
+    // JUMP ATTACK
+    // =====================
+
+    private void StartJumpAttack()
+    {
+        isJumpAttacking = true;
+        isAttacking = true;
+
+        jumpTimer = 0f;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            rb.useGravity = false;
+        }
+
+        animator.Play(
+            "Mutant Jump Attack"
+        );
+    }
+
+    // =====================
+    // DEATH
+    // =====================
+
+    private void StartDeath()
+    {
         if (!isDead)
         {
-            agent.isStopped = false;
+            Die();
         }
     }
 
-    private void StartJumpAttack()
+    public void Die()
     {
         if (isDead)
             return;
 
-        isJumpAttacking = true;
+        isDead = true;
 
-        jumpTimer = 0f;
+        CancelInvoke();
 
-        agent.isStopped = true;
-
-        FaceTarget();
+        animator.SetBool(
+            "isDeath",
+            true
+        );
 
         animator.SetTrigger(
-            "JumpAttack"
+            "Death"
         );
-    }
 
-    // Animation Event
-    public void JumpLand()
-    {
-        Collider[] hits =
-            Physics.OverlapSphere(
-                transform.position,
-                shockwaveRadius
-            );
-
-        foreach (Collider hit in hits)
+        if (col != null)
         {
-            if (!hit.CompareTag("Player"))
-                continue;
-
-            IDamageable player =
-                hit.GetComponent<IDamageable>();
-
-            if (player != null)
-            {
-                player.Damage(
-                    shockwaveDamage,
-                    false
-                );
-            }
-
-            Rigidbody playerRb =
-                hit.GetComponent<Rigidbody>();
-
-            if (playerRb != null)
-            {
-                Vector3 dir =
-                    (
-                        hit.transform.position -
-                        transform.position
-                    ).normalized;
-
-                playerRb.AddForce(
-                    dir * 10f,
-                    ForceMode.Impulse
-                );
-            }
+            col.enabled = false;
         }
-    }
 
-    // Animation Event cuối clip
-    public void EndJumpAttack()
-    {
-        isJumpAttacking = false;
-
-        if (!isDead)
+        if (rb != null)
         {
-            agent.isStopped = false;
+            rb.linearVelocity =
+                Vector3.zero;
+
+            rb.angularVelocity =
+                Vector3.zero;
+
+            rb.isKinematic = true;
+            rb.useGravity = false;
         }
-    }
 
-    // Animation Event của attack clip
-    public new void AttackHit()
-    {
-        if (target == null)
-            return;
-
-        float distance =
-            Vector3.Distance(
-                transform.position,
-                target.position
-            );
-
-        if (distance <= attackDistance + 1f)
-        {
-            DamagePlayer(49);
-        }
-    }
-
-    private void CheckEnrage()
-    {
-        if (enraged)
-            return;
-
-        float hpPercent =
-            (float)currentHealth /
-            maxHealth;
-
-        if (hpPercent <= 0.3f)
-        {
-            enraged = true;
-
-            runSpeed *= 1.25f;
-
-            jumpCooldown *= 0.5f;
-
-            animator.SetTrigger(
-                "Enrage"
-            );
-        }
-    }
-
-    protected override void Die()
-    {
-        base.Die();
+        Destroy(
+            gameObject,
+            6f
+        );
     }
 }
