@@ -6013,7 +6013,7 @@ MonoBehaviour:
   attackCooldown: 1.5
   acceleration: 5
   animationDamping: 0.25
-  maxHealth: 100
+  maxHealth: 10
   dropPrefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
   dropChance: 50
   dropOffset: {x: 0, y: 0.5, z: 0}

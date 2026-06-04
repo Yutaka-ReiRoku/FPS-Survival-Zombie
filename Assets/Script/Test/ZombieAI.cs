@@ -4,7 +4,7 @@
     public class ZombieAI : MonoBehaviour, IDamageable
     {
         [Header("Target")]
-        public Transform target;
+        protected Transform target;
 
         [Header("Movement")]
         public float walkSpeed = 1.5f;
@@ -32,7 +32,7 @@
         [Header("Health")]
         public int maxHealth = 100;
 
-        private int currentHealth;
+        protected int currentHealth;
 
         [Header("Loot Drop")]
         public GameObject dropPrefab;
@@ -41,8 +41,8 @@
         public Vector3 dropOffset = new Vector3(0, 0.5f, 0);
 
 
-    private Animator animator;
-        private NavMeshAgent agent;
+        protected Animator animator;
+        protected NavMeshAgent agent;
 
         private float currentSpeed;
         private float targetSpeed;
@@ -50,9 +50,9 @@
         private float attackTimer;
         private float wanderCounter;
 
-        private bool isAttacking;
-        private bool isDead;
-        private bool isHit;
+        protected bool isAttacking;
+        protected bool isDead;
+        protected bool isHit;
 
         // IDLE WANDER
         private bool isIdleWander;
@@ -63,7 +63,7 @@
 
 
 
-        private void Start()
+        protected virtual void Start()
         {
             currentHealth = maxHealth;
 
@@ -104,21 +104,21 @@
 
         NavMeshHit navHit;
 
-        if (
-            NavMesh.SamplePosition(
-                transform.position,
-                out navHit,
-                3f,
-                NavMesh.AllAreas
+            if (
+                NavMesh.SamplePosition(
+                    transform.position,
+                    out navHit,
+                    3f,
+                    NavMesh.AllAreas
+                )
             )
-        )
-        {
-            transform.position =
-                navHit.position;
+            {
+                transform.position =
+                    navHit.position;
+            }
         }
-    }
 
-        private void Update()
+        protected virtual void Update()
         {
             if (target == null || isDead)
                 return;
@@ -179,15 +179,10 @@
                         animator.SetTrigger("Attack");
 
                         isAttacking = true;
-
                         attackTimer = 0f;
 
-                        DamagePlayer(10);
+                        Invoke(nameof(ResetAttack), attackCooldown);
 
-                        Invoke(
-                            nameof(ResetAttack),
-                            attackCooldown
-                        );
                     }
                 }
                 else
@@ -376,7 +371,7 @@
             }
         }
 
-        private void Die()
+        protected virtual void Die()
         {
             if (AIDirector.Instance != null)
             {
@@ -422,7 +417,7 @@
             TakeDamage(Mathf.RoundToInt(damage));
         }
 
-    private void DamagePlayer(float damage)
+        protected virtual void DamagePlayer(float damage)
         {
             if (target == null) return;
 
@@ -450,46 +445,56 @@
                 transform.position + dropOffset,
                 Quaternion.identity
             );
-    }
+        }
 
 
-    [ContextMenu("TEST DROP")]
-    public void TestDrop()
-    {
-        DropLoot();
-    }
+        [ContextMenu("TEST DROP")]
+        public void TestDrop()
+        {
+            DropLoot();
+        }
 
-    private void FaceTarget()
-    {
-        if (target == null)
-            return;
+        protected void FaceTarget()
+        {
+            if (target == null)
+                return;
 
-        Vector3 lookDir =
-            target.position -
-            transform.position;
+            Vector3 lookDir =
+                target.position -
+                transform.position;
 
-        lookDir.y = 0f;
+            lookDir.y = 0f;
 
-        if (lookDir.sqrMagnitude < 0.01f)
-            return;
+            if (lookDir.sqrMagnitude < 0.01f)
+                return;
 
-        Quaternion targetRotation =
-            Quaternion.LookRotation(
-                lookDir
+            Quaternion targetRotation =
+                Quaternion.LookRotation(
+                    lookDir
+                );
+
+            transform.rotation =
+                Quaternion.Slerp(
+                    transform.rotation,
+                    targetRotation,
+                    Time.deltaTime * 12f
+                );
+        }
+
+        public void AttackHit()
+        {
+            if (isDead || target == null)
+                return;
+
+            float distance = Vector3.Distance(
+                transform.position,
+                target.position
             );
 
-        transform.rotation =
-            Quaternion.Slerp(
-                transform.rotation,
-                targetRotation,
-                Time.deltaTime * 12f
-            );
+            if (distance <= attackDistance + 0.5f)
+            {
+                DamagePlayer(20);
+            }
+        }
+
     }
-
-    public void AttackHit()
-    {
-        DamagePlayer(20);
-    }
-
-
-}
