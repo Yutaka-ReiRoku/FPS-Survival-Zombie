@@ -32,7 +32,7 @@
         [Header("Health")]
         public int maxHealth = 100;
 
-        private int currentHealth;
+        protected int currentHealth;
 
         [Header("Loot Drop")]
         public GameObject dropPrefab;
