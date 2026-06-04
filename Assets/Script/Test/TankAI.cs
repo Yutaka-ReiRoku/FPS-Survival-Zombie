@@ -1,53 +1,46 @@
 ﻿using cowsins;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class TankAI : ZombieAI
 {
     [Header("Tank Stats")]
-    public int tankHealth = 300;
-    public float speedMultiplier = 0.8f;
+    public int tankMaxHealth = 150;
 
-    [Header("Leap")]
-    public float leapRangeMin = 8f;
-    public float leapRangeMax = 20f;
-    public float leapForce = 15f;
-    public float leapHeight = 6f;
-    public float leapCooldown = 15f;
-
-    [Header("Shockwave")]
+    [Header("Jump Attack")]
+    public float jumpAttackRange = 12f;
+    public float jumpCooldown = 12f;
     public float shockwaveRadius = 4f;
     public float shockwaveDamage = 35f;
 
-    private Rigidbody rb;
+    [Header("Scream")]
+    public float screamDuration = 2.5f;
 
-    private float leapTimer;
+    private float jumpTimer;
 
-    private bool isLeaping;
+    private bool isJumpAttacking;
+    private bool isScreaming;
+    private bool hasScreamed;
+    private bool introJumpUsed;
     private bool enraged;
 
     protected override void Start()
     {
-        maxHealth = tankHealth;
+        maxHealth = tankMaxHealth;
 
-        walkSpeed *= speedMultiplier;
-        runSpeed *= speedMultiplier;
+        walkSpeed *= 0.8f;
+        runSpeed *= 0.8f;
 
         base.Start();
 
-        rb = GetComponent<Rigidbody>();
-
-        leapTimer = leapCooldown;
+        jumpTimer = jumpCooldown;
     }
 
     protected override void Update()
     {
-        base.Update();
-
-        if (target == null)
+        if (target == null || isDead)
             return;
 
-        leapTimer -= Time.deltaTime;
+        jumpTimer += Time.deltaTime;
 
         float distance =
             Vector3.Distance(
@@ -55,54 +48,103 @@ public class TankAI : ZombieAI
                 target.position
             );
 
-        if (!isLeaping &&
-            leapTimer <= 0f &&
-            distance >= leapRangeMin &&
-            distance <= leapRangeMax)
+        // FIRST SCREAM
+        if (
+            !hasScreamed &&
+            distance <= detectDistance
+        )
         {
-            StartLeap();
+            StartScream();
+            return;
         }
 
+        // LOCK AI DURING SCREAM
+        if (isScreaming)
+            return;
+
+        // ENRAGE
         CheckEnrage();
-    }
 
-    private void StartLeap()
-    {
-        if (agent == null || !agent.enabled)
-            return;
-
-        isLeaping = true;
-
-        leapTimer = leapCooldown;
-
-        agent.enabled = false;
-
-        animator.SetTrigger("Leap");
-
-        Vector3 direction =
-            (target.position -
-            transform.position).normalized;
-
-        rb.linearVelocity =
-            direction * leapForce +
-            Vector3.up * leapHeight;
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (!isLeaping)
-            return;
-
-        if (collision.contacts.Length > 0)
+        // INTRO JUMP
+        if (
+            hasScreamed &&
+            !introJumpUsed &&
+            distance <= jumpAttackRange
+        )
         {
-            LandImpact();
+            introJumpUsed = true;
+
+            StartJumpAttack();
+
+            return;
+        }
+
+        // NORMAL JUMP
+        if (
+            distance > attackDistance &&
+            distance <= jumpAttackRange &&
+            jumpTimer >= jumpCooldown &&
+            !isJumpAttacking
+        )
+        {
+            StartJumpAttack();
+
+            return;
+        }
+
+        // LOCK DURING JUMP
+        if (isJumpAttacking)
+            return;
+
+        base.Update();
+    }
+
+    private void StartScream()
+    {
+        hasScreamed = true;
+        isScreaming = true;
+
+        agent.isStopped = true;
+
+        animator.SetTrigger("Scream");
+
+        Invoke(
+            nameof(EndScream),
+            screamDuration
+        );
+    }
+
+    private void EndScream()
+    {
+        isScreaming = false;
+
+        if (!isDead)
+        {
+            agent.isStopped = false;
         }
     }
 
-    private void LandImpact()
+    private void StartJumpAttack()
     {
-        isLeaping = false;
+        if (isDead)
+            return;
 
+        isJumpAttacking = true;
+
+        jumpTimer = 0f;
+
+        agent.isStopped = true;
+
+        FaceTarget();
+
+        animator.SetTrigger(
+            "JumpAttack"
+        );
+    }
+
+    // Animation Event
+    public void JumpLand()
+    {
         Collider[] hits =
             Physics.OverlapSphere(
                 transform.position,
@@ -130,46 +172,32 @@ public class TankAI : ZombieAI
 
             if (playerRb != null)
             {
-                Vector3 pushDir =
+                Vector3 dir =
                     (
                         hit.transform.position -
                         transform.position
                     ).normalized;
 
                 playerRb.AddForce(
-                    pushDir * 10f,
+                    dir * 10f,
                     ForceMode.Impulse
                 );
             }
         }
+    }
+
+    // Animation Event cuối clip
+    public void EndJumpAttack()
+    {
+        isJumpAttacking = false;
 
         if (!isDead)
         {
-            agent.enabled = true;
+            agent.isStopped = false;
         }
     }
 
-    private void CheckEnrage()
-    {
-        if (enraged)
-            return;
-
-        float healthPercent =
-            (float)GetCurrentHealth() /
-            tankHealth;
-
-        if (healthPercent <= 0.3f)
-        {
-            enraged = true;
-
-            runSpeed *= 1.25f;
-
-            leapCooldown = 8f;
-
-            animator.SetTrigger("Enrage");
-        }
-    }
-
+    // Animation Event của attack clip
     public new void AttackHit()
     {
         if (target == null)
@@ -181,27 +209,37 @@ public class TankAI : ZombieAI
                 target.position
             );
 
-        if (distance <= attackDistance + 0.5f)
+        if (distance <= attackDistance + 1f)
         {
             DamagePlayer(49);
         }
     }
 
-    private int GetCurrentHealth()
+    private void CheckEnrage()
     {
-        return Mathf.Max(
-            1,
-            tankHealth
-        );
+        if (enraged)
+            return;
+
+        float hpPercent =
+            (float)currentHealth /
+            maxHealth;
+
+        if (hpPercent <= 0.3f)
+        {
+            enraged = true;
+
+            runSpeed *= 1.25f;
+
+            jumpCooldown *= 0.5f;
+
+            animator.SetTrigger(
+                "Enrage"
+            );
+        }
     }
 
-    private void OnDrawGizmosSelected()
+    protected override void Die()
     {
-        Gizmos.color = Color.red;
-
-        Gizmos.DrawWireSphere(
-            transform.position,
-            shockwaveRadius
-        );
+        base.Die();
     }
 }
