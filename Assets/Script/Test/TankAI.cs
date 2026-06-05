@@ -29,12 +29,10 @@ public class TankBossAI : MonoBehaviour, IDamageable
     public float swipeDamage = 40f;
     public float jumpDamage = 60f;
     public float jumpRadius = 5f;
+    public bool shakeCameraOnLand = true;
 
     [Header("Scream")]
     public float screamDuration = 2.5f;
-
-    [Header("Lifetime")]
-    public float lifeTime = 60f;
 
     private Animator animator;
     private NavMeshAgent agent;
@@ -78,8 +76,6 @@ public class TankBossAI : MonoBehaviour, IDamageable
 
         animator.speed =
             Random.Range(0.95f, 1.05f);
-
-        Invoke(nameof(StartDeath), lifeTime);
     }
 
     private void Update()
@@ -161,21 +157,6 @@ public class TankBossAI : MonoBehaviour, IDamageable
         {
             StartMeleeAttack();
         }
-
-        //------------------------------------------------
-        // ANIMATION SPEED
-        //------------------------------------------------
-
-        float speed =
-            agent.velocity.magnitude /
-            runSpeed;
-
-        animator.SetFloat(
-            "Speed",
-            speed,
-            0.2f,
-            Time.deltaTime
-        );
     }
 
     private void FindPlayer()
@@ -342,7 +323,9 @@ public class TankBossAI : MonoBehaviour, IDamageable
 
         foreach (Collider hit in hits)
         {
-            // DAMAGE
+            if (hit.transform == transform)
+                continue;
+            // Damage Player
 
             IDamageable damageable =
                 hit.GetComponent<IDamageable>();
@@ -355,7 +338,7 @@ public class TankBossAI : MonoBehaviour, IDamageable
                 );
             }
 
-            // CAMERA SHAKE
+            // Camera Shake
 
             IPlayerMovementStateProvider player =
                 hit.GetComponent<IPlayerMovementStateProvider>();
@@ -367,14 +350,11 @@ public class TankBossAI : MonoBehaviour, IDamageable
 
                 if (cameraEffects != null)
                 {
-                    float distance =
+                    cameraEffects.ExplosionShake(
                         Vector3.Distance(
                             cameraEffects.transform.position,
                             transform.position
-                        );
-
-                    cameraEffects.ExplosionShake(
-                        distance
+                        ) * 0.5f
                     );
                 }
             }
@@ -439,14 +419,6 @@ public class TankBossAI : MonoBehaviour, IDamageable
     //==================================================
     // DEATH
     //==================================================
-
-    private void StartDeath()
-    {
-        if (!isDead)
-        {
-            Die();
-        }
-    }
 
     public void Die()
     {
