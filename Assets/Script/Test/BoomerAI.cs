@@ -38,7 +38,7 @@ public class BoomerAI : MonoBehaviour, IDamageable
     [Header("Prefab Reference for Pooling")]
     public GameObject prefab;
 
-    private static Collider[] overlapColliders = new Collider[50];
+    private static Collider[] overlapColliders = new Collider[500];
 
     private Animator animator;
     private NavMeshAgent agent;

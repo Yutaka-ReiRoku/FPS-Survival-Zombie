@@ -22,7 +22,7 @@ namespace cowsins
         [HideInInspector] public GameObject prefab;
         [SerializeField] private LayerMask projectileHitLayer;
 
-        private static Collider[] overlapColliders = new Collider[50];
+        private static Collider[] overlapColliders = new Collider[500];
         private bool projectileHasAlreadyHit = false; // Prevent from double hitting issues
 
         private void OnEnable()
