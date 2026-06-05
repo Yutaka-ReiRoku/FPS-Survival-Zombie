@@ -18,7 +18,7 @@ public class Spawm : MonoBehaviour
 
     [Header("Object Pool")]
     public int poolSize = 60;
-    private System.Collections.Generic.List<GameObject> zombiePool = new System.Collections.Generic.List<GameObject>();
+    private System.Collections.Generic.Dictionary<GameObject, System.Collections.Generic.List<GameObject>> poolDictionary = new System.Collections.Generic.Dictionary<GameObject, System.Collections.Generic.List<GameObject>>();
 
     private float timer;
 
@@ -27,21 +27,36 @@ public class Spawm : MonoBehaviour
         if (zombiePrefabs == null || zombiePrefabs.Length == 0)
             return;
 
-        for (int i = 0; i < poolSize; i++)
+        int perPrefabSize = Mathf.Max(1, poolSize / zombiePrefabs.Length);
+
+        foreach (GameObject prefab in zombiePrefabs)
         {
-            int randomIndex = Random.Range(0, zombiePrefabs.Length);
-            GameObject zombie = Instantiate(zombiePrefabs[randomIndex], transform.position, Quaternion.identity);
-            zombie.SetActive(false);
-            zombiePool.Add(zombie);
+            if (prefab == null) continue;
+
+            poolDictionary[prefab] = new System.Collections.Generic.List<GameObject>();
+            for (int i = 0; i < perPrefabSize; i++)
+            {
+                GameObject zombie = Instantiate(prefab, transform.position, Quaternion.identity);
+                zombie.SetActive(false);
+                poolDictionary[prefab].Add(zombie);
+            }
         }
     }
 
-    private GameObject GetPooledZombie()
+    private GameObject GetPooledZombie(GameObject prefab)
     {
-        foreach (GameObject zombie in zombiePool)
+        if (poolDictionary.TryGetValue(prefab, out var poolList))
         {
-            if (!zombie.activeInHierarchy)
-                return zombie;
+            foreach (GameObject zombie in poolList)
+            {
+                if (!zombie.activeInHierarchy)
+                    return zombie;
+            }
+
+            GameObject newZombie = Instantiate(prefab, transform.position, Quaternion.identity);
+            newZombie.SetActive(false);
+            poolList.Add(newZombie);
+            return newZombie;
         }
         return null;
     }
@@ -128,10 +143,13 @@ public class Spawm : MonoBehaviour
 
             SpawnZombie();
         }
-        Debug.Log(
-            "Director State = " +
-            AIDirector.Instance.currentState
-        );
+        if (AIDirector.Instance != null)
+        {
+            Debug.Log(
+                "Director State = " +
+                AIDirector.Instance.currentState
+            );
+        }
         Debug.Log(
             "Spawn Amount = " +
             spawnAmount
@@ -154,7 +172,15 @@ public class Spawm : MonoBehaviour
                 )
             );
 
-        GameObject zombie = GetPooledZombie();
+        if (zombiePrefabs == null || zombiePrefabs.Length == 0)
+            return;
+
+        int randomIndex = Random.Range(0, zombiePrefabs.Length);
+        GameObject selectedPrefab = zombiePrefabs[randomIndex];
+
+        if (selectedPrefab == null) return;
+
+        GameObject zombie = GetPooledZombie(selectedPrefab);
 
         if (zombie != null)
         {
@@ -199,7 +225,12 @@ public class Spawm : MonoBehaviour
                 Random.Range(-3f, 3f)
             );
 
-        GameObject zombie = GetPooledZombie();
+        int randomIndex = Random.Range(0, zombiePrefabs.Length);
+        GameObject selectedPrefab = zombiePrefabs[randomIndex];
+
+        if (selectedPrefab == null) return;
+
+        GameObject zombie = GetPooledZombie(selectedPrefab);
 
         if (zombie != null)
         {
