@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class Spawm : MonoBehaviour
 {
@@ -16,7 +16,35 @@ public class Spawm : MonoBehaviour
     [Header("Player")]
     public Transform player;
 
+    [Header("Object Pool")]
+    public int poolSize = 60;
+    private System.Collections.Generic.List<GameObject> zombiePool = new System.Collections.Generic.List<GameObject>();
+
     private float timer;
+
+    private void Start()
+    {
+        if (zombiePrefabs == null || zombiePrefabs.Length == 0)
+            return;
+
+        for (int i = 0; i < poolSize; i++)
+        {
+            int randomIndex = Random.Range(0, zombiePrefabs.Length);
+            GameObject zombie = Instantiate(zombiePrefabs[randomIndex], transform.position, Quaternion.identity);
+            zombie.SetActive(false);
+            zombiePool.Add(zombie);
+        }
+    }
+
+    private GameObject GetPooledZombie()
+    {
+        foreach (GameObject zombie in zombiePool)
+        {
+            if (!zombie.activeInHierarchy)
+                return zombie;
+        }
+        return null;
+    }
 
     private void Update()
     {
@@ -126,20 +154,14 @@ public class Spawm : MonoBehaviour
                 )
             );
 
-        int randomIndex =
-            Random.Range(
-                0,
-                zombiePrefabs.Length
-            );
+        GameObject zombie = GetPooledZombie();
 
-        GameObject selectedPrefab =
-            zombiePrefabs[randomIndex];
-
-        Instantiate(
-            selectedPrefab,
-            randomPos,
-            Quaternion.identity
-        );
+        if (zombie != null)
+        {
+            zombie.transform.position = randomPos;
+            zombie.transform.rotation = Quaternion.identity;
+            zombie.SetActive(true);
+        }
     }
 
     private void CheckCamperPunishment()
@@ -177,21 +199,18 @@ public class Spawm : MonoBehaviour
                 Random.Range(-3f, 3f)
             );
 
-        int randomIndex =
-            Random.Range(
-                0,
-                zombiePrefabs.Length
+        GameObject zombie = GetPooledZombie();
+
+        if (zombie != null)
+        {
+            zombie.transform.position = spawnPos;
+            zombie.transform.rotation = Quaternion.identity;
+            zombie.SetActive(true);
+
+            Debug.Log(
+                "[DIRECTOR] Camper Punishment Spawn!"
             );
-
-        Instantiate(
-            zombiePrefabs[randomIndex],
-            spawnPos,
-            Quaternion.identity
-        );
-
-        Debug.Log(
-            "[DIRECTOR] Camper Punishment Spawn!"
-        );
+        }
     }
 
     private void OnDrawGizmosSelected()

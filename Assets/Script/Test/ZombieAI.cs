@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.AI;
 using cowsins;
 
@@ -66,13 +66,21 @@ public class ZombieAI : MonoBehaviour, IDamageable
     private static readonly int AttackIndexHash =
         Animator.StringToHash("AttackIndex");
 
-    void Start()
+    void Awake()
     {
-        currentHealth = maxHealth;
-
         animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         audioSource = GetComponent<AudioSource>();
+    }
+
+    void OnEnable()
+    {
+        isDead = false;
+        isAttacking = false;
+        hasDetectedPlayer = false;
+        currentHealth = maxHealth;
+        attackTimer = 0f;
+        wanderTimer = wanderInterval;
 
         if (target == null)
         {
@@ -83,10 +91,23 @@ public class ZombieAI : MonoBehaviour, IDamageable
                 target = player.transform;
         }
 
-        agent.speed = walkSpeed;
-        agent.stoppingDistance = attackDistance;
+        if (agent != null)
+        {
+            agent.enabled = true;
+            agent.isStopped = false;
+            agent.speed = walkSpeed;
+            agent.stoppingDistance = attackDistance;
+        }
 
-        wanderTimer = wanderInterval;
+        Collider col = GetComponent<Collider>();
+        if (col != null)
+            col.enabled = true;
+
+        if (animator != null)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+        }
     }
 
     void Update()
@@ -256,7 +277,12 @@ public class ZombieAI : MonoBehaviour, IDamageable
 
         TryDropLoot();
 
-        Destroy(gameObject, 6f);
+        Invoke(nameof(DeactivateZombie), 6f);
+    }
+
+    void DeactivateZombie()
+    {
+        gameObject.SetActive(false);
     }
 
     void TryDropLoot()
