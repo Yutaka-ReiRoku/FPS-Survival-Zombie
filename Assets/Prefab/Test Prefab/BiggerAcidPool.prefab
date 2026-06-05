@@ -123,26 +123,5 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4279132647305870351, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: -4339454945799587913}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
---- !u!1 &8605726754624049729 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4279132647305870351, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
-  m_PrefabInstance: {fileID: 5480641722687974990}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &-4339454945799587913
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8605726754624049729}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3a5abcd7a35e3a46b57380b3a68ab0f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AcidPoolLifetime
-  lifetime: 10
