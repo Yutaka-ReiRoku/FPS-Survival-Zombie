@@ -22,7 +22,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 921490360460372017, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_LocalScale.x
-      value: 4.9
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 921490360460372017, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_LocalScale.y
@@ -30,11 +30,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 921490360460372017, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_LocalScale.z
-      value: 4.9
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 921490360460372017, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_ConstrainProportionsScale
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2571134209364101844, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2571134209364101844, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -80,9 +84,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4279132647305870350, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
+      propertyPath: m_Radius
+      value: 2.66
+      objectReference: {fileID: 0}
+    - target: {fileID: 4279132647305870350, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
+      propertyPath: m_Center.z
+      value: 0.05
+      objectReference: {fileID: 0}
     - target: {fileID: 4279132647305870351, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_Name
-      value: HurtTrigger Variant
+      value: AcidPool
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

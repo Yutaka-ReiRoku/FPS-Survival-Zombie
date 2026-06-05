@@ -70,6 +70,13 @@ public class BoomerPrototypeController : MonoBehaviour
 
     void Update()
     {
+        // TEST DAMAGE
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            TakeDamage(20f);
+        }
+
+
         UpdateAnimator();
 
 
@@ -162,10 +169,6 @@ public class BoomerPrototypeController : MonoBehaviour
     }
 
 
-
-
-
-
     IEnumerator StartWarning()
     {
         state = State.Warning;
@@ -208,12 +211,6 @@ public class BoomerPrototypeController : MonoBehaviour
         StartExplosionDeath();
     }
 
-
-
-
-
-
-
     void StartExplosionDeath()
     {
         state = State.Death;
@@ -239,10 +236,27 @@ public class BoomerPrototypeController : MonoBehaviour
     }
 
 
+    IEnumerator HitStun()
+    {
+        // nếu đang chết / chuẩn bị nổ thì không cần unlock lại
+        if (state == State.Death ||
+           state == State.Exploded)
+            yield break;
+
+
+        canMove = false;
+
+
+        yield return new WaitForSeconds(1f);
 
 
 
-
+        // chỉ cho chạy lại nếu vẫn còn sống
+        if (!dead && !exploded)
+        {
+            canMove = true;
+        }
+    }
 
     IEnumerator ExplosionRoutine()
     {
@@ -255,21 +269,18 @@ public class BoomerPrototypeController : MonoBehaviour
     }
 
 
-
-
-
-
-
-
     public void TakeDamage(float damage)
     {
         if (dead || exploded)
             return;
 
 
-
         health -= damage;
 
+
+        Debug.Log(
+            "BOOMER HIT - HP: " + health
+        );
 
 
         animator.SetTrigger(
@@ -277,8 +288,9 @@ public class BoomerPrototypeController : MonoBehaviour
         );
 
 
-        Debug.Log(
-            "Boomer HP: " + health
+        // lock movement 1 giây
+        StartCoroutine(
+            HitStun()
         );
 
 
@@ -290,15 +302,14 @@ public class BoomerPrototypeController : MonoBehaviour
             canMove = false;
 
 
+            Debug.Log(
+                "BOOMER DEAD -> EXPLOSION SEQUENCE"
+            );
+
+
             StartExplosionDeath();
         }
     }
-
-
-
-
-
-
 
 
     void Explode()
