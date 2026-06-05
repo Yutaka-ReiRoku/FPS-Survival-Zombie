@@ -145,8 +145,8 @@ namespace cowsins
 
             rb.freezeRotation = true;
 
-            // Use discrete for better performance (away from heavy continuous dynamic)
-            rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+            // Use ContinuousDynamic to prevent physics tunneling
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             // Set interpolation for smooth movement
             rb.interpolation = RigidbodyInterpolation.Interpolate;
