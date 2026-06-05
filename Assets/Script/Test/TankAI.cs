@@ -403,6 +403,7 @@ public class TankBossAI : MonoBehaviour, IDamageable
 
     public void TakeDamage(int damage)
     {
+
         if (isDead)
             return;
 

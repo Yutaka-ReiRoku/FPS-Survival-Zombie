@@ -1256,7 +1256,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 1397897947513670}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
+  m_Radius: 0.38
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
@@ -1281,27 +1281,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e30625a6dfc73054282c8fd5c3556be0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TankAI
-  walkSpeed: 1.5
-  runSpeed: 3.5
-  detectDistance: 20
-  stopDistance: 1
-  attackDistance: 1.8
-  wanderRadius: 15
-  wanderTimer: 5
-  idleTimeMin: 2
-  idleTimeMax: 5
-  attackCooldown: 1.5
-  acceleration: 6
-  animationDamping: 0.4
+  target: {fileID: 0}
   maxHealth: 100
-  dropPrefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
-  dropChance: 100
-  dropOffset: {x: 0, y: 0.5, z: 0}
-  tankMaxHealth: 150
+  detectRange: 20
+  runSpeed: 6
+  rotationSpeed: 10
+  meleeRange: 3
   jumpAttackRange: 12
-  jumpCooldown: 12
-  shockwaveRadius: 4
-  shockwaveDamage: 35
+  attackCooldown: 1.5
+  jumpAttackCooldown: 10
+  punchDamage: 30
+  swipeDamage: 40
+  jumpDamage: 60
+  jumpRadius: 10
+  shakeCameraOnLand: 1
   screamDuration: 2.5
 --- !u!1 &1407548066537998
 GameObject:

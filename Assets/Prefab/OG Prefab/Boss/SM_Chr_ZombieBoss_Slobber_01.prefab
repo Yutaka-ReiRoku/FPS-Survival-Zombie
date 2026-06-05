@@ -869,6 +869,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330850e7e64eda349aef75563d26fb35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoomerAI
+  target: {fileID: 0}
+  moveSpeed: 1.5
+  explodeRange: 3
+  maxHealth: 100
+  screamDuration: 1.5
+  explosionPrefab: {fileID: 5018994898019192216, guid: ab977a440365d1c4092c15552e5ff157, type: 3}
+  acidPoolPrefab: {fileID: 8605726754624049729, guid: 1662b07117d017d4189203a20424de4e, type: 3}
 --- !u!1 &1391895566585514
 GameObject:
   m_ObjectHideFlags: 0

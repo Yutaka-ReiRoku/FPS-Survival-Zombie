@@ -13,7 +13,7 @@ public class CameraShake : MonoBehaviour
 
     public void Shake()
     {
-        Shake(0.15f, 0.5f);
+        Shake(0.15f, 0.1f);
     }
 
     public void Shake(float duration, float magnitude)
