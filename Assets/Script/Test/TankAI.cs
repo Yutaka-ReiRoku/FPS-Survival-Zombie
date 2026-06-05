@@ -347,7 +347,7 @@ public class TankBossAI : MonoBehaviour, IDamageable
             if (hit.transform == transform)
                 continue;
 
-            if (hit.transform == target)
+            if (target != null && hit.transform.root == target.root)
             {
                 if (cachedPlayerDamageable != null)
                 {
