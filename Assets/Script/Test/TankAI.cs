@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.AI;
 using cowsins;
 
@@ -85,7 +85,12 @@ public class TankBossAI : MonoBehaviour, IDamageable
 
         if (target == null)
         {
-            FindPlayer();
+            findPlayerTimer += Time.deltaTime;
+            if (findPlayerTimer >= 1f)
+            {
+                FindPlayer();
+                findPlayerTimer = 0f;
+            }
             return;
         }
 
@@ -159,8 +164,21 @@ public class TankBossAI : MonoBehaviour, IDamageable
         }
     }
 
+    private float findPlayerTimer;
+    private static Transform cachedPlayerTransform;
+    private IDamageable cachedPlayerDamageable;
+    private CameraEffects cachedCameraEffects;
+
     private void FindPlayer()
     {
+        if (cachedPlayerTransform != null)
+        {
+            target = cachedPlayerTransform;
+            cachedPlayerDamageable = target.GetComponent<IDamageable>();
+            cachedCameraEffects = target.GetComponent<CameraEffects>();
+            return;
+        }
+
         GameObject player =
             GameObject.FindGameObjectWithTag(
                 "Player"
@@ -168,7 +186,10 @@ public class TankBossAI : MonoBehaviour, IDamageable
 
         if (player != null)
         {
+            cachedPlayerTransform = player.transform;
             target = player.transform;
+            cachedPlayerDamageable = target.GetComponent<IDamageable>();
+            cachedCameraEffects = target.GetComponent<CameraEffects>();
         }
     }
 
@@ -325,36 +346,38 @@ public class TankBossAI : MonoBehaviour, IDamageable
         {
             if (hit.transform == transform)
                 continue;
-            // Damage Player
 
-            IDamageable damageable =
-                hit.GetComponent<IDamageable>();
-
-            if (damageable != null)
+            if (hit.transform == target)
             {
-                damageable.Damage(
-                    jumpDamage,
-                    false
-                );
-            }
-
-            // Camera Shake
-
-            IPlayerMovementStateProvider player =
-                hit.GetComponent<IPlayerMovementStateProvider>();
-
-            if (player != null)
-            {
-                CameraEffects cameraEffects =
-                    hit.GetComponent<CameraEffects>();
-
-                if (cameraEffects != null)
+                if (cachedPlayerDamageable != null)
                 {
-                    cameraEffects.ExplosionShake(
+                    cachedPlayerDamageable.Damage(
+                        jumpDamage,
+                        false
+                    );
+                }
+
+                if (cachedCameraEffects != null)
+                {
+                    cachedCameraEffects.ExplosionShake(
                         Vector3.Distance(
-                            cameraEffects.transform.position,
+                            cachedCameraEffects.transform.position,
                             transform.position
                         ) * 0.5f
+                    );
+                }
+            }
+            else
+            {
+                // Damage other enemies or entities
+                IDamageable damageable =
+                    hit.GetComponent<IDamageable>();
+
+                if (damageable != null)
+                {
+                    damageable.Damage(
+                        jumpDamage,
+                        false
                     );
                 }
             }
@@ -375,12 +398,9 @@ public class TankBossAI : MonoBehaviour, IDamageable
         if (distance > meleeRange + 1f)
             return;
 
-        IDamageable player =
-            target.GetComponent<IDamageable>();
-
-        if (player != null)
+        if (cachedPlayerDamageable != null)
         {
-            player.Damage(
+            cachedPlayerDamageable.Damage(
                 damage,
                 false
             );

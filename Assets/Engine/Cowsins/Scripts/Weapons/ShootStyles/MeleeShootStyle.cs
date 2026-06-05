@@ -23,6 +23,10 @@ namespace cowsins
         // Calls events in Weapon Controller when shooting or hitting an enemy
         public event Action onShoot;
 
+        private WaitForSeconds hitDelayWfs;
+        private WaitForSeconds attackRateWfs;
+        private static Collider[] overlapColliders = new Collider[50];
+
         public MeleeShootStyle(PlayerDependencies playerDependencies, LayerMask hitLayer)
         {
             this.playerDependencies = playerDependencies;
@@ -33,6 +37,9 @@ namespace cowsins
             this.firePoint = id.FirePoint;
             this.mainCamera = weaponReference.MainCamera;
             this.hitLayer = hitLayer;
+
+            hitDelayWfs = new WaitForSeconds(weapon.hitDelay);
+            attackRateWfs = new WaitForSeconds(weapon.attackRate);
         }
 
         public void Shoot(float spread, float damageMultiplier, float shakeMultiplier)
@@ -57,10 +64,10 @@ namespace cowsins
 
             if (weapon == null) yield break;
 
-            yield return new WaitForSeconds(weapon.hitDelay);
+            yield return hitDelayWfs;
 
             Melee(weapon, 0, damageMultiplier);
-            playerDependencies.StartCoroutine(AllowShootAfterDelay(weapon.attackRate));
+            playerDependencies.StartCoroutine(AllowShootAfterDelay());
 
             // OnShoot() inside WeaponController is subscribed to this onShoot method.
             // When onShoot is called, OnShoot() inside WeaponController is called. Mainly used for Camera Effects.
@@ -71,12 +78,13 @@ namespace cowsins
         {
             RaycastHit hit;
             Vector3 basePosition = id != null ? id.transform.position : playerDependencies.transform.position;
-            Collider[] col = Physics.OverlapSphere(basePosition + mainCamera.transform.parent.forward * weapon.attackRange / 2, weapon.attackRange, hitLayer);
+            int numHits = Physics.OverlapSphereNonAlloc(basePosition + mainCamera.transform.parent.forward * weapon.attackRange / 2, weapon.attackRange, overlapColliders, hitLayer);
 
             float dmg = weapon.damagePerHit * damageMultiplier;
 
-            foreach (var c in col)
+            for (int i = 0; i < numHits; i++)
             {
+                var c = overlapColliders[i];
                 if (c.CompareTag("Critical") || c.CompareTag("BodyShot"))
                 {
                     CowsinsUtilities.GatherDamageableParent(c.transform).Damage(dmg, false);
@@ -101,9 +109,9 @@ namespace cowsins
             }
         }
 
-        private IEnumerator AllowShootAfterDelay(float delay)
+        private IEnumerator AllowShootAfterDelay()
         {
-            yield return new WaitForSeconds(delay);
+            yield return attackRateWfs;
             canShoot = true;
         }
 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace cowsins
 {
@@ -74,9 +74,18 @@ namespace cowsins
             PoolManager.Instance.RegisterPool(muzzleFlash, projectilePoolSize);
         }
 
+        private float searchTimer = 0f;
+        private float searchInterval = 0.5f;
+
         private void Update()
         {
-            UpdateTarget();
+            searchTimer += Time.deltaTime;
+            if (searchTimer >= searchInterval)
+            {
+                UpdateTarget();
+                searchTimer = 0f;
+            }
+
             if (target == null) return;
 
             Vector3 targetDir = target.position - transform.position;

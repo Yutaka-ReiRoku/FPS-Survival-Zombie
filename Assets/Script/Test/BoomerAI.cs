@@ -35,6 +35,11 @@ public class BoomerAI : MonoBehaviour, IDamageable
     [Header("Acid Pool Lifetime")]
     public float acidPoolLifetime = 10f;
 
+    [Header("Prefab Reference for Pooling")]
+    public GameObject prefab;
+
+    private static Collider[] overlapColliders = new Collider[50];
+
     private Animator animator;
     private NavMeshAgent agent;
 
@@ -85,7 +90,12 @@ public class BoomerAI : MonoBehaviour, IDamageable
 
         if (target == null)
         {
-            FindPlayer();
+            findPlayerTimer += Time.deltaTime;
+            if (findPlayerTimer >= 1f)
+            {
+                FindPlayer();
+                findPlayerTimer = 0f;
+            }
             return;
         }
 
@@ -143,8 +153,17 @@ public class BoomerAI : MonoBehaviour, IDamageable
         );
     }
 
+    private float findPlayerTimer;
+    private static Transform cachedPlayerTransform;
+
     private void FindPlayer()
     {
+        if (cachedPlayerTransform != null)
+        {
+            target = cachedPlayerTransform;
+            return;
+        }
+
         GameObject player =
             GameObject.FindGameObjectWithTag(
                 "Player"
@@ -152,6 +171,7 @@ public class BoomerAI : MonoBehaviour, IDamageable
 
         if (player != null)
         {
+            cachedPlayerTransform = player.transform;
             target = player.transform;
         }
     }
@@ -268,7 +288,7 @@ public class BoomerAI : MonoBehaviour, IDamageable
 
         if (explosionPrefab != null)
         {
-            Instantiate(
+            cowsins.PoolManager.Instance.GetFromPool(
                 explosionPrefab,
                 transform.position,
                 Quaternion.identity
@@ -286,10 +306,11 @@ public class BoomerAI : MonoBehaviour, IDamageable
         {
             if (acidPoolDeathPrefab != null)
             {
-                acidPool = Instantiate(
+                acidPool = cowsins.PoolManager.Instance.GetFromPool(
                     acidPoolDeathPrefab,
                     transform.position,
-                    Quaternion.identity
+                    Quaternion.identity,
+                    acidPoolLifetime
                 );
             }
         }
@@ -297,34 +318,28 @@ public class BoomerAI : MonoBehaviour, IDamageable
         {
             if (acidPoolSelfExplodePrefab != null)
             {
-                acidPool = Instantiate(
+                acidPool = cowsins.PoolManager.Instance.GetFromPool(
                     acidPoolSelfExplodePrefab,
                     transform.position,
-                    Quaternion.identity
+                    Quaternion.identity,
+                    acidPoolLifetime
                 );
             }
-        }
-
-        if (acidPool != null)
-        {
-            Destroy(
-                acidPool,
-                acidPoolLifetime
-            );
         }
 
         //--------------------------------
         // DAMAGE
         //--------------------------------
 
-        Collider[] hits =
-            Physics.OverlapSphere(
+        int numHits = Physics.OverlapSphereNonAlloc(
                 transform.position,
-                explosionRadius
+                explosionRadius,
+                overlapColliders
             );
 
-        foreach (Collider hit in hits)
+        for (int i = 0; i < numHits; i++)
         {
+            Collider hit = overlapColliders[i];
             if (hit.transform == transform)
                 continue;
 
@@ -351,7 +366,14 @@ public class BoomerAI : MonoBehaviour, IDamageable
             agent.enabled = false;
         }
 
-        Destroy(gameObject);
+        if (prefab != null)
+        {
+            cowsins.PoolManager.Instance.ReturnToPool(gameObject, prefab);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void OnDrawGizmosSelected()

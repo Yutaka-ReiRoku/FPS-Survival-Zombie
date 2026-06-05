@@ -110,6 +110,7 @@ namespace cowsins
 
         private void FixedUpdate()
         {
+            groundDetectionBehaviour?.FixedTick();
             // Added Gravity, only if we are not climbing to prevent unvoluntary sliding
             if (!IsClimbing && !movementContext.IsPlayerOnSlope) rb.AddForce(Vector3.down * extraGravityForce, ForceMode.Acceleration);
 
@@ -144,8 +145,8 @@ namespace cowsins
 
             rb.freezeRotation = true;
 
-            // Use continuous dynamic for better collision detection
-            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            // Use discrete for better performance (away from heavy continuous dynamic)
+            rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
 
             // Set interpolation for smooth movement
             rb.interpolation = RigidbodyInterpolation.Interpolate;

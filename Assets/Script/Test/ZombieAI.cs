@@ -110,6 +110,9 @@ public class ZombieAI : MonoBehaviour, IDamageable
         }
     }
 
+    private float distanceTimer = 0f;
+    private float cachedDistance = 100f;
+
     void Update()
     {
         if (isDead || target == null)
@@ -117,15 +120,20 @@ public class ZombieAI : MonoBehaviour, IDamageable
 
         attackTimer += Time.deltaTime;
         wanderTimer += Time.deltaTime;
+        distanceTimer += Time.deltaTime;
 
-        float distance =
-            Vector3.Distance(
-                transform.position,
-                target.position);
-
-        if (distance <= detectDistance)
+        if (distanceTimer >= 0.2f)
         {
-            ChasePlayer(distance);
+            cachedDistance =
+                Vector3.Distance(
+                    transform.position,
+                    target.position);
+            distanceTimer = 0f;
+        }
+
+        if (cachedDistance <= detectDistance)
+        {
+            ChasePlayer(cachedDistance);
         }
         else
         {
@@ -139,6 +147,8 @@ public class ZombieAI : MonoBehaviour, IDamageable
             0.15f,
             Time.deltaTime);
     }
+
+    private float pathTimer = 0f;
 
     void ChasePlayer(float distance)
     {
@@ -164,7 +174,13 @@ public class ZombieAI : MonoBehaviour, IDamageable
         {
             agent.isStopped = false;
             agent.speed = runSpeed;
-            agent.SetDestination(target.position);
+            
+            pathTimer += Time.deltaTime;
+            if (pathTimer >= 0.25f)
+            {
+                agent.SetDestination(target.position);
+                pathTimer = 0f;
+            }
         }
     }
 

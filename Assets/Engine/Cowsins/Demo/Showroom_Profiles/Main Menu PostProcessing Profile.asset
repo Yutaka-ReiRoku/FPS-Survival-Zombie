@@ -38,8 +38,8 @@ MonoBehaviour:
     overrideState: 0
     value: {r: 1, g: 1, b: 1, a: 1}
   fastMode:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 1
   dirtTexture:
     overrideState: 0
     value: {fileID: 0}
@@ -94,8 +94,8 @@ MonoBehaviour:
     overrideState: 0
     value: 0.25
   quality:
-    overrideState: 0
-    value: 2
+    overrideState: 1
+    value: 0
 --- !u!114 &-621669826506474016
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -168,8 +168,8 @@ MonoBehaviour:
     overrideState: 1
     value: 0.456
   fastMode:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 1
 --- !u!114 &3037222841446730779
 MonoBehaviour:
   m_ObjectHideFlags: 3

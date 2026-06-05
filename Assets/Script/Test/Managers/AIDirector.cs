@@ -62,25 +62,30 @@ public class AIDirector : MonoBehaviour
             lastPlayerPosition = player.transform.position;
     }
 
+    private float updateTimer = 0f;
+    private float updateInterval = 0.5f;
+
     private void Update()
     {
         if (player == null)
             return;
 
         survivalTime += Time.deltaTime;
+        updateTimer += Time.deltaTime;
 
-        TrackMovement();
-
-        UpdatePlayerHealth();
-
-        CalculateThreat();
-
-        UpdateState();
+        if (updateTimer >= updateInterval)
+        {
+            TrackMovement(updateTimer);
+            UpdatePlayerHealth();
+            CalculateThreat();
+            UpdateState();
+            updateTimer = 0f;
+        }
     }
 
     #region Tracking
 
-    private void TrackMovement()
+    private void TrackMovement(float dt)
     {
         float moved =
             Vector3.Distance(
@@ -90,8 +95,8 @@ public class AIDirector : MonoBehaviour
 
         distanceMoved += moved;
 
-        if (moved < 0.05f)
-            camperTime += Time.deltaTime;
+        if (moved < 3f * dt)
+            camperTime += dt;
         else
             camperTime = 0f;
 

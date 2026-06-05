@@ -8,9 +8,4 @@ public class HookerAI : MonoBehaviour
         
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

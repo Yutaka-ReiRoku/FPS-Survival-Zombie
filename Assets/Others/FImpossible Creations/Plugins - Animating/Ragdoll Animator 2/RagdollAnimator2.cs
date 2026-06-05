@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace FIMSpace.FProceduralAnimation
 {
@@ -62,9 +62,16 @@ namespace FIMSpace.FProceduralAnimation
             if (!handler.Mecanim) if (transform.parent) handler.Mecanim = transform.parent.GetComponent<Animator>();
         }
 
+        [Header("Optimization")]
+        public bool disableOffscreen = true;
+        public int fixedUpdateSkipFrames = 1;
+        private int _fixedUpdateCounter = 0;
+        private Renderer _visibilityRenderer;
+
 
         private void Start()
         {
+            _visibilityRenderer = GetComponentInChildren<Renderer>();
             handler.Initialize(this, gameObject);
         }
 
@@ -115,6 +122,21 @@ namespace FIMSpace.FProceduralAnimation
 
         private void FixedUpdate()
         {
+            if (disableOffscreen && _visibilityRenderer != null && !_visibilityRenderer.isVisible)
+            {
+                return;
+            }
+
+            if (fixedUpdateSkipFrames > 0)
+            {
+                _fixedUpdateCounter++;
+                if (_fixedUpdateCounter <= fixedUpdateSkipFrames)
+                {
+                    return;
+                }
+                _fixedUpdateCounter = 0;
+            }
+
             #region Debug Performance Measure Start
 
 #if UNITY_EDITOR

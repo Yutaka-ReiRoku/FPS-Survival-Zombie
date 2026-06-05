@@ -54,13 +54,22 @@ namespace cowsins
             playerEvents.Events.OnJump.AddListener(NegateCancellingGrounded);
         }
 
+        private bool _foundGroundThisFixedUpdate;
+        private RaycastHit _groundHitThisFixedUpdate;
+
+        public void FixedTick()
+        {
+            _foundGroundThisFixedUpdate = PerformGroundCheck(out _groundHitThisFixedUpdate);
+        }
+
         public void Tick()
         {
             if (IsSliding())
                 playerMovement.IsSliding = true;
 
-            // Perform ground check every frame
-            bool foundGroundThisFrame = PerformGroundCheck(out RaycastHit hit);
+            // Use ground check performed in FixedUpdate
+            bool foundGroundThisFrame = _foundGroundThisFixedUpdate;
+            RaycastHit hit = _groundHitThisFixedUpdate;
 
             context.IsPlayerOnSlope = IsPlayerOnSlope(hit, foundGroundThisFrame);
 
@@ -172,8 +181,8 @@ namespace cowsins
         {
             yield return new WaitForSeconds(0.1f);
 
-            // Check if we are grounded
-            bool stillHasGround = PerformGroundCheck(out RaycastHit hit);
+            // Check if we are grounded using the cached result from FixedUpdate
+            bool stillHasGround = _foundGroundThisFixedUpdate;
 
             if (!stillHasGround)
             {

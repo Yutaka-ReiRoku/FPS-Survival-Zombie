@@ -110,6 +110,8 @@ public class CameraLookBehaviour
 
     private Transform currentAimAssistTarget;
     private float targetLockTimer;
+    private float aimAssistSearchTimer;
+    private Collider[] aimAssistColliders = new Collider[32];
 
     private void HandleAimAssist()
     {
@@ -155,11 +157,22 @@ public class CameraLookBehaviour
         // Find new target if we don't have a locked one just yet
         if (target == null)
         {
-            target = AimAssistHit();
-            if (target != null)
+            aimAssistSearchTimer -= Time.deltaTime;
+            if (aimAssistSearchTimer <= 0f)
             {
-                currentAimAssistTarget = target;
-                targetLockTimer = playerSettings.targetLockDuration;
+                target = AimAssistHit();
+                aimAssistSearchTimer = 0.2f;
+
+                if (target != null)
+                {
+                    currentAimAssistTarget = target;
+                    targetLockTimer = playerSettings.targetLockDuration;
+                }
+                else
+                {
+                    currentAimAssistTarget = null;
+                    return;
+                }
             }
             else
             {
@@ -220,19 +233,21 @@ public class CameraLookBehaviour
             : 40f;
 
         // Find all potential enemy targets within range
-        Collider[] nearbyEnemies = Physics.OverlapSphere(
+        int count = Physics.OverlapSphereNonAlloc(
             camera.position,
             range,
+            aimAssistColliders,
             LayerMask.GetMask("Enemy")
         );
 
-        if (nearbyEnemies.Length == 0) return null;
+        if (count == 0) return null;
 
         Transform bestTarget = null;
         float bestScore = float.MaxValue;
 
-        foreach (var enemyCollider in nearbyEnemies)
+        for (int i = 0; i < count; i++)
         {
+            Collider enemyCollider = aimAssistColliders[i];
             // Gather the aim point from the target
             Vector3 targetPosition = GetTargetAimPoint(enemyCollider.transform);
 

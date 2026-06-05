@@ -28,6 +28,10 @@ namespace cowsins
         public event Action<int, float, RaycastHit, bool> onHit;
 #pragma warning restore CS0067
 
+        private WaitForSeconds shootDelayWfs;
+        private WaitForSeconds timeBetweenShotsWfs;
+        private WaitForSeconds fireRateWfs;
+
         public ProjectileShootStyle(PlayerDependencies playerDependencies)
         {
             this.playerDependencies = playerDependencies;
@@ -37,6 +41,10 @@ namespace cowsins
             this.weaponEvents = playerDependencies.WeaponEvents;
             this.mainCamera = weaponReference.MainCamera;
             this.firePoint = weaponReference.Id.FirePoint;
+
+            shootDelayWfs = new WaitForSeconds(weapon.shootDelay);
+            timeBetweenShotsWfs = new WaitForSeconds(weapon.timeBetweenShots);
+            fireRateWfs = new WaitForSeconds(weapon.fireRate);
         }
 
         public void Shoot(float spread, float damageMultiplier, float shakeMultiplier)
@@ -56,7 +64,7 @@ namespace cowsins
                 playerDependencies.StopCoroutine(allowShootCoroutine);
                 allowShootCoroutine = null;
             }
-            playerDependencies.StartCoroutine(AllowShootAfterDelay(weapon.fireRate));
+            allowShootCoroutine = playerDependencies.StartCoroutine(AllowShootAfterDelay());
 
             weaponEvents.Events.OnShootSpawnEffects?.Invoke();
         }
@@ -65,7 +73,7 @@ namespace cowsins
         {
             if ((int)weapon.shootStyle == 1)
             {
-                yield return new WaitForSeconds(weapon.shootDelay);
+                yield return shootDelayWfs;
             }
 
             if (weapon.timeBetweenShots == 0)
@@ -88,7 +96,7 @@ namespace cowsins
                     if (weapon == null) yield break;
 
                     ProjectileShoot(spread);
-                    yield return new WaitForSeconds(weapon.timeBetweenShots);
+                    yield return timeBetweenShotsWfs;
                     i++;
                 }
             }
@@ -106,8 +114,10 @@ namespace cowsins
 
             foreach (var p in firePoint)
             {
-                GameObject bulletGO = GameObject.Instantiate(weapon.projectile.gameObject, p.position, p.transform.rotation);
+                GameObject bulletGO = PoolManager.Instance.GetFromPool(weapon.projectile.gameObject, p.position, p.transform.rotation);
                 Bullet bullet = bulletGO.GetComponent<Bullet>();
+                bullet.prefab = weapon.projectile.gameObject;
+
                 if (weapon.explosionOnHit) bullet.explosionVFX = weapon.explosionVFX;
 
                 bullet.hurtsPlayer = weapon.hurtsPlayer;
@@ -122,12 +132,14 @@ namespace cowsins
                 bullet.GetComponent<Rigidbody>().isKinematic = (!weapon.projectileUsesGravity) ? true : false;
                 bullet.damage = weaponReference.Id.damage * multipliers.DamageMultiplier;
                 bullet.duration = weapon.bulletDuration;
+
+                bullet.Initialize();
             }
         }
 
-        private IEnumerator AllowShootAfterDelay(float delay)
+        private IEnumerator AllowShootAfterDelay()
         {
-            yield return new WaitForSeconds(delay);
+            yield return fireRateWfs;
             canShoot = true;
         }
 

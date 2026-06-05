@@ -1,5 +1,5 @@
 /// <summary>
-/// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved. 
+/// This script belongs to cowsinsï¿½ as a part of the cowsinsï¿½ FPS Engine. All rights reserved. 
 /// </summary>using UnityEngine;
 using UnityEngine;
 
@@ -19,11 +19,23 @@ namespace cowsins
         [HideInInspector] public float explosionForce;
         [HideInInspector] public float criticalMultiplier;
         [HideInInspector] public float duration;
+        [HideInInspector] public GameObject prefab;
         [SerializeField] private LayerMask projectileHitLayer;
 
+        private static Collider[] overlapColliders = new Collider[50];
         private bool projectileHasAlreadyHit = false; // Prevent from double hitting issues
 
-        private void Start()
+        private void OnEnable()
+        {
+            projectileHasAlreadyHit = false;
+        }
+
+        private void OnDisable()
+        {
+            CancelInvoke(nameof(DestroyProjectile));
+        }
+
+        public void Initialize()
         {
             transform.LookAt(destination);
             Invoke(nameof(DestroyProjectile), duration);
@@ -80,13 +92,14 @@ namespace cowsins
                 if (explosionVFX != null)
                 {
                     var contact = GetComponent<Collider>().ClosestPoint(transform.position);
-                    Instantiate(explosionVFX, contact, Quaternion.identity);
+                    PoolManager.Instance.GetFromPool(explosionVFX, contact, Quaternion.identity);
                 }
 
-                Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
+                int numHits = Physics.OverlapSphereNonAlloc(transform.position, explosionRadius, overlapColliders);
 
-                foreach (var collider in colliders)
+                for (int i = 0; i < numHits; i++)
                 {
+                    var collider = overlapColliders[i];
                     var damageable = collider.GetComponent<IDamageable>();
                     var playerMovement = collider.GetComponent<PlayerMovement>();
                     var rigidbody = collider.GetComponent<Rigidbody>();
@@ -122,7 +135,14 @@ namespace cowsins
                 }
             }
 
-            Destroy(gameObject);
+            if (prefab != null)
+            {
+                PoolManager.Instance.ReturnToPool(gameObject, prefab);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

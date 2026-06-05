@@ -8,9 +8,4 @@ public class SnatcherAI : MonoBehaviour
         
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

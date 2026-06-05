@@ -19,6 +19,7 @@ namespace cowsins
         private UnityEvent customMethod;
 
         private bool canShoot = true;
+        private WaitForSeconds fireRateWfs;
 
         // Calls events in Weapon Controller when shooting or hitting an enemy ( CustomShootStyle does not handle hits so onHit is not used here,
         // but it is still required by IShootStyle.
@@ -35,6 +36,8 @@ namespace cowsins
             this.settings = settings;
 
             SelectCustomShotMethod();
+
+            fireRateWfs = new WaitForSeconds(weapon.fireRate);
         }
 
         public void Shoot(float spread, float damageMultiplier, float shakeMultiplier)
@@ -47,7 +50,7 @@ namespace cowsins
             if (!weapon.continuousFire)
             {
                 canShoot = false;
-                playerDependencies.StartCoroutine(AllowShootAfterDelay(weapon.fireRate));
+                playerDependencies.StartCoroutine(AllowShootAfterDelay());
             }
         }
 
@@ -70,9 +73,9 @@ namespace cowsins
         }
 
 
-        private IEnumerator AllowShootAfterDelay(float delay)
+        private IEnumerator AllowShootAfterDelay()
         {
-            yield return new WaitForSeconds(delay);
+            yield return fireRateWfs;
             canShoot = true;
         }
 

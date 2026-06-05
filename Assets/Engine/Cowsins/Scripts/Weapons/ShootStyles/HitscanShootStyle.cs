@@ -26,6 +26,10 @@ namespace cowsins
         // Calls events in Weapon Controller when shooting or hitting an enemy
         public event Action onShoot;
 
+        private WaitForSeconds shootDelayWfs;
+        private WaitForSeconds timeBetweenShotsWfs;
+        private WaitForSeconds fireRateWfs;
+
         public HitscanShootStyle(PlayerDependencies playerDependencies, LayerMask hitLayer)
         {
             this.playerDependencies = playerDependencies;
@@ -37,6 +41,10 @@ namespace cowsins
             this.firePoint = id.FirePoint;
             this.mainCamera = weaponReference.MainCamera;
             this.hitLayer = hitLayer;
+
+            shootDelayWfs = new WaitForSeconds(weapon.shootDelay);
+            timeBetweenShotsWfs = new WaitForSeconds(weapon.timeBetweenShots);
+            fireRateWfs = new WaitForSeconds(weapon.fireRate);
         }
 
         public void Shoot(float spread, float damageMultiplier, float shakeMultiplier)
@@ -57,7 +65,7 @@ namespace cowsins
                 playerDependencies.StopCoroutine(allowShootCoroutine);
                 allowShootCoroutine = null;
             }
-            playerDependencies.StartCoroutine(AllowShootAfterDelay(weapon.fireRate));
+            allowShootCoroutine = playerDependencies.StartCoroutine(AllowShootAfterDelay());
 
             weaponEvents.Events.OnShootSpawnEffects?.Invoke();
         }
@@ -66,7 +74,7 @@ namespace cowsins
         {
             if ((int)weapon.shootStyle == 1)
             {
-                yield return new WaitForSeconds(weapon.shootDelay);
+                yield return shootDelayWfs;
             }
 
             if (weapon.timeBetweenShots == 0)
@@ -89,7 +97,7 @@ namespace cowsins
                     if (weapon == null) yield break;
 
                     HitscanShot(spread);
-                    yield return new WaitForSeconds(weapon.timeBetweenShots);
+                    yield return timeBetweenShotsWfs;
                     i++;
                 }
             }
@@ -157,9 +165,9 @@ namespace cowsins
             PoolManager.Instance.ReturnToPool(trail.gameObject, prefab);
         }
 
-        private IEnumerator AllowShootAfterDelay(float delay)
+        private IEnumerator AllowShootAfterDelay()
         {
-            yield return new WaitForSeconds(delay);
+            yield return fireRateWfs;
             canShoot = true;
         }
 
