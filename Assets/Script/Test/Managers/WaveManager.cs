@@ -17,6 +17,8 @@ public class WaveManager : MonoBehaviour
     [Header("UI")]
     public TMP_Text waveText;
 
+    private int _lastWave = -1;
+
     private void Awake()
     {
         Instance = this;
@@ -31,8 +33,12 @@ public class WaveManager : MonoBehaviour
     {
         if (waveText != null)
         {
-            waveText.text =
-                "Wave " + currentWave;
+            if (currentWave != _lastWave)
+            {
+                _lastWave = currentWave;
+                waveText.text =
+                    "Wave " + currentWave;
+            }
         }
     }
 
