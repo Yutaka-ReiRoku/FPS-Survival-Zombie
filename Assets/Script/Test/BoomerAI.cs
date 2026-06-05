@@ -21,6 +21,10 @@ public class BoomerAI : MonoBehaviour, IDamageable
     public float explodeRange = 3f;
     public float screamDuration = 1.5f;
 
+    [Header("Explosion Damage")]
+    public float explosionDamage = 50f;
+    public float explosionRadius = 5f;
+
     [Header("VFX")]
     public GameObject explosionPrefab;
     public GameObject acidPoolPrefab;
@@ -237,6 +241,8 @@ public class BoomerAI : MonoBehaviour, IDamageable
     // Event ở frame bụng nổ
     public void ExplosionEvent()
     {
+        // Spawn VFX
+
         if (explosionPrefab != null)
         {
             Instantiate(
@@ -253,6 +259,31 @@ public class BoomerAI : MonoBehaviour, IDamageable
                 transform.position,
                 Quaternion.identity
             );
+        }
+
+        // Damage
+
+        Collider[] hits =
+            Physics.OverlapSphere(
+                transform.position,
+                explosionRadius
+            );
+
+        foreach (Collider hit in hits)
+        {
+            if (hit.transform == transform)
+                continue;
+
+            IDamageable damageable =
+                hit.GetComponent<IDamageable>();
+
+            if (damageable != null)
+            {
+                damageable.Damage(
+                    explosionDamage,
+                    false
+                );
+            }
         }
     }
 
