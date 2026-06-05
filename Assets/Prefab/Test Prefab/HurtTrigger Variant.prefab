@@ -14,11 +14,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 168221714930276236, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: cooldown
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 168221714930276236, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: uniqueID
-      value: fdafa057-92a9-49b2-9e35-05e833608de1
+      value: fe625a13-2ad6-434d-b3a6-351713abf2d3
       objectReference: {fileID: 0}
     - target: {fileID: 921490360460372017, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_LocalScale.x
