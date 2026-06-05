@@ -11,7 +11,7 @@ public class BoomerAI : MonoBehaviour, IDamageable
     public int maxHealth = 100;
 
     [Header("Detection")]
-    public float detectRange = 25f;
+    public float detectRange = 20f;
 
     [Header("Movement")]
     public float moveSpeed = 2f;
@@ -25,9 +25,15 @@ public class BoomerAI : MonoBehaviour, IDamageable
     public float explosionDamage = 50f;
     public float explosionRadius = 5f;
 
-    [Header("VFX")]
+    [Header("Effects")]
     public GameObject explosionPrefab;
-    public GameObject acidPoolPrefab;
+
+    [Header("Acid Pools")]
+    public GameObject acidPoolSelfExplodePrefab;
+    public GameObject acidPoolDeathPrefab;
+
+    [Header("Acid Pool Lifetime")]
+    public float acidPoolLifetime = 10f;
 
     private Animator animator;
     private NavMeshAgent agent;
@@ -38,6 +44,14 @@ public class BoomerAI : MonoBehaviour, IDamageable
     private bool isHit;
     private bool isScreaming;
     private bool hasStartedExplosion;
+
+    private enum ExplosionType
+    {
+        SelfExplode,
+        Killed
+    }
+
+    private ExplosionType explosionType;
 
     private void Start()
     {
@@ -86,35 +100,36 @@ public class BoomerAI : MonoBehaviour, IDamageable
 
         FaceTarget();
 
-        //----------------------------------
+        //--------------------------------
         // CHASE
-        //----------------------------------
+        //--------------------------------
 
-        if (!isScreaming)
+        if (!isScreaming &&
+            distance <= detectRange)
         {
-            if (distance <= detectRange)
-            {
-                agent.isStopped = false;
+            agent.isStopped = false;
 
-                agent.SetDestination(
-                    target.position
-                );
-            }
+            agent.SetDestination(
+                target.position
+            );
         }
 
-        //----------------------------------
-        // EXPLODE
-        //----------------------------------
+        //--------------------------------
+        // SELF EXPLODE
+        //--------------------------------
 
         if (!hasStartedExplosion &&
             distance <= explodeRange)
         {
+            explosionType =
+                ExplosionType.SelfExplode;
+
             StartExplosion();
         }
 
-        //----------------------------------
-        // ANIMATION
-        //----------------------------------
+        //--------------------------------
+        // ANIMATION SPEED
+        //--------------------------------
 
         float speed =
             agent.velocity.magnitude /
@@ -150,7 +165,7 @@ public class BoomerAI : MonoBehaviour, IDamageable
             target.position -
             transform.position;
 
-        dir.y = 0;
+        dir.y = 0f;
 
         if (dir.sqrMagnitude < 0.01f)
             return;
@@ -180,7 +195,10 @@ public class BoomerAI : MonoBehaviour, IDamageable
 
         isScreaming = true;
 
-        agent.isStopped = true;
+        if (agent != null)
+        {
+            agent.isStopped = true;
+        }
 
         animator.SetBool(
             "isWarning",
@@ -230,6 +248,9 @@ public class BoomerAI : MonoBehaviour, IDamageable
 
         if (currentHealth <= 0)
         {
+            explosionType =
+                ExplosionType.Killed;
+
             StartExplosion();
         }
     }
@@ -238,10 +259,12 @@ public class BoomerAI : MonoBehaviour, IDamageable
     // ANIMATION EVENTS
     //==================================
 
-    // Event ở frame bụng nổ
+    // Gọi tại frame nổ
     public void ExplosionEvent()
     {
-        // Spawn VFX
+        //--------------------------------
+        // VFX
+        //--------------------------------
 
         if (explosionPrefab != null)
         {
@@ -252,16 +275,47 @@ public class BoomerAI : MonoBehaviour, IDamageable
             );
         }
 
-        if (acidPoolPrefab != null)
+        //--------------------------------
+        // ACID POOL
+        //--------------------------------
+
+        GameObject acidPool = null;
+
+        if (explosionType ==
+            ExplosionType.Killed)
         {
-            Instantiate(
-                acidPoolPrefab,
-                transform.position,
-                Quaternion.identity
+            if (acidPoolDeathPrefab != null)
+            {
+                acidPool = Instantiate(
+                    acidPoolDeathPrefab,
+                    transform.position,
+                    Quaternion.identity
+                );
+            }
+        }
+        else
+        {
+            if (acidPoolSelfExplodePrefab != null)
+            {
+                acidPool = Instantiate(
+                    acidPoolSelfExplodePrefab,
+                    transform.position,
+                    Quaternion.identity
+                );
+            }
+        }
+
+        if (acidPool != null)
+        {
+            Destroy(
+                acidPool,
+                acidPoolLifetime
             );
         }
 
-        // Damage
+        //--------------------------------
+        // DAMAGE
+        //--------------------------------
 
         Collider[] hits =
             Physics.OverlapSphere(
@@ -275,7 +329,7 @@ public class BoomerAI : MonoBehaviour, IDamageable
                 continue;
 
             IDamageable damageable =
-                hit.GetComponent<IDamageable>();
+                hit.GetComponentInParent<IDamageable>();
 
             if (damageable != null)
             {
@@ -287,7 +341,7 @@ public class BoomerAI : MonoBehaviour, IDamageable
         }
     }
 
-    // Event ở frame cuối animation
+    // Gọi ở frame cuối animation Death
     public void DestroyEvent()
     {
         isDead = true;
@@ -303,15 +357,24 @@ public class BoomerAI : MonoBehaviour, IDamageable
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
+
         Gizmos.DrawWireSphere(
             transform.position,
             detectRange
         );
 
         Gizmos.color = Color.red;
+
         Gizmos.DrawWireSphere(
             transform.position,
             explodeRange
+        );
+
+        Gizmos.color = Color.green;
+
+        Gizmos.DrawWireSphere(
+            transform.position,
+            explosionRadius
         );
     }
 }

@@ -18,7 +18,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 168221714930276236, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: uniqueID
-      value: be13f27a-d59b-47ac-9621-9b80cf5b1b93
+      value: ad024f16-3046-4120-bfb7-51c3350d683b
       objectReference: {fileID: 0}
     - target: {fileID: 168221714930276236, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: events.onExit.m_PersistentCalls.m_Calls.Array.size
@@ -53,16 +53,24 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: a1c0af6fee2a19146ad2b574276b0cbe, type: 2}
     - target: {fileID: 4279132647305870347, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4279132647305870347, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4279132647305870347, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8.637548
+      value: -14.837667
       objectReference: {fileID: 0}
     - target: {fileID: 4279132647305870347, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.0000003014436
+      value: -0.0000000425417
       objectReference: {fileID: 0}
     - target: {fileID: 4279132647305870347, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.4202967
+      value: 5.4629383
       objectReference: {fileID: 0}
     - target: {fileID: 4279132647305870347, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_LocalRotation.w
@@ -93,12 +101,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4279132647305870350, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
+      propertyPath: m_Height
+      value: 7.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 4279132647305870350, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_Radius
-      value: 3
+      value: 3.06
       objectReference: {fileID: 0}
     - target: {fileID: 4279132647305870350, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_Center.y
-      value: -0.09
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 4279132647305870350, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_Center.z
@@ -106,7 +118,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4279132647305870351, guid: 921fac3942a09f540a2f4d9d5b2a6926, type: 3}
       propertyPath: m_Name
-      value: AcidPool
+      value: BiggerAcidPool
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
