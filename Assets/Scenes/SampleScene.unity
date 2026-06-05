@@ -178,7 +178,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1389694247779218, guid: 6e6f4b3417a0abb45b1cce8fdf021eb5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2017430393}
   m_SourcePrefab: {fileID: 100100000, guid: 6e6f4b3417a0abb45b1cce8fdf021eb5, type: 3}
 --- !u!1 &308054164
 GameObject:
@@ -619,12 +622,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TankAI
   target: {fileID: 498896899}
+  maxHealth: 500
+  detectRange: 20
   runSpeed: 10
-  chaseDistance: 25
+  rotationSpeed: 8
   meleeRange: 3
   jumpAttackRange: 8
+  attackCooldown: 2
   jumpAttackCooldown: 12
-  rotationSpeed: 8
+  punchDamage: 30
+  swipeDamage: 40
+  jumpDamage: 60
+  jumpRadius: 5
   screamDuration: 2
   lifeTime: 40
 --- !u!1 &1879135359
@@ -740,6 +749,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2017430392 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1389694247779218, guid: 6e6f4b3417a0abb45b1cce8fdf021eb5, type: 3}
+  m_PrefabInstance: {fileID: 61582840}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2017430393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2017430392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebc0bcc7dca92df48bf30c8b7296f620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BoomerPrototype
+  target: {fileID: 498896899}
+  moveSpeed: 1.5
+  explodeRange: 3
+  maxHealth: 100
+  screamDuration: 1.5
+  deathAnimationDelay: 2
+  explosionPrefab: {fileID: 0}
+  acidPoolPrefab: {fileID: 8605726754624049729, guid: 1662b07117d017d4189203a20424de4e, type: 3}
 --- !u!1001 &7587750521708630891
 PrefabInstance:
   m_ObjectHideFlags: 0
