@@ -1286,7 +1286,7 @@ MonoBehaviour:
   hitClip: {fileID: 8300000, guid: 3aa049bb077689345a82a44125e24046, type: 3}
   deathClip: {fileID: 8300000, guid: 0432ef46ba0b9834b8315ea8262e9abc, type: 3}
   footstepClip: {fileID: 0}
-  dropPrefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
+  dropPrefab: {fileID: 3821068731288931261, guid: 5144d72f9767e2f4aacd4ed8fdf87ad0, type: 3}
   dropChance: 50
 --- !u!82 &-4885929642163043100
 AudioSource:
