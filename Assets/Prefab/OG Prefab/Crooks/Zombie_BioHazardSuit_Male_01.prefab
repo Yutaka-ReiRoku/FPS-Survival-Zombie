@@ -2609,7 +2609,6 @@ GameObject:
   - component: {fileID: 7448987408377252147}
   - component: {fileID: 4004680118005081459}
   - component: {fileID: 7307370834702727575}
-  - component: {fileID: -4643184880297594193}
   - component: {fileID: -8946659493336706950}
   m_Layer: 7
   m_Name: Zombie_BioHazardSuit_Male_01
@@ -2807,56 +2806,6 @@ MonoBehaviour:
   footstepClip: {fileID: 0}
   dropPrefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
   dropChance: 50
---- !u!114 &-4643184880297594193
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1379516714727752}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
-  uniqueID: 51c33138-d7a3-41e2-8cda-01d8b538553f
-  _name: 
-  health: 0
-  shield: 0
-  maxHealth: 0
-  maxShield: 0
-  destroyOnDie: 0
-  destroyComponentOnDie: 0
-  deathEffect: {fileID: 0}
-  enemyStatusContainer: {fileID: 0}
-  healthBar: {fileID: 0}
-  shieldBar: {fileID: 0}
-  showUI: 0
-  showDamagePopUps: 0
-  showKillFeed: 0
-  dieSFX: {fileID: 0}
-  events:
-    OnSpawn:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDamaged:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeath:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 7307370834702727575}
-          m_TargetAssemblyTypeName: ZombieAI, Assembly-CSharp
-          m_MethodName: DropLoot
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
 --- !u!82 &-8946659493336706950
 AudioSource:
   m_ObjectHideFlags: 0

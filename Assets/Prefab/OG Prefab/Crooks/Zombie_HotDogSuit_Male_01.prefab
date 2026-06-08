@@ -7451,7 +7451,6 @@ GameObject:
   - component: {fileID: -6164700642195434078}
   - component: {fileID: -6080711271991337141}
   - component: {fileID: 6133772844936038738}
-  - component: {fileID: -7619648954145489740}
   - component: {fileID: 7087267153920491888}
   m_Layer: 7
   m_Name: Zombie_HotDogSuit_Male_01
@@ -7649,44 +7648,6 @@ MonoBehaviour:
   footstepClip: {fileID: 0}
   dropPrefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
   dropChance: 50
---- !u!114 &-7619648954145489740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1865598692286518}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
-  uniqueID: 3504bf38-dc62-4cf3-9cbf-7000807efe2a
-  _name: 
-  health: 0
-  shield: 0
-  maxHealth: 0
-  maxShield: 0
-  destroyOnDie: 0
-  destroyComponentOnDie: 0
-  deathEffect: {fileID: 0}
-  enemyStatusContainer: {fileID: 0}
-  healthBar: {fileID: 0}
-  shieldBar: {fileID: 0}
-  showUI: 0
-  showDamagePopUps: 0
-  showKillFeed: 0
-  dieSFX: {fileID: 0}
-  events:
-    OnSpawn:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDamaged:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeath:
-      m_PersistentCalls:
-        m_Calls: []
 --- !u!82 &7087267153920491888
 AudioSource:
   m_ObjectHideFlags: 0

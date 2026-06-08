@@ -1324,7 +1324,6 @@ GameObject:
   - component: {fileID: -8998040539023179049}
   - component: {fileID: 8301135632034299241}
   - component: {fileID: -3299576494662595262}
-  - component: {fileID: -33692726752916888}
   - component: {fileID: 8684228118084596075}
   m_Layer: 7
   m_Name: Zombie_SummerGirl_Female_01
@@ -1522,44 +1521,6 @@ MonoBehaviour:
   footstepClip: {fileID: 0}
   dropPrefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
   dropChance: 50
---- !u!114 &-33692726752916888
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1186368985647942}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
-  uniqueID: 9604cab0-0573-452d-a043-759c0952599a
-  _name: 
-  health: 0
-  shield: 0
-  maxHealth: 0
-  maxShield: 0
-  destroyOnDie: 0
-  destroyComponentOnDie: 0
-  deathEffect: {fileID: 0}
-  enemyStatusContainer: {fileID: 0}
-  healthBar: {fileID: 0}
-  shieldBar: {fileID: 0}
-  showUI: 0
-  showDamagePopUps: 0
-  showKillFeed: 0
-  dieSFX: {fileID: 0}
-  events:
-    OnSpawn:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDamaged:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeath:
-      m_PersistentCalls:
-        m_Calls: []
 --- !u!82 &8684228118084596075
 AudioSource:
   m_ObjectHideFlags: 0

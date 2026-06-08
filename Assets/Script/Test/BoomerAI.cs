@@ -9,6 +9,7 @@ public class BoomerAI : MonoBehaviour, IDamageable
 
     [Header("Health")]
     public int maxHealth = 100;
+    public int currentHealth;
 
     [Header("Detection")]
     public float detectRange = 20f;
@@ -42,8 +43,8 @@ public class BoomerAI : MonoBehaviour, IDamageable
 
     private Animator animator;
     private NavMeshAgent agent;
-
-    private int currentHealth;
+    private Rigidbody rb;
+    private Collider col;
 
     private bool isDead;
     private bool isHit;
@@ -64,6 +65,8 @@ public class BoomerAI : MonoBehaviour, IDamageable
 
         animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
+        rb = GetComponent<Rigidbody>();
+        col = GetComponent<Collider>();
 
         FindPlayer();
 

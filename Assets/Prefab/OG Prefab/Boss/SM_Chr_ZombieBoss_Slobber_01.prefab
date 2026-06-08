@@ -719,7 +719,6 @@ GameObject:
   - component: {fileID: 95695708587524960}
   - component: {fileID: -3814564408992573594}
   - component: {fileID: -3127262831344354278}
-  - component: {fileID: -167264230100921591}
   - component: {fileID: -175469625241617827}
   - component: {fileID: 7774266083722105626}
   m_Layer: 7
@@ -820,44 +819,6 @@ CapsuleCollider:
   m_Height: 1.8446273
   m_Direction: 1
   m_Center: {x: -0.00052732724, y: 0.9240821, z: 0}
---- !u!114 &-167264230100921591
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1389694247779218}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5890fdf64f390414bb1e5dbe4986e4aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::cowsins.EnemyHealth
-  uniqueID: c4baeca5-ee30-4ec8-9617-48379240965a
-  _name: 
-  health: 0
-  shield: 0
-  maxHealth: 0
-  maxShield: 0
-  destroyOnDie: 0
-  destroyComponentOnDie: 0
-  deathEffect: {fileID: 0}
-  enemyStatusContainer: {fileID: 0}
-  healthBar: {fileID: 0}
-  shieldBar: {fileID: 0}
-  showUI: 0
-  showDamagePopUps: 0
-  showKillFeed: 0
-  dieSFX: {fileID: 0}
-  events:
-    OnSpawn:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDamaged:
-      m_PersistentCalls:
-        m_Calls: []
-    OnDeath:
-      m_PersistentCalls:
-        m_Calls: []
 --- !u!114 &-175469625241617827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -871,7 +832,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoomerAI
   target: {fileID: 0}
-  maxHealth: 100
+  maxHealth: 70
+  currentHealth: 0
   detectRange: 25
   moveSpeed: 1.5
   rotationSpeed: 10
@@ -883,6 +845,7 @@ MonoBehaviour:
   acidPoolSelfExplodePrefab: {fileID: 8605726754624049729, guid: cf80a5c29f8ed204a9880fdd242ffc9c, type: 3}
   acidPoolDeathPrefab: {fileID: 8605726754624049729, guid: 1662b07117d017d4189203a20424de4e, type: 3}
   acidPoolLifetime: 10
+  prefab: {fileID: 0}
 --- !u!195 &7774266083722105626
 NavMeshAgent:
   m_ObjectHideFlags: 0

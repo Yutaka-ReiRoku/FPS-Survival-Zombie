@@ -13,6 +13,9 @@ namespace cowsins
         private float totalExperience;
 
         public float TotalExperience => totalExperience;
+        [SerializeField] private int skillPoints;
+
+        public int SkillPoints => skillPoints;
 
         private void OnEnable()
         {
@@ -49,6 +52,7 @@ namespace cowsins
             while (playerLevel < experienceRequirements.Length - 1 && totalExperience >= experienceRequirements[playerLevel])
             {
                 playerLevel++;
+                skillPoints++;
             }
         }
 
@@ -75,6 +79,14 @@ namespace cowsins
             // Calculate the player's current experience by subtracting the experience required for the previous level from their total experience.
             float previousLevelExperience = playerLevel > 0 ? experienceRequirements[playerLevel - 1] : 0;
             return totalExperience - previousLevelExperience;
+        }
+        public bool SpendSkillPoints(int amount)
+        {
+            if (skillPoints < amount)
+                return false;
+
+            skillPoints -= amount;
+            return true;
         }
     }
 }

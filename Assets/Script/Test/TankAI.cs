@@ -9,6 +9,7 @@ public class TankBossAI : MonoBehaviour, IDamageable
 
     [Header("Health")]
     public int maxHealth = 500;
+    public int currentHealth;
 
     [Header("Detection")]
     public float detectRange = 20f;
@@ -38,8 +39,6 @@ public class TankBossAI : MonoBehaviour, IDamageable
     private NavMeshAgent agent;
     private Rigidbody rb;
     private Collider col;
-
-    private int currentHealth;
 
     private float attackTimer;
     private float jumpTimer;
