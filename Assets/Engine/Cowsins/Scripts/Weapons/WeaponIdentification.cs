@@ -115,7 +115,9 @@ namespace cowsins
 
             muzzleVFX = weapon.muzzleVFX;
             fireSFXs = weapon.audioSFX.shooting;
-            magazineSize = weapon.magazineSize;
+            magazineSize =
+            weapon.magazineSize +
+            PlayerUpgradeManager.Instance.bonusMagazine;
         }
 
         public void SetShootStyle(IShootStyle shootBehaviour) => this.shootBehaviour = shootBehaviour;

@@ -80,6 +80,9 @@ namespace cowsins
             GetAllReferences();
 
             // Apply basic settings 
+            maxHealth += PlayerUpgradeManager.Instance.bonusHealth;
+            maxShield += PlayerUpgradeManager.Instance.bonusShield;
+
             health = maxHealth;
             shield = maxShield;
             Events.OnInitializeHealth?.Invoke(health, shield, maxHealth, maxShield);
@@ -138,6 +141,7 @@ namespace cowsins
                 CancelInvoke(nameof(AutoHeal));
                 InvokeRepeating(nameof(AutoHeal), restartAutoHealTime, healRate);
             }
+
         }
 
 
