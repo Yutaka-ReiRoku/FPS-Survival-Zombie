@@ -4,42 +4,171 @@ namespace cowsins
 {
     public class SkillTreeManager : MonoBehaviour
     {
+        [Header("Debug")]
         [SerializeField] private int currentLevel;
         [SerializeField] private int currentSkillPoints;
-        public int movementLevel;
-        public int aimLevel;
-        public int intelligenceLevel;
+
+        [Header("Skill Levels")]
+        [SerializeField] private int movementLevel;
+        [SerializeField] private int aimLevel;
+        [SerializeField] private int intelligenceLevel;
+
+        private PlayerMovement movement;
+
+        private float baseWalkSpeed;
+        private float baseRunSpeed;
+        private float baseAirControl;
+        private float baseGrappleForce;
+
+        private void Awake()
+        {
+            movement = GetComponent<PlayerMovement>();
+
+            if (movement == null)
+            {
+                Debug.LogError("PlayerMovement not found!");
+                return;
+            }
+
+            baseWalkSpeed = movement.playerSettings.walkSpeed;
+            baseRunSpeed = movement.playerSettings.runSpeed;
+            baseAirControl = movement.playerSettings.controlAirborne;
+            baseGrappleForce = movement.playerSettings.grappleForce;
+
+            RefreshMovementStats();
+        }
+
         private void Update()
         {
-            if(ExperienceManager.Instance == null) return;
+            if (ExperienceManager.Instance == null)
+                return;
 
             currentLevel = ExperienceManager.Instance.GetPlayerLevel();
             currentSkillPoints = ExperienceManager.Instance.SkillPoints;
-            if (Input.GetKeyDown(KeyCode.M))
-            {
-                UpgradeMovement();
-            }
+
+#if UNITY_EDITOR
+            // TEST ONLY
             if (Input.GetKeyDown(KeyCode.P))
             {
                 ExperienceManager.Instance.AddExperience(100);
             }
+
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                UpgradeMovement();
+            }
+#endif
         }
+
+        #region Movement
 
         public bool UpgradeMovement()
         {
+            if (movementLevel >= 5)
+            {
+                Debug.Log("Movement tree maxed.");
+                return false;
+            }
+
             int cost = GetCost(movementLevel + 1);
 
             if (!ExperienceManager.Instance.SpendSkillPoints(cost))
+            {
+                Debug.Log($"Not enough Skill Points. Need {cost}");
                 return false;
+            }
 
             movementLevel++;
 
-            ApplyMovementSkill();
+            RefreshMovementStats();
+
+            Debug.Log($"Movement upgraded to Node {movementLevel}");
 
             return true;
         }
 
-        int GetCost(int node)
+        private void RefreshMovementStats()
+        {
+            movement.playerSettings.walkSpeed = baseWalkSpeed;
+            movement.playerSettings.runSpeed = baseRunSpeed;
+            movement.playerSettings.controlAirborne = baseAirControl;
+            movement.playerSettings.grappleForce = baseGrappleForce;
+
+            movement.playerSettings.canWallRun = false;
+
+            if (movementLevel >= 1)
+            {
+                movement.playerSettings.walkSpeed *= 1.05f;
+            }
+
+            if (movementLevel >= 2)
+            {
+                movement.playerSettings.runSpeed *= 1.10f;
+            }
+
+            if (movementLevel >= 3)
+            {
+                movement.playerSettings.controlAirborne =
+                    Mathf.Clamp01(baseAirControl * 1.15f);
+            }
+
+            if (movementLevel >= 4)
+            {
+                movement.playerSettings.canWallRun = true;
+            }
+
+            if (movementLevel >= 5)
+            {
+                movement.playerSettings.runSpeed *= 1.25f;
+                movement.playerSettings.grappleForce *= 1.25f;
+            }
+        }
+
+        #endregion
+
+        #region Aim
+
+        public bool UpgradeAim()
+        {
+            if (aimLevel >= 5)
+                return false;
+
+            int cost = GetCost(aimLevel + 1);
+
+            if (!ExperienceManager.Instance.SpendSkillPoints(cost))
+                return false;
+
+            aimLevel++;
+
+            Debug.Log($"Aim upgraded to Node {aimLevel}");
+
+            return true;
+        }
+
+        #endregion
+
+        #region Intelligence
+
+        public bool UpgradeIntelligence()
+        {
+            if (intelligenceLevel >= 5)
+                return false;
+
+            int cost = GetCost(intelligenceLevel + 1);
+
+            if (!ExperienceManager.Instance.SpendSkillPoints(cost))
+                return false;
+
+            intelligenceLevel++;
+
+            Debug.Log($"Intelligence upgraded to Node {intelligenceLevel}");
+
+            return true;
+        }
+
+        #endregion
+
+        private int GetCost(int node)
         {
             switch (node)
             {
@@ -53,9 +182,8 @@ namespace cowsins
             return 999;
         }
 
-        void ApplyMovementSkill()
-        {
-
-        }
+        public int MovementLevel => movementLevel;
+        public int AimLevel => aimLevel;
+        public int IntelligenceLevel => intelligenceLevel;
     }
 }
