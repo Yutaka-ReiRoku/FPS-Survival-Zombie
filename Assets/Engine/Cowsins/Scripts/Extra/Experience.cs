@@ -21,6 +21,47 @@ namespace cowsins
 
         private float timer = 0f;
 
+        private Transform player;
+        private IntelligenceSkillSystem intelligence;
+
+        private void Start()
+        {
+            GameObject playerObj =
+                GameObject.FindGameObjectWithTag("Player");
+
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+                intelligence = playerObj.GetComponent<IntelligenceSkillSystem>();
+            }
+        }
+
+        private void Update()
+        {
+            Movement();
+            MagnetXP();
+        }
+
+        private void MagnetXP()
+        {
+            if (player == null || intelligence == null)
+                return;
+
+            if (intelligence.XPPickupRadius <= 0)
+                return;
+
+            float distance =
+                Vector3.Distance(transform.position, player.position);
+
+            if (distance <= intelligence.XPPickupRadius)
+            {
+                transform.position = Vector3.MoveTowards(
+                    transform.position,
+                    player.position,
+                    15f * Time.deltaTime);
+            }
+        }
+
         public override void TriggerEnter(Collider other)
         {
             if (ExperienceManager.Instance == null || !ExperienceManager.Instance.useExperience) return; // If we are not using XP in our game we should not pick up XP or we should not be able to.
@@ -29,7 +70,15 @@ namespace cowsins
 
             // Generate a random amount of XP.
             float amount = Random.Range(minXp, maxXp);
-            // Add the experience to the player.
+
+            var intelligenceStats =
+                other.GetComponent<IntelligenceSkillSystem>();
+
+            if (intelligenceStats != null)
+            {
+                amount *= intelligenceStats.XPMultiplier;
+            }
+
             ExperienceManager.Instance.AddExperience(amount);
             UIEvents.onExperienceCollected?.Invoke(true);
 
@@ -38,7 +87,6 @@ namespace cowsins
             // Destroy the XP.
             Destroy(this.gameObject);
         }
-        private void Update() => Movement();
 
         private void Movement()
         {

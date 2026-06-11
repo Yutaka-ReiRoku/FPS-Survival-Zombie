@@ -13,6 +13,8 @@ namespace cowsins
         [SerializeField] private int aimLevel;
         [SerializeField] private int intelligenceLevel;
 
+        private IntelligenceSkillSystem intelligenceSystem;
+
         private PlayerMovement movement;
 
         private float baseWalkSpeed;
@@ -23,6 +25,7 @@ namespace cowsins
         private void Awake()
         {
             movement = GetComponent<PlayerMovement>();
+            intelligenceSystem = GetComponent<IntelligenceSkillSystem>();
 
             if (movement == null)
             {
@@ -160,6 +163,8 @@ namespace cowsins
                 return false;
 
             intelligenceLevel++;
+
+            intelligenceSystem.RefreshStats(intelligenceLevel);
 
             Debug.Log($"Intelligence upgraded to Node {intelligenceLevel}");
 
