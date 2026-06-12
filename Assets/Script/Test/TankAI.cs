@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using cowsins;
 
-public class TankBossAI : MonoBehaviour, IDamageable
+public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 {
     [Header("Player")]
     public Transform target;

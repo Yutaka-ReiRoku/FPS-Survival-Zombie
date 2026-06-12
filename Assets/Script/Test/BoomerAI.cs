@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using cowsins;
 
-public class BoomerAI : MonoBehaviour, IDamageable
+public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy
 {
     [Header("Player")]
     public Transform target;

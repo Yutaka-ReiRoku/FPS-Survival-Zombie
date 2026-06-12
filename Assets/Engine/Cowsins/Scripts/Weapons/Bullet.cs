@@ -88,31 +88,36 @@ namespace cowsins
 
             float finalDamage = dmg;
 
-            // Aim Skill Effects
             if (aimSystem != null)
             {
-                ZombieAI zombie =
-                    (target as MonoBehaviour)?
-                    .GetComponent<ZombieAI>();
+                MonoBehaviour enemy =
+                    target as MonoBehaviour;
 
-                if (zombie != null)
+                if (enemy != null)
                 {
-                    // Node 5: One Shot Crook
-                    if (zombie.Type == ZombieAI.EnemyType.Crook &&
+                    ICrookEnemy crook =
+                        enemy.GetComponent<ICrookEnemy>();
+
+                    if (crook != null &&
                         aimSystem.OneShotCrook)
                     {
-                        finalDamage = zombie.MaxHealth * 10f;
+                        target.Damage(crook.GetMaxHealth() * 10f, isCritical);
+
+                        projectileHasAlreadyHit = true;
+                        DestroyProjectile();
+                        return;
                     }
 
-                    // Node 5: Bonus Damage vs Special
-                    if (zombie.Type == ZombieAI.EnemyType.Special &&
+                    ISpecialEnemy special =
+                        enemy.GetComponent<ISpecialEnemy>();
+
+                    if (special != null &&
                         aimSystem.BonusDamageVsSpecial)
                     {
                         finalDamage *= 2f;
                     }
                 }
 
-                // Crit Chance
                 if (aimSystem.RollCritical())
                 {
                     finalDamage =

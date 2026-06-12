@@ -4,19 +4,12 @@ using cowsins;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(AudioSource))]
-public class ZombieAI : MonoBehaviour, IDamageable
+public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
 {
-    public enum EnemyType
+    public float GetMaxHealth()
     {
-        Crook,
-        Special
+        return maxHealth;
     }
-
-    [Header("Enemy Type")]
-    [SerializeField]
-    private EnemyType enemyType = EnemyType.Crook;
-    public EnemyType Type => enemyType;
-    public int MaxHealth => maxHealth;
 
     [Header("Target")]
     public Transform target;
