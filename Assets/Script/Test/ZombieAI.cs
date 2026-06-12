@@ -6,6 +6,18 @@ using cowsins;
 [RequireComponent(typeof(AudioSource))]
 public class ZombieAI : MonoBehaviour, IDamageable
 {
+    public enum EnemyType
+    {
+        Crook,
+        Special
+    }
+
+    [Header("Enemy Type")]
+    [SerializeField]
+    private EnemyType enemyType = EnemyType.Crook;
+    public EnemyType Type => enemyType;
+    public int MaxHealth => maxHealth;
+
     [Header("Target")]
     public Transform target;
 

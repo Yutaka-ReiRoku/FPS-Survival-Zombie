@@ -25,6 +25,8 @@ namespace cowsins
         private static Collider[] overlapColliders = new Collider[500];
         private bool projectileHasAlreadyHit = false; // Prevent from double hitting issues
 
+        private AimSkillSystem aimSystem;
+
         private void OnEnable()
         {
             projectileHasAlreadyHit = false;
@@ -38,6 +40,12 @@ namespace cowsins
         public void Initialize()
         {
             transform.LookAt(destination);
+
+            if (player != null)
+            {
+                aimSystem = player.GetComponent<AimSkillSystem>();
+            }
+
             Invoke(nameof(DestroyProjectile), duration);
         }
 
@@ -70,14 +78,55 @@ namespace cowsins
             }
         }
 
-        private void DamageTarget(IDamageable target, float dmg, bool isCritical)
+        private void DamageTarget(
+            IDamageable target,
+            float dmg,
+            bool isCritical)
         {
-            if (target != null)
+            if (target == null)
+                return;
+
+            float finalDamage = dmg;
+
+            // Aim Skill Effects
+            if (aimSystem != null)
             {
-                target.Damage(dmg, isCritical);
-                projectileHasAlreadyHit = true;
-                DestroyProjectile();
+                ZombieAI zombie =
+                    (target as MonoBehaviour)?
+                    .GetComponent<ZombieAI>();
+
+                if (zombie != null)
+                {
+                    // Node 5: One Shot Crook
+                    if (zombie.Type == ZombieAI.EnemyType.Crook &&
+                        aimSystem.OneShotCrook)
+                    {
+                        finalDamage = zombie.MaxHealth * 10f;
+                    }
+
+                    // Node 5: Bonus Damage vs Special
+                    if (zombie.Type == ZombieAI.EnemyType.Special &&
+                        aimSystem.BonusDamageVsSpecial)
+                    {
+                        finalDamage *= 2f;
+                    }
+                }
+
+                // Crit Chance
+                if (aimSystem.RollCritical())
+                {
+                    finalDamage =
+                        aimSystem.ApplyCriticalDamage(finalDamage);
+
+                    Debug.Log("CRITICAL HIT!");
+                }
             }
+
+            target.Damage(finalDamage, isCritical);
+
+            projectileHasAlreadyHit = true;
+
+            DestroyProjectile();
         }
 
         private bool IsGroundOrObstacleLayer(int layer)

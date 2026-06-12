@@ -14,6 +14,7 @@ namespace cowsins
         [SerializeField] private int intelligenceLevel;
 
         private IntelligenceSkillSystem intelligenceSystem;
+        private AimSkillSystem aimSystem;
 
         private PlayerMovement movement;
 
@@ -26,6 +27,7 @@ namespace cowsins
         {
             movement = GetComponent<PlayerMovement>();
             intelligenceSystem = GetComponent<IntelligenceSkillSystem>();
+            aimSystem = GetComponent<AimSkillSystem>();
 
             if (movement == null)
             {
@@ -142,6 +144,8 @@ namespace cowsins
                 return false;
 
             aimLevel++;
+
+            aimSystem.RefreshStats(aimLevel);
 
             Debug.Log($"Aim upgraded to Node {aimLevel}");
 
