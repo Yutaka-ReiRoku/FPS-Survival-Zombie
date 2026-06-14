@@ -43,6 +43,7 @@ namespace cowsins
             {
                 xpPickupRadius = 15f;
                 highlightCollectibles = true;
+                Debug.Log("HIGHLIGHT ON");
             }
 
             Debug.Log(
