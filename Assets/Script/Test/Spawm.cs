@@ -16,6 +16,10 @@ public class Spawm : MonoBehaviour
     [Header("Player")]
     public Transform player;
 
+    [Header("Spawn Safety")]
+    [Tooltip("Zombies will not spawn closer than this XZ distance to the player (prevents spawn-on-top kills).")]
+    public float minDistanceFromPlayer = 8f;
+
     [Header("Object Pool")]
     public int poolSize = 60;
     private System.Collections.Generic.Dictionary<GameObject, System.Collections.Generic.List<GameObject>> poolDictionary = new System.Collections.Generic.Dictionary<GameObject, System.Collections.Generic.List<GameObject>>();
@@ -24,6 +28,12 @@ public class Spawm : MonoBehaviour
 
     private void Start()
     {
+        if (player == null)
+        {
+            GameObject p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) player = p.transform;
+        }
+
         if (zombiePrefabs == null || zombiePrefabs.Length == 0)
             return;
 
@@ -158,6 +168,9 @@ public class Spawm : MonoBehaviour
 
     private void SpawnZombie()
     {
+        if (zombiePrefabs == null || zombiePrefabs.Length == 0)
+            return;
+
         Vector3 randomPos =
             transform.position +
             new Vector3(
@@ -172,8 +185,19 @@ public class Spawm : MonoBehaviour
                 )
             );
 
-        if (zombiePrefabs == null || zombiePrefabs.Length == 0)
-            return;
+        // Prevent zombies from materialising on top of the player.
+        if (player != null && minDistanceFromPlayer > 0f)
+        {
+            Vector3 offset = randomPos - player.position;
+            offset.y = 0f;
+            if (offset.sqrMagnitude < minDistanceFromPlayer * minDistanceFromPlayer)
+            {
+                if (offset.sqrMagnitude < 0.0001f)
+                    offset = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f));
+                randomPos = player.position + offset.normalized * minDistanceFromPlayer;
+                randomPos.y = transform.position.y;
+            }
+        }
 
         int randomIndex = Random.Range(0, zombiePrefabs.Length);
         GameObject selectedPrefab = zombiePrefabs[randomIndex];
