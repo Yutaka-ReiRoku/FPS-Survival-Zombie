@@ -93,6 +93,13 @@ public class PauseManager : MonoBehaviour
             var go = canvas.Find(n);
             if (go != null) go.gameObject.SetActive(visible);
         }
+        // Ẩn crosshair Cowsins (nằm trong PlayerUI)
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            var crosshair = player.GetComponentInChildren<cowsins.Crosshair>(true);
+            if (crosshair != null) crosshair.gameObject.SetActive(visible);
+        }
     }
 
     public void GoToMainMenu()
