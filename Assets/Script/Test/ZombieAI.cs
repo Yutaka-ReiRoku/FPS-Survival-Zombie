@@ -76,6 +76,14 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
         animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         audioSource = GetComponent<AudioSource>();
+
+        // Performance: zombies do not cast/receive shadows (large GPU saving at high counts).
+        var smrs = GetComponentsInChildren<SkinnedMeshRenderer>(true);
+        for (int i = 0; i < smrs.Length; i++)
+        {
+            smrs[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            smrs[i].receiveShadows = false;
+        }
     }
 
     void OnEnable()
@@ -102,6 +110,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
             agent.isStopped = false;
             agent.speed = walkSpeed;
             agent.stoppingDistance = attackDistance;
+            // Performance: HighQuality avoidance is ~quadratic with agent count; use cheap avoidance + varied priority.
+            agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+            agent.avoidancePriority = Random.Range(30, 70);
         }
 
         Collider col = GetComponent<Collider>();
