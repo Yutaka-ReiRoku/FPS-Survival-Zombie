@@ -57,6 +57,15 @@ public class CowsinsHUDAdapter : MonoBehaviour
     public bool IsDead { get; private set; }
     public event Action OnDied;
 
+    // ---- Progression (Coins / XP) ----
+    public int Coins { get; private set; }
+    public int PlayerLevel { get; private set; }
+    public float XpFill { get; private set; }
+    public event Action<int> OnCoinsChanged;
+    /// <summary>(displayLevel, xpFill01)</summary>
+    public event Action<int, float> OnXpChanged;
+    private bool _staticBound;
+
     private PlayerStats _stats;
     private PlayerStatsEvents _statsEvents;
     private WeaponController _weapon;
@@ -77,6 +86,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
     private void OnDisable()
     {
         Unbind();
+        UnsubscribeStatic();
         StopAllCoroutines();
     }
 
@@ -111,6 +121,10 @@ public class CowsinsHUDAdapter : MonoBehaviour
         PullHealth(false);
         PullWeapon();
         PullAmmo();
+
+        SubscribeStatic();
+        PullCoins();
+        PullXp();
 
         StartCoroutine(PollHeat());
     }
@@ -222,6 +236,9 @@ public class CowsinsHUDAdapter : MonoBehaviour
                     OnHeatChanged?.Invoke(Heat);
                 }
             }
+            if (CoinManager.Instance != null && CoinManager.Instance.coins != Coins) PullCoins();
+            var xpm = ExperienceManager.Instance;
+            if (xpm != null && xpm.GetPlayerLevel() != PlayerLevel) PullXp();
             yield return wait;
         }
     }
@@ -258,4 +275,43 @@ public class CowsinsHUDAdapter : MonoBehaviour
 
     // ---- Shoot (for fire-punch animation; ammo number handled by OnAmmoChanged) ----
     private void HandleShoot() => OnFired?.Invoke();
+
+    // ---- Progression: Coins / XP (Cowsins static UIEvents) ----
+    private void SubscribeStatic()
+    {
+        if (_staticBound) return;
+        UIEvents.onCoinsChange += HandleCoinsChanged;
+        UIEvents.onExperienceCollected += HandleXpChanged;
+        _staticBound = true;
+    }
+
+    private void UnsubscribeStatic()
+    {
+        if (!_staticBound) return;
+        UIEvents.onCoinsChange -= HandleCoinsChanged;
+        UIEvents.onExperienceCollected -= HandleXpChanged;
+        _staticBound = false;
+    }
+
+    private void HandleCoinsChanged(int amount, bool updatePanel) => PullCoins();
+    private void HandleXpChanged(bool updatePanel) => PullXp();
+
+    private void PullCoins()
+    {
+        Coins = CoinManager.Instance != null ? CoinManager.Instance.coins : Coins;
+        OnCoinsChanged?.Invoke(Coins);
+    }
+
+    private void PullXp()
+    {
+        var xp = ExperienceManager.Instance;
+        if (xp == null) { OnXpChanged?.Invoke(PlayerLevel, XpFill); return; }
+        PlayerLevel = xp.GetPlayerLevel();
+        float fill = 0f;
+        var reqs = xp.experienceRequirements;
+        if (reqs != null && xp.playerLevel >= 0 && xp.playerLevel < reqs.Length && reqs[xp.playerLevel] > 0)
+            fill = Mathf.Clamp01(xp.GetCurrentExperience() / (float)reqs[xp.playerLevel]);
+        XpFill = fill;
+        OnXpChanged?.Invoke(PlayerLevel, XpFill);
+    }
 }
