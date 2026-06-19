@@ -62,6 +62,7 @@ public class PauseManager : MonoBehaviour
         IsPaused = true;
         if (pausePanel != null)
             pausePanel.SetActive(true);
+        SetHUDVisible(false);
         if (playerControl != null)
             playerControl.LoseControl();
         Time.timeScale = 0f;
@@ -74,11 +75,24 @@ public class PauseManager : MonoBehaviour
         IsPaused = false;
         if (pausePanel != null)
             pausePanel.SetActive(false);
+        SetHUDVisible(true);
         Time.timeScale = 1f;
         if (playerControl != null)
             playerControl.GrantControl();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+
+    private void SetHUDVisible(bool visible)
+    {
+        var canvas = pausePanel != null ? pausePanel.transform.parent : null;
+        if (canvas == null) return;
+        string[] hudNames = { "HUD", "HealthCluster", "AmmoCluster", "WeaponIndicator", "ReloadIndicator", "ProgressionCluster", "LowHealthVignette" };
+        foreach (var n in hudNames)
+        {
+            var go = canvas.Find(n);
+            if (go != null) go.gameObject.SetActive(visible);
+        }
     }
 
     public void GoToMainMenu()
