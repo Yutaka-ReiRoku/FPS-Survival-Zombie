@@ -43,6 +43,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
     [Range(0, 100)]
     public float dropChance = 50f;
 
+    [Header("Rewards")]
+    public float experienceReward = 10f;
+    public float headshotBonusExperience = 5f;
+    public int coinReward = 5;
+    public int headshotBonusCoins = 5;
+
     private Animator animator;
     private NavMeshAgent agent;
     private AudioSource audioSource;
@@ -55,6 +61,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
     private bool isDead;
     private bool isAttacking;
     private bool hasDetectedPlayer;
+    private bool lastHitWasHeadshot;
 
     private static readonly int SpeedHash =
         Animator.StringToHash("Speed");
@@ -96,6 +103,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
         isDead = false;
         isAttacking = false;
         hasDetectedPlayer = false;
+        lastHitWasHeadshot = false;
         currentHealth = maxHealth;
         attackTimer = 0f;
         wanderTimer = wanderInterval;
@@ -298,6 +306,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
     public void Damage(float damage,
         bool isHeadshot)
     {
+        // Capture headshot/critical flag so Die() can award the bonus.
+        // Damage -> TakeDamage -> Die run synchronously, so this reflects the killing blow.
+        lastHitWasHeadshot = isHeadshot;
+
         TakeDamage(
             Mathf.RoundToInt(damage));
     }
@@ -316,7 +328,28 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
             WaveManager.Instance.RegisterZombieKill();
 
         if (ScoreManager.Instance != null)
+        {
             ScoreManager.Instance.AddKill();
+            if (lastHitWasHeadshot)
+                ScoreManager.Instance.AddHeadshot();
+        }
+
+        // Player progression via the real Cowsins ExperienceManager (XP -> level -> skill points -> upgrades).
+        if (ExperienceManager.Instance != null && ExperienceManager.Instance.useExperience)
+        {
+            float xp = experienceReward;
+            if (lastHitWasHeadshot)
+                xp += headshotBonusExperience;
+            ExperienceManager.Instance.AddExperience(xp);
+        }
+
+        if (CoinManager.Instance != null && CoinManager.Instance.useCoins)
+        {
+            int coins = coinReward;
+            if (lastHitWasHeadshot)
+                coins += headshotBonusCoins;
+            CoinManager.Instance.AddCoins(coins);
+        }
 
         PlaySound(deathClip);
 
