@@ -17,6 +17,8 @@ namespace cowsins
             if (Instance == null)
             {
                 Instance = this;
+                // DontDestroyOnLoad only persists root GameObjects; detach if nested.
+                if (transform.parent != null) transform.SetParent(null);
                 DontDestroyOnLoad(gameObject);
             }
             else
