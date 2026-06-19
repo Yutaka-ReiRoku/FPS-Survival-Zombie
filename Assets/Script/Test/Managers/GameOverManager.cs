@@ -20,6 +20,11 @@ public class GameOverManager : MonoBehaviour
     public TMP_Text killsText;
     public Button restartButton;
     public Button quitButton;
+    public Button mainMenuButton;
+    public TMP_Text bestScoreText;
+
+    [Header("Main Menu")]
+    public string mainMenuSceneName = "MainMenu";
 
     [Header("Behaviour")]
     public float showDelay = 1.5f;
@@ -39,6 +44,8 @@ public class GameOverManager : MonoBehaviour
             restartButton.onClick.AddListener(RestartGame);
         if (quitButton != null)
             quitButton.onClick.AddListener(QuitGame);
+        if (mainMenuButton != null)
+            mainMenuButton.onClick.AddListener(GoToMainMenu);
     }
 
     private void OnEnable() { TrySubscribe(); }
@@ -84,12 +91,26 @@ public class GameOverManager : MonoBehaviour
 
     private void ShowGameOver()
     {
+        int finalScore = ScoreManager.Instance != null ? ScoreManager.Instance.GetFinalScore() : 0;
+        int wave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 0;
+        int kills = ScoreManager.Instance != null ? ScoreManager.Instance.kills : 0;
+
+        // High score persistence (best score + best wave).
+        int bestScore = PlayerPrefs.GetInt("BestScore", 0);
+        int bestWave = PlayerPrefs.GetInt("BestWave", 0);
+        if (finalScore > bestScore) { bestScore = finalScore; PlayerPrefs.SetInt("BestScore", bestScore); }
+        if (wave > bestWave) { bestWave = wave; PlayerPrefs.SetInt("BestWave", bestWave); }
+        PlayerPrefs.Save();
+
         if (finalScoreText != null)
-            finalScoreText.text = "Score : " + (ScoreManager.Instance != null ? ScoreManager.Instance.GetFinalScore() : 0);
+            finalScoreText.text = "Score : " + finalScore;
         if (waveReachedText != null)
-            waveReachedText.text = "Wave : " + (WaveManager.Instance != null ? WaveManager.Instance.currentWave : 0);
+            waveReachedText.text = "Wave : " + wave;
         if (killsText != null)
-            killsText.text = "Kills : " + (ScoreManager.Instance != null ? ScoreManager.Instance.kills : 0);
+            killsText.text = "Kills : " + kills;
+        if (bestScoreText != null)
+            bestScoreText.text = "Best : " + bestScore + "  (Wave " + bestWave + ")";
+
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
@@ -103,6 +124,13 @@ public class GameOverManager : MonoBehaviour
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+
+    public void GoToMainMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(mainMenuSceneName);
+    }
+
 
     public void QuitGame()
     {
