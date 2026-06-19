@@ -84,6 +84,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
             smrs[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             smrs[i].receiveShadows = false;
         }
+
+        // Performance: don't evaluate the animator for zombies no camera renders.
+        // NOTE: off-screen zombies won't play attack animations until visible (acceptable for a horde shooter; revert to CullUpdateTransforms if undesired).
+        if (animator != null)
+            animator.cullingMode = AnimatorCullingMode.CullCompletely;
     }
 
     void OnEnable()
