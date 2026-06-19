@@ -296,6 +296,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
         if (AIDirector.Instance != null)
             AIDirector.Instance.RegisterKill();
 
+        if (WaveManager.Instance != null)
+            WaveManager.Instance.RegisterZombieKill();
+
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.AddKill();
+
         PlaySound(deathClip);
 
         agent.isStopped = true;
