@@ -14,6 +14,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Engine/Cowsins/Demo/Showroom.unity
     guid: c65d245ca63349e40af89661df799c04
+  - enabled: 1
+    path: Assets/Map/PolygonApocalypse/Scenes/Demo_City_Test.unity
+    guid: 9d524e5463df8b947a104fff529348a5
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 33f591010f343104f853b337a1fca25a, type: 2}
   m_UseUCBPForAssetBundles: 0
