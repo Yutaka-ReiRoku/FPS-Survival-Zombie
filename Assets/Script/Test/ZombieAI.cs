@@ -113,7 +113,17 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
             animator.Rebind();
             animator.Update(0f);
         }
+
+        if (AIDirector.Instance != null)
+            AIDirector.Instance.RegisterZombie(this);
     }
+
+    void OnDisable()
+    {
+        if (AIDirector.Instance != null)
+            AIDirector.Instance.UnregisterZombie(this);
+    }
+
 
     private float distanceTimer = 0f;
     private float cachedDistance = 100f;
@@ -282,6 +292,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
             return;
 
         isDead = true;
+
+        if (AIDirector.Instance != null)
+            AIDirector.Instance.RegisterKill();
 
         PlaySound(deathClip);
 

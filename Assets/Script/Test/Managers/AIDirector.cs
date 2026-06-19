@@ -207,8 +207,13 @@ public class AIDirector : MonoBehaviour
         ZombieAI zombie)
     {
         activeZombies.Remove(zombie);
+    }
+
+    public void RegisterKill()
+    {
         zombiesKilled++;
     }
+
 
     public int GetZombieCount()
     {
