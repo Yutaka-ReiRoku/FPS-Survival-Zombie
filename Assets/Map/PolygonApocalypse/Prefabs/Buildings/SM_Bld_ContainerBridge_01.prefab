@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33772357943974690}
   - component: {fileID: 23900527041154468}
   - component: {fileID: 9016454491360858268}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_ContainerBridge_Door_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33995422814283514}
   - component: {fileID: 23943478966466474}
   - component: {fileID: 394316651007983184}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_ContainerBridge_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33342465649932344}
   - component: {fileID: 23444515548266370}
   - component: {fileID: 6919399472530565668}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_ContainerBridge_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

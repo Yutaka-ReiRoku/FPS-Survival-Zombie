@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 23945254969340090}
   - component: {fileID: 95104648418811738}
   - component: {fileID: 4261029544953522429}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_FirePit_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

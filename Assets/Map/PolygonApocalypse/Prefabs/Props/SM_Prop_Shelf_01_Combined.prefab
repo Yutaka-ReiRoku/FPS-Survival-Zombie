@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33923224173477890}
   - component: {fileID: 23957360658936786}
   - component: {fileID: 1122861529791618038}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Shelf_01_Combined_Glass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33731540233272370}
   - component: {fileID: 23854672899937078}
   - component: {fileID: 4220676319449150085}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Shelf_01_Combined
   m_TagString: Untagged
   m_Icon: {fileID: 0}

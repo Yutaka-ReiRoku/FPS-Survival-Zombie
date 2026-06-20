@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33873675672806256}
   - component: {fileID: 23098213190569932}
   - component: {fileID: 7894738186103199630}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_BarrelStack_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

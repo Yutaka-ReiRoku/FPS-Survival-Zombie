@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33238187823927600}
   - component: {fileID: 23207282932197208}
   - component: {fileID: 1872869247893292103}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Rubble_Concrete_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

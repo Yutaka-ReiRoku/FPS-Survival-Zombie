@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33569836751091600}
   - component: {fileID: 23476263437045500}
   - component: {fileID: 2735808384104942924}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Mannequin_Base_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33252526880440356}
   - component: {fileID: 23606368622028584}
   - component: {fileID: 3860262212905666951}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Walkway_Cover_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

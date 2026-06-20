@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33988092740475798}
   - component: {fileID: 23908330098914450}
   - component: {fileID: 5898430184933697972}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Military_Tent_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

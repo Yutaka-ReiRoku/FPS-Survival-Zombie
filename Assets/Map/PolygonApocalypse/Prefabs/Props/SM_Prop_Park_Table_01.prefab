@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33067796257089724}
   - component: {fileID: 23099179502678062}
   - component: {fileID: 742998208339793936}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Park_Table_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

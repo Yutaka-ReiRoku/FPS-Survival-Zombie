@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33476450890661520}
   - component: {fileID: 23652768186200794}
   - component: {fileID: 2596793493543910120}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Dirt_Slope_Corner_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

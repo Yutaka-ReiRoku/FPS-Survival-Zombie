@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33553313442813058}
   - component: {fileID: 23384812773447178}
   - component: {fileID: 6109689035360597198}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Trailer_Steps_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

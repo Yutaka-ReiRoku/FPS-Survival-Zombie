@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33823687898005804}
   - component: {fileID: 23208344648196292}
   - component: {fileID: 3091937828448778602}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Rubble_Pebbles_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

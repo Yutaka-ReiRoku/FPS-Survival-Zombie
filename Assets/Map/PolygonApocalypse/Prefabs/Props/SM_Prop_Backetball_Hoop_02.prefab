@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33849864308858424}
   - component: {fileID: 23070327505840038}
   - component: {fileID: 8576495395052543059}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Backetball_Hoop_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

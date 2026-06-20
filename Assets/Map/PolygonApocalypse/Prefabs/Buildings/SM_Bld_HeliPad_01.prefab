@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33513443248867908}
   - component: {fileID: 23524873241476436}
   - component: {fileID: 6804787999337093255}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_HeliPad_Skirt_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33199004188697480}
   - component: {fileID: 23017358487269268}
   - component: {fileID: 7772851616071697195}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_HeliPad_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

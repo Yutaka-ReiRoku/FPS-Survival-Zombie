@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33358406793153240}
   - component: {fileID: 23182018396205458}
   - component: {fileID: 5339159136636705610}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Sidewalk_Merger_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

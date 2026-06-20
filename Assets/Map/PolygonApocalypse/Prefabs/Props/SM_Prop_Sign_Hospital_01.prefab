@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33894848304344348}
   - component: {fileID: 23464502365632612}
   - component: {fileID: 956341299664276712}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sign_Hospital_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

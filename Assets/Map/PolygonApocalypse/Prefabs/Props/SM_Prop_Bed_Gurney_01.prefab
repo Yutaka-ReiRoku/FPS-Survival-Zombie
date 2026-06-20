@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33894734129468648}
   - component: {fileID: 23512337228821176}
   - component: {fileID: 751938234997498485}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bed_Gurney_Legs_r1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33415715590411040}
   - component: {fileID: 23581988663112084}
   - component: {fileID: 3623868925990789634}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bed_Gurney_Wheels_r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -239,7 +239,7 @@ GameObject:
   - component: {fileID: 33433216487558322}
   - component: {fileID: 23962974507523374}
   - component: {fileID: 8826996648081478691}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bed_Gurney_Legs_r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -353,7 +353,7 @@ GameObject:
   - component: {fileID: 33174056268306568}
   - component: {fileID: 23701096597380014}
   - component: {fileID: 6390469349307525862}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bed_Gurney_Wheels_f
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -466,7 +466,7 @@ GameObject:
   - component: {fileID: 33723843005800610}
   - component: {fileID: 23350296692298866}
   - component: {fileID: 8654231465840032287}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bed_Gurney_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

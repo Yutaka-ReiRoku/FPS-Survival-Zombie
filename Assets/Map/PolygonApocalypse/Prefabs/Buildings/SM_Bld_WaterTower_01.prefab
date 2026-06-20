@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33673532127983576}
   - component: {fileID: 23210784042459330}
   - component: {fileID: 6395288949825009069}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_WaterTower_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

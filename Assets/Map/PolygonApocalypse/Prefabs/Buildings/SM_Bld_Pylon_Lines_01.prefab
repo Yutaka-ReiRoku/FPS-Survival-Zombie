@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33172300293394992}
   - component: {fileID: 23877683586893700}
   - component: {fileID: 7269616213028282345}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Pylon_Lines_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

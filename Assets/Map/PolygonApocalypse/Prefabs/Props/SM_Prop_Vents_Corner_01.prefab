@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33339843892267362}
   - component: {fileID: 23765500947101926}
   - component: {fileID: 6910770318910176002}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Vents_Corner_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

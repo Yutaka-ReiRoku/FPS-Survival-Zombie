@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33131944275573592}
   - component: {fileID: 23853602427286854}
   - component: {fileID: 7964839923398131440}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Pot_Street_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33195572479643574}
   - component: {fileID: 23250849512946944}
   - component: {fileID: 144961042406197623}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Pot_Street_Plant_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

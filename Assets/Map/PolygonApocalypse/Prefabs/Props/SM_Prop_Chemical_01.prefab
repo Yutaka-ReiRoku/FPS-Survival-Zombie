@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33719524749993640}
   - component: {fileID: 23277171856043236}
   - component: {fileID: 2102508872742676018}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Chemical_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

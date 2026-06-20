@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33747984145488046}
   - component: {fileID: 23850958721430466}
   - component: {fileID: 9022261756165892595}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_BedMatress_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

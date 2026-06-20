@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33905877335304188}
   - component: {fileID: 23434727167728664}
   - component: {fileID: 4652075329200032857}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_BloodSplat_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

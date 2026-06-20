@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33858008444289728}
   - component: {fileID: 23739972041073954}
   - component: {fileID: 8824860567386957721}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Trailer_Logs_Frame_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

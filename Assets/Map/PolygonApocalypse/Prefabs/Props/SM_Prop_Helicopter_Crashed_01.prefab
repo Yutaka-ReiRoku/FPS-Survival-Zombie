@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33962840245166324}
   - component: {fileID: 23242021904348476}
   - component: {fileID: 7979550524843440678}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Helicopter_Crashed_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33038321624453916}
   - component: {fileID: 23350868427227562}
   - component: {fileID: 7618566035770854325}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Helicopter_Crashed_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

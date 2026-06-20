@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33057233975605652}
   - component: {fileID: 23902316916098212}
   - component: {fileID: 4342916359383505492}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Trailer_Gate_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33521084794192644}
   - component: {fileID: 23826240143624060}
   - component: {fileID: 4035216938530802481}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33510971445053074}
   - component: {fileID: 23343871729619050}
   - component: {fileID: 606724289882663364}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Wheel_rl_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 33783268229099170}
   - component: {fileID: 23179682838963204}
   - component: {fileID: 6788918586760873975}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Wheel_rr_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -464,7 +464,7 @@ GameObject:
   - component: {fileID: 33303300792581054}
   - component: {fileID: 23852798813142374}
   - component: {fileID: 5808455389081366758}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Wheel_fl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -577,7 +577,7 @@ GameObject:
   - component: {fileID: 33259315581427108}
   - component: {fileID: 23495593618171964}
   - component: {fileID: 2399501725526527326}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Armour_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -690,7 +690,7 @@ GameObject:
   - component: {fileID: 33879560101143010}
   - component: {fileID: 23912568332485152}
   - component: {fileID: 6371056129778592864}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Canopy_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -803,7 +803,7 @@ GameObject:
   - component: {fileID: 33586941941594660}
   - component: {fileID: 23402540413520502}
   - component: {fileID: 1657220871414094030}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_01_SteeringW
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -916,7 +916,7 @@ GameObject:
   - component: {fileID: 33629429346609860}
   - component: {fileID: 23055410471370972}
   - component: {fileID: 5613989617296716775}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1043,7 +1043,7 @@ GameObject:
   - component: {fileID: 33853970702178686}
   - component: {fileID: 23916029910621326}
   - component: {fileID: 5902358905686799455}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Trailer_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1156,7 +1156,7 @@ GameObject:
   - component: {fileID: 33377117790571310}
   - component: {fileID: 23081148251785388}
   - component: {fileID: 5345436351333770977}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Wheel_fr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1269,7 +1269,7 @@ GameObject:
   - component: {fileID: 33205143810337048}
   - component: {fileID: 23393363335949370}
   - component: {fileID: 8380960087198203659}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Wheel_rr_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1382,7 +1382,7 @@ GameObject:
   - component: {fileID: 33800496436969240}
   - component: {fileID: 23488621006419744}
   - component: {fileID: 1795947461035079650}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Glass_Armour_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1495,7 +1495,7 @@ GameObject:
   - component: {fileID: 33367946956615148}
   - component: {fileID: 23807474866214778}
   - component: {fileID: 1888716159803165731}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Tank_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1608,7 +1608,7 @@ GameObject:
   - component: {fileID: 33096253113877308}
   - component: {fileID: 23002943468913018}
   - component: {fileID: 4943817858934719123}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Army_Truck_Wheel_rl_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

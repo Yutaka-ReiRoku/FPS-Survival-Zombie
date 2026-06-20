@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33980988118837770}
   - component: {fileID: 23067776557518126}
   - component: {fileID: 4804766803505485606}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_DirtPile_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

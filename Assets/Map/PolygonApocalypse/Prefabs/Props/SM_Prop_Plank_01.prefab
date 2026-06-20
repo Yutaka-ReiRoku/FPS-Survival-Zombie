@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33909612893088414}
   - component: {fileID: 23142801915513552}
   - component: {fileID: 1343875779500818530}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Plank_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

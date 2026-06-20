@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33531082328613224}
   - component: {fileID: 23226720680079316}
   - component: {fileID: 8085298885689938853}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Chair_Folding_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

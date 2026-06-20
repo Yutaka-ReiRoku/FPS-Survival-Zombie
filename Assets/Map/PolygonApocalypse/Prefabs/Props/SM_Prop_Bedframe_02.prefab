@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33633821675946392}
   - component: {fileID: 23044137747587110}
   - component: {fileID: 8234182584643421754}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bedframe_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

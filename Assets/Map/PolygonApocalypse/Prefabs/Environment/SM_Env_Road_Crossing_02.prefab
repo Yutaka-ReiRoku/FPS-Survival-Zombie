@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33101351309283794}
   - component: {fileID: 23923766338002086}
   - component: {fileID: 3815908232642452785}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Road_Crossing_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33349588884626048}
   - component: {fileID: 23040012015841724}
   - component: {fileID: 668527215720060053}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Chair_Plastic_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33681872516178196}
   - component: {fileID: 23393076120484306}
   - component: {fileID: 870979358103735558}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_DeadBody_Sitting_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

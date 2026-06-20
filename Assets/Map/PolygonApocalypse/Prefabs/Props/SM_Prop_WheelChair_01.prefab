@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33698954728758798}
   - component: {fileID: 23329517097608152}
   - component: {fileID: 8162096786753726798}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_WheelChair_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129,7 +129,7 @@ GameObject:
   - component: {fileID: 33447295862832180}
   - component: {fileID: 23324611502561246}
   - component: {fileID: 1097681387094048151}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_WheelChair_Wheel_fr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 33121574564096162}
   - component: {fileID: 23653823745487694}
   - component: {fileID: 6964682706420956995}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_WheelChair_Wheel_rr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 33656731304929740}
   - component: {fileID: 23434981328621976}
   - component: {fileID: 5784811340482578747}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_WheelChair_Wheel_fl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -468,7 +468,7 @@ GameObject:
   - component: {fileID: 33684645170633924}
   - component: {fileID: 23942626766658886}
   - component: {fileID: 927674737347643315}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_WheelChair_Wheel_rl
   m_TagString: Untagged
   m_Icon: {fileID: 0}

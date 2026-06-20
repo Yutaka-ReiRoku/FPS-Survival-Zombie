@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33397045546301912}
   - component: {fileID: 23352111840512972}
   - component: {fileID: 1899155002263433429}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Cooling_Tower_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

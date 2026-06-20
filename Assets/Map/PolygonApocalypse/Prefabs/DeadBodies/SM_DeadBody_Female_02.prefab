@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33376959608857744}
   - component: {fileID: 23369656222105562}
   - component: {fileID: 2961568375894369851}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_DeadBody_Female_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33571443755575942}
   - component: {fileID: 23245210485350484}
   - component: {fileID: 6804483937726793394}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Road_SpeedBump_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

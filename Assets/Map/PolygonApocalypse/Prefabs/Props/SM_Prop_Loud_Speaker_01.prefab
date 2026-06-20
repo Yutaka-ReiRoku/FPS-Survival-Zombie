@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33130791573805004}
   - component: {fileID: 23304151845961664}
   - component: {fileID: 3381546310061429724}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Loud_Speaker_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33559646068304524}
   - component: {fileID: 23172158030136350}
   - component: {fileID: 9093730515817563083}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Loud_Speaker_Cone_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

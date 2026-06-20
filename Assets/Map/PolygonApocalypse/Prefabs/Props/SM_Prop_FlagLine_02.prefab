@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33915734699998072}
   - component: {fileID: 23664916599280696}
   - component: {fileID: 1339308465236665310}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_FlagLine_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

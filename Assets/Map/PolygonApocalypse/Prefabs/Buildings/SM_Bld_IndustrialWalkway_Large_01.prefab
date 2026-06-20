@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33767168853097466}
   - component: {fileID: 23551847093150960}
   - component: {fileID: 6706191495416375380}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_IndustrialWalkway_Large_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

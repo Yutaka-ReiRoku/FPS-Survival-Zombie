@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33767873888030798}
   - component: {fileID: 23146751299847514}
   - component: {fileID: 4952559535849093471}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_BookPodium_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

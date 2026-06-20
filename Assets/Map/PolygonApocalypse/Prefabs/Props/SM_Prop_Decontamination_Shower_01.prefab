@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33683859621103796}
   - component: {fileID: 23749675326806686}
   - component: {fileID: 6537876187985704453}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Decontamination_Shower_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

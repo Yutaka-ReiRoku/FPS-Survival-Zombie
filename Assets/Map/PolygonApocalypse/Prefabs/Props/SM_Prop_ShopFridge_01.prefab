@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33274149835864766}
   - component: {fileID: 23690499719755118}
   - component: {fileID: 3001483844713005419}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShopFridge_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33405242210226452}
   - component: {fileID: 23104011046835474}
   - component: {fileID: 8763358840033878730}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShopFridge_01_Glass
   m_TagString: Untagged
   m_Icon: {fileID: 0}

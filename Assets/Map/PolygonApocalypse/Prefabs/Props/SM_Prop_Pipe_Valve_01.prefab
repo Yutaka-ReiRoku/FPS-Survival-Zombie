@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33272147290742622}
   - component: {fileID: 23047357610784128}
   - component: {fileID: 5957353423968641770}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Pipe_Valve_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

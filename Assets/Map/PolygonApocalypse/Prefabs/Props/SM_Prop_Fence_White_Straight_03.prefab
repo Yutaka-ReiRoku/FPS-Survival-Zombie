@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33380476948996640}
   - component: {fileID: 23509739094107116}
   - component: {fileID: 5382416825514091498}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Fence_White_Straight_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

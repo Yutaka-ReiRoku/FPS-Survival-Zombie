@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33982687888009632}
   - component: {fileID: 23822427692748754}
   - component: {fileID: 1910637582703583532}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_AutoRepair_01_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33569476797997216}
   - component: {fileID: 23915277858330662}
   - component: {fileID: 2877992101185774410}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_AutoRepair_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 33839459225547374}
   - component: {fileID: 23499962023598048}
   - component: {fileID: 2450683758980464905}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_AutoRepair_01_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 33386663720330046}
   - component: {fileID: 23531085292794866}
   - component: {fileID: 3858906679578641017}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_AutoRepair_01_Overgrowth_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -469,7 +469,7 @@ GameObject:
   - component: {fileID: 33704448027276128}
   - component: {fileID: 23859071587060226}
   - component: {fileID: 659855316909973558}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_AutoRepair_01_Door_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

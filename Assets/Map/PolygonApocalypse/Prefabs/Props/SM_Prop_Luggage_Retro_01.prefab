@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33086884409648748}
   - component: {fileID: 23590268667691236}
   - component: {fileID: 4112549591285657333}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Luggage_Retro_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

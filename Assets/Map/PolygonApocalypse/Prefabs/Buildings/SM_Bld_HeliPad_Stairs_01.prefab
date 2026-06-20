@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33958967266809336}
   - component: {fileID: 23902464283260840}
   - component: {fileID: 8358952225550570904}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_HeliPad_Stairs_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

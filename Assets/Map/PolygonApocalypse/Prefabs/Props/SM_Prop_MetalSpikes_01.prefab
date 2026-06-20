@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33186055023661740}
   - component: {fileID: 23620416270672344}
   - component: {fileID: 1740984407793329612}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_MetalSpikes_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

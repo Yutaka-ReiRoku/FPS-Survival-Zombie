@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33539020533162098}
   - component: {fileID: 23034224825320030}
   - component: {fileID: 2809042419545396324}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Sidewalk_Overgrown_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

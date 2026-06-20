@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33108584418603184}
   - component: {fileID: 23805586467356632}
   - component: {fileID: 2413111414264111651}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Toaster_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33700875710989880}
   - component: {fileID: 23510766064992982}
   - component: {fileID: 1302154858498932374}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_HangingRope_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33978121565983534}
   - component: {fileID: 23858007764501298}
   - component: {fileID: 5009626091925028624}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_DeadBody_Hanging_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

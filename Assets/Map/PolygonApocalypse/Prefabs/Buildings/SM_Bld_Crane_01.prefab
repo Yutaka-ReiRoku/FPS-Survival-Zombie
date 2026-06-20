@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33481668430599344}
   - component: {fileID: 23880727532049124}
   - component: {fileID: 1372273370607594532}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Crane_Hook_Wire_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33072342037771094}
   - component: {fileID: 23731725709692138}
   - component: {fileID: 3917281767834960778}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Crane_Slide_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -239,7 +239,7 @@ GameObject:
   - component: {fileID: 33553979770038348}
   - component: {fileID: 23219447984215272}
   - component: {fileID: 6973499691259058776}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Crane_Top_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -353,7 +353,7 @@ GameObject:
   - component: {fileID: 33668624594204154}
   - component: {fileID: 23416577159563762}
   - component: {fileID: 3941265828923454711}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Crane_Hook_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -467,7 +467,7 @@ GameObject:
   - component: {fileID: 33011368544676000}
   - component: {fileID: 23265984192610714}
   - component: {fileID: 5258972044012568220}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Crane_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

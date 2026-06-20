@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33007307340009564}
   - component: {fileID: 23721946733838284}
   - component: {fileID: 5221547168131612119}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Motel_Sign_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

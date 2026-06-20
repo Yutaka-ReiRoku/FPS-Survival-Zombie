@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33636651265897602}
   - component: {fileID: 23132830802113762}
   - component: {fileID: 7143149769485047475}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Barrier_Concrete_Half_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

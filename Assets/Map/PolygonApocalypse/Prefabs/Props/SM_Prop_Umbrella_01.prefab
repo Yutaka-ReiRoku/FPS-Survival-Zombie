@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33777657718375788}
   - component: {fileID: 23091750140919872}
   - component: {fileID: 784172562422719003}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Umbrella_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33041137147546716}
   - component: {fileID: 23905370874358736}
   - component: {fileID: 1386843697659620137}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_SidewalkPoles_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

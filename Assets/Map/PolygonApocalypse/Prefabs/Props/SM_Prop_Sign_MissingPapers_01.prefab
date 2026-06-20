@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33119623820155592}
   - component: {fileID: 23795733181031564}
   - component: {fileID: 412248091851708585}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sign_MissingPapers_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33286298260268228}
   - component: {fileID: 23245619866255092}
   - component: {fileID: 7253699607508416288}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Generic_Small_Rocks_04
   m_TagString: Untagged
   m_Icon: {fileID: 0}

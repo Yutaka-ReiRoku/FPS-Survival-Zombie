@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33443071297748082}
   - component: {fileID: 23623251179389348}
   - component: {fileID: 1194393434633268281}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Flamingo_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

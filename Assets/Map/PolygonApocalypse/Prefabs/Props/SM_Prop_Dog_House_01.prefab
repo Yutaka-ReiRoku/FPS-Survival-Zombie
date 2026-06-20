@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33707366666757876}
   - component: {fileID: 23846319412280770}
   - component: {fileID: 1022853610319248625}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Dog_House_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

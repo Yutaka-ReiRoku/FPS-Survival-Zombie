@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33036300596791594}
   - component: {fileID: 23946191665825424}
   - component: {fileID: 6093388488619503131}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wall_Brick_Collasped_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

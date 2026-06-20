@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33993434407589204}
   - component: {fileID: 23196025471840556}
   - component: {fileID: 8031604969817049488}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Pylon_Broken_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33749063645492648}
   - component: {fileID: 23507458860456704}
   - component: {fileID: 6013928743664880996}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Junk_Shelter_02_Tarp
   m_TagString: Untagged
   m_Icon: {fileID: 0}

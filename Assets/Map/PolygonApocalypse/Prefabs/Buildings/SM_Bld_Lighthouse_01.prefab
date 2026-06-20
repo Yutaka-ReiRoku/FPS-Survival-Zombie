@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33547089796033152}
   - component: {fileID: 23227934263587886}
   - component: {fileID: 107554397923090810}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Lighthouse_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33197001068354804}
   - component: {fileID: 23479633586699438}
   - component: {fileID: 7960929830200221388}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Lighthouse_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

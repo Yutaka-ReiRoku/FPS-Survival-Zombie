@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33960450670465376}
   - component: {fileID: 23125258357264224}
   - component: {fileID: 1242721819011847912}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Sunshade_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

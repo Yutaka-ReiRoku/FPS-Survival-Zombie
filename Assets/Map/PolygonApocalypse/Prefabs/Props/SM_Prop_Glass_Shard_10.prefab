@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33659495115412678}
   - component: {fileID: 23084020677806482}
   - component: {fileID: 4228624822216483237}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Glass_Shard_10
   m_TagString: Untagged
   m_Icon: {fileID: 0}

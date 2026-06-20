@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33600768096300140}
   - component: {fileID: 23989498887796950}
   - component: {fileID: 2879268891127597518}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wall_Wire_Pillar_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

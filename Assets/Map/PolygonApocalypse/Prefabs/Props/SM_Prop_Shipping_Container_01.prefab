@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33177628175055484}
   - component: {fileID: 23913947109915134}
   - component: {fileID: 66456586319516207}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Shipping_Container_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33087432318745870}
   - component: {fileID: 23070347038214838}
   - component: {fileID: 2770673267008830378}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Shipping_Container_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 33277052457036850}
   - component: {fileID: 23813490821053248}
   - component: {fileID: 8756216201822406287}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Shipping_Container_Door_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 33084424827568258}
   - component: {fileID: 23806686790328398}
   - component: {fileID: 6802251778475052090}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Shipping_Container_Door_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -468,7 +468,7 @@ GameObject:
   - component: {fileID: 33569601679070370}
   - component: {fileID: 23113230206119418}
   - component: {fileID: 4267391235896883502}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Shipping_Container_Door_04
   m_TagString: Untagged
   m_Icon: {fileID: 0}

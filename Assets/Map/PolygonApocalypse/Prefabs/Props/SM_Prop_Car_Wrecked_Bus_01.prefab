@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33812322034531280}
   - component: {fileID: 23258059270206270}
   - component: {fileID: 4076632892925710442}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Car_Wrecked_Bus_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 33427500780281062}
   - component: {fileID: 23917923183760546}
   - component: {fileID: 6447965816096831103}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Car_Wrecked_Bus_01_Overgrowth
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33114185724284244}
   - component: {fileID: 23066927348910956}
   - component: {fileID: 2842576793552526420}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Cafe_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33294600713339314}
   - component: {fileID: 23348552649683458}
   - component: {fileID: 726730667982870435}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Cafe_01_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

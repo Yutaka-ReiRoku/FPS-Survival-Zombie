@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33386883515210854}
   - component: {fileID: 23381639798947936}
   - component: {fileID: 2739771279652778462}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Warehouse_Concrete_Door_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33598286067549500}
   - component: {fileID: 23901072681594514}
   - component: {fileID: 765563931061309848}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Warehouse_Concrete_Door_04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33572784978915588}
   - component: {fileID: 23659745550315168}
   - component: {fileID: 85924756469086349}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Warehouse_Concrete_Door_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 33761063296137626}
   - component: {fileID: 23907089995738864}
   - component: {fileID: 8003571046614496565}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Warehouse_Concrete_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -464,7 +464,7 @@ GameObject:
   - component: {fileID: 33591892025947112}
   - component: {fileID: 23008229691531296}
   - component: {fileID: 6464383701086608336}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Warehouse_Concrete_Overgrowth_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -578,7 +578,7 @@ GameObject:
   - component: {fileID: 33777873350221408}
   - component: {fileID: 23720099123282416}
   - component: {fileID: 8936757380815752881}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Warehouse_Concrete_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

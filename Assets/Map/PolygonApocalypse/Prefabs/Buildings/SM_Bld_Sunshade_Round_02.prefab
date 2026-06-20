@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33616317603907352}
   - component: {fileID: 23771442527937152}
   - component: {fileID: 4269503709096175947}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Sunshade_Round_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33817235588878962}
   - component: {fileID: 23384704228864188}
   - component: {fileID: 3444368100922616374}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Wep_Rifle_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129,7 +129,7 @@ GameObject:
   - component: {fileID: 33132296278052434}
   - component: {fileID: 23489208515858616}
   - component: {fileID: 1450666717866430056}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Wep_Rifle_01_Slide_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 33699173713469948}
   - component: {fileID: 23873981616366866}
   - component: {fileID: 5881909534702381175}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Wep_Rifle_01_Trigger_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 33816561289822200}
   - component: {fileID: 23531480255994560}
   - component: {fileID: 877940522891027880}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Wep_Rifle_01_Magazine_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -468,7 +468,7 @@ GameObject:
   - component: {fileID: 33234294084713846}
   - component: {fileID: 23921333112350260}
   - component: {fileID: 932811372528308453}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Wep_Rifle_01_Handle_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

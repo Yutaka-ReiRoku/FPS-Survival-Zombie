@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33691916296252458}
   - component: {fileID: 23679877745412308}
   - component: {fileID: 4786266378852334757}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Tree_Pine_Cluster_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

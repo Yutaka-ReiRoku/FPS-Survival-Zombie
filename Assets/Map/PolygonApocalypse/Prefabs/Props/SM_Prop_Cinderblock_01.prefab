@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33837655498289936}
   - component: {fileID: 23172726427991896}
   - component: {fileID: 366584048572914676}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Cinderblock_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

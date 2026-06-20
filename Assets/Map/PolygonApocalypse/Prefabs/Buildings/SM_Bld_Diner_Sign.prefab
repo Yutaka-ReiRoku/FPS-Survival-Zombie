@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33894434145941740}
   - component: {fileID: 23077198229787280}
   - component: {fileID: 5252469753389494858}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Diner_Sign
   m_TagString: Untagged
   m_Icon: {fileID: 0}

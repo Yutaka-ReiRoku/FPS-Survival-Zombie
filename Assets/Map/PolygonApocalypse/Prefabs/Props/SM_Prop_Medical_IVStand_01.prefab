@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33698692624808940}
   - component: {fileID: 23070353145696826}
   - component: {fileID: 3365067349313373316}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Medical_IVStand_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

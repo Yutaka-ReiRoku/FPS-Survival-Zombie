@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33527638400997434}
   - component: {fileID: 23136642856728892}
   - component: {fileID: 3071279478696743431}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wall_Quarantine_Column_Tall_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

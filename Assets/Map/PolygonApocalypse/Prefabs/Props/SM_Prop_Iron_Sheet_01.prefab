@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33480746941587254}
   - component: {fileID: 23835719165809802}
   - component: {fileID: 3117179591858980525}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Iron_Sheet_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33256682194100414}
   - component: {fileID: 23147106745123700}
   - component: {fileID: 5024455944443788333}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Ladder_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

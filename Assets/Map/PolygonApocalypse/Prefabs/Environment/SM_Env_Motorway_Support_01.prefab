@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33376478375611146}
   - component: {fileID: 23862013930832750}
   - component: {fileID: 2830969789685390530}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Motorway_Support_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33243497604436994}
   - component: {fileID: 23842099936786994}
   - component: {fileID: 8106228403424001727}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Bridge_Support_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

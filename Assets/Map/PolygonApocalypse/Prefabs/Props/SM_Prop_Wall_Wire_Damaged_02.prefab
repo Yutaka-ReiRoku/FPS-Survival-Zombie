@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33899896285698290}
   - component: {fileID: 23501572490186702}
   - component: {fileID: 2164474789947709219}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wall_Wire_Damaged_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

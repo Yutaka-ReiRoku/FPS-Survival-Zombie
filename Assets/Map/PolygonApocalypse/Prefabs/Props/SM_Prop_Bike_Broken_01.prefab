@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33974542465670680}
   - component: {fileID: 23015301966089326}
   - component: {fileID: 3180282294576671347}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bike_Broken_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33724424720786002}
   - component: {fileID: 23528193884681910}
   - component: {fileID: 8935367898699695817}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Diner_Table_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

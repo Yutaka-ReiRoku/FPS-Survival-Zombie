@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33162836894288962}
   - component: {fileID: 23730977530807818}
   - component: {fileID: 2800578153961260863}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Trailer_Aerial_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

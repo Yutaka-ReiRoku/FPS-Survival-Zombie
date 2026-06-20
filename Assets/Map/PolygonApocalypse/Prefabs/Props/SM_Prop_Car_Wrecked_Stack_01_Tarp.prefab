@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 23874965104409890}
   - component: {fileID: 95844412125258708}
   - component: {fileID: 4012224491988031343}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Car_Wrecked_Stack_01_Tarp
   m_TagString: Untagged
   m_Icon: {fileID: 0}

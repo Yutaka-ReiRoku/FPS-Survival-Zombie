@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33519133536175870}
   - component: {fileID: 23760973729668968}
   - component: {fileID: 5967245645181258764}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_RoadPiece_Damaged_08
   m_TagString: Untagged
   m_Icon: {fileID: 0}

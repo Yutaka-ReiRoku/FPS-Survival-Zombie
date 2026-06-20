@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33622480724006368}
   - component: {fileID: 23553604691938544}
   - component: {fileID: 1795467820233858048}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_GroundLeaves_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

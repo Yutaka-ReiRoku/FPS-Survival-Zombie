@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33562290227737982}
   - component: {fileID: 23413239548111736}
   - component: {fileID: 8027606115240447017}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_BodyBag_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

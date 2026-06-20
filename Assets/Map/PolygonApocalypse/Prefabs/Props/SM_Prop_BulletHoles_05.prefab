@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33212168509827294}
   - component: {fileID: 23946392396651264}
   - component: {fileID: 1046629935980455184}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_BulletHoles_05
   m_TagString: Untagged
   m_Icon: {fileID: 0}

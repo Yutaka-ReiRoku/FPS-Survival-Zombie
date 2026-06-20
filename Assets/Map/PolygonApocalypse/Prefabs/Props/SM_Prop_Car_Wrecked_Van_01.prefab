@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33962705587648388}
   - component: {fileID: 23707735709763348}
   - component: {fileID: 3424323737001420860}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Car_Wrecked_Van_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33701424122793846}
   - component: {fileID: 23478913215521626}
   - component: {fileID: 3665305855671908999}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Car_Wrecked_Van_01_Overgrowth
   m_TagString: Untagged
   m_Icon: {fileID: 0}

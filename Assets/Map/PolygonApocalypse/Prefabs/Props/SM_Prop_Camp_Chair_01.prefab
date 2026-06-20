@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33586881616868552}
   - component: {fileID: 23873340502714248}
   - component: {fileID: 5157674919528041796}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Camp_Chair_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

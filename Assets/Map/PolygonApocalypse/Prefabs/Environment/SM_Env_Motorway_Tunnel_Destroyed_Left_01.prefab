@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33612842985629018}
   - component: {fileID: 23177363044546164}
   - component: {fileID: 8288557383714551123}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Motorway_Tunnel_Destroyed_Left_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33348361418056750}
   - component: {fileID: 23433687522962408}
   - component: {fileID: 7173467500622600932}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_BurnPile_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

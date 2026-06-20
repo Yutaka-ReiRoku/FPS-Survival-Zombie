@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33944999549700930}
   - component: {fileID: 23728584683718608}
   - component: {fileID: 1759469580885512776}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Kitchen_Fridge_Tray_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33086656011401396}
   - component: {fileID: 23964720496902906}
   - component: {fileID: 1214542521582110473}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Kitchen_Fridge_01_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33467424056080854}
   - component: {fileID: 23216196517528122}
   - component: {fileID: 5108977880686684488}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Kitchen_Fridge_01_Door_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 33279102640243318}
   - component: {fileID: 23060207542932304}
   - component: {fileID: 6463372977764428510}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Kitchen_Fridge_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33214045974273844}
   - component: {fileID: 23544631144704702}
   - component: {fileID: 6431729935378341371}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_WaterTank_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

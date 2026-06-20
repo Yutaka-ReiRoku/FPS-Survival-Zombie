@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33098351723395688}
   - component: {fileID: 23316252110140036}
   - component: {fileID: 5260089704722729711}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Fence_Wood_Post_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

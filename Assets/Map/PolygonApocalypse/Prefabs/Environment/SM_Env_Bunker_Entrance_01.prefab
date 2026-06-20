@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33932815029325048}
   - component: {fileID: 23477279636064334}
   - component: {fileID: 8247014256213189254}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Bunker_Entrance_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

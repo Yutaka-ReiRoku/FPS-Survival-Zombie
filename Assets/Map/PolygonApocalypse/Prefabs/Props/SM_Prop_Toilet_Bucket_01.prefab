@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33244410593242556}
   - component: {fileID: 23833650326775768}
   - component: {fileID: 1573068809720631206}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Toilet_Bucket_Lid_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33659370451839784}
   - component: {fileID: 23087102294283484}
   - component: {fileID: 5194204879537463561}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Toilet_Bucket_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33391570611544814}
   - component: {fileID: 23515093303918458}
   - component: {fileID: 7524104299614541659}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Industrial_Small_01_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33989748295943886}
   - component: {fileID: 23579205289961352}
   - component: {fileID: 5002976070626992855}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Industrial_Small_01_Barricades_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33238523982148334}
   - component: {fileID: 23118881517435952}
   - component: {fileID: 2976473798380591280}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Industrial_Small_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

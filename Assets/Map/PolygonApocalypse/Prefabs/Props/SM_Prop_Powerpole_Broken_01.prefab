@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33626015981048870}
   - component: {fileID: 23616603970620824}
   - component: {fileID: 8873750672398154701}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Powerpole_Broken_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

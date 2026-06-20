@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33416821893608196}
   - component: {fileID: 23476172705350998}
   - component: {fileID: 2010038871152093588}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Roof_Chimney
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33345530914163390}
   - component: {fileID: 23061085161800028}
   - component: {fileID: 1659978128261647367}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bear_Trap_Jaw_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33178053537451970}
   - component: {fileID: 23461655443978976}
   - component: {fileID: 4665480729332159538}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bear_Trap_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -240,7 +240,7 @@ GameObject:
   - component: {fileID: 33649056669966808}
   - component: {fileID: 23672735490973770}
   - component: {fileID: 2030586012073079208}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bear_Trap_Jaw_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

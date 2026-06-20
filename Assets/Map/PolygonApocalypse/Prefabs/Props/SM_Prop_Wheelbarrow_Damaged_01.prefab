@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33797191745654408}
   - component: {fileID: 23483163008717098}
   - component: {fileID: 444203605218376807}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wheelbarrow_Damaged_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

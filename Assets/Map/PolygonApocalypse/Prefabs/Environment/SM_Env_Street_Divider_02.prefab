@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33715145355444826}
   - component: {fileID: 23636532157326042}
   - component: {fileID: 8509122955820700556}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Street_Divider_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

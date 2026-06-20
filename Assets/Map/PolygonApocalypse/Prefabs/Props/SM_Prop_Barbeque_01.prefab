@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33502793004273904}
   - component: {fileID: 23066351733444980}
   - component: {fileID: 8081903774802230375}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Barbeque_Lid_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33220528753887282}
   - component: {fileID: 23105458554272944}
   - component: {fileID: 5104415867238499136}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Barbeque_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

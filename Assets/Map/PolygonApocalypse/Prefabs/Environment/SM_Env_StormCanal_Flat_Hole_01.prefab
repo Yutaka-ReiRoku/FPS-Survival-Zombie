@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33300586919895340}
   - component: {fileID: 23160408250555854}
   - component: {fileID: 7710314296307956449}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_StormCanal_Flat_Hole_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

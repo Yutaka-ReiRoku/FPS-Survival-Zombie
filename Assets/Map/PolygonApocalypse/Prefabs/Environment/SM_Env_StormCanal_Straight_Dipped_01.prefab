@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33416351127797184}
   - component: {fileID: 23459918055821792}
   - component: {fileID: 8274403691173837721}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_StormCanal_Straight_Dipped_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

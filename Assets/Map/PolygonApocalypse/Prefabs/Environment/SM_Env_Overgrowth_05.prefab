@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33882613519147652}
   - component: {fileID: 23114228236904822}
   - component: {fileID: 8106227446928104096}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Overgrowth_05
   m_TagString: Untagged
   m_Icon: {fileID: 0}

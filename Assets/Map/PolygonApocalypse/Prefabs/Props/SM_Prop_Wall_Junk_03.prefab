@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33264483577742386}
   - component: {fileID: 23440008820446904}
   - component: {fileID: 6253810738565813397}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wall_Junk_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

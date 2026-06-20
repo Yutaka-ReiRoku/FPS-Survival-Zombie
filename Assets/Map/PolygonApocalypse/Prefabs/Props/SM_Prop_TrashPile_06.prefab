@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33678670147670540}
   - component: {fileID: 23639763745567366}
   - component: {fileID: 5294828614934658145}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Rubble_Grass_06
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33563807874939792}
   - component: {fileID: 23518283705052728}
   - component: {fileID: 7728297101371559811}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Rubble_Trash_06
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -239,7 +239,7 @@ GameObject:
   - component: {fileID: 33327306719081710}
   - component: {fileID: 23674929853151692}
   - component: {fileID: 3073240393069465376}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_TrashPile_06
   m_TagString: Untagged
   m_Icon: {fileID: 0}

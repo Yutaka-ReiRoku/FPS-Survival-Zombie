@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33192762712135202}
   - component: {fileID: 23818071905978808}
   - component: {fileID: 1086969182849818497}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Barrel_Water_Open_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

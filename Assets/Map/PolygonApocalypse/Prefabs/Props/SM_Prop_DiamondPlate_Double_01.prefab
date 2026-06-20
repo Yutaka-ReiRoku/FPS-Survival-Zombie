@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33699557776268684}
   - component: {fileID: 23852826687995024}
   - component: {fileID: 2022331509073555967}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_DiamondPlate_Double_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

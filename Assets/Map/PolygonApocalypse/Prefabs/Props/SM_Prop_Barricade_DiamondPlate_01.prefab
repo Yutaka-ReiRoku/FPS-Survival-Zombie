@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33481773747902144}
   - component: {fileID: 23339530828454246}
   - component: {fileID: 8025884517851618564}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Barricade_DiamondPlate_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

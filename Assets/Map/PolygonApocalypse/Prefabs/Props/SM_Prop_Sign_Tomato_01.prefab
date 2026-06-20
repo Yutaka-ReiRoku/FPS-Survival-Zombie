@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33526130402756662}
   - component: {fileID: 23309567409978254}
   - component: {fileID: 6126953439529095936}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sign_Tomato_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

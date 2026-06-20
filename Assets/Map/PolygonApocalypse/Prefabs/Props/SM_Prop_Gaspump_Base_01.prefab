@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33164493988308964}
   - component: {fileID: 23095714995542244}
   - component: {fileID: 8867217932857591127}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Gaspump_Base_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

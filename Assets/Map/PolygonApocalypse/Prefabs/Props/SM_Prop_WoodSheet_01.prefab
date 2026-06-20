@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33666975077628044}
   - component: {fileID: 23346777613180872}
   - component: {fileID: 8823426758976756427}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_WoodSheet_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

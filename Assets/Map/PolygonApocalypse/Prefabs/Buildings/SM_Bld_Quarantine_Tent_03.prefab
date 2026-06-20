@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33130236708039168}
   - component: {fileID: 23696985932192456}
   - component: {fileID: 6675127372242610101}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Quarantine_Tent_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

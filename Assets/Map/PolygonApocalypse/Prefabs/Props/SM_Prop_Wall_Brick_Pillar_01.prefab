@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33445759241646546}
   - component: {fileID: 23444434549069042}
   - component: {fileID: 1285277566405425398}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wall_Brick_Pillar_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

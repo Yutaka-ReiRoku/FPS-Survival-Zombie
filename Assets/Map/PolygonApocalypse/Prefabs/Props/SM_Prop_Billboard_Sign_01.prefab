@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33585665876397438}
   - component: {fileID: 23337024415645790}
   - component: {fileID: 6490548509239395828}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Billboard_Sign_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

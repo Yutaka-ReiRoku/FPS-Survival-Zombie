@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33276320062651438}
   - component: {fileID: 23316265176307696}
   - component: {fileID: 141779090031359454}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Flag_Wall_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

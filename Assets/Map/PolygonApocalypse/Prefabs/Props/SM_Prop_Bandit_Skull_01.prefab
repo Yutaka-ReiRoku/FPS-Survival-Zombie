@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33065961754370556}
   - component: {fileID: 23325573725876408}
   - component: {fileID: 3894185891940795698}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bandit_Skull_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

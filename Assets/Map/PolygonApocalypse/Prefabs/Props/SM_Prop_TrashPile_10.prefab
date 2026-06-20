@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33734643133887054}
   - component: {fileID: 23182610568749556}
   - component: {fileID: 34868898380277903}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_TrashPile_10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 33414295486385854}
   - component: {fileID: 23067922786138250}
   - component: {fileID: 6445686796113365068}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Trash_10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 33829485229802120}
   - component: {fileID: 23119321207131240}
   - component: {fileID: 2370156098727419763}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Grass_10
   m_TagString: Untagged
   m_Icon: {fileID: 0}

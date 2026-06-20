@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33307527736058764}
   - component: {fileID: 23145681873127966}
   - component: {fileID: 3054032678342609738}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Powerpole_Preset_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

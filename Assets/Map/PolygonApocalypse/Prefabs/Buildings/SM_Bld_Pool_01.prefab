@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33975032194059324}
   - component: {fileID: 23013124191110746}
   - component: {fileID: 2796110134026676817}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Pool_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

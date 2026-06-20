@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33594327199287900}
   - component: {fileID: 23057599446662756}
   - component: {fileID: 4610933042612017705}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_DeadBody_Spiked_Female_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

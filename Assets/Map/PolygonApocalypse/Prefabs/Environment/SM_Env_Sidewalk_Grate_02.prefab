@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33302267628614114}
   - component: {fileID: 23932547576374184}
   - component: {fileID: 504606952807348143}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Sidewalk_Grate_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

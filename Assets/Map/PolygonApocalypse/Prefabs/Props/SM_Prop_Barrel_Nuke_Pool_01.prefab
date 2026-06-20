@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33501998264538368}
   - component: {fileID: 23179164882159030}
   - component: {fileID: 7041524566448836145}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Barrel_Nuke_Pool_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

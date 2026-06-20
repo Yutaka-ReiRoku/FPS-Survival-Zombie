@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33855428842345178}
   - component: {fileID: 23873922596647538}
   - component: {fileID: 5198741730629874518}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Trailer_Interior_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33286087937579022}
   - component: {fileID: 23159545435610956}
   - component: {fileID: 6806093874205915402}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Trailer_Skirt_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -239,7 +239,7 @@ GameObject:
   - component: {fileID: 33692616507804678}
   - component: {fileID: 23945551273393682}
   - component: {fileID: 2793728283343107281}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Trailer_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -352,7 +352,7 @@ GameObject:
   - component: {fileID: 33008076005727554}
   - component: {fileID: 23775090170111850}
   - component: {fileID: 6709895725816579978}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Trailer_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -468,7 +468,7 @@ GameObject:
   - component: {fileID: 33371886298558308}
   - component: {fileID: 23124707976433510}
   - component: {fileID: 6444920598431057120}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Trailer_Interior_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

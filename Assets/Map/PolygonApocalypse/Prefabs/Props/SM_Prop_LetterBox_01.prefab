@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33276717162975578}
   - component: {fileID: 23811733911674698}
   - component: {fileID: 3438546015557155091}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_LetterBox_01_Flag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33904892622804338}
   - component: {fileID: 23109133623645640}
   - component: {fileID: 8615570499370930115}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_LetterBox_01_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33812432127300094}
   - component: {fileID: 23846436170874074}
   - component: {fileID: 427648194273234881}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_LetterBox_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

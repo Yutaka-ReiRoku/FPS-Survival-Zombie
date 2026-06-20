@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33781410917249538}
   - component: {fileID: 23837598357442208}
   - component: {fileID: 3862210439046030484}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Item_SmartPhone_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33338949919562952}
   - component: {fileID: 23492840278336620}
   - component: {fileID: 3567026073775092612}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Road_Parking_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

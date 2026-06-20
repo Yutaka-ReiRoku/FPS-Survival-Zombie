@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33357356053638650}
   - component: {fileID: 23330569301061640}
   - component: {fileID: 4268175638439326324}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Railing_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

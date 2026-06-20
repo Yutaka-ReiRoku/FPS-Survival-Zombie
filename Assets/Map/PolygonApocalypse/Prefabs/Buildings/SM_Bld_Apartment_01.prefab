@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33327063403659474}
   - component: {fileID: 23114533275561460}
   - component: {fileID: 33857117733498872}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Apartment_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33688689266606212}
   - component: {fileID: 23586649963676370}
   - component: {fileID: 8235469913858719634}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Apartment_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

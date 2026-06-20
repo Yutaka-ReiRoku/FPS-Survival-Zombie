@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33057325188518068}
   - component: {fileID: 23201386649653852}
   - component: {fileID: 164669209109194559}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShootingRange_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33861055508737234}
   - component: {fileID: 23647925160477330}
   - component: {fileID: 1914341022280986306}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Roof_SolarPanel_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

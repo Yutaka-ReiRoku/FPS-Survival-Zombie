@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33110826378233716}
   - component: {fileID: 23821766979615670}
   - component: {fileID: 1948753815075257362}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sign_Grocery_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

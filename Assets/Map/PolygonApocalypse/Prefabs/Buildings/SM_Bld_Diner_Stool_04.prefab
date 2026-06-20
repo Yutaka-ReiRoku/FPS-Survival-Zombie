@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33432716511854676}
   - component: {fileID: 23953904561868936}
   - component: {fileID: 2618470146458580191}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Diner_Stool_04
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33415757376075910}
   - component: {fileID: 23004408781582004}
   - component: {fileID: 1328422550775795791}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Diner_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33018463963168932}
   - component: {fileID: 23090344595979022}
   - component: {fileID: 976282910161929756}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Diner_Door_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

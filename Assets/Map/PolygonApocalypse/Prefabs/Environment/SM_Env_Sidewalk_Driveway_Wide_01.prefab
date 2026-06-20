@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33560225122813806}
   - component: {fileID: 23457299017521482}
   - component: {fileID: 7783714648298644455}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Sidewalk_Driveway_Wide_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33068854888314920}
   - component: {fileID: 23780178404680498}
   - component: {fileID: 6833881027245748303}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Tree_Dead_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

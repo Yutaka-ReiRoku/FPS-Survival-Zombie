@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33504012864290738}
   - component: {fileID: 23067097432527224}
   - component: {fileID: 6477318153955405765}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sign_Military_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

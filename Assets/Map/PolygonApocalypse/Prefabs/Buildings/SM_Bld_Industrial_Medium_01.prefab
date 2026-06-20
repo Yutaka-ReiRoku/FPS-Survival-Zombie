@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33076890582783826}
   - component: {fileID: 23106362091818492}
   - component: {fileID: 3996641842497639660}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Industrial_Medium_01_Overgrowth_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33708375683215500}
   - component: {fileID: 23974130997710876}
   - component: {fileID: 9139802653393906517}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Industrial_Medium_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -241,7 +241,7 @@ GameObject:
   - component: {fileID: 33158593446459492}
   - component: {fileID: 23261966930213076}
   - component: {fileID: 4205533833853357854}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Industrial_Medium_01_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33321637703718348}
   - component: {fileID: 23494672906210634}
   - component: {fileID: 3762183202468604128}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_LightPole_Base_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

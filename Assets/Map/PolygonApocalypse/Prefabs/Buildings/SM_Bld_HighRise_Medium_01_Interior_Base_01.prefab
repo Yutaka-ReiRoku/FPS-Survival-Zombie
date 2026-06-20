@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33209099441803764}
   - component: {fileID: 23592160581607584}
   - component: {fileID: 306176526970689083}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_HighRise_Medium_01_Interior_Overgrowth_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33783411740962050}
   - component: {fileID: 23744459635493708}
   - component: {fileID: 4200685206389590595}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_HighRise_Medium_01_Interior_Base_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -240,7 +240,7 @@ GameObject:
   - component: {fileID: 33601925971135628}
   - component: {fileID: 23090892249278274}
   - component: {fileID: 6403615104007894367}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_HighRise_Medium_01_Interior_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

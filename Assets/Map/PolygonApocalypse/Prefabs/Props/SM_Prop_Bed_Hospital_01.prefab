@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33049122648223696}
   - component: {fileID: 23848319796668738}
   - component: {fileID: 8077350218398176722}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bed_Hospital_Wheels_f
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33540584159181550}
   - component: {fileID: 23776083508022906}
   - component: {fileID: 6402161942450137351}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bed_Hospital_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -240,7 +240,7 @@ GameObject:
   - component: {fileID: 33555043084955586}
   - component: {fileID: 23358251760999614}
   - component: {fileID: 5667570856740885160}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Bed_Hospital_Wheels_r
   m_TagString: Untagged
   m_Icon: {fileID: 0}

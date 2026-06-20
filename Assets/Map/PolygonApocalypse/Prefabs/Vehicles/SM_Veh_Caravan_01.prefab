@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33080898511911162}
   - component: {fileID: 23717182943819460}
   - component: {fileID: 4783682108043821345}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Caravan_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33114361819442126}
   - component: {fileID: 23535481833798334}
   - component: {fileID: 2731074167816070732}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Caravan_Wheel_l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33167755161930292}
   - component: {fileID: 23581318198268786}
   - component: {fileID: 9051008714619223512}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Caravan_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -357,7 +357,7 @@ GameObject:
   - component: {fileID: 33142519603490678}
   - component: {fileID: 23520824790866238}
   - component: {fileID: 2385425629186877427}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Caravan_Interior_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -470,7 +470,7 @@ GameObject:
   - component: {fileID: 33194179806983738}
   - component: {fileID: 23248922028594868}
   - component: {fileID: 8899637260179296127}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Caravan_Wheel_r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -583,7 +583,7 @@ GameObject:
   - component: {fileID: 33083908705701074}
   - component: {fileID: 23224520714148282}
   - component: {fileID: 6138032880432385477}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Caravan_Stand_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -696,7 +696,7 @@ GameObject:
   - component: {fileID: 33079750705294082}
   - component: {fileID: 23254219414051684}
   - component: {fileID: 7912084034459262411}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Caravan_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -809,7 +809,7 @@ GameObject:
   - component: {fileID: 33970355647774630}
   - component: {fileID: 23943544409786972}
   - component: {fileID: 5180967949712750164}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Caravan_Interior_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

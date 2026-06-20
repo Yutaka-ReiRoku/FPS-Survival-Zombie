@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33646492893078966}
   - component: {fileID: 23115557861023428}
   - component: {fileID: 956561304736617851}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_House_Burnt_01_Overgrowth_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33591639829641088}
   - component: {fileID: 23970654101815414}
   - component: {fileID: 249581334488514364}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_House_Burnt_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -241,7 +241,7 @@ GameObject:
   - component: {fileID: 33431923499624022}
   - component: {fileID: 23614118325418036}
   - component: {fileID: 8947600144203842918}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_House_Burnt_01_Barricades_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33122723174834720}
   - component: {fileID: 23912906270088896}
   - component: {fileID: 4021961797296000662}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Construction_Blocks_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

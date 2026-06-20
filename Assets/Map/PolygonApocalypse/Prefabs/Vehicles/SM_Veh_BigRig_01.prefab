@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33729177813430456}
   - component: {fileID: 23283908803545890}
   - component: {fileID: 1980705644253227562}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Armour_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33697021442448800}
   - component: {fileID: 23778164127408492}
   - component: {fileID: 2861759665993923680}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Wheel_fr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33915740903102302}
   - component: {fileID: 23681022404421046}
   - component: {fileID: 2328773092553639057}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Wheel_rr_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 33358862450565986}
   - component: {fileID: 23196809892744080}
   - component: {fileID: 7148807042486152395}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -464,7 +464,7 @@ GameObject:
   - component: {fileID: 33021805952508222}
   - component: {fileID: 23467037437214396}
   - component: {fileID: 2694271620378362290}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Wheel_fl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -577,7 +577,7 @@ GameObject:
   - component: {fileID: 33325682844223104}
   - component: {fileID: 23699882770404316}
   - component: {fileID: 7288141258674145773}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_BigBlock_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -690,7 +690,7 @@ GameObject:
   - component: {fileID: 33854635508535304}
   - component: {fileID: 23710495890347254}
   - component: {fileID: 4427865053360303331}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_SteeringW
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -803,7 +803,7 @@ GameObject:
   - component: {fileID: 33002027128245430}
   - component: {fileID: 23984748144963752}
   - component: {fileID: 571128818843332996}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -929,7 +929,7 @@ GameObject:
   - component: {fileID: 33914787974240014}
   - component: {fileID: 23907374334787490}
   - component: {fileID: 3090664091599070353}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Wheel_rr_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1042,7 +1042,7 @@ GameObject:
   - component: {fileID: 33121323816017804}
   - component: {fileID: 23719368311486744}
   - component: {fileID: 5289170895913947522}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Glass_Armour_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1155,7 +1155,7 @@ GameObject:
   - component: {fileID: 33115544873736348}
   - component: {fileID: 23563876326796274}
   - component: {fileID: 3471931795375634887}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_BullBars_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1268,7 +1268,7 @@ GameObject:
   - component: {fileID: 33432684925930556}
   - component: {fileID: 23556696793087008}
   - component: {fileID: 2315794740378999763}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Wheel_rl_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1381,7 +1381,7 @@ GameObject:
   - component: {fileID: 33674793223010748}
   - component: {fileID: 23155619955662490}
   - component: {fileID: 6477255882625085163}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Ram_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1494,7 +1494,7 @@ GameObject:
   - component: {fileID: 33983967175962448}
   - component: {fileID: 23062096577016496}
   - component: {fileID: 4471213244997036707}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_BigRig_Wheel_rl_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

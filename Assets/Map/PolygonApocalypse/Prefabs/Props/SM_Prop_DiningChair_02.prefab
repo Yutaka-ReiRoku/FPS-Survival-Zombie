@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33780880248292992}
   - component: {fileID: 23037829075821026}
   - component: {fileID: 2124507787531487390}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_DiningChair_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

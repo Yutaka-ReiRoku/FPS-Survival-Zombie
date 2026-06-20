@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33331941617859930}
   - component: {fileID: 23246924429530696}
   - component: {fileID: 4957926766192055973}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Roof_SkyLight_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

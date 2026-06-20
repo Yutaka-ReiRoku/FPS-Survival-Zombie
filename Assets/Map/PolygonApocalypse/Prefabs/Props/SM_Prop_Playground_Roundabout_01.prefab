@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33967906419798460}
   - component: {fileID: 23838471070920298}
   - component: {fileID: 7176547451326584667}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Playground_Roundabout_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

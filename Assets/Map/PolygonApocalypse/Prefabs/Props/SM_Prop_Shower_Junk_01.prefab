@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33875584629840854}
   - component: {fileID: 23240746232994246}
   - component: {fileID: 7657603835154357605}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Shower_Junk_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

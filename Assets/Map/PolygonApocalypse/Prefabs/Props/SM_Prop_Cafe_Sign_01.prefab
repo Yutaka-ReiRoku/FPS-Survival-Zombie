@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33087928329600762}
   - component: {fileID: 23659683215367926}
   - component: {fileID: 2308332996558887044}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Cafe_Sign_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33916120532352180}
   - component: {fileID: 23579634772909862}
   - component: {fileID: 2595011647778829947}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Cafe_Sign_Stand_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

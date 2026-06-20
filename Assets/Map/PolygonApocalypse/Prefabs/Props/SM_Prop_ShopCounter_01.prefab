@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33307108449444910}
   - component: {fileID: 23460445660125130}
   - component: {fileID: 1210031397080399161}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShopCounter_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

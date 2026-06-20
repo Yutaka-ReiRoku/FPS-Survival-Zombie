@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33025051819416570}
   - component: {fileID: 23929741611009450}
   - component: {fileID: 2387047363752273833}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_HighRise_Large_01_Interior_Roof_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33585252885836098}
   - component: {fileID: 23174190712474902}
   - component: {fileID: 6525432904430323845}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_HighRise_Large_01_Interior_Roof_Overgrowth_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33812572425709410}
   - component: {fileID: 23599330786776988}
   - component: {fileID: 3750993443588178066}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_StormCanal_Corner_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

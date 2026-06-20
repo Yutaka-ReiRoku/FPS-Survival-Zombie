@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33455525410199272}
   - component: {fileID: 23017385913964396}
   - component: {fileID: 6677117509586434541}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Driveway_Wide_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33111324038898828}
   - component: {fileID: 23186423013500590}
   - component: {fileID: 2052334573205770814}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wall_Quarantine_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33317233927321496}
   - component: {fileID: 23174791425283164}
   - component: {fileID: 6429260267253988748}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wall_Quarantine_Door_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

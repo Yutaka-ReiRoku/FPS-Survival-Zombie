@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33831390585803270}
   - component: {fileID: 23716868481364566}
   - component: {fileID: 7370587180257193083}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Playground_Swing_Rope_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33974889321506346}
   - component: {fileID: 23065333399341906}
   - component: {fileID: 920734749697165156}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Playground_Swing_Rope_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33237448250816480}
   - component: {fileID: 23280070867569008}
   - component: {fileID: 7313114130347936987}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Playground_Swing_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

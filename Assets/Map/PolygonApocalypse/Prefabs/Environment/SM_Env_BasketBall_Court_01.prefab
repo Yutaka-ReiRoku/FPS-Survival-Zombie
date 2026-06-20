@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33299120511881162}
   - component: {fileID: 23478777826920780}
   - component: {fileID: 1035119237174331630}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_BasketBall_Court_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

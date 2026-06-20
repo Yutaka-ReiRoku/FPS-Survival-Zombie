@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33287932807828580}
   - component: {fileID: 23950991984154110}
   - component: {fileID: 1230947749725213215}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Diner_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,7 +127,7 @@ GameObject:
   - component: {fileID: 33420783522316768}
   - component: {fileID: 23578050527981152}
   - component: {fileID: 7427009896910756913}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Diner_Interior_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -240,7 +240,7 @@ GameObject:
   - component: {fileID: 33736078968203302}
   - component: {fileID: 23873073925459452}
   - component: {fileID: 8750856405312611109}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Diner_Glass_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

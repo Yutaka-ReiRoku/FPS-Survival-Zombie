@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33884630506170260}
   - component: {fileID: 23077544424191496}
   - component: {fileID: 7095413922719157071}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Road_Barrier_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33373098387113322}
   - component: {fileID: 23769478158385338}
   - component: {fileID: 8328843772194331239}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Road_Barrier_Arm_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

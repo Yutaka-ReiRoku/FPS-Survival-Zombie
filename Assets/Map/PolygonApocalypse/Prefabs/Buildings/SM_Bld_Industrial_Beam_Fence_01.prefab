@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33562269268981314}
   - component: {fileID: 23419635465151348}
   - component: {fileID: 8045438096279422509}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Industrial_Beam_Fence_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

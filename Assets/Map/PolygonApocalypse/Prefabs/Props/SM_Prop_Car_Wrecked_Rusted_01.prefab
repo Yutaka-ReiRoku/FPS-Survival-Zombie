@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33498923016380488}
   - component: {fileID: 23301162639600394}
   - component: {fileID: 836486669470340477}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Car_Wrecked_Rusted_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33347520561304262}
   - component: {fileID: 23800302696407468}
   - component: {fileID: 3005877694358110365}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Car_Wrecked_Rusted_Overgrowth_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

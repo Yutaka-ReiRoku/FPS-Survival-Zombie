@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33579609816195506}
   - component: {fileID: 23987638062234710}
   - component: {fileID: 7814598996524299556}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_StormCanal_Divider_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

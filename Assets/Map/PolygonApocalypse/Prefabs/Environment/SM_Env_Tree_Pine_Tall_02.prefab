@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33308759525151002}
   - component: {fileID: 23281227900082898}
   - component: {fileID: 1784270122051926243}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Tree_Pine_Tall_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

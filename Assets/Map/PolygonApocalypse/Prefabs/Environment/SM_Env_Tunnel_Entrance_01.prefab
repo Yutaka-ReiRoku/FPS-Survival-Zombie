@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33504248084202258}
   - component: {fileID: 23927653211981748}
   - component: {fileID: 7465678192127799393}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Tunnel_Entrance_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -217,7 +217,7 @@ GameObject:
   - component: {fileID: 33847766111302902}
   - component: {fileID: 23748984108078372}
   - component: {fileID: 5778607578641920754}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Tunnel_Entrance_Middle_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

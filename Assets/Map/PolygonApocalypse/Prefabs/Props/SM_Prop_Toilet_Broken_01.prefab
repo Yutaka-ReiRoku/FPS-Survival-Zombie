@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33605670176868290}
   - component: {fileID: 23018997836021784}
   - component: {fileID: 5967043025064775826}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Toilet_Broken_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

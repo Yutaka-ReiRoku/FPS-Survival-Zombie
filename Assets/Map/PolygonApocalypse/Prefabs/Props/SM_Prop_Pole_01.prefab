@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33555714268940164}
   - component: {fileID: 23527010879234464}
   - component: {fileID: 874925202451006303}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Pole_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

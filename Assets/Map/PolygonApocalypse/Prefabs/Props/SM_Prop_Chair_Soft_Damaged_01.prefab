@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33541150934556560}
   - component: {fileID: 23130616694124142}
   - component: {fileID: 4445697170534693848}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Chair_Soft_Damaged_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33605450994484930}
   - component: {fileID: 23660441955102122}
   - component: {fileID: 8537326193287721364}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Motorway_Bridge_Edge_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

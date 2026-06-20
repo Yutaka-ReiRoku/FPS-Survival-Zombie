@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33017189580151580}
   - component: {fileID: 23386360852600430}
   - component: {fileID: 951932688600647529}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Toy_Bear_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

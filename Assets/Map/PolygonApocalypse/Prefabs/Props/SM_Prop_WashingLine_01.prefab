@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33951563600529984}
   - component: {fileID: 23598447171549334}
   - component: {fileID: 2180811487764341343}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_WashingLine_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33243000419136416}
   - component: {fileID: 23003662358657624}
   - component: {fileID: 2769451909872482987}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sign_Emergency_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

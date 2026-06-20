@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33513556065367498}
   - component: {fileID: 23597171066770682}
   - component: {fileID: 2777101826790427330}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Log_Big_Shards_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

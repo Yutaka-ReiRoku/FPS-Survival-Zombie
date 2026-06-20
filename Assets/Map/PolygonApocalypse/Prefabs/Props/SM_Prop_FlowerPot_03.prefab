@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33593439034654606}
   - component: {fileID: 23338027767330072}
   - component: {fileID: 5761237236997171883}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_FlowerPot_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

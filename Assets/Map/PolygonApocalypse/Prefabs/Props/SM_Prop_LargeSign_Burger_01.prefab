@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33005319604301004}
   - component: {fileID: 23716545533390990}
   - component: {fileID: 4430828701759842277}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_LargeSign_Burger_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

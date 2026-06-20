@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33958698431650226}
   - component: {fileID: 23226650228332158}
   - component: {fileID: 9001957426164751443}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Tire_Pile_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}

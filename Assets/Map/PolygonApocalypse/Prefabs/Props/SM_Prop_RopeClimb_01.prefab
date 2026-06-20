@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33612868346642554}
   - component: {fileID: 23625193516861286}
   - component: {fileID: 4364307323871119704}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_RopeClimb_Rope_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33305335615096782}
   - component: {fileID: 23756805053762078}
   - component: {fileID: 4449393463580087034}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_RopeClimb_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

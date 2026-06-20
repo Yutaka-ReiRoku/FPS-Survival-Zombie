@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33618413443779036}
   - component: {fileID: 23112836986232148}
   - component: {fileID: 500540974704458717}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Road_BridgeRamp_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

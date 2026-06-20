@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 23905736651006910}
   - component: {fileID: 95316178683085924}
   - component: {fileID: 8685975713793760151}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Floodlights_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -150,7 +150,7 @@ GameObject:
   - component: {fileID: 33625626801447710}
   - component: {fileID: 23259576578863858}
   - component: {fileID: 3294411800290582616}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Floodlights_LightL_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -263,7 +263,7 @@ GameObject:
   - component: {fileID: 33634228564211356}
   - component: {fileID: 23164149838726844}
   - component: {fileID: 4778276124779689836}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Floodlights_LightR_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

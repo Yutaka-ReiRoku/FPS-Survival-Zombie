@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33517648072582276}
   - component: {fileID: 23541630920138038}
   - component: {fileID: 6572335526859445821}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Wood_Pole_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

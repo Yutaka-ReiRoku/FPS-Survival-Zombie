@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33989264089774676}
   - component: {fileID: 23901709514443718}
   - component: {fileID: 307299359404573003}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_Lights_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33994328132219394}
   - component: {fileID: 23861958190867738}
   - component: {fileID: 2100000264676762396}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -251,7 +251,7 @@ GameObject:
   - component: {fileID: 33518481388944342}
   - component: {fileID: 23195502293422272}
   - component: {fileID: 5970883495402143961}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_Wheel_fr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -364,7 +364,7 @@ GameObject:
   - component: {fileID: 33054592949767186}
   - component: {fileID: 23675011408207166}
   - component: {fileID: 2175479041698896435}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_SteeringW_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -477,7 +477,7 @@ GameObject:
   - component: {fileID: 33475190238967744}
   - component: {fileID: 23914177366250778}
   - component: {fileID: 8596446212474408556}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_WireMesh_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -590,7 +590,7 @@ GameObject:
   - component: {fileID: 33566879647669926}
   - component: {fileID: 23543564598927894}
   - component: {fileID: 2263723058023096557}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_TowHook_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -703,7 +703,7 @@ GameObject:
   - component: {fileID: 33758991529116506}
   - component: {fileID: 23130010962409720}
   - component: {fileID: 955694837769817630}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_Roof_Props_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -816,7 +816,7 @@ GameObject:
   - component: {fileID: 33975252975310128}
   - component: {fileID: 23408549208140344}
   - component: {fileID: 6545294430638304208}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_Wheel_rr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -929,7 +929,7 @@ GameObject:
   - component: {fileID: 33996339303174702}
   - component: {fileID: 23313256841764886}
   - component: {fileID: 2824296904221806700}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_Rear_Flap_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1042,7 +1042,7 @@ GameObject:
   - component: {fileID: 33814173824362842}
   - component: {fileID: 23802376286368610}
   - component: {fileID: 3237154702022001830}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_01_Glass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1155,7 +1155,7 @@ GameObject:
   - component: {fileID: 33084424755161650}
   - component: {fileID: 23140990896951040}
   - component: {fileID: 1946459350642521413}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_Glass_Armour_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1268,7 +1268,7 @@ GameObject:
   - component: {fileID: 33177135210171300}
   - component: {fileID: 23052676668203916}
   - component: {fileID: 4588749364580188792}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_Wheel_fl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1381,7 +1381,7 @@ GameObject:
   - component: {fileID: 33791895774258018}
   - component: {fileID: 23725542063836814}
   - component: {fileID: 6450632138682169327}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_Armour_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1494,7 +1494,7 @@ GameObject:
   - component: {fileID: 33964766443407166}
   - component: {fileID: 23126999937359592}
   - component: {fileID: 2435560987723171411}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Ute_Wheel_rl
   m_TagString: Untagged
   m_Icon: {fileID: 0}

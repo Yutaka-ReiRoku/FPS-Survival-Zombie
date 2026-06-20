@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33808445065195616}
   - component: {fileID: 23053539224817064}
   - component: {fileID: 8495651448535726110}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Roof_Satellite_Dish_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33072143099545368}
   - component: {fileID: 23684556058710404}
   - component: {fileID: 1766733661154089349}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_GasCan_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

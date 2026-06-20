@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33674911276560570}
   - component: {fileID: 23279187254398522}
   - component: {fileID: 878810436191741791}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Sidewalk_Corner_05
   m_TagString: Untagged
   m_Icon: {fileID: 0}

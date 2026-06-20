@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33150912066574716}
   - component: {fileID: 23951386074694430}
   - component: {fileID: 3379699374201951772}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Tarp_Generic_05
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33029660886070550}
   - component: {fileID: 23061460526797964}
   - component: {fileID: 7754007590010343502}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_BloodPool_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

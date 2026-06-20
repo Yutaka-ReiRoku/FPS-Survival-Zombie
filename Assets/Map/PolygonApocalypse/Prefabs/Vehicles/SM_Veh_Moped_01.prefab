@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33075472793901438}
   - component: {fileID: 23401875402502690}
   - component: {fileID: 6486696958508932336}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Moped_Wheel_Armour_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33647780642390438}
   - component: {fileID: 23180733252244094}
   - component: {fileID: 5423143170546002105}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Moped_Handles_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33373950489284682}
   - component: {fileID: 23805074627806964}
   - component: {fileID: 1607194835695352966}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Moped_Armour_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -351,7 +351,7 @@ GameObject:
   - component: {fileID: 33494162754899614}
   - component: {fileID: 23566425770547796}
   - component: {fileID: 4062047786238628849}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Moped_FrontWheel_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -464,7 +464,7 @@ GameObject:
   - component: {fileID: 33531386827670270}
   - component: {fileID: 23699274554319094}
   - component: {fileID: 517922158187646213}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Moped_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -581,7 +581,7 @@ GameObject:
   - component: {fileID: 33131384486746458}
   - component: {fileID: 23801696730907468}
   - component: {fileID: 1547578089818702237}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Moped_FrontWheel_Cover_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -696,7 +696,7 @@ GameObject:
   - component: {fileID: 33301274500809404}
   - component: {fileID: 23930203863274444}
   - component: {fileID: 8577855023292896319}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Veh_Moped_RearWheel_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33687309681083448}
   - component: {fileID: 23980320989280774}
   - component: {fileID: 4500204069510571107}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sign_Arcade_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33735253889556964}
   - component: {fileID: 23540504641452000}
   - component: {fileID: 6157903583775683667}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Outdoor_Table_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

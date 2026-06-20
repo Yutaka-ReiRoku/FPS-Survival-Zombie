@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33822781446652522}
   - component: {fileID: 23735543063951780}
   - component: {fileID: 3724569495453777681}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_RubbishBin_02_Lid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33918556415389918}
   - component: {fileID: 23544133865645942}
   - component: {fileID: 7723132540558445742}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_RubbishBin_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

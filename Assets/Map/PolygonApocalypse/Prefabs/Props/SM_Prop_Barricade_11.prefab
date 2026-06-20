@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33194378793441476}
   - component: {fileID: 23285932880896556}
   - component: {fileID: 3447133190577562419}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Barricade_11
   m_TagString: Untagged
   m_Icon: {fileID: 0}

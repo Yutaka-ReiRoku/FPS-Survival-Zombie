@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33103378289175624}
   - component: {fileID: 23825799025632000}
   - component: {fileID: 5154410218516230492}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Generic_Ground_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33651221696482050}
   - component: {fileID: 23328056111933498}
   - component: {fileID: 1118297371539880387}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Manhole_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

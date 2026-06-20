@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33649163093512370}
   - component: {fileID: 23080338384616186}
   - component: {fileID: 6275199942882452603}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Door_Barricaded_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

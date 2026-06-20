@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33015536216426100}
   - component: {fileID: 23172201053951000}
   - component: {fileID: 273289096912908190}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Motorway_Edge_Destroyed_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

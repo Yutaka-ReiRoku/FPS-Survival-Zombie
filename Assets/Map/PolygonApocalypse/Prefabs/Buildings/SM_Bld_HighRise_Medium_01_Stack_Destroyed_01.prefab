@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33697812723728362}
   - component: {fileID: 23363675932018156}
   - component: {fileID: 7300193315530241308}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_HighRise_Medium_01_Stack_Destroyed_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33139178748591560}
   - component: {fileID: 23375609821790064}
   - component: {fileID: 2536482970244447337}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Crucifix_Burnt_Pile_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33250650225753472}
   - component: {fileID: 23537122561987146}
   - component: {fileID: 7158837273694008411}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Crucifix_BurntBody_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33472264227424460}
   - component: {fileID: 23757724138252268}
   - component: {fileID: 707007756926200520}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Crucifix_Burnt_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

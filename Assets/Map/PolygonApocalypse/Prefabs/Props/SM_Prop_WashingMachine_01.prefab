@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33097351758667904}
   - component: {fileID: 23325013029981696}
   - component: {fileID: 7611908724931305747}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_WashingMachine_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33667993506679324}
   - component: {fileID: 23882403169336042}
   - component: {fileID: 1922804071737350088}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_WashingMachine_01_Glass
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33232957716076634}
   - component: {fileID: 23777643517937742}
   - component: {fileID: 7786342631554925125}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Keg_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

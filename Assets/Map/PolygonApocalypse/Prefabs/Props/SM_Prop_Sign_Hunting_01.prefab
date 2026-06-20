@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33923329076902948}
   - component: {fileID: 23260530964690428}
   - component: {fileID: 9221603640315749155}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sign_Hunting_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33452210238357180}
   - component: {fileID: 23658454189201946}
   - component: {fileID: 1922185132470765600}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Luggage_Open_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

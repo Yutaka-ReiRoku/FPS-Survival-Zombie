@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33730719131066942}
   - component: {fileID: 23771778458810942}
   - component: {fileID: 1183875707312569627}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_SpikeWall_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

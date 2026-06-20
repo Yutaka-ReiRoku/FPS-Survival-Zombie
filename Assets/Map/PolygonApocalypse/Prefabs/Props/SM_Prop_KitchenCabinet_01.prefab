@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33390546052407538}
   - component: {fileID: 23288804734374904}
   - component: {fileID: 4880568430802948046}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_KitchenCabinet_01_Door_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33999138137160080}
   - component: {fileID: 23808801466580704}
   - component: {fileID: 2179062737566395133}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_KitchenCabinet_01_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 33309203592406312}
   - component: {fileID: 23566337431920580}
   - component: {fileID: 3556064934773684649}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_KitchenCabinet_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33585401244420244}
   - component: {fileID: 23348106410861222}
   - component: {fileID: 8202552907834379678}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Shop_Small_03_Overgrowth_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33093290785339434}
   - component: {fileID: 23753512394304246}
   - component: {fileID: 5412189707337718281}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Shop_Small_03_Ladder_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -239,7 +239,7 @@ GameObject:
   - component: {fileID: 33347049826981192}
   - component: {fileID: 23197097642812156}
   - component: {fileID: 3310076824237279130}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Shop_Small_03_Door_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -352,7 +352,7 @@ GameObject:
   - component: {fileID: 33473737938762552}
   - component: {fileID: 23089906275641076}
   - component: {fileID: 6882195006613468928}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Shop_Small_03_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -466,7 +466,7 @@ GameObject:
   - component: {fileID: 33132885206456522}
   - component: {fileID: 23919883537021076}
   - component: {fileID: 7497553931049663390}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Shop_Small_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -584,7 +584,7 @@ GameObject:
   - component: {fileID: 33738288144971394}
   - component: {fileID: 23407646285130074}
   - component: {fileID: 855778406976916494}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Shop_Small_03_Barricades_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

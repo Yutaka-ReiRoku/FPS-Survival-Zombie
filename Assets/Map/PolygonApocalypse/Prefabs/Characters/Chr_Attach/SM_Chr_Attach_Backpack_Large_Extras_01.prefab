@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33330938650066212}
   - component: {fileID: 23546940227785952}
   - component: {fileID: 3922135522683720741}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Chr_Attach_Backpack_Large_Extras_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

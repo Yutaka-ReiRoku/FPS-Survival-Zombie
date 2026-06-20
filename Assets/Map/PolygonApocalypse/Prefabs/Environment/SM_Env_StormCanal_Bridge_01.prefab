@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33643611466277106}
   - component: {fileID: 23201161764352012}
   - component: {fileID: 8399069531366315455}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_StormCanal_Bridge_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

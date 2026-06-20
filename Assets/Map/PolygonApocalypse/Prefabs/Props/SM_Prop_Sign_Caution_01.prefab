@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33484622475392118}
   - component: {fileID: 23774529886398422}
   - component: {fileID: 1918590447129295272}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sign_Caution_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

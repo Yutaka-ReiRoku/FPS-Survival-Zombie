@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33784683076356082}
   - component: {fileID: 23770322645603288}
   - component: {fileID: 4925028800181047356}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Gaspump_Cover_Burnt_Rubble_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33285750683720802}
   - component: {fileID: 23613734980043834}
   - component: {fileID: 4234292615221985145}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Gaspump_Cover_Burnt_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

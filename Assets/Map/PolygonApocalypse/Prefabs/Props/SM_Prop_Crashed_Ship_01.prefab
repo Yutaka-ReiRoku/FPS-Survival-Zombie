@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33591895891311898}
   - component: {fileID: 23465478662949912}
   - component: {fileID: 9154591898041354742}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Crashed_Ship_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

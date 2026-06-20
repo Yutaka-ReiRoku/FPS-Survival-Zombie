@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33234306662766814}
   - component: {fileID: 23541334280381088}
   - component: {fileID: 8935387294638074008}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Laundry_WasherTop_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

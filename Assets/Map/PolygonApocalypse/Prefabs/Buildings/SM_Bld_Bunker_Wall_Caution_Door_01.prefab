@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33292485093895102}
   - component: {fileID: 23986779903556158}
   - component: {fileID: 3041869226717991544}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Bunker_Wall_Caution_Door_Opening_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 33428171189451706}
   - component: {fileID: 23386998164799684}
   - component: {fileID: 146777890636382833}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Bld_Bunker_Wall_Caution_Door_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

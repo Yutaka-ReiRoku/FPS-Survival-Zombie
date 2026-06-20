@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33880903378344960}
   - component: {fileID: 23978978096481832}
   - component: {fileID: 490444764939460280}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShoppingCart_Wheel_Guard_fr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33373569455149244}
   - component: {fileID: 23167985938728366}
   - component: {fileID: 968574009372403963}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShoppingCart_Wheel_fl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -239,7 +239,7 @@ GameObject:
   - component: {fileID: 33001368069739214}
   - component: {fileID: 23296518068786774}
   - component: {fileID: 5285257507177217747}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShoppingCart_Wheel_fr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -352,7 +352,7 @@ GameObject:
   - component: {fileID: 33294689093195746}
   - component: {fileID: 23076526554004022}
   - component: {fileID: 3014317319325553640}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShoppingCart_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -470,7 +470,7 @@ GameObject:
   - component: {fileID: 33037981905107740}
   - component: {fileID: 23087573877000962}
   - component: {fileID: 7795087075168534739}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShoppingCart_Wheel_Guard_fl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -584,7 +584,7 @@ GameObject:
   - component: {fileID: 33726877774536712}
   - component: {fileID: 23563722526606004}
   - component: {fileID: 3003136161423056557}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShoppingCart_Wheel_rr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -697,7 +697,7 @@ GameObject:
   - component: {fileID: 33814245552902658}
   - component: {fileID: 23384057745532856}
   - component: {fileID: 3476505929191030872}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_ShoppingCart_Wheel_rl
   m_TagString: Untagged
   m_Icon: {fileID: 0}

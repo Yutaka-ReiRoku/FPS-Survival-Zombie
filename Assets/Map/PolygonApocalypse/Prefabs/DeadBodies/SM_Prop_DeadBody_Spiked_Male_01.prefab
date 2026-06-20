@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33385426694690354}
   - component: {fileID: 23109301707549490}
   - component: {fileID: 2526078777580901255}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_DeadBody_Spiked_Male_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

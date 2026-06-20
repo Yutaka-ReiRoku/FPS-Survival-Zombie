@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33730633442139624}
   - component: {fileID: 23960245027098016}
   - component: {fileID: 5627597883063160035}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Wep_Cross_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

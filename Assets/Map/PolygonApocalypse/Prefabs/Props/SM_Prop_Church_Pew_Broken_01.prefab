@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33221745091660934}
   - component: {fileID: 23909561511305990}
   - component: {fileID: 1011139740443096660}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Church_Pew_Broken_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33121750990884692}
   - component: {fileID: 23496648515743656}
   - component: {fileID: 8058953676569954130}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Env_Sidewalk_Straight_09
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33776946577000308}
   - component: {fileID: 23068638164535304}
   - component: {fileID: 7260433641649091118}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_GraveStick_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 33198889901211892}
   - component: {fileID: 23165902581554782}
   - component: {fileID: 9191684177503218486}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_GraveStick_Pile_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

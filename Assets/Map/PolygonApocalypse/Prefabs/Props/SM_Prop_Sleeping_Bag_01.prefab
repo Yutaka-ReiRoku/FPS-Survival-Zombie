@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33158478834724616}
   - component: {fileID: 23306855880937336}
   - component: {fileID: 4000104687915264620}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SM_Prop_Sleeping_Bag_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
