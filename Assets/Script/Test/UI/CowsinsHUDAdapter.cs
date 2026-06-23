@@ -64,11 +64,21 @@ public class CowsinsHUDAdapter : MonoBehaviour
     public event Action<int> OnCoinsChanged;
     /// <summary>(displayLevel, xpFill01)</summary>
     public event Action<int, float> OnXpChanged;
+
+    // ---- Dash ----
+    public int CurrentDashes { get; private set; }
+    public int MaxDashes { get; private set; }
+    public bool InfiniteDashes { get; private set; }
+    /// <summary>(currentDashes, maxDashes)</summary>
+    public event Action<int, int> OnDashChanged;
+
     private bool _staticBound;
 
     private PlayerStats _stats;
     private PlayerStatsEvents _statsEvents;
     private WeaponController _weapon;
+    private PlayerDependencies _deps;
+    private PlayerMovementEvents _moveEvents;
     private float _lastHealth = -1f;
     private bool _bound;
 
@@ -104,6 +114,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
         {
             if (_stats == null) _stats = FindObjectOfType<PlayerStats>();
             if (_weapon == null) _weapon = FindObjectOfType<WeaponController>();
+            if (_deps == null) _deps = FindObjectOfType<PlayerDependencies>();
             if (_stats != null && _weapon != null) break;
             timeout -= Time.unscaledDeltaTime;
             yield return null;
@@ -127,6 +138,25 @@ public class CowsinsHUDAdapter : MonoBehaviour
         PullXp();
 
         StartCoroutine(PollHeat());
+        StartCoroutine(BindDashWhenReady());
+    }
+
+    // Provider events (PlayerDependencies.PlayerMovementEvents) are populated in the
+    // player's Awake, which may run after our Bind(); wait for them, then subscribe dash.
+    private IEnumerator BindDashWhenReady()
+    {
+        float timeout = 12f;
+        while (timeout > 0f && (_deps == null || _deps.PlayerMovementEvents == null || _deps.PlayerMovementEvents.Events == null))
+        {
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+        if (_deps == null || _deps.PlayerMovementEvents == null) yield break;
+        _moveEvents = _deps.PlayerMovementEvents.Events;
+        if (_moveEvents == null) yield break;
+        _moveEvents.OnInitializeDash.AddListener(HandleInitDash);
+        _moveEvents.OnDashUsed.AddListener(HandleDashUsed);
+        _moveEvents.OnDashGained.AddListener(HandleDashGained);
     }
 
     private void Bind()
@@ -175,6 +205,13 @@ public class CowsinsHUDAdapter : MonoBehaviour
             e.OnSelectWeapon.RemoveListener(HandleWeaponChanged);
             e.OnUnholster.RemoveListener(HandleUnholster);
             e.OnShoot.RemoveListener(HandleShoot);
+        }
+
+        if (_moveEvents != null)
+        {
+            _moveEvents.OnInitializeDash.RemoveListener(HandleInitDash);
+            _moveEvents.OnDashUsed.RemoveListener(HandleDashUsed);
+            _moveEvents.OnDashGained.RemoveListener(HandleDashGained);
         }
 
         _bound = false;
@@ -275,6 +312,11 @@ public class CowsinsHUDAdapter : MonoBehaviour
 
     // ---- Shoot (for fire-punch animation; ammo number handled by OnAmmoChanged) ----
     private void HandleShoot() => OnFired?.Invoke();
+
+    // ---- Dash ----
+    private void HandleInitDash(int max) { MaxDashes = max; CurrentDashes = max; InfiniteDashes = false; OnDashChanged?.Invoke(CurrentDashes, MaxDashes); }
+    private void HandleDashUsed(int cur) { CurrentDashes = cur; if (cur > MaxDashes) MaxDashes = cur; OnDashChanged?.Invoke(CurrentDashes, MaxDashes); }
+    private void HandleDashGained(int cur) { CurrentDashes = cur; if (cur > MaxDashes) MaxDashes = cur; OnDashChanged?.Invoke(CurrentDashes, MaxDashes); }
 
     // ---- Progression: Coins / XP (Cowsins static UIEvents) ----
     private void SubscribeStatic()
