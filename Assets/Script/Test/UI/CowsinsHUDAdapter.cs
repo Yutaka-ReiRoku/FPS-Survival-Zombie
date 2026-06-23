@@ -80,6 +80,14 @@ public class CowsinsHUDAdapter : MonoBehaviour
     /// <summary>interaction hold progress 0..1</summary>
     public event Action<float> OnInteractProgress;
 
+    // ---- Weapon inventory ----
+    public struct SlotInfo { public bool occupied; public string name; public Sprite icon; }
+    public int InventorySize { get; private set; }
+    public int SelectedWeaponIndex { get; private set; }
+    public SlotInfo[] WeaponSlots { get; private set; } = new SlotInfo[0];
+    public event Action OnInventoryStructureChanged;
+    public event Action<int> OnWeaponSelected;
+
     private bool _staticBound;
 
     private PlayerStats _stats;
@@ -141,6 +149,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
         PullHealth(false);
         PullWeapon();
         PullAmmo();
+        BuildInventorySnapshot();
 
         SubscribeStatic();
         PullCoins();
@@ -213,6 +222,8 @@ public class CowsinsHUDAdapter : MonoBehaviour
             e.OnSelectWeapon.AddListener(HandleWeaponChanged);
             e.OnUnholster.AddListener(HandleUnholster);
             e.OnShoot.AddListener(HandleShoot);
+            e.OnInitializeWeaponSystem.AddListener(HandleInitInventory);
+            e.OnWeaponInventoryChanged.AddListener(HandleSlotChanged);
         }
 
         _bound = true;
@@ -238,6 +249,8 @@ public class CowsinsHUDAdapter : MonoBehaviour
             e.OnSelectWeapon.RemoveListener(HandleWeaponChanged);
             e.OnUnholster.RemoveListener(HandleUnholster);
             e.OnShoot.RemoveListener(HandleShoot);
+            e.OnInitializeWeaponSystem.RemoveListener(HandleInitInventory);
+            e.OnWeaponInventoryChanged.RemoveListener(HandleSlotChanged);
         }
 
         if (_moveEvents != null)
@@ -323,7 +336,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
     }
 
     // ---- Weapon ----
-    private void HandleWeaponChanged() => PullWeapon();
+    private void HandleWeaponChanged() { PullWeapon(); var wref = _weapon as IWeaponReferenceProvider; if (wref != null) { SelectedWeaponIndex = wref.CurrentWeaponIndex; OnWeaponSelected?.Invoke(SelectedWeaponIndex); } }
     private void HandleUnholster(bool a, bool b) => PullWeapon();
 
     private void PullWeapon()
@@ -354,6 +367,42 @@ public class CowsinsHUDAdapter : MonoBehaviour
 
     // ---- Shoot (for fire-punch animation; ammo number handled by OnAmmoChanged) ----
     private void HandleShoot() => OnFired?.Invoke();
+
+    // ---- Weapon inventory ----
+    private void EnsureSlots(int size)
+    {
+        if (size < 0) size = 0;
+        if (WeaponSlots.Length != size)
+        {
+            var n = new SlotInfo[size];
+            for (int i = 0; i < Mathf.Min(size, WeaponSlots.Length); i++) n[i] = WeaponSlots[i];
+            WeaponSlots = n;
+        }
+        InventorySize = size;
+    }
+    private void HandleInitInventory(int size) { EnsureSlots(size); OnInventoryStructureChanged?.Invoke(); }
+    private void HandleSlotChanged(int index, Weapon_SO w)
+    {
+        if (index < 0) return;
+        if (index >= WeaponSlots.Length) EnsureSlots(index + 1);
+        WeaponSlots[index] = new SlotInfo { occupied = w != null, name = w != null ? w._name : string.Empty, icon = w != null ? w.icon : null };
+        OnInventoryStructureChanged?.Invoke();
+    }
+    private void BuildInventorySnapshot()
+    {
+        var wref = _weapon as IWeaponReferenceProvider;
+        if (wref == null || wref.Inventory == null) return;
+        EnsureSlots(wref.Inventory.Length);
+        for (int i = 0; i < wref.Inventory.Length; i++)
+        {
+            var id = wref.Inventory[i];
+            var w = id != null ? id.weapon : null;
+            WeaponSlots[i] = new SlotInfo { occupied = w != null, name = w != null ? w._name : string.Empty, icon = w != null ? w.icon : null };
+        }
+        SelectedWeaponIndex = wref.CurrentWeaponIndex;
+        OnInventoryStructureChanged?.Invoke();
+        OnWeaponSelected?.Invoke(SelectedWeaponIndex);
+    }
 
     // ---- Dash ----
     private void HandleInitDash(int max) { MaxDashes = max; CurrentDashes = max; InfiniteDashes = false; OnDashChanged?.Invoke(CurrentDashes, MaxDashes); }
