@@ -21,7 +21,10 @@ public class CollectibleManager : MonoBehaviour
 
         collected.Add(journal);
 
-        JournalUI.Instance.Show(journal);
+        if (JournalUI.Instance != null)
+            JournalUI.Instance.Show(journal);
+        else
+            Debug.LogWarning("[CollectibleManager] No JournalUI in scene; collected without display.");
 
         Debug.Log($"Collected {Count}/6");
     }
