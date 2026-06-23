@@ -11,6 +11,34 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
         return maxHealth;
     }
 
+    // ---- Health observation (read-only; for UI such as EnemyHealthBar) ----
+    // Combat logic is unchanged; these only expose state already tracked internally.
+
+    /// <summary>Current hit points (never negative for display).</summary>
+    public int CurrentHealth
+    {
+        get { return Mathf.Max(0, currentHealth); }
+    }
+
+    /// <summary>Normalized health in [0,1]. 1 = full, 0 = dead/empty.</summary>
+    public float HealthFraction
+    {
+        get { return maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f; }
+    }
+
+    /// <summary>True once this zombie has died (before it is pooled back to inactive).</summary>
+    public bool IsDead
+    {
+        get { return isDead; }
+    }
+
+    /// <summary>
+    /// Raised whenever health changes (damage or death). Argument is the new
+    /// <see cref="HealthFraction"/> in [0,1]. Subscribers must null-check the
+    /// zombie's <see cref="IsDead"/> state to decide show/hide.
+    /// </summary>
+    public event System.Action<float> OnHealthChanged;
+
     [Header("Target")]
     public Transform target;
 
@@ -301,6 +329,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
         {
             Die();
         }
+
+        // Notify observers (e.g. EnemyHealthBar). Die() above runs synchronously
+        // and sets isDead, so a killing blow reports IsDead=true here.
+        if (OnHealthChanged != null)
+            OnHealthChanged(HealthFraction);
     }
 
     public void Damage(float damage,
