@@ -1659,6 +1659,7 @@ GameObject:
   - component: {fileID: 749007296799832708}
   - component: {fileID: 3342828192778812082}
   - component: {fileID: 925581121862933867}
+  - component: {fileID: 8422845806260261558}
   m_Layer: 7
   m_Name: Zombie_Coat_Female_01
   m_TagString: Enemy
@@ -1907,6 +1908,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8422845806260261558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1967962345597456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1977624811219782
 GameObject:
   m_ObjectHideFlags: 0

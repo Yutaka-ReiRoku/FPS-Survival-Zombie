@@ -1630,6 +1630,7 @@ GameObject:
   - component: {fileID: -6232245464901847885}
   - component: {fileID: 9106402229349597378}
   - component: {fileID: -5710538067676183996}
+  - component: {fileID: 8225523144956557870}
   m_Layer: 7
   m_Name: Zombie_ShopKeeper_Female_01
   m_TagString: Enemy
@@ -1878,6 +1879,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8225523144956557870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918804341386412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1930758972371996
 GameObject:
   m_ObjectHideFlags: 0

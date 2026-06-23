@@ -1533,6 +1533,7 @@ GameObject:
   - component: {fileID: 3011801108600203279}
   - component: {fileID: 914275881548687039}
   - component: {fileID: -4787634446482783417}
+  - component: {fileID: 5839887151431755391}
   m_Layer: 7
   m_Name: Zombie_Punk_Female_01
   m_TagString: Enemy
@@ -1781,6 +1782,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &5839887151431755391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1876492869514370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1883282516694820
 GameObject:
   m_ObjectHideFlags: 0

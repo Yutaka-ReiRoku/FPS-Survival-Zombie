@@ -1662,6 +1662,7 @@ GameObject:
   - component: {fileID: 1396112251967597721}
   - component: {fileID: -364635528743703257}
   - component: {fileID: -160582481887365898}
+  - component: {fileID: 2548180913348876835}
   m_Layer: 7
   m_Name: Zombie_Police_Female_01
   m_TagString: Enemy
@@ -1910,6 +1911,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2548180913348876835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1922703142909278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1934420352407756
 GameObject:
   m_ObjectHideFlags: 0

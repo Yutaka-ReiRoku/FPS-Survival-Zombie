@@ -1694,6 +1694,7 @@ GameObject:
   - component: {fileID: 4694893556557720610}
   - component: {fileID: 1014436292749332023}
   - component: {fileID: -2625384947588112845}
+  - component: {fileID: 3026016876225491580}
   m_Layer: 7
   m_Name: Zombie_Underwear_Male_01
   m_TagString: Enemy
@@ -1942,6 +1943,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &3026016876225491580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965423065467750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1975784649669560
 GameObject:
   m_ObjectHideFlags: 0

@@ -1276,6 +1276,7 @@ GameObject:
   - component: {fileID: -1131441040142376611}
   - component: {fileID: 330721761141320153}
   - component: {fileID: -1024248490080593523}
+  - component: {fileID: 8044213207607374540}
   m_Layer: 7
   m_Name: Zombie_Business_Female_01
   m_TagString: Enemy
@@ -1524,6 +1525,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8044213207607374540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743311549795642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1745743701896458
 GameObject:
   m_ObjectHideFlags: 0

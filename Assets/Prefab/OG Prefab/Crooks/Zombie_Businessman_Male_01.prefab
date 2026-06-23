@@ -1375,6 +1375,7 @@ GameObject:
   - component: {fileID: -6566193092585903067}
   - component: {fileID: -1831521199854760444}
   - component: {fileID: -4312058955194045178}
+  - component: {fileID: 1290837455566041442}
   m_Layer: 7
   m_Name: Zombie_Businessman_Male_01
   m_TagString: Enemy
@@ -1623,6 +1624,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1290837455566041442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767653040776728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1769254449459080
 GameObject:
   m_ObjectHideFlags: 0

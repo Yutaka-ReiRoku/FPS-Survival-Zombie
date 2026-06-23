@@ -956,6 +956,7 @@ GameObject:
   - component: {fileID: -3536112104130784148}
   - component: {fileID: -2962718752157446824}
   - component: {fileID: 26861041247467871}
+  - component: {fileID: 7369009814328517006}
   m_Layer: 7
   m_Name: Zombie_Prisoner_Male_01
   m_TagString: Enemy
@@ -1204,6 +1205,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &7369009814328517006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448682853809946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1518447182408978
 GameObject:
   m_ObjectHideFlags: 0

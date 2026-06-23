@@ -1308,6 +1308,7 @@ GameObject:
   - component: {fileID: -9072017844058355088}
   - component: {fileID: 9024499191621514400}
   - component: {fileID: 218022883369428724}
+  - component: {fileID: 5450731773711896099}
   m_Layer: 7
   m_Name: Zombie_BusinessShirt_Male_01
   m_TagString: Enemy
@@ -1556,6 +1557,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &5450731773711896099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1713425991072746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1754674532180350
 GameObject:
   m_ObjectHideFlags: 0

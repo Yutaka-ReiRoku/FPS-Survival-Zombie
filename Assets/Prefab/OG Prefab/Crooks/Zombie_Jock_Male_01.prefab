@@ -1278,6 +1278,7 @@ GameObject:
   - component: {fileID: 4637460513988829582}
   - component: {fileID: -1317188124855078072}
   - component: {fileID: 6199362548491487526}
+  - component: {fileID: 6082155074369180846}
   m_Layer: 7
   m_Name: Zombie_Jock_Male_01
   m_TagString: Enemy
@@ -1526,6 +1527,21 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6082155074369180846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562126803887444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.1
+  barSize: {x: 120, y: 16}
+  worldScale: 0.01
 --- !u!1 &1590648828359392
 GameObject:
   m_ObjectHideFlags: 0
