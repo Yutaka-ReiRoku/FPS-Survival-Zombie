@@ -72,6 +72,14 @@ public class CowsinsHUDAdapter : MonoBehaviour
     /// <summary>(currentDashes, maxDashes)</summary>
     public event Action<int, int> OnDashChanged;
 
+    // ---- Interact ----
+    public string InteractText { get; private set; } = string.Empty;
+    /// <summary>(visible, displayText)</summary>
+    public event Action<bool, string> OnInteractPrompt;
+    public event Action OnInteractForbidden;
+    /// <summary>interaction hold progress 0..1</summary>
+    public event Action<float> OnInteractProgress;
+
     private bool _staticBound;
 
     private PlayerStats _stats;
@@ -79,6 +87,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
     private WeaponController _weapon;
     private PlayerDependencies _deps;
     private PlayerMovementEvents _moveEvents;
+    private InteractManagerEvents _interactEvents;
     private float _lastHealth = -1f;
     private bool _bound;
 
@@ -139,7 +148,31 @@ public class CowsinsHUDAdapter : MonoBehaviour
 
         StartCoroutine(PollHeat());
         StartCoroutine(BindDashWhenReady());
+        StartCoroutine(BindInteractWhenReady());
     }
+
+    private IEnumerator BindInteractWhenReady()
+    {
+        float timeout = 12f;
+        while (timeout > 0f && (_deps == null || _deps.InteractEvents == null || _deps.InteractEvents.Events == null))
+        {
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+        if (_deps == null || _deps.InteractEvents == null) yield break;
+        _interactEvents = _deps.InteractEvents.Events;
+        if (_interactEvents == null) yield break;
+        _interactEvents.OnAllowedInteraction.AddListener(HandleAllowed);
+        _interactEvents.OnForbiddenInteraction.AddListener(HandleForbidden);
+        _interactEvents.OnDisableInteraction.AddListener(HandleInteractHide);
+        _interactEvents.OnFinishInteraction.AddListener(HandleInteractHide);
+        _interactEvents.OnInteractionProgressChanged.AddListener(HandleInteractProgress);
+    }
+
+    private void HandleAllowed(string text) { InteractText = text; OnInteractPrompt?.Invoke(true, text); }
+    private void HandleForbidden() { OnInteractForbidden?.Invoke(); OnInteractPrompt?.Invoke(false, string.Empty); }
+    private void HandleInteractHide() { OnInteractPrompt?.Invoke(false, string.Empty); OnInteractProgress?.Invoke(0f); }
+    private void HandleInteractProgress(float v) { OnInteractProgress?.Invoke(v); }
 
     // Provider events (PlayerDependencies.PlayerMovementEvents) are populated in the
     // player's Awake, which may run after our Bind(); wait for them, then subscribe dash.
@@ -212,6 +245,15 @@ public class CowsinsHUDAdapter : MonoBehaviour
             _moveEvents.OnInitializeDash.RemoveListener(HandleInitDash);
             _moveEvents.OnDashUsed.RemoveListener(HandleDashUsed);
             _moveEvents.OnDashGained.RemoveListener(HandleDashGained);
+        }
+
+        if (_interactEvents != null)
+        {
+            _interactEvents.OnAllowedInteraction.RemoveListener(HandleAllowed);
+            _interactEvents.OnForbiddenInteraction.RemoveListener(HandleForbidden);
+            _interactEvents.OnDisableInteraction.RemoveListener(HandleInteractHide);
+            _interactEvents.OnFinishInteraction.RemoveListener(HandleInteractHide);
+            _interactEvents.OnInteractionProgressChanged.RemoveListener(HandleInteractProgress);
         }
 
         _bound = false;
