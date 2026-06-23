@@ -310,6 +310,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
         // Damage -> TakeDamage -> Die run synchronously, so this reflects the killing blow.
         lastHitWasHeadshot = isHeadshot;
 
+        if (CombatFeedbackHUD.Instance != null)
+            CombatFeedbackHUD.Instance.ShowHit(transform.position, damage, isHeadshot);
+
         TakeDamage(
             Mathf.RoundToInt(damage));
     }
@@ -320,6 +323,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
             return;
 
         isDead = true;
+
+        if (CombatFeedbackHUD.Instance != null)
+            CombatFeedbackHUD.Instance.ShowKill("Zombie");
 
         if (AIDirector.Instance != null)
             AIDirector.Instance.RegisterKill();
