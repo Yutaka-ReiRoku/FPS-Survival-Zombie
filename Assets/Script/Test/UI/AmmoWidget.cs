@@ -32,6 +32,8 @@ public class AmmoWidget : MonoBehaviour
 
     private IEnumerator Bind()
     {
+        var th = UITheme.Active;
+        if (th != null) { normalColor = th.ammoNormal; lowColor = th.ammoLow; punchScale = th.ammoPunchScale; }
         if (punchRoot != null) _home = punchRoot.localScale;
         while (CowsinsHUDAdapter.Instance == null) yield return null;
         var a = CowsinsHUDAdapter.Instance;

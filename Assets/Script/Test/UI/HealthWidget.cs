@@ -39,6 +39,8 @@ public class HealthWidget : MonoBehaviour
 
     private IEnumerator Bind()
     {
+        var th = UITheme.Active;
+        if (th != null) { healthFullColor = th.healthFull; healthLowColor = th.healthLow; shieldColor = th.shield; }
         if (shakeRoot != null) _shakeHome = shakeRoot.anchoredPosition;
         while (CowsinsHUDAdapter.Instance == null) yield return null;
         var a = CowsinsHUDAdapter.Instance;

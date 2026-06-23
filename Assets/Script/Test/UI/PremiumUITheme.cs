@@ -11,9 +11,9 @@ public static class PremiumUITheme
     public const string FULL_SDF = "TextMeshPro/Distance Field";
     const string Root = "Assets/Others/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/";
 
-    public static TMP_FontAsset GetDisplay() { return Load("Anton SDF"); }
-    public static TMP_FontAsset GetHeader()  { return Load("Oswald Bold SDF"); }
-    public static TMP_FontAsset GetBody()    { return Load("Roboto-Bold SDF"); }
+    public static TMP_FontAsset GetDisplay() { var t = UITheme.Active; if (t != null && t.displayFont != null) return t.displayFont; return Load("Anton SDF"); }
+    public static TMP_FontAsset GetHeader()  { var t = UITheme.Active; if (t != null && t.headerFont != null) return t.headerFont; return Load("Oswald Bold SDF"); }
+    public static TMP_FontAsset GetBody()    { var t = UITheme.Active; if (t != null && t.bodyFont != null) return t.bodyFont; return Load("Roboto-Bold SDF"); }
 
     static TMP_FontAsset Load(string name)
     {
