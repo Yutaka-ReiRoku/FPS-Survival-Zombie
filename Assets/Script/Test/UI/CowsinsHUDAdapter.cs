@@ -88,12 +88,27 @@ public class CowsinsHUDAdapter : MonoBehaviour
     public event Action OnInventoryStructureChanged;
     public event Action<int> OnWeaponSelected;
 
+    // ---- Stamina ----
+    // The engine (StaminaBehaviour) has no continuous stamina value event; its only
+    // public output is the assigned UI Slider, which it mirrors currentStamina into
+    // every Tick. We give it a headless data Slider we own (the "sink"), then poll it
+    // and re-broadcast engine-free. The original Cowsins stamina Slider is retired
+    // (disabled in scene); once we repoint the reference the engine never touches it.
+    public float Stamina { get; private set; }
+    public float MaxStamina { get; private set; }
+    public bool UsesStamina { get; private set; }
+    /// <summary>(currentStamina, maxStamina)</summary>
+    public event Action<float, float> OnStaminaChanged;
+
     private bool _staticBound;
 
     private PlayerStats _stats;
     private PlayerStatsEvents _statsEvents;
     private WeaponController _weapon;
     private PlayerDependencies _deps;
+    private PlayerMovement _pm;
+    private UnityEngine.UI.Slider _staminaSink;
+    private float _lastStaminaPolled = -1f;
     private PlayerMovementEvents _moveEvents;
     private InteractManagerEvents _interactEvents;
     private float _lastHealth = -1f;
@@ -114,6 +129,8 @@ public class CowsinsHUDAdapter : MonoBehaviour
     {
         Unbind();
         UnsubscribeStatic();
+        if (_pm != null && _staminaSink != null && _pm.playerSettings.staminaSlider == _staminaSink)
+            _pm.playerSettings.staminaSlider = null;
         StopAllCoroutines();
     }
 
@@ -132,6 +149,10 @@ public class CowsinsHUDAdapter : MonoBehaviour
             if (_stats == null) _stats = FindObjectOfType<PlayerStats>();
             if (_weapon == null) _weapon = FindObjectOfType<WeaponController>();
             if (_deps == null) _deps = FindObjectOfType<PlayerDependencies>();
+            if (_pm == null) _pm = FindObjectOfType<PlayerMovement>();
+            // Repoint the engine's stamina output to our headless sink as early as
+            // possible so the original Cowsins slider is never re-activated.
+            if (_pm != null && _staminaSink == null) SetupStaminaSink();
             if (_stats != null && _weapon != null) break;
             timeout -= Time.unscaledDeltaTime;
             yield return null;
@@ -144,6 +165,10 @@ public class CowsinsHUDAdapter : MonoBehaviour
         }
 
         Bind();
+
+        // Fallback: if the loop broke on stats/weapon before PlayerMovement appeared.
+        if (_pm == null) _pm = FindObjectOfType<PlayerMovement>();
+        if (_pm != null && _staminaSink == null) SetupStaminaSink();
 
         // Pull authoritative current values (init events may have fired in Start before we bound).
         PullHealth(false);
@@ -269,6 +294,10 @@ public class CowsinsHUDAdapter : MonoBehaviour
             _interactEvents.OnInteractionProgressChanged.RemoveListener(HandleInteractProgress);
         }
 
+        // Drop the stamina reference so the engine never writes to a destroyed sink.
+        if (_pm != null && _staminaSink != null && _pm.playerSettings.staminaSlider == _staminaSink)
+            _pm.playerSettings.staminaSlider = null;
+
         _bound = false;
     }
 
@@ -331,6 +360,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
             if (CoinManager.Instance != null && CoinManager.Instance.coins != Coins) PullCoins();
             var xpm = ExperienceManager.Instance;
             if (xpm != null && xpm.GetPlayerLevel() != PlayerLevel) PullXp();
+            PollStamina();
             yield return wait;
         }
     }
@@ -408,6 +438,42 @@ public class CowsinsHUDAdapter : MonoBehaviour
     private void HandleInitDash(int max) { MaxDashes = max; CurrentDashes = max; InfiniteDashes = false; OnDashChanged?.Invoke(CurrentDashes, MaxDashes); }
     private void HandleDashUsed(int cur) { CurrentDashes = cur; if (cur > MaxDashes) MaxDashes = cur; OnDashChanged?.Invoke(CurrentDashes, MaxDashes); }
     private void HandleDashGained(int cur) { CurrentDashes = cur; if (cur > MaxDashes) MaxDashes = cur; OnDashChanged?.Invoke(CurrentDashes, MaxDashes); }
+
+    private void SetupStaminaSink()
+    {
+        if (_pm == null || _staminaSink != null) return;
+        UsesStamina = _pm.playerSettings.usesStamina;
+        float max = _pm.playerSettings.maxStamina;
+        var go = new GameObject("StaminaSink", typeof(RectTransform));
+        go.transform.SetParent(transform, false);
+        _staminaSink = go.AddComponent<UnityEngine.UI.Slider>();
+        _staminaSink.transition = UnityEngine.UI.Selectable.Transition.None;
+        _staminaSink.navigation = new UnityEngine.UI.Navigation { mode = UnityEngine.UI.Navigation.Mode.None };
+        _staminaSink.interactable = false;
+        _staminaSink.minValue = 0f;
+        _staminaSink.maxValue = max;
+        _staminaSink.value = max;
+        MaxStamina = max;
+        Stamina = max;
+        _lastStaminaPolled = max;
+        // Repoint the engine's stamina UI hook to our headless sink.
+        _pm.playerSettings.staminaSlider = _staminaSink;
+        OnStaminaChanged?.Invoke(Stamina, MaxStamina);
+    }
+
+    private void PollStamina()
+    {
+        if (_staminaSink == null) return;
+        float v = _staminaSink.value;
+        float mx = _staminaSink.maxValue;
+        if (!Mathf.Approximately(v, _lastStaminaPolled) || !Mathf.Approximately(mx, MaxStamina))
+        {
+            Stamina = v;
+            MaxStamina = mx;
+            _lastStaminaPolled = v;
+            OnStaminaChanged?.Invoke(Stamina, MaxStamina);
+        }
+    }
 
     // ---- Progression: Coins / XP (Cowsins static UIEvents) ----
     private void SubscribeStatic()
