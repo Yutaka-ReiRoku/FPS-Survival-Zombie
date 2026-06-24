@@ -26,6 +26,7 @@ namespace cowsins
         private void Awake()
         {
             movement = GetComponent<PlayerMovement>();
+            if (movement == null) movement = FindObjectOfType<PlayerMovement>();
             intelligenceSystem = GetComponent<IntelligenceSkillSystem>();
             aimSystem = GetComponent<AimSkillSystem>();
 
@@ -94,6 +95,7 @@ namespace cowsins
 
         private void RefreshMovementStats()
         {
+            if (movement == null) return;
             movement.playerSettings.walkSpeed = baseWalkSpeed;
             movement.playerSettings.runSpeed = baseRunSpeed;
             movement.playerSettings.controlAirborne = baseAirControl;
@@ -194,5 +196,11 @@ namespace cowsins
         public int MovementLevel => movementLevel;
         public int AimLevel => aimLevel;
         public int IntelligenceLevel => intelligenceLevel;
+
+        public const int MaxLevel = 5;
+        public int CurrentSkillPoints => ExperienceManager.Instance != null ? ExperienceManager.Instance.SkillPoints : currentSkillPoints;
+        public int NextMovementCost => movementLevel < MaxLevel ? GetCost(movementLevel + 1) : 0;
+        public int NextAimCost => aimLevel < MaxLevel ? GetCost(aimLevel + 1) : 0;
+        public int NextIntelligenceCost => intelligenceLevel < MaxLevel ? GetCost(intelligenceLevel + 1) : 0;
     }
 }
