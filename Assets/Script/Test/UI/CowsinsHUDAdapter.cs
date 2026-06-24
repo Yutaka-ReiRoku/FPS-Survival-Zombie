@@ -69,6 +69,8 @@ public class CowsinsHUDAdapter : MonoBehaviour
     public int CurrentDashes { get; private set; }
     public int MaxDashes { get; private set; }
     public bool InfiniteDashes { get; private set; }
+    /// <summary>Seconds to regenerate one dash charge (PlayerMovementSettings.dashCooldown).</summary>
+    public float DashCooldown => _pm != null ? _pm.playerSettings.dashCooldown : 0f;
     /// <summary>(currentDashes, maxDashes)</summary>
     public event Action<int, int> OnDashChanged;
 
