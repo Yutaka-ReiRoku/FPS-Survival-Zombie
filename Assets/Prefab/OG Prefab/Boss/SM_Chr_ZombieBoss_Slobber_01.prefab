@@ -721,6 +721,7 @@ GameObject:
   - component: {fileID: -3127262831344354278}
   - component: {fileID: -175469625241617827}
   - component: {fileID: 7774266083722105626}
+  - component: {fileID: 9181636602099139013}
   m_Layer: 7
   m_Name: SM_Chr_ZombieBoss_Slobber_01
   m_TagString: Enemy
@@ -846,6 +847,10 @@ MonoBehaviour:
   acidPoolDeathPrefab: {fileID: 8605726754624049729, guid: 1662b07117d017d4189203a20424de4e, type: 3}
   acidPoolLifetime: 10
   prefab: {fileID: 0}
+  experienceReward: 60
+  coinReward: 25
+  explodeFxDelay: 0.25
+  cleanupDelay: 2.5
 --- !u!195 &7774266083722105626
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -868,6 +873,21 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &9181636602099139013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1389694247779218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d72388f91a941a60ba7ca12ffdd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  heightOffset: 2.8
+  barSize: {x: 160, y: 18}
+  worldScale: 0.01
 --- !u!1 &1391895566585514
 GameObject:
   m_ObjectHideFlags: 0

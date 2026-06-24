@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using cowsins;
 
-public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy
+public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthReadout
 {
     [Header("Player")]
     public Transform target;
@@ -39,7 +39,29 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy
     [Header("Prefab Reference for Pooling")]
     public GameObject prefab;
 
+    [Header("Rewards (granted only when the player shoots it down)")]
+    public float experienceReward = 60f;
+    public int coinReward = 25;
+
+    [Header("Self-Contained Timing (independent of animation events)")]
+    [Tooltip("Delay after the Explode trigger before the blast actually fires.")]
+    public float explodeFxDelay = 0.25f;
+    [Tooltip("Delay after the Explode trigger before the corpse is cleaned up.")]
+    public float cleanupDelay = 2.5f;
+
     private static Collider[] overlapColliders = new Collider[500];
+
+    // ---- IEnemyHealthReadout (read-only; for EnemyHealthBar) ----
+    public float HealthFraction
+    {
+        get { return maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f; }
+    }
+    public bool IsDead { get { return isDead; } }
+    public event System.Action<float> OnHealthChanged;
+
+    private bool hasExploded;
+    private bool hasDestroyed;
+    private bool rewardsGranted;
 
     private Animator animator;
     private NavMeshAgent agent;
@@ -244,6 +266,12 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy
         animator.SetTrigger(
             "Explode"
         );
+
+        // The authored death clip has no animation events wired, so drive the
+        // blast and cleanup from code. Guards make this safe even if events are
+        // added later (they would simply no-op the second call).
+        Invoke(nameof(ExplosionEvent), explodeFxDelay);
+        Invoke(nameof(DestroyEvent), cleanupDelay);
     }
 
     //==================================
@@ -255,6 +283,9 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy
         bool isHeadshot
     )
     {
+        if (CombatFeedbackHUD.Instance != null)
+            CombatFeedbackHUD.Instance.ShowHit(transform.position, damage, isHeadshot);
+
         TakeDamage(
             Mathf.RoundToInt(damage)
         );
@@ -262,20 +293,51 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
     public void TakeDamage(int damage)
     {
-        if (isDead)
+        // Once it has begun screaming/exploding, further hits no longer matter.
+        if (isDead || hasStartedExplosion)
             return;
 
         currentHealth -= damage;
 
         animator.SetTrigger("Hit");
 
+        if (OnHealthChanged != null)
+            OnHealthChanged(HealthFraction);
+
         if (currentHealth <= 0)
         {
             explosionType =
                 ExplosionType.Killed;
 
+            GrantKillRewards();
+
             StartExplosion();
         }
+    }
+
+    // The player shot it down before it reached them: award bonus progression.
+    // Self-detonation (reaching the player) grants nothing on purpose.
+    private void GrantKillRewards()
+    {
+        if (rewardsGranted)
+            return;
+
+        rewardsGranted = true;
+
+        if (CombatFeedbackHUD.Instance != null)
+            CombatFeedbackHUD.Instance.ShowKill("Boomer");
+
+        if (AIDirector.Instance != null)
+            AIDirector.Instance.RegisterKill();
+
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.AddKill();
+
+        if (ExperienceManager.Instance != null && ExperienceManager.Instance.useExperience)
+            ExperienceManager.Instance.AddExperience(experienceReward);
+
+        if (CoinManager.Instance != null && CoinManager.Instance.useCoins)
+            CoinManager.Instance.AddCoins(coinReward);
     }
 
     //==================================
@@ -285,6 +347,11 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy
     // Gọi tại frame nổ
     public void ExplosionEvent()
     {
+        if (hasExploded)
+            return;
+
+        hasExploded = true;
+
         //--------------------------------
         // VFX
         //--------------------------------
@@ -355,6 +422,10 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy
                     explosionDamage,
                     false
                 );
+
+                // Feed the directional damage indicator when the blast hits the player.
+                if (hit.CompareTag("Player") && DamageDirectionHUD.Instance != null)
+                    DamageDirectionHUD.Instance.ShowDamageFrom(transform.position);
             }
         }
     }
@@ -362,6 +433,11 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy
     // Gọi ở frame cuối animation Death
     public void DestroyEvent()
     {
+        if (hasDestroyed)
+            return;
+
+        hasDestroyed = true;
+
         isDead = true;
 
         if (agent != null)

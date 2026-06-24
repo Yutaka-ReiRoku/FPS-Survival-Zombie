@@ -4,7 +4,7 @@ using cowsins;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(AudioSource))]
-public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
+public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthReadout
 {
     public float GetMaxHealth()
     {

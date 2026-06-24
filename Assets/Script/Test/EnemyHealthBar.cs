@@ -5,9 +5,10 @@ using UnityEngine.UI;
 /// World-space, billboarded health bar shown above a zombie only while it is
 /// damaged (hidden at full health and when dead) — cheap for large pooled hordes.
 /// Self-builds its world-space Canvas + bar at runtime, so adding just this one
-/// component to a zombie prefab is enough. Reads ZombieAI.HealthFraction / IsDead
-/// and reacts to ZombieAI.OnHealthChanged. The fill is sized by RectTransform anchor
-/// (not localScale), and uses no external sprite (solid Images), so it is build-safe.
+/// component to an enemy prefab is enough. Binds to any IEnemyHealthReadout on the
+/// same GameObject (ZombieAI, BoomerAI, ...) and reacts to its OnHealthChanged. The
+/// fill is sized by RectTransform anchor (not localScale), and uses no external
+/// sprite (solid Images), so it is build-safe.
 /// </summary>
 [DisallowMultipleComponent]
 public class EnemyHealthBar : MonoBehaviour
@@ -19,7 +20,7 @@ public class EnemyHealthBar : MonoBehaviour
     [Tooltip("World-space canvas scale (pixels -> meters).")]
     public float worldScale = 0.01f;
 
-    private ZombieAI _zombie;
+    private IEnemyHealthReadout _zombie;
     private GameObject _barGO;
     private RectTransform _fill;
     private Transform _cam;
@@ -29,7 +30,7 @@ public class EnemyHealthBar : MonoBehaviour
 
     private void Awake()
     {
-        _zombie = GetComponent<ZombieAI>();
+        _zombie = GetComponent<IEnemyHealthReadout>();
         var th = UITheme.Active;
         if (th != null) { _full = th.healthFull; _low = th.healthLow; }
         Build();
