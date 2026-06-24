@@ -14,9 +14,13 @@ public class GameHUD : MonoBehaviour
     public TMP_Text scoreText;
     public TMP_Text headshotsText;   // optional
     public TMP_Text survivalTimeText; // optional, MM:SS
+    public TMP_Text collectiblesText; // optional, "Journals X/total"
+    [Tooltip("Total collectible journals in the level (CollectibleManager has no public total).")]
+    public int collectiblesTotal = 6;
 
     private int _lastWave = -1, _lastKilled = -1, _lastToKill = -1;
     private int _lastKills = -1, _lastScore = -1, _lastHeadshots = -1, _lastSec = -1;
+    private int _lastCollectibles = -1;
 
     private void Update()
     {
@@ -48,6 +52,17 @@ public class GameHUD : MonoBehaviour
                     int m = sec / 60, s = sec % 60;
                     survivalTimeText.text = $"{m:00}:{s:00}";
                 }
+            }
+        }
+
+        if (collectiblesText != null)
+        {
+            var cm = CollectibleManager.Instance;
+            int c = cm != null ? cm.Count : 0;
+            if (c != _lastCollectibles)
+            {
+                _lastCollectibles = c;
+                collectiblesText.text = $"Journals : {c}/{collectiblesTotal}";
             }
         }
     }
