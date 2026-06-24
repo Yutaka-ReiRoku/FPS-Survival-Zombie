@@ -5,6 +5,13 @@ public class Collectible : MonoBehaviour
     public JournalData journal;
 
     bool picked = false;
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Player"))
+            return;
+
+        Collect();
+    }
 
     public void Collect()
     {
