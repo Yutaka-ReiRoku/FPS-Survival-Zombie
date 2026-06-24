@@ -27,6 +27,14 @@ public class CombatFeedbackHUD : MonoBehaviour
     private float _hitTimer, _hitDuration = 0.18f;
     private Color _hitNormal = new Color(1f, 1f, 1f, 0.9f);
     private Color _hitKill = new Color(0.95f, 0.32f, 0.27f, 1f);
+    private Color _critColor = new Color(1f, 0.78f, 0.2f, 1f);
+
+    // Skill-crit flag, set by the weapon (Bullet) just before damage is applied, then
+    // consumed by the very next ShowHit (same frame). Lets us style crits distinctly
+    // without the engine's Damage signature carrying a crit flag.
+    private bool _critPending;
+    private int _critFrame;
+    public void FlagCriticalHit() { _critPending = true; _critFrame = Time.frameCount; }
 
     // ---- Damage numbers (pool) ----
     private class Dmg { public RectTransform rt; public TMP_Text tmp; public CanvasGroup cg; public float life; public Vector2 vel; public bool active; }
@@ -50,7 +58,7 @@ public class CombatFeedbackHUD : MonoBehaviour
         _root = (RectTransform)transform;
         _root.anchorMin = Vector2.zero; _root.anchorMax = Vector2.one;
         _root.offsetMin = Vector2.zero; _root.offsetMax = Vector2.zero; _root.pivot = new Vector2(0.5f, 0.5f);
-        if (_theme != null) { _hitKill = _theme.dangerTop; }
+        if (_theme != null) { _hitKill = _theme.dangerTop; _critColor = _theme.accent; }
         BuildHitmarker();
         BuildDamageContainer();
         BuildKillfeed();
@@ -131,10 +139,13 @@ public class CombatFeedbackHUD : MonoBehaviour
     // ---------- API ----------
     public void ShowHit(Vector3 worldPos, float damage, bool headshot)
     {
+        bool crit = _critPending && Time.frameCount == _critFrame;
+        _critPending = false;
+
         // hitmarker
         _hitTimer = _hitDuration;
-        _hit.localScale = Vector3.one * (headshot ? 1.4f : 1f);
-        var col = headshot ? _hitKill : _hitNormal;
+        _hit.localScale = Vector3.one * (crit ? 1.6f : headshot ? 1.4f : 1f);
+        var col = crit ? _critColor : headshot ? _hitKill : _hitNormal;
         foreach (var img in _hit.GetComponentsInChildren<Image>()) img.color = col;
 
         // damage number
@@ -149,9 +160,10 @@ public class CombatFeedbackHUD : MonoBehaviour
             RectTransformUtility.ScreenPointToLocalPointInRectangle(_dmgContainer, sp, null, out local);
         }
         d.rt.anchoredPosition = local + new Vector2(Random.Range(-18f, 18f), 0f);
-        d.tmp.text = Mathf.Max(1, Mathf.RoundToInt(damage)).ToString();
-        d.tmp.color = headshot ? _hitKill : (_theme != null ? _theme.textPrimary : Color.white);
-        d.tmp.fontSize = headshot ? 36 : 28;
+        int dmgInt = Mathf.Max(1, Mathf.RoundToInt(damage));
+        d.tmp.text = crit ? (dmgInt + "!") : dmgInt.ToString();
+        d.tmp.color = crit ? _critColor : headshot ? _hitKill : (_theme != null ? _theme.textPrimary : Color.white);
+        d.tmp.fontSize = crit ? 42 : headshot ? 36 : 28;
         d.cg.alpha = 1f;
         d.life = _dmgLife;
         d.vel = new Vector2(Random.Range(-10f, 10f), 90f);
@@ -194,6 +206,9 @@ public class CombatFeedbackHUD : MonoBehaviour
     private void Update()
     {
         float dt = Time.unscaledDeltaTime;
+
+        // clear a stale crit flag if it wasn't consumed the frame it was set
+        if (_critPending && Time.frameCount != _critFrame) _critPending = false;
 
         // hitmarker fade
         if (_hitTimer > 0f)

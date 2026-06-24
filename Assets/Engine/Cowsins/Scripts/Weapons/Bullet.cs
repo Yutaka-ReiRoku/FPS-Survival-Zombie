@@ -124,6 +124,9 @@ namespace cowsins
                         aimSystem.ApplyCriticalDamage(finalDamage);
 
                     Debug.Log("CRITICAL HIT!");
+
+                    if (CombatFeedbackHUD.Instance != null)
+                        CombatFeedbackHUD.Instance.FlagCriticalHit();
                 }
             }
 
