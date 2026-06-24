@@ -311,6 +311,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy
             damageable.Damage(
                 attackDamage,
                 false);
+
+            // Feed the directional damage indicator (engine Damage carries no direction).
+            if (DamageDirectionHUD.Instance != null)
+                DamageDirectionHUD.Instance.ShowDamageFrom(transform.position);
         }
     }
 
