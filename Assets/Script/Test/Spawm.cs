@@ -24,6 +24,10 @@ public class Spawm : MonoBehaviour
     public int poolSize = 60;
     private System.Collections.Generic.Dictionary<GameObject, System.Collections.Generic.List<GameObject>> poolDictionary = new System.Collections.Generic.Dictionary<GameObject, System.Collections.Generic.List<GameObject>>();
 
+    // All pooled zombies are parented under this single container so the runtime
+    // hierarchy stays tidy instead of flooding the scene root.
+    private Transform zombieContainer;
+
     private float timer;
 
     private void Start()
@@ -37,6 +41,9 @@ public class Spawm : MonoBehaviour
         if (zombiePrefabs == null || zombiePrefabs.Length == 0)
             return;
 
+        if (zombieContainer == null)
+            zombieContainer = new GameObject("Zombies").transform;
+
         int perPrefabSize = Mathf.Max(1, poolSize / zombiePrefabs.Length);
 
         foreach (GameObject prefab in zombiePrefabs)
@@ -46,7 +53,7 @@ public class Spawm : MonoBehaviour
             poolDictionary[prefab] = new System.Collections.Generic.List<GameObject>();
             for (int i = 0; i < perPrefabSize; i++)
             {
-                GameObject zombie = Instantiate(prefab, transform.position, Quaternion.identity);
+                GameObject zombie = Instantiate(prefab, transform.position, Quaternion.identity, zombieContainer);
                 zombie.SetActive(false);
                 poolDictionary[prefab].Add(zombie);
             }
@@ -63,7 +70,7 @@ public class Spawm : MonoBehaviour
                     return zombie;
             }
 
-            GameObject newZombie = Instantiate(prefab, transform.position, Quaternion.identity);
+            GameObject newZombie = Instantiate(prefab, transform.position, Quaternion.identity, zombieContainer);
             newZombie.SetActive(false);
             poolList.Add(newZombie);
             return newZombie;
