@@ -100,6 +100,33 @@ public class CowsinsHUDAdapter : MonoBehaviour
     /// <summary>(currentStamina, maxStamina)</summary>
     public event Action<float, float> OnStaminaChanged;
 
+    // ---- Crosshair-supporting state ----
+    // Live read-through of the movement/weapon providers so the custom CrosshairWidget
+    // can reproduce the Cowsins dynamic crosshair (spread by movement, hide on ADS,
+    // enemy-spotted colour) without touching cowsins.* itself. EnemySpotted is the only
+    // stateful one (driven by the weapon's OnEnemySpotted event).
+    public bool MoveGrounded => _moveState != null && _moveState.Grounded;
+    public float MoveCurrentSpeed => _moveState != null ? _moveState.CurrentSpeed : 0f;
+    public float MoveRunSpeed => _moveState != null ? _moveState.RunSpeed : 0f;
+    public float MoveWalkSpeed => _moveState != null ? _moveState.WalkSpeed : 0f;
+    public float MoveCrouchSpeed => _moveState != null ? _moveState.CrouchSpeed : 0f;
+    public bool MoveIsIdle => _moveState != null && _moveState.IsIdle;
+    public bool IsAiming => _weaponBehaviourProv != null && _weaponBehaviourProv.IsAiming;
+    public bool EnemySpotted { get; private set; }
+    public float WeaponCrosshairResize => (_weapon != null && _weapon.Weapon != null) ? _weapon.Weapon.crosshairResize : 0f;
+    public event Action<bool> OnEnemySpottedChanged;
+
+    // Equipped weapon's crosshair shape (engine-free mirror of Weapon_SO.crosshairParts).
+    public bool CHTop { get; private set; } = true;
+    public bool CHDown { get; private set; } = true;
+    public bool CHLeft { get; private set; } = true;
+    public bool CHRight { get; private set; } = true;
+    public bool CHCenter { get; private set; }
+    public bool CHTopLeft { get; private set; }
+    public bool CHTopRight { get; private set; }
+    public bool CHBottomLeft { get; private set; }
+    public bool CHBottomRight { get; private set; }
+
     private bool _staticBound;
 
     private PlayerStats _stats;
@@ -109,6 +136,8 @@ public class CowsinsHUDAdapter : MonoBehaviour
     private PlayerMovement _pm;
     private UnityEngine.UI.Slider _staminaSink;
     private float _lastStaminaPolled = -1f;
+    private IPlayerMovementStateProvider _moveState;
+    private IWeaponBehaviourProvider _weaponBehaviourProv;
     private PlayerMovementEvents _moveEvents;
     private InteractManagerEvents _interactEvents;
     private float _lastHealth = -1f;
@@ -169,6 +198,14 @@ public class CowsinsHUDAdapter : MonoBehaviour
         // Fallback: if the loop broke on stats/weapon before PlayerMovement appeared.
         if (_pm == null) _pm = FindObjectOfType<PlayerMovement>();
         if (_pm != null && _staminaSink == null) SetupStaminaSink();
+
+        // Crosshair-supporting providers (populated in PlayerDependencies.Awake).
+        if (_deps == null) _deps = FindObjectOfType<PlayerDependencies>();
+        if (_deps != null)
+        {
+            _moveState = _deps.PlayerMovementState;
+            _weaponBehaviourProv = _deps.WeaponBehaviour;
+        }
 
         // Pull authoritative current values (init events may have fired in Start before we bound).
         PullHealth(false);
@@ -249,6 +286,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
             e.OnShoot.AddListener(HandleShoot);
             e.OnInitializeWeaponSystem.AddListener(HandleInitInventory);
             e.OnWeaponInventoryChanged.AddListener(HandleSlotChanged);
+            e.OnEnemySpotted.AddListener(HandleEnemySpotted);
         }
 
         _bound = true;
@@ -276,6 +314,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
             e.OnShoot.RemoveListener(HandleShoot);
             e.OnInitializeWeaponSystem.RemoveListener(HandleInitInventory);
             e.OnWeaponInventoryChanged.RemoveListener(HandleSlotChanged);
+            e.OnEnemySpotted.RemoveListener(HandleEnemySpotted);
         }
 
         if (_moveEvents != null)
@@ -377,6 +416,16 @@ public class CowsinsHUDAdapter : MonoBehaviour
         WeaponName = w != null ? w._name : string.Empty;
         WeaponIcon = w != null ? w.icon : null;
         ReloadTime = w != null ? w.reloadTime : 0f;
+        var cp = w != null ? w.crosshairParts : null;
+        CHTop = cp != null && cp.topPart;
+        CHDown = cp != null && cp.downPart;
+        CHLeft = cp != null && cp.leftPart;
+        CHRight = cp != null && cp.rightPart;
+        CHCenter = cp != null && cp.center;
+        CHTopLeft = cp != null && cp.topLeftBracket;
+        CHTopRight = cp != null && cp.topRightBracket;
+        CHBottomLeft = cp != null && cp.bottomLeftBracket;
+        CHBottomRight = cp != null && cp.bottomRightBracket;
         OnWeaponChanged?.Invoke(WeaponName, WeaponIcon);
         PullAmmo();
     }
@@ -397,6 +446,14 @@ public class CowsinsHUDAdapter : MonoBehaviour
 
     // ---- Shoot (for fire-punch animation; ammo number handled by OnAmmoChanged) ----
     private void HandleShoot() => OnFired?.Invoke();
+
+    // ---- Enemy-spotted (crosshair colour) ----
+    private void HandleEnemySpotted(bool spotted)
+    {
+        if (EnemySpotted == spotted) return;
+        EnemySpotted = spotted;
+        OnEnemySpottedChanged?.Invoke(spotted);
+    }
 
     // ---- Weapon inventory ----
     private void EnsureSlots(int size)
