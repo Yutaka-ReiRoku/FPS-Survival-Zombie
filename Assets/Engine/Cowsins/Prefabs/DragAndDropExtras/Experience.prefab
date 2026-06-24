@@ -5043,8 +5043,8 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   rememberTriggerState: 0
-  minXp: 500
-  maxXp: 1000
+  minXp: 50
+  maxXp: 120
   pickUpSFX: {fileID: 8300000, guid: bc4c31f8d95dda74db5572d615ba98ef, type: 3}
   onCollect:
     m_PersistentCalls:
