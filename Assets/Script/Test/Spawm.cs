@@ -136,7 +136,9 @@ public class Spawm : MonoBehaviour
             ? AIDirector.Instance.GetZombieCount()
             : 0;
 
-        if (currentZombie >= maxZombie)
+        int cap = EffectiveMaxZombie();
+
+        if (currentZombie >= cap)
             return;
 
         int spawnAmount = 1;
@@ -155,7 +157,7 @@ public class Spawm : MonoBehaviour
                 ? AIDirector.Instance.GetZombieCount()
                 : currentZombie;
 
-            if (currentZombie >= maxZombie)
+            if (currentZombie >= cap)
                 break;
 
             SpawnZombie();
@@ -233,7 +235,7 @@ public class Spawm : MonoBehaviour
             return;
 
         if (AIDirector.Instance.GetZombieCount()
-            >= maxZombie)
+            >= EffectiveMaxZombie())
             return;
 
         SpawnBehindPlayer();
@@ -283,6 +285,15 @@ public class Spawm : MonoBehaviour
             transform.position,
             spawnAreaSize
         );
+    }
+
+    // The active-zombie ceiling, ramped per wave. WaveManager-driven GetWaveLimit()
+    // grows the horde as waves progress (baseZombieCount + wave*5), while maxZombie
+    // stays the absolute hard cap (also the perf ceiling). Early waves stay
+    // survivable instead of instantly piling to the hard cap.
+    private int EffectiveMaxZombie()
+    {
+        return Mathf.Min(maxZombie, GetWaveLimit());
     }
 
     private int GetWaveLimit()
