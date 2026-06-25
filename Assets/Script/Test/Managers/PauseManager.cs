@@ -56,7 +56,22 @@ public class PauseManager : MonoBehaviour
             return;
         var kb = Keyboard.current;
         if (kb != null && kb.escapeKey.wasPressedThisFrame)
+        {
+            // If the skill-tree panel is open, Esc closes it instead of pausing.
+            var skillTree = FindObjectOfType<SkillTreeWidget>();
+            if (skillTree != null && skillTree.IsOpen)
+            {
+                skillTree.Close();
+                return;
+            }
+            // If the journal panel is open, Esc closes it instead of pausing.
+            if (JournalUI.Instance != null && JournalUI.Instance.IsOpen)
+            {
+                JournalUI.Instance.Close();
+                return;
+            }
             Toggle();
+        }
     }
 
     public void Toggle()

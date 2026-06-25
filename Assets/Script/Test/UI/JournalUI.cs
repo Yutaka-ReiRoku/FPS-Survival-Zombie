@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using cowsins;
 
 public class JournalUI : MonoBehaviour
 {
@@ -16,6 +17,12 @@ public class JournalUI : MonoBehaviour
 
     public AudioSource audioSource;
 
+    private PlayerControl _playerControl;
+    private bool _open;
+
+    /// <summary>True while the journal panel is visible.</summary>
+    public bool IsOpen => _open;
+
     void Awake()
     {
         Instance = this;
@@ -23,8 +30,23 @@ public class JournalUI : MonoBehaviour
         panel.SetActive(false);
     }
 
+    private void Start()
+    {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            _playerControl = player.GetComponentInChildren<PlayerControl>();
+    }
+
     public void Show(JournalData journal)
     {
+        // Don't open the journal while the pause menu or skill tree is already open.
+        bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+        bool skillTreeOpen = false;
+        var skillTree = FindObjectOfType<SkillTreeWidget>();
+        if (skillTree != null) skillTreeOpen = skillTree.IsOpen;
+        if (pauseOpen || skillTreeOpen) return;
+
+        _open = true;
         panel.SetActive(true);
 
         title.text = journal.title;
@@ -43,17 +65,34 @@ public class JournalUI : MonoBehaviour
         Cursor.visible = true;
 
         Time.timeScale = 0;
+
+        // Strip control from the player so they can't shoot/look around while
+        // the journal is open (Time.timeScale=0 alone doesn't block input).
+        if (_playerControl != null)
+            _playerControl.LoseControl();
     }
 
     public void Close()
     {
+        if (!_open) return;
+        _open = false;
         panel.SetActive(false);
 
         audioSource.Stop();
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Only restore time/cursor/control if neither the pause menu nor the
+        // skill tree is holding them, and the game isn't over.
+        bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+        bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+        if (!pauseOpen && !gameOver)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
 
-        Time.timeScale = 1;
+            Time.timeScale = 1;
+
+            if (_playerControl != null)
+                _playerControl.GrantControl();
+        }
     }
 }

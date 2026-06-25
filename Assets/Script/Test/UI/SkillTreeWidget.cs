@@ -27,7 +27,11 @@ public class SkillTreeWidget : MonoBehaviour
     private readonly TMP_Text[] _cost = new TMP_Text[3];
     private readonly TMP_Text[] _next = new TMP_Text[3];
     private SkillTreeManager _mgr;
+    private PlayerControl _playerControl;
     private bool _open;
+
+    /// <summary>True while the skill-tree panel is visible.</summary>
+    public bool IsOpen => _open;
 
     private static readonly string[] TreeNames = { "MOVEMENT", "AIM", "INTELLIGENCE" };
     private const int NodesPerTree = 5;
@@ -212,10 +216,17 @@ public class SkillTreeWidget : MonoBehaviour
     private IEnumerator Bind()
     {
         float timeout = 12f;
-        while (_mgr == null && timeout > 0f)
+        while ((_mgr == null || _playerControl == null) && timeout > 0f)
         {
-            _mgr = FindObjectOfType<SkillTreeManager>();
-            if (_mgr != null) break;
+            if (_mgr == null)
+                _mgr = FindObjectOfType<SkillTreeManager>();
+            if (_playerControl == null)
+            {
+                var player = GameObject.FindGameObjectWithTag("Player");
+                if (player != null)
+                    _playerControl = player.GetComponentInChildren<PlayerControl>();
+            }
+            if (_mgr != null && _playerControl != null) break;
             timeout -= Time.unscaledDeltaTime;
             yield return null;
         }
@@ -226,8 +237,11 @@ public class SkillTreeWidget : MonoBehaviour
         if (Input.GetKeyDown(toggleKey))
         {
             bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+            // Don't open the skill tree while the pause menu or journal is open.
+            bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+            bool journalOpen = JournalUI.Instance != null && JournalUI.Instance.IsOpen;
             if (_open) Close();
-            else if (!gameOver) Open();
+            else if (!gameOver && !pauseOpen && !journalOpen) Open();
         }
         if (_open) Refresh();
     }
@@ -238,16 +252,29 @@ public class SkillTreeWidget : MonoBehaviour
         _panel.alpha = 1f; _panel.interactable = true; _panel.blocksRaycasts = true;
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
+        // Strip control from the player so they can't shoot/look around while
+        // the skill tree is open (Time.timeScale=0 alone doesn't block input).
+        if (_playerControl != null)
+            _playerControl.LoseControl();
         if (_transition != null) _transition.Play();
         Refresh();
     }
 
-    private void Close()
+    public void Close()
     {
+        if (!_open) return;
         _open = false;
         _panel.alpha = 0f; _panel.interactable = false; _panel.blocksRaycasts = false;
-        Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false;
+        // Only restore time/cursor/control if the pause menu isn't holding them.
+        bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+        bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+        if (!pauseOpen && !gameOver)
+        {
+            Time.timeScale = 1f;
+            Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false;
+            if (_playerControl != null)
+                _playerControl.GrantControl();
+        }
     }
 
     private void TryUpgrade(int tree)
