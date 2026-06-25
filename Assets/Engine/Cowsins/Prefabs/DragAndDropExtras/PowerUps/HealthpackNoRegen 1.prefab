@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6866079498763795903}
   - component: {fileID: 6866079498763795896}
   m_Layer: 0
-  m_Name: HealthpackNoRegen
+  m_Name: HealthpackNoRegen 1
   m_TagString: Untagged
   m_Icon: {fileID: 2800000, guid: 72d8a449b6f0fa547bdec2a8e9b0f517, type: 3}
   m_NavMeshLayer: 0
@@ -63,7 +63,7 @@ MonoBehaviour:
   reappearTime: 5
   Timer: {fileID: 0}
   used: 0
-  healAmount: 50
+  healAmount: 25
 --- !u!65 &6866079498763795903
 BoxCollider:
   m_ObjectHideFlags: 0
