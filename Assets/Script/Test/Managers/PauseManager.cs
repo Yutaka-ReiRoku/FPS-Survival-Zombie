@@ -39,6 +39,14 @@ public class PauseManager : MonoBehaviour
         var p = GameObject.FindGameObjectWithTag("Player");
         if (p != null)
             playerControl = p.GetComponentInChildren<PlayerControl>();
+
+        // Lock cursor khi vào gameplay (scene này không có Cowsins UIController
+        // để gọi LockMouse() trong Start, nên PauseManager phải đảm nhiệm việc đó).
+        if (!IsPaused && (GameOverManager.Instance == null || !GameOverManager.Instance.IsGameOver))
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 
     private void Update()
