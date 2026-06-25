@@ -88,6 +88,10 @@ namespace cowsins
 
             RefreshMovementStats();
 
+            // Survival bonus folded into this branch: +20 HP per node.
+            if (PlayerUpgradeManager.Instance != null)
+                PlayerUpgradeManager.Instance.AddHealth(MovementHealthPerNode);
+
             Debug.Log($"Movement upgraded to Node {movementLevel}");
 
             return true;
@@ -149,6 +153,10 @@ namespace cowsins
 
             aimSystem.RefreshStats(aimLevel);
 
+            // Survival bonus folded into this branch: +5 Magazine per node.
+            if (PlayerUpgradeManager.Instance != null)
+                PlayerUpgradeManager.Instance.AddMagazine(AimMagazinePerNode);
+
             Debug.Log($"Aim upgraded to Node {aimLevel}");
 
             return true;
@@ -171,6 +179,10 @@ namespace cowsins
             intelligenceLevel++;
 
             intelligenceSystem.RefreshStats(intelligenceLevel);
+
+            // Survival bonus folded into this branch: +20 Shield per node.
+            if (PlayerUpgradeManager.Instance != null)
+                PlayerUpgradeManager.Instance.AddShield(IntelligenceShieldPerNode);
 
             Debug.Log($"Intelligence upgraded to Node {intelligenceLevel}");
 
@@ -202,5 +214,69 @@ namespace cowsins
         public int NextMovementCost => movementLevel < MaxLevel ? GetCost(movementLevel + 1) : 0;
         public int NextAimCost => aimLevel < MaxLevel ? GetCost(aimLevel + 1) : 0;
         public int NextIntelligenceCost => intelligenceLevel < MaxLevel ? GetCost(intelligenceLevel + 1) : 0;
+
+        // Survival bonuses folded into each branch (applied per node via PlayerUpgradeManager).
+        public const int MovementHealthPerNode = 20;
+        public const int AimMagazinePerNode = 5;
+        public const int IntelligenceShieldPerNode = 20;
+
+        // Total survival bonus per branch at max level (for display).
+        public int MovementTotalHealth => movementLevel * MovementHealthPerNode;
+        public int AimTotalMagazine => aimLevel * AimMagazinePerNode;
+        public int IntelligenceTotalShield => intelligenceLevel * IntelligenceShieldPerNode;
+
+        /// <summary>
+        /// Short human-readable description of what a given node grants.
+        /// tree: 0=Movement, 1=Aim, 2=Intelligence. node: 1..MaxLevel.
+        /// </summary>
+        public static string GetNodeDescription(int tree, int node)
+        {
+            switch (tree)
+            {
+                case 0: // Movement
+                    switch (node)
+                    {
+                        case 1: return "Walk Speed +5%  +20 HP";
+                        case 2: return "Run Speed +10%  +20 HP";
+                        case 3: return "Air Control +15%  +20 HP";
+                        case 4: return "Wall Run unlocked  +20 HP";
+                        case 5: return "Run +25% & Grapple +25%  +20 HP";
+                    }
+                    break;
+                case 1: // Aim
+                    switch (node)
+                    {
+                        case 1: return "Recoil -10%  +5 Mag";
+                        case 2: return "Crit Chance 10%  +5 Mag";
+                        case 3: return "Crit Chance 20%  +5 Mag";
+                        case 4: return "Crit Damage x1.5  +5 Mag";
+                        case 5: return "One-shot Crook & Bonus dmg  +5 Mag";
+                    }
+                    break;
+                case 2: // Intelligence
+                    switch (node)
+                    {
+                        case 1: return "XP Pickup Radius 5  +20 Shield";
+                        case 2: return "XP Multiplier x1.10  +20 Shield";
+                        case 3: return "XP Pickup Radius 10  +20 Shield";
+                        case 4: return "XP Multiplier x1.15  +20 Shield";
+                        case 5: return "XP Radius 15 & Highlight  +20 Shield";
+                    }
+                    break;
+            }
+            return "";
+        }
+
+        /// <summary>Short survival-stat label for each branch header.</summary>
+        public static string GetBranchSurvivalLabel(int tree)
+        {
+            switch (tree)
+            {
+                case 0: return "+ HP";
+                case 1: return "+ MAG";
+                case 2: return "+ SHIELD";
+            }
+            return "";
+        }
     }
 }

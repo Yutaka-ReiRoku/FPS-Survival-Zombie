@@ -5,73 +5,155 @@ using TMPro;
 using cowsins;
 
 /// <summary>
-/// Skill-tree panel on the unified HUD. Surfaces SkillTreeManager — an entire earned
-/// resource (skill points from ExperienceManager) + 3 upgrade trees (Movement/Aim/
-/// Intelligence) that were previously only reachable via editor debug keys. Toggle
-/// with K: shows skill points, each tree's level (n/5) and next cost, and an Upgrade
-/// button wired to the manager. Self-building; pauses time + frees the cursor while
-/// open. Root stays active; a CanvasGroup gates interaction.
+/// Visual skill-tree panel on the unified HUD. 3 branches (Movement / Aim /
+/// Intelligence), each with 5 nodes connected by vertical lines. Unlocked nodes
+/// glow accent gold, the next-available node glows green when affordable, locked
+/// nodes are dim. Click the next-available node to upgrade that branch. Toggle
+/// with Tab. Self-building; pauses time + frees the cursor while open. Root stays
+/// active; a CanvasGroup gates interaction.
 /// </summary>
 public class SkillTreeWidget : MonoBehaviour
 {
-    public KeyCode toggleKey = KeyCode.K;
+    public KeyCode toggleKey = KeyCode.Tab;
 
     private CanvasGroup _panel;
+    private UIPanelTransition _transition;
     private TMP_Text _sp;
-    private readonly TMP_Text[] _lvl = new TMP_Text[3];
-    private readonly TMP_Text[] _btnLabel = new TMP_Text[3];
-    private readonly Button[] _btn = new Button[3];
+    private readonly Image[] _nodeBg = new Image[15];
+    private readonly Button[] _nodeBtn = new Button[15];
+    private readonly TMP_Text[] _nodeLabel = new TMP_Text[15];
+    private readonly Image[] _lines = new Image[12];
+    private readonly TMP_Text[] _sub = new TMP_Text[3];
+    private readonly TMP_Text[] _cost = new TMP_Text[3];
+    private readonly TMP_Text[] _next = new TMP_Text[3];
     private SkillTreeManager _mgr;
     private bool _open;
 
     private static readonly string[] TreeNames = { "MOVEMENT", "AIM", "INTELLIGENCE" };
+    private const int NodesPerTree = 5;
+    private const int Trees = 3;
 
-    private void Awake() { Build(); }
+    // Layout constants (@ 1920x1080 reference)
+    private const float CardW = 920f, CardH = 720f;
+    private const float ColSpacing = 300f;
+    private const float NodeSize = 60f;
+    private static readonly float[] NodeY = { 130f, 50f, -30f, -110f, -190f };
+    private static readonly float[] LineY = { 90f, 10f, -70f, -150f };
+    private const float LineH = 20f;
+    private const float LineW = 6f;
+
+    private void Awake()
+    {
+        try { Build(); }
+        catch (System.Exception e) { Debug.LogError($"[SkillTreeWidget] Build failed in Awake: {e}"); }
+    }
 
     private void Build()
     {
         var th = UITheme.Active;
+        Color accent = th != null ? th.accent : new Color(0.85f, 0.78f, 0.45f, 1f);
+        Color cardBottom = th != null ? th.cardBottom : new Color(0.075f, 0.09f, 0.11f, 1f);
+        Color cardTop = th != null ? th.cardTop : new Color(0.122f, 0.149f, 0.18f, 1f);
+        Color textPrimary = th != null ? th.textPrimary : Color.white;
+        Color textMuted = th != null ? th.textMuted : new Color(0.62f, 0.66f, 0.72f, 1f);
+        Color scrimColor = th != null ? th.scrimBottom : new Color(0f, 0f, 0f, 0.85f);
+
         // scrim (blocks clicks behind)
-        var scrim = NewImage(transform, "Scrim", th != null ? th.scrimBottom : new Color(0f, 0f, 0f, 0.85f));
-        var srt = (RectTransform)scrim.transform;
-        srt.anchorMin = Vector2.zero; srt.anchorMax = Vector2.one; srt.offsetMin = Vector2.zero; srt.offsetMax = Vector2.zero;
+        var scrim = NewImage(transform, "Scrim", scrimColor);
+        Stretch(scrim);
         scrim.raycastTarget = true;
         _panel = scrim.gameObject.AddComponent<CanvasGroup>();
         _panel.alpha = 0f; _panel.interactable = false; _panel.blocksRaycasts = false;
 
         // card
-        var card = NewImage(scrim.transform, "Card", th != null ? th.cardBottom : new Color(0.09f, 0.10f, 0.13f, 1f));
-        var crt = (RectTransform)card.transform;
-        crt.anchorMin = crt.anchorMax = new Vector2(0.5f, 0.5f); crt.pivot = new Vector2(0.5f, 0.5f);
-        crt.anchoredPosition = Vector2.zero; crt.sizeDelta = new Vector2(760f, 480f);
+        var card = NewImage(scrim.transform, "Card", cardBottom);
+        Center(card, CardW, CardH);
+        card.gameObject.AddComponent<CanvasGroup>();
+        _transition = card.gameObject.AddComponent<UIPanelTransition>();
+        _transition.duration = th != null ? th.panelInDuration : 0.22f;
+        _transition.startScale = th != null ? th.panelStartScale : 0.9f;
+        _transition.animateOnEnable = false;
 
-        var title = NewText(crt, "Title", 44f, new Vector2(0f, 190f), new Vector2(700f, 60f), th != null ? th.displayFont : null);
-        title.text = "SKILL TREE"; title.alignment = TextAlignmentOptions.Center;
-        title.color = th != null ? th.accent : new Color(0.85f, 0.78f, 0.45f, 1f);
+        // title
+        var title = NewText(card.transform, "Title", 40f, new Vector2(0f, 320f), new Vector2(700f, 56f), th != null ? th.displayFont : null);
+        title.text = "SKILL TREE";
+        title.alignment = TextAlignmentOptions.Center;
+        title.color = accent;
 
-        _sp = NewText(crt, "SP", 26f, new Vector2(0f, 138f), new Vector2(700f, 40f), th != null ? th.headerFont : null);
+        // skill points
+        _sp = NewText(card.transform, "SP", 24f, new Vector2(0f, 270f), new Vector2(700f, 36f), th != null ? th.headerFont : null);
         _sp.alignment = TextAlignmentOptions.Center;
-        _sp.color = th != null ? th.textPrimary : Color.white;
+        _sp.color = textPrimary;
 
-        for (int i = 0; i < 3; i++)
+        float[] colX = { -ColSpacing, 0f, ColSpacing };
+
+        for (int t = 0; t < Trees; t++)
         {
-            float y = 60f - i * 96f;
-            var name = NewText(crt, "Tree" + i, 28f, new Vector2(-150f, y + 18f), new Vector2(380f, 36f), th != null ? th.headerFont : null);
-            name.text = TreeNames[i]; name.alignment = TextAlignmentOptions.Left;
-            name.color = th != null ? th.textPrimary : Color.white;
+            // branch header
+            var header = NewText(card.transform, "Header" + t, 22f, new Vector2(colX[t], 200f), new Vector2(240f, 32f), th != null ? th.headerFont : null);
+            header.text = TreeNames[t];
+            header.alignment = TextAlignmentOptions.Center;
+            header.color = accent;
 
-            _lvl[i] = NewText(crt, "Lvl" + i, 20f, new Vector2(-150f, y - 16f), new Vector2(380f, 28f), th != null ? th.bodyFont : null);
-            _lvl[i].alignment = TextAlignmentOptions.Left;
-            _lvl[i].color = th != null ? th.textMuted : new Color(0.62f, 0.66f, 0.72f, 1f);
+            // survival-stat subtitle (e.g. "+ HP")
+            _sub[t] = NewText(card.transform, "Sub" + t, 16f, new Vector2(colX[t], 174f), new Vector2(240f, 24f), th != null ? th.bodyFont : null);
+            _sub[t].text = SkillTreeManager.GetBranchSurvivalLabel(t);
+            _sub[t].alignment = TextAlignmentOptions.Center;
+            _sub[t].color = textMuted;
 
-            _btn[i] = NewButton(crt, "Btn" + i, new Vector2(230f, y), new Vector2(180f, 56f), th, out _btnLabel[i]);
-            int idx = i; // capture
-            _btn[i].onClick.AddListener(() => TryUpgrade(idx));
+            // nodes + connection lines
+            for (int n = 0; n < NodesPerTree; n++)
+            {
+                int idx = t * NodesPerTree + n;
+
+                // node
+                var node = NewImage(card.transform, "Node" + t + "_" + n, cardTop);
+                Center(node, NodeSize, NodeSize, new Vector2(colX[t], NodeY[n]));
+                node.raycastTarget = true;
+                _nodeBg[idx] = node;
+                _nodeBtn[idx] = node.gameObject.AddComponent<Button>();
+                _nodeBtn[idx].targetGraphic = node;
+                var motion = node.gameObject.AddComponent<UIButtonMotion>();
+                motion.hoverScale = th != null ? th.hoverScale : 1.06f;
+                motion.pressScale = th != null ? th.pressScale : 0.95f;
+
+                var label = NewText(node.transform, "Label", 22f, Vector2.zero, new Vector2(NodeSize, NodeSize), th != null ? th.headerFont : null);
+                Stretch(label);
+                label.alignment = TextAlignmentOptions.Center;
+                label.color = textMuted;
+                label.text = (n + 1).ToString();
+                _nodeLabel[idx] = label;
+
+                int treeIdx = t;
+                _nodeBtn[idx].onClick.AddListener(() => TryUpgrade(treeIdx));
+
+                // connection line to next node
+                if (n < NodesPerTree - 1)
+                {
+                    int lineIdx = t * (NodesPerTree - 1) + n;
+                    var line = NewImage(card.transform, "Line" + t + "_" + n, textMuted);
+                    Center(line, LineW, LineH, new Vector2(colX[t], LineY[n]));
+                    line.raycastTarget = false;
+                    _lines[lineIdx] = line;
+                }
+            }
+
+            // next-node effect description
+            _next[t] = NewText(card.transform, "Next" + t, 16f, new Vector2(colX[t], -240f), new Vector2(260f, 22f), th != null ? th.bodyFont : null);
+            _next[t].alignment = TextAlignmentOptions.Center;
+            _next[t].color = textMuted;
+
+            // cost / status label
+            _cost[t] = NewText(card.transform, "Cost" + t, 18f, new Vector2(colX[t], -266f), new Vector2(220f, 24f), th != null ? th.headerFont : null);
+            _cost[t].alignment = TextAlignmentOptions.Center;
+            _cost[t].color = textMuted;
         }
 
-        var hint = NewText(crt, "Hint", 18f, new Vector2(0f, -210f), new Vector2(700f, 28f), th != null ? th.bodyFont : null);
-        hint.text = "[K] Close"; hint.alignment = TextAlignmentOptions.Center;
-        hint.color = th != null ? th.textMuted : new Color(0.62f, 0.66f, 0.72f, 1f);
+        // hint
+        var hint = NewText(card.transform, "Hint", 18f, new Vector2(0f, -330f), new Vector2(700f, 28f), th != null ? th.bodyFont : null);
+        hint.text = "[TAB] CLOSE";
+        hint.alignment = TextAlignmentOptions.Center;
+        hint.color = textMuted;
     }
 
     // ---- build helpers ----
@@ -84,31 +166,45 @@ public class SkillTreeWidget : MonoBehaviour
         return img;
     }
 
+    private void Stretch(Image img)
+    {
+        var rt = (RectTransform)img.transform;
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
+    }
+
+    private void Center(Image img, float w, float h, Vector2 pos)
+    {
+        var rt = (RectTransform)img.transform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = new Vector2(w, h);
+    }
+
+    private void Center(Image img, float w, float h) => Center(img, w, h, Vector2.zero);
+
+    private void Stretch(TMP_Text t)
+    {
+        var rt = (RectTransform)t.transform;
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
+    }
+
     private TMP_Text NewText(Transform parent, string n, float size, Vector2 pos, Vector2 sd, TMP_FontAsset font)
     {
         var go = new GameObject(n, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var rt = (RectTransform)go.transform;
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f); rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = pos; rt.sizeDelta = sd;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = pos;
+        rt.sizeDelta = sd;
         var t = go.AddComponent<TextMeshProUGUI>();
-        t.fontSize = size; t.raycastTarget = false;
+        t.fontSize = size;
+        t.raycastTarget = false;
         if (font != null) t.font = font;
         return t;
-    }
-
-    private Button NewButton(Transform parent, string n, Vector2 pos, Vector2 sd, UITheme th, out TMP_Text label)
-    {
-        var img = NewImage(parent, n, th != null ? th.accent : new Color(0.85f, 0.78f, 0.45f, 1f));
-        var rt = (RectTransform)img.transform;
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f); rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = pos; rt.sizeDelta = sd;
-        var btn = img.gameObject.AddComponent<Button>();
-        btn.targetGraphic = img;
-        label = NewText(rt, "Label", 22f, Vector2.zero, sd, th != null ? th.headerFont : null);
-        label.alignment = TextAlignmentOptions.Center;
-        label.color = th != null ? th.cardBottom : Color.black;
-        return btn;
     }
 
     private void OnEnable() { StartCoroutine(Bind()); }
@@ -142,6 +238,7 @@ public class SkillTreeWidget : MonoBehaviour
         _panel.alpha = 1f; _panel.interactable = true; _panel.blocksRaycasts = true;
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
+        if (_transition != null) _transition.Play();
         Refresh();
     }
 
@@ -162,17 +259,71 @@ public class SkillTreeWidget : MonoBehaviour
 
     private void Refresh()
     {
+        var th = UITheme.Active;
+        Color accent = th != null ? th.accent : new Color(0.85f, 0.78f, 0.45f, 1f);
+        Color cardBottom = th != null ? th.cardBottom : new Color(0.075f, 0.09f, 0.11f, 1f);
+        Color cardTop = th != null ? th.cardTop : new Color(0.122f, 0.149f, 0.18f, 1f);
+        Color textMuted = th != null ? th.textMuted : new Color(0.62f, 0.66f, 0.72f, 1f);
+        Color ready = th != null ? th.successTop : new Color(0.31f, 0.878f, 0.541f, 1f);
+        Color dimLine = new Color(textMuted.r, textMuted.g, textMuted.b, 0.3f);
+
         int sp = _mgr != null ? _mgr.CurrentSkillPoints : 0;
         _sp.text = "SKILL POINTS : " + sp;
-        for (int i = 0; i < 3; i++)
+
+        for (int t = 0; t < Trees; t++)
         {
-            int lvl = _mgr == null ? 0 : (i == 0 ? _mgr.MovementLevel : i == 1 ? _mgr.AimLevel : _mgr.IntelligenceLevel);
-            int cost = _mgr == null ? 0 : (i == 0 ? _mgr.NextMovementCost : i == 1 ? _mgr.NextAimCost : _mgr.NextIntelligenceCost);
+            int lvl = _mgr == null ? 0 : (t == 0 ? _mgr.MovementLevel : t == 1 ? _mgr.AimLevel : _mgr.IntelligenceLevel);
+            int cost = _mgr == null ? 0 : (t == 0 ? _mgr.NextMovementCost : t == 1 ? _mgr.NextAimCost : _mgr.NextIntelligenceCost);
             bool maxed = lvl >= SkillTreeManager.MaxLevel;
-            _lvl[i].text = "Level " + lvl + " / " + SkillTreeManager.MaxLevel;
-            _btnLabel[i].text = maxed ? "MAX" : ("UPGRADE  " + cost + " SP");
             bool canAfford = !maxed && _mgr != null && sp >= cost;
-            _btn[i].interactable = canAfford;
+
+            for (int n = 0; n < NodesPerTree; n++)
+            {
+                int idx = t * NodesPerTree + n;
+                bool unlocked = n < lvl;
+                bool isNext = n == lvl && !maxed;
+
+                if (unlocked)
+                {
+                    _nodeBg[idx].color = accent;
+                    _nodeLabel[idx].color = cardBottom;
+                    _nodeBtn[idx].interactable = false;
+                }
+                else if (isNext)
+                {
+                    _nodeBg[idx].color = canAfford ? ready : cardTop;
+                    _nodeLabel[idx].color = canAfford ? cardBottom : textMuted;
+                    _nodeBtn[idx].interactable = canAfford;
+                }
+                else
+                {
+                    _nodeBg[idx].color = cardTop;
+                    _nodeLabel[idx].color = textMuted;
+                    _nodeBtn[idx].interactable = false;
+                }
+                _nodeLabel[idx].text = (n + 1).ToString();
+            }
+
+            // connection lines: accent if both endpoints unlocked, ready if upper is next+affordable, dim if both locked
+            for (int n = 0; n < NodesPerTree - 1; n++)
+            {
+                int lineIdx = t * (NodesPerTree - 1) + n;
+                bool upperUnlocked = (n + 1) < lvl;
+                bool upperIsNext = (n + 1) == lvl && !maxed;
+
+                if (upperUnlocked)
+                    _lines[lineIdx].color = accent;
+                else if (upperIsNext)
+                    _lines[lineIdx].color = canAfford ? ready : textMuted;
+                else
+                    _lines[lineIdx].color = dimLine;
+            }
+
+            _cost[t].text = maxed ? "MAXED" : ("NEXT  " + cost + " SP");
+            _cost[t].color = maxed ? accent : (canAfford ? ready : textMuted);
+
+            _next[t].text = maxed ? "—" : SkillTreeManager.GetNodeDescription(t, lvl + 1);
+            _next[t].color = maxed ? textMuted : (canAfford ? ready : textMuted);
         }
     }
 }
