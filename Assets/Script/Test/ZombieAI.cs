@@ -3,9 +3,10 @@ using UnityEngine.AI;
 using cowsins;
 
 /// <summary>
-/// Một entry trong loot table của zombie. Mỗi entry roll độc lập theo
-/// <see cref="dropChance"/>; nếu trúng thì rơi đúng 1 bản sao của
-/// <see cref="prefab"/>. Có thể có nhiều entry trùng prefab.
+/// Một entry trong loot table. Mỗi entry roll độc lập theo
+/// <see cref="dropChance"/>; nếu trúng thì rơi <see cref="minQuantity"/>..
+/// <see cref="maxQuantity"/> bản sao của <see cref="prefab"/> (mỗi bản sao
+/// pop hướng riêng). Có thể có nhiều entry trùng prefab.
 /// </summary>
 [System.Serializable]
 public struct LootDropEntry
@@ -16,6 +17,12 @@ public struct LootDropEntry
     [Range(0, 100)]
     [Tooltip("Xác suất rơi entry này (0-100). Mỗi entry roll độc lập.")]
     public float dropChance;
+
+    [Tooltip("Số bản sao tối thiểu nếu entry trúng (mặc định 1).")]
+    public int minQuantity;
+
+    [Tooltip("Số bản sao tối đa nếu entry trúng (mặc định 1).")]
+    public int maxQuantity;
 }
 
 [RequireComponent(typeof(NavMeshAgent))]
@@ -462,48 +469,15 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     void TryDropLoot()
     {
-        bool usedTable = false;
-
-        if (lootTable != null && lootTable.Length > 0)
-        {
-            usedTable = true;
-            for (int i = 0; i < lootTable.Length; i++)
-            {
-                var entry = lootTable[i];
-                if (entry.prefab == null)
-                    continue;
-
-                if (Random.Range(0f, 100f) <= entry.dropChance)
-                    SpawnLoot(entry.prefab);
-            }
-        }
-
-        // Fallback: legacy single-drop khi lootTable trống.
-        if (!usedTable && dropPrefab != null &&
-            Random.Range(0f, 100f) <= dropChance)
-        {
-            SpawnLoot(dropPrefab);
-        }
-    }
-
-    void SpawnLoot(GameObject prefab)
-    {
-        Vector3 dropPos = transform.position;
-        dropPos.y += dropHeightOffset;
-        GameObject loot = Instantiate(
-            prefab,
-            dropPos,
-            Quaternion.identity);
-
-        if (popLootOnDeath)
-        {
-            var pop = loot.GetComponent<LootPop>();
-            if (pop == null)
-                pop = loot.AddComponent<LootPop>();
-            pop.upwardSpeed = lootPopUpwardSpeed;
-            pop.horizontalSpeed = lootPopHorizontalSpeed;
-            pop.Launch(dropPos);
-        }
+        LootDropHelper.TryDropLoot(
+            lootTable,
+            dropPrefab,
+            dropChance,
+            transform.position,
+            dropHeightOffset,
+            popLootOnDeath,
+            lootPopUpwardSpeed,
+            lootPopHorizontalSpeed);
     }
 
     void FaceTarget()

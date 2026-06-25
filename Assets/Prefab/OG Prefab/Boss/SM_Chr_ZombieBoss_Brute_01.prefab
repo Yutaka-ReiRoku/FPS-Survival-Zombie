@@ -1283,6 +1283,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TankAI
   target: {fileID: 0}
   maxHealth: 100
+  currentHealth: 0
   detectRange: 20
   runSpeed: 6
   rotationSpeed: 10
@@ -1296,6 +1297,21 @@ MonoBehaviour:
   jumpRadius: 10
   shakeCameraOnLand: 1
   screamDuration: 2.5
+  lootTable:
+  - prefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
+    dropChance: 100
+    minQuantity: 3
+    maxQuantity: 5
+  - prefab: {fileID: 3821068731288931261, guid: 5144d72f9767e2f4aacd4ed8fdf87ad0, type: 3}
+    dropChance: 100
+    minQuantity: 1
+    maxQuantity: 3
+  dropPrefab: {fileID: 0}
+  dropChance: 100
+  dropHeightOffset: 0.5
+  popLootOnDeath: 1
+  lootPopUpwardSpeed: 6
+  lootPopHorizontalSpeed: 4
 --- !u!1 &1407548066537998
 GameObject:
   m_ObjectHideFlags: 0

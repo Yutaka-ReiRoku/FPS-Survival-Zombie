@@ -848,7 +848,22 @@ MonoBehaviour:
   acidPoolLifetime: 10
   prefab: {fileID: 0}
   experienceReward: 60
-  coinReward: 25
+  coinReward: 250
+  lootTable:
+  - prefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
+    dropChance: 100
+    minQuantity: 1
+    maxQuantity: 3
+  - prefab: {fileID: 3821068731288931261, guid: 5144d72f9767e2f4aacd4ed8fdf87ad0, type: 3}
+    dropChance: 100
+    minQuantity: 3
+    maxQuantity: 5
+  dropPrefab: {fileID: 0}
+  dropChance: 100
+  dropHeightOffset: 0.5
+  popLootOnDeath: 1
+  lootPopUpwardSpeed: 5
+  lootPopHorizontalSpeed: 3.5
   explodeFxDelay: 0.25
   cleanupDelay: 2.5
 --- !u!195 &7774266083722105626

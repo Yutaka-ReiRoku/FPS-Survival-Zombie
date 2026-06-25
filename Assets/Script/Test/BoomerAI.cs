@@ -43,6 +43,22 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     public float experienceReward = 60f;
     public int coinReward = 25;
 
+    [Header("Loot (dropped only when the player shoots it down)")]
+    [Tooltip("Loot table: mỗi entry roll độc lập, có thể rơi 0..N loại cùng lúc.")]
+    public LootDropEntry[] lootTable;
+    [Tooltip("Fallback khi lootTable trống: loot đơn lẻ theo dropChance.")]
+    public GameObject dropPrefab;
+    [Range(0, 100)]
+    public float dropChance = 100f;
+    [Tooltip("Khoảng cách nâng loot lên so với vị trí boomer khi rớt xuống.")]
+    public float dropHeightOffset = 1.5f;
+    [Tooltip("Bật hiệu ứng loot nhảy ra khỏi boomer khi chết.")]
+    public bool popLootOnDeath = true;
+    [Tooltip("Vận tốc đứng (lên) khi loot bị bắn ra (m/s).")]
+    public float lootPopUpwardSpeed = 5f;
+    [Tooltip("Vận tốc ngang tối đa khi loot bị bắn ra (m/s).")]
+    public float lootPopHorizontalSpeed = 3.5f;
+
     [Header("Self-Contained Timing (independent of animation events)")]
     [Tooltip("Delay after the Explode trigger before the blast actually fires.")]
     public float explodeFxDelay = 0.25f;
@@ -443,6 +459,20 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         if (agent != null)
         {
             agent.enabled = false;
+        }
+
+        // Chỉ rơi loot khi player bắn chết (Killed), không rơi khi tự nổ (SelfExplode).
+        if (explosionType == ExplosionType.Killed)
+        {
+            LootDropHelper.TryDropLoot(
+                lootTable,
+                dropPrefab,
+                dropChance,
+                transform.position,
+                dropHeightOffset,
+                popLootOnDeath,
+                lootPopUpwardSpeed,
+                lootPopHorizontalSpeed);
         }
 
         if (prefab != null)

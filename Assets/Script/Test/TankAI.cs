@@ -35,6 +35,22 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     [Header("Scream")]
     public float screamDuration = 2.5f;
 
+    [Header("Loot")]
+    [Tooltip("Loot table: mỗi entry roll độc lập, có thể rơi 0..N loại cùng lúc.")]
+    public LootDropEntry[] lootTable;
+    [Tooltip("Fallback khi lootTable trống: loot đơn lẻ theo dropChance.")]
+    public GameObject dropPrefab;
+    [Range(0, 100)]
+    public float dropChance = 100f;
+    [Tooltip("Khoảng cách nâng loot lên so với vị trí boss khi rớt xuống.")]
+    public float dropHeightOffset = 2f;
+    [Tooltip("Bật hiệu ứng loot nhảy ra khỏi boss khi chết.")]
+    public bool popLootOnDeath = true;
+    [Tooltip("Vận tốc đứng (lên) khi loot bị bắn ra (m/s).")]
+    public float lootPopUpwardSpeed = 6f;
+    [Tooltip("Vận tốc ngang tối đa khi loot bị bắn ra (m/s).")]
+    public float lootPopHorizontalSpeed = 4f;
+
     private Animator animator;
     private NavMeshAgent agent;
     private Rigidbody rb;
@@ -470,6 +486,16 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             rb.isKinematic = true;
             rb.useGravity = false;
         }
+
+        LootDropHelper.TryDropLoot(
+            lootTable,
+            dropPrefab,
+            dropChance,
+            transform.position,
+            dropHeightOffset,
+            popLootOnDeath,
+            lootPopUpwardSpeed,
+            lootPopHorizontalSpeed);
 
         Destroy(
             gameObject,
