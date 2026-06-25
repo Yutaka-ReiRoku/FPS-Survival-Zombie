@@ -51,9 +51,14 @@ namespace cowsins
 #else
             if (player.GetComponent<IWeaponReferenceProvider>().Weapon == null) return;
 #endif
-            alreadyInteracted = true; 
+            alreadyInteracted = true;
             base.Interact(player);
-            player.GetComponent<IWeaponReferenceProvider>().Id.totalBullets += amountOfBullets;
+            var wRef = player.GetComponent<IWeaponReferenceProvider>();
+            wRef.Id.totalBullets += amountOfBullets;
+            // Fire OnAmmoChanged so HUD updates reserve ammo immediately on pickup.
+            var wEvents = player.GetComponent<IWeaponEventsProvider>();
+            if (wEvents != null && wEvents.Events != null)
+                wEvents.Events.OnAmmoChanged?.Invoke(false);
             Destroy(this.gameObject);
         }
         public void SetBullets(BulletsItem_SO bulletsSO, int amountOfBullets)

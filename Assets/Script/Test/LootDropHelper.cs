@@ -8,17 +8,9 @@ using UnityEngine;
 public static class LootDropHelper
 {
     /// <summary>
-    /// Ammo drop toàn cục: nếu != null, mỗi enemy chết có几率 rơi ammo prefab.
-    /// Được khởi tạo từ WaveManager (hoặc manager khác) trong Awake.
-    /// </summary>
-    public static GameObject AmmoDropPrefab;
-    public static float AmmoDropChance = 25f;
-
-    /// <summary>
     /// Roll loot table (mỗi entry độc lập) + fallback legacy, spawn tại
     /// <paramref name="position"/> + <paramref name="heightOffset"/>, gắn
     /// <see cref="LootPop"/> nếu <paramref name="popOnDeath"/>.
-    /// Cuối cùng, roll ammo drop toàn cục nếu <see cref="AmmoDropPrefab"/> được set.
     /// </summary>
     public static void TryDropLoot(
         LootDropEntry[] lootTable,
@@ -57,13 +49,6 @@ public static class LootDropHelper
             Random.Range(0f, 100f) <= fallbackDropChance)
         {
             SpawnLoot(fallbackPrefab, position, heightOffset,
-                      popOnDeath, popUpwardSpeed, popHorizontalSpeed);
-        }
-
-        // Ammo drop toàn cục — độc lập với loot table, áp dụng cho mọi enemy.
-        if (AmmoDropPrefab != null && Random.Range(0f, 100f) <= AmmoDropChance)
-        {
-            SpawnLoot(AmmoDropPrefab, position, heightOffset,
                       popOnDeath, popUpwardSpeed, popHorizontalSpeed);
         }
     }
