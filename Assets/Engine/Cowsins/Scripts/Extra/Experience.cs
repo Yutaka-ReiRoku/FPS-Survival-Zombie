@@ -32,8 +32,11 @@ namespace cowsins
             if (playerObj != null)
             {
                 player = playerObj.transform;
-                intelligence = playerObj.GetComponent<IntelligenceSkillSystem>();
             }
+
+            // IntelligenceSkillSystem lives on a manager GameObject (not the
+            // tagged Player root), so search globally instead of via GetComponent.
+            intelligence = FindObjectOfType<IntelligenceSkillSystem>();
         }
 
         private void Update()
@@ -71,8 +74,10 @@ namespace cowsins
             // Generate a random amount of XP.
             float amount = Random.Range(minXp, maxXp);
 
+            // IntelligenceSkillSystem lives on a manager GameObject, not on the
+            // player collider that entered the trigger, so search globally.
             var intelligenceStats =
-                other.GetComponent<IntelligenceSkillSystem>();
+                FindObjectOfType<IntelligenceSkillSystem>();
 
             if (intelligenceStats != null)
             {

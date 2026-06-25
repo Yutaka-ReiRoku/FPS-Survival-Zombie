@@ -11,14 +11,9 @@ namespace cowsins
         {
             outline = GetComponent<Outline>();
 
-            GameObject player =
-                GameObject.FindGameObjectWithTag("Player");
-
-            if (player != null)
-            {
-                intelligence =
-                    player.GetComponent<IntelligenceSkillSystem>();
-            }
+            // IntelligenceSkillSystem lives on a manager GameObject (not the
+            // tagged Player root), so search globally instead of via GetComponent.
+            intelligence = FindObjectOfType<IntelligenceSkillSystem>();
 
             if (outline != null)
             {

@@ -7,6 +7,50 @@ namespace cowsins
         [SerializeField] private int minCoins, maxCoins;
 
         [SerializeField] private AudioClip collectCoinSFX;
+
+        private Transform player;
+        private IntelligenceSkillSystem intelligence;
+
+        private void Start()
+        {
+            GameObject playerObj =
+                GameObject.FindGameObjectWithTag("Player");
+
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+            }
+
+            // IntelligenceSkillSystem lives on a manager GameObject (not the
+            // tagged Player root), so search globally instead of via GetComponent.
+            intelligence = FindObjectOfType<IntelligenceSkillSystem>();
+        }
+
+        private void Update()
+        {
+            MagnetCoin();
+        }
+
+        private void MagnetCoin()
+        {
+            if (player == null || intelligence == null)
+                return;
+
+            if (intelligence.XPPickupRadius <= 0)
+                return;
+
+            float distance =
+                Vector3.Distance(transform.position, player.position);
+
+            if (distance <= intelligence.XPPickupRadius)
+            {
+                transform.position = Vector3.MoveTowards(
+                    transform.position,
+                    player.position,
+                    15f * Time.deltaTime);
+            }
+        }
+
         public override void TriggerEnter(Collider other)
         {
             int amountOfCoins = Random.Range(minCoins, maxCoins);
