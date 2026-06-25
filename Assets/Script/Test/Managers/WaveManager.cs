@@ -17,11 +17,20 @@ public class WaveManager : MonoBehaviour
     [Header("UI")]
     public TMP_Text waveText;
 
+    [Header("Ammo Drops")]
+    [Tooltip("Prefab đạn rơi khi zombie chết. Mặc định: Bullet Pickeable.")]
+    [SerializeField] private GameObject ammoDropPrefab;
+    [Tooltip("Tỉ lệ rơi đạn (0-100). Mặc định 25%.")]
+    [Range(0, 100)]
+    [SerializeField] private float ammoDropChance = 25f;
+
     private int _lastWave = -1;
 
     private void Awake()
     {
         Instance = this;
+        LootDropHelper.AmmoDropPrefab = ammoDropPrefab;
+        LootDropHelper.AmmoDropChance = ammoDropChance;
     }
 
     private void Start()
