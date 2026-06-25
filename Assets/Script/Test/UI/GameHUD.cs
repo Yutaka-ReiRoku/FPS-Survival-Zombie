@@ -18,9 +18,15 @@ public class GameHUD : MonoBehaviour
     [Tooltip("Total collectible journals in the level (CollectibleManager has no public total).")]
     public int collectiblesTotal = 6;
 
+    [Header("Coins")]
+    [Tooltip("Coin counter text. Reads from CowsinsHUDAdapter (engine-free).")]
+    public TMP_Text coinsText;
+    public string coinsPrefix = "Coins : ";
+
     private int _lastWave = -1, _lastKilled = -1, _lastToKill = -1;
     private int _lastKills = -1, _lastScore = -1, _lastHeadshots = -1, _lastSec = -1;
     private int _lastCollectibles = -1;
+    private int _lastCoins = -1;
 
     private void Update()
     {
@@ -63,6 +69,17 @@ public class GameHUD : MonoBehaviour
             {
                 _lastCollectibles = c;
                 collectiblesText.text = $"Journals : {c}/{collectiblesTotal}";
+            }
+        }
+
+        if (coinsText != null)
+        {
+            var adapter = CowsinsHUDAdapter.Instance;
+            int coins = adapter != null ? adapter.Coins : 0;
+            if (coins != _lastCoins)
+            {
+                _lastCoins = coins;
+                coinsText.text = coinsPrefix + coins.ToString();
             }
         }
     }
