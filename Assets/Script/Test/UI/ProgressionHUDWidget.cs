@@ -15,10 +15,18 @@ public class ProgressionHUDWidget : MonoBehaviour
 
     [Header("XP / Level")]
     public TMP_Text levelText;
-    public Image xpFill;
+    public Slider xpSlider;       // non-interactable; value driven by adapter
+    public Image xpGhost;         // optional delayed trail (Filled Image)
     public string levelPrefix = "LV ";
 
+    [Header("Tuning")]
+    [Tooltip("Damped lerp rate for XP fill (higher = snappier).")]
+    public float xpDamping = 6f;
+    [Tooltip("Damped lerp rate for XP ghost trail.")]
+    public float xpGhostDamping = 2.5f;
+
     private CowsinsHUDAdapter _adapter;
+    private float _xpTarget;
 
     private void OnEnable() { StartCoroutine(Bind()); }
 
@@ -32,6 +40,14 @@ public class ProgressionHUDWidget : MonoBehaviour
         }
         _adapter = CowsinsHUDAdapter.Instance;
         if (_adapter == null) yield break;
+        // Configure slider as read-only HUD bar
+        if (xpSlider != null)
+        {
+            xpSlider.interactable = false;
+            xpSlider.minValue = 0f;
+            xpSlider.maxValue = 1f;
+            xpSlider.wholeNumbers = false;
+        }
         _adapter.OnCoinsChanged += HandleCoins;
         _adapter.OnXpChanged += HandleXp;
         HandleCoins(_adapter.Coins);
@@ -55,6 +71,21 @@ public class ProgressionHUDWidget : MonoBehaviour
     private void HandleXp(int level, float fill)
     {
         if (levelText != null) levelText.text = levelPrefix + level.ToString();
-        if (xpFill != null) xpFill.fillAmount = Mathf.Clamp01(fill);
+        _xpTarget = Mathf.Clamp01(fill);
+    }
+
+    private void Update()
+    {
+        float dt = Time.unscaledDeltaTime;
+        if (xpSlider != null)
+        {
+            float k = 1f - Mathf.Exp(-xpDamping * dt);
+            xpSlider.value = Mathf.Lerp(xpSlider.value, _xpTarget, k);
+        }
+        if (xpGhost != null)
+        {
+            if (xpGhost.fillAmount < _xpTarget) xpGhost.fillAmount = _xpTarget;
+            else xpGhost.fillAmount = Mathf.Lerp(xpGhost.fillAmount, _xpTarget, 1f - Mathf.Exp(-xpGhostDamping * dt));
+        }
     }
 }
