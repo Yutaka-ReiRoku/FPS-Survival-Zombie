@@ -1650,6 +1650,7 @@ MonoBehaviour:
   footstepClip: {fileID: 0}
   dropPrefab: {fileID: 3821068731288931261, guid: 5144d72f9767e2f4aacd4ed8fdf87ad0, type: 3}
   dropChance: 50
+  dropHeightOffset: 0.5
   experienceReward: 10
   headshotBonusExperience: 5
   coinReward: 5

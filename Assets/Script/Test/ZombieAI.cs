@@ -70,6 +70,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     public GameObject dropPrefab;
     [Range(0, 100)]
     public float dropChance = 50f;
+    [Tooltip("Khoảng cách nâng loot lên so với vị trí zombie khi rớt xuống.")]
+    public float dropHeightOffset = 1.5f;
 
     [Header("Rewards")]
     public float experienceReward = 10f;
@@ -442,9 +444,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         if (chance <= dropChance)
         {
+            Vector3 dropPos = transform.position;
+            dropPos.y += dropHeightOffset;
             Instantiate(
                 dropPrefab,
-                transform.position,
+                dropPos,
                 Quaternion.identity);
         }
     }
