@@ -45,11 +45,30 @@ namespace cowsins
 
         public void ResetExperience() => totalExperience = 0;
 
+        // Requirement (cumulative XP threshold) for a given (0-based) level. Beyond the
+        // defined array the threshold keeps growing by the same step as the last two
+        // defined entries, so leveling never stops but also never loops infinitely.
+        public float GetRequirement(int level)
+        {
+            if (experienceRequirements == null || experienceRequirements.Length == 0)
+                return float.MaxValue;
+            if (level < 0)
+                return float.MaxValue;
+            int n = experienceRequirements.Length;
+            if (level < n)
+                return experienceRequirements[level];
+            float last = experienceRequirements[n - 1];
+            float step = n >= 2 ? last - experienceRequirements[n - 2] : last;
+            if (step <= 0) step = last; // fallback: grow by last value itself
+            return last + step * (level - (n - 1));
+        }
+
         // check if the player has leveled up.
         private void CheckForLevelUp()
         {
-            // While the player's level is less than the maximum level and their total experience is greater than the experience required for the next level, increase the player's level.
-            while (playerLevel < experienceRequirements.Length - 1 && totalExperience >= experienceRequirements[playerLevel])
+            // No hard cap: once past the defined array the last requirement repeats,
+            // so the player can keep leveling forever.
+            while (totalExperience >= GetRequirement(playerLevel))
             {
                 playerLevel++;
                 skillPoints++;
@@ -60,7 +79,7 @@ namespace cowsins
         private void CheckForLevelDown()
         {
             // While the player's level is greater than the minimum level and their total experience is less than the experience required for the current level, decrease the player's level.
-            while (playerLevel > 0 && totalExperience < experienceRequirements[playerLevel])
+            while (playerLevel > 0 && totalExperience < GetRequirement(playerLevel))
             {
                 playerLevel--;
             }
@@ -77,7 +96,7 @@ namespace cowsins
         public float GetCurrentExperience()
         {
             // Calculate the player's current experience by subtracting the experience required for the previous level from their total experience.
-            float previousLevelExperience = playerLevel > 0 ? experienceRequirements[playerLevel - 1] : 0;
+            float previousLevelExperience = playerLevel > 0 ? GetRequirement(playerLevel - 1) : 0;
             return totalExperience - previousLevelExperience;
         }
         public bool SpendSkillPoints(int amount)

@@ -566,9 +566,9 @@ public class CowsinsHUDAdapter : MonoBehaviour
         if (xp == null) { OnXpChanged?.Invoke(PlayerLevel, XpFill); return; }
         PlayerLevel = xp.GetPlayerLevel();
         float fill = 0f;
-        var reqs = xp.experienceRequirements;
-        if (reqs != null && xp.playerLevel >= 0 && xp.playerLevel < reqs.Length && reqs[xp.playerLevel] > 0)
-            fill = Mathf.Clamp01(xp.GetCurrentExperience() / (float)reqs[xp.playerLevel]);
+        float req = xp.GetRequirement(xp.playerLevel);
+        if (req > 0)
+            fill = Mathf.Clamp01(xp.GetCurrentExperience() / req);
         XpFill = fill;
         OnXpChanged?.Invoke(PlayerLevel, XpFill);
     }

@@ -30,6 +30,15 @@ namespace cowsins
         public void AddHealth(int amount)
         {
             bonusHealth += amount;
+            // Apply to the live PlayerStats so maxHealth/health update immediately
+            // (PlayerStats.Start only reads bonusHealth once at spawn).
+            var stats = FindObjectOfType<PlayerStats>();
+            if (stats != null)
+            {
+                stats.maxHealth += amount;
+                stats.health = Mathf.Min(stats.health + amount, stats.maxHealth);
+                stats.Events.OnHealthChanged?.Invoke(stats.health, stats.shield, false);
+            }
         }
 
         public void AddShield(int amount)
