@@ -70,6 +70,10 @@ public class JournalUI : MonoBehaviour
         // the journal is open (Time.timeScale=0 alone doesn't block input).
         if (_playerControl != null)
             _playerControl.LoseControl();
+
+        // Hide gameplay HUD while the journal is open.
+        var canvas = GetComponentInParent<Canvas>();
+        PauseManager.SetHUDVisible(canvas != null ? canvas.transform : transform.parent, false);
     }
 
     public void Close()
@@ -93,6 +97,10 @@ public class JournalUI : MonoBehaviour
 
             if (_playerControl != null)
                 _playerControl.GrantControl();
+
+            // Restore gameplay HUD when no other overlay is holding it.
+            var canvas = GetComponentInParent<Canvas>();
+            PauseManager.SetHUDVisible(canvas != null ? canvas.transform : transform.parent, true);
         }
     }
 }

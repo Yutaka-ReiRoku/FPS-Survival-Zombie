@@ -85,7 +85,7 @@ public class PauseManager : MonoBehaviour
         IsPaused = true;
         if (pausePanel != null)
             pausePanel.SetActive(true);
-        SetHUDVisible(false);
+        SetHUDVisible(pausePanel != null ? pausePanel.transform.parent : null, false);
         if (playerControl != null)
             playerControl.LoseControl();
         Time.timeScale = 0f;
@@ -98,7 +98,7 @@ public class PauseManager : MonoBehaviour
         IsPaused = false;
         if (pausePanel != null)
             pausePanel.SetActive(false);
-        SetHUDVisible(true);
+        SetHUDVisible(pausePanel != null ? pausePanel.transform.parent : null, true);
         Time.timeScale = 1f;
         if (playerControl != null)
             playerControl.GrantControl();
@@ -106,15 +106,62 @@ public class PauseManager : MonoBehaviour
         Cursor.visible = false;
     }
 
-    private void SetHUDVisible(bool visible)
+    /// <summary>
+    /// Toggles visibility of gameplay HUD elements and the Cowsins crosshair.
+    /// Shared by PauseManager, SkillTreeWidget and JournalUI so any overlay menu
+    /// can hide the gameplay HUD while it's open. Hides every direct child of
+    /// <paramref name="canvasRoot"/> except the overlay panels themselves
+    /// (PausePanel, GameOverPanel, JournalUI, SkillTreeWidget), so newly added
+    /// gameplay widgets are hidden automatically without updating a name list.
+    /// When restoring (visible=true), only children that were active right before
+    /// the HUD was hidden are re-activated — elements that are intentionally
+    /// inactive (legacy HUD, GameOverPanel, LowHealthVignette, ...) stay off.
+    /// </summary>
+    /// <param name="canvasRoot">Transform whose direct children include the HUD
+    /// elements (typically the UICanvas). Pass null to skip the canvas search.</param>
+    public static void SetHUDVisible(Transform canvasRoot, bool visible)
     {
-        var canvas = pausePanel != null ? pausePanel.transform.parent : null;
-        if (canvas == null) return;
-        string[] hudNames = { "HUD", "HealthCluster", "AmmoCluster", "WeaponIndicator", "ReloadIndicator", "ProgressionCluster", "LowHealthVignette" };
-        foreach (var n in hudNames)
+        if (canvasRoot != null)
         {
-            var go = canvas.Find(n);
-            if (go != null) go.gameObject.SetActive(visible);
+            // Overlay panels that must stay visible regardless of `visible`.
+            string[] overlayNames = { "PausePanel", "GameOverPanel", "JournalUI", "SkillTreeWidget" };
+
+            if (!visible)
+            {
+                // If HUD is already hidden by another overlay, don't overwrite
+                // the recorded state — just let the caller keep the existing hide.
+                if (_hudActiveState.Count > 0) return;
+                // Remember which non-overlay children were active so we can
+                // restore exactly those (and only those) later.
+                for (int i = 0; i < canvasRoot.childCount; i++)
+                {
+                    var child = canvasRoot.GetChild(i);
+                    bool isOverlay = false;
+                    foreach (var n in overlayNames)
+                    {
+                        if (child.name == n) { isOverlay = true; break; }
+                    }
+                    if (!isOverlay)
+                    {
+                        _hudActiveState[child.name] = child.gameObject.activeSelf;
+                        child.gameObject.SetActive(false);
+                    }
+                }
+            }
+            else
+            {
+                // Re-activate only the children that were active before hiding.
+                // If we never hid (no recorded state), do nothing.
+                if (_hudActiveState.Count == 0) return;
+                for (int i = 0; i < canvasRoot.childCount; i++)
+                {
+                    var child = canvasRoot.GetChild(i);
+                    bool wasActive;
+                    if (_hudActiveState.TryGetValue(child.name, out wasActive))
+                        child.gameObject.SetActive(wasActive);
+                }
+                _hudActiveState.Clear();
+            }
         }
         // Ẩn crosshair Cowsins (nằm trong PlayerUI)
         var player = GameObject.FindGameObjectWithTag("Player");
@@ -124,6 +171,11 @@ public class PauseManager : MonoBehaviour
             if (crosshair != null) crosshair.gameObject.SetActive(visible);
         }
     }
+
+    // Remembers which gameplay-HUD children of the canvas were active before
+    // SetHUDVisible(false) was called, so the matching restore only turns back
+    // on the ones that were on — not legacy/conditional elements.
+    private static readonly System.Collections.Generic.Dictionary<string, bool> _hudActiveState = new System.Collections.Generic.Dictionary<string, bool>();
 
     public void GoToMainMenu()
     {

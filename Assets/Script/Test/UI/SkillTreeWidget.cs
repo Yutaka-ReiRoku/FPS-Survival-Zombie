@@ -256,6 +256,9 @@ public class SkillTreeWidget : MonoBehaviour
         // the skill tree is open (Time.timeScale=0 alone doesn't block input).
         if (_playerControl != null)
             _playerControl.LoseControl();
+        // Hide gameplay HUD while the skill tree is open.
+        var canvas = GetComponentInParent<Canvas>();
+        PauseManager.SetHUDVisible(canvas != null ? canvas.transform : transform.parent, false);
         if (_transition != null) _transition.Play();
         Refresh();
     }
@@ -274,6 +277,9 @@ public class SkillTreeWidget : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false;
             if (_playerControl != null)
                 _playerControl.GrantControl();
+            // Restore gameplay HUD when no other overlay is holding it.
+            var canvas = GetComponentInParent<Canvas>();
+            PauseManager.SetHUDVisible(canvas != null ? canvas.transform : transform.parent, true);
         }
     }
 
