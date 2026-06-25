@@ -1840,9 +1840,17 @@ MonoBehaviour:
   hitClip: {fileID: 8300000, guid: 3aa049bb077689345a82a44125e24046, type: 3}
   deathClip: {fileID: 8300000, guid: 0432ef46ba0b9834b8315ea8262e9abc, type: 3}
   footstepClip: {fileID: 0}
+  lootTable:
+  - prefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
+    dropChance: 50
+  - prefab: {fileID: 3821068731288931261, guid: 5144d72f9767e2f4aacd4ed8fdf87ad0, type: 3}
+    dropChance: 80
   dropPrefab: {fileID: 3821068731288931261, guid: 5144d72f9767e2f4aacd4ed8fdf87ad0, type: 3}
   dropChance: 50
   dropHeightOffset: 0.5
+  popLootOnDeath: 1
+  lootPopUpwardSpeed: 4.5
+  lootPopHorizontalSpeed: 2.5
   experienceReward: 10
   headshotBonusExperience: 5
   coinReward: 5

@@ -365,7 +365,7 @@ MonoBehaviour:
     OnInteract:
       m_PersistentCalls:
         m_Calls: []
-  price: 0
+  price: 1000
   loot:
   - {fileID: 3428643961104354711, guid: 1d08260f365dfbf4e8ea905112f1419a, type: 3}
   - {fileID: 39021870808220807, guid: 59f209a6517268e4c899fed4b1697440, type: 3}

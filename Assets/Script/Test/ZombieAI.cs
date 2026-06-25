@@ -2,6 +2,22 @@ using UnityEngine;
 using UnityEngine.AI;
 using cowsins;
 
+/// <summary>
+/// Một entry trong loot table của zombie. Mỗi entry roll độc lập theo
+/// <see cref="dropChance"/>; nếu trúng thì rơi đúng 1 bản sao của
+/// <see cref="prefab"/>. Có thể có nhiều entry trùng prefab.
+/// </summary>
+[System.Serializable]
+public struct LootDropEntry
+{
+    [Tooltip("Prefab loot sẽ rơi (Coin, Experience, Healthpack, ...).")]
+    public GameObject prefab;
+
+    [Range(0, 100)]
+    [Tooltip("Xác suất rơi entry này (0-100). Mỗi entry roll độc lập.")]
+    public float dropChance;
+}
+
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(AudioSource))]
 public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthReadout
@@ -67,11 +83,21 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     public AudioClip footstepClip;
 
     [Header("Loot")]
+    [Tooltip("Loot table mới: mỗi entry roll độc lập, có thể rơi 0..N loại cùng lúc. Để trống nếu muốn dùng dropPrefab/dropChance cũ bên dưới.")]
+    public LootDropEntry[] lootTable;
+
+    [Tooltip("Fallback khi lootTable trống: loot đơn lẻ theo dropChance.")]
     public GameObject dropPrefab;
     [Range(0, 100)]
     public float dropChance = 50f;
     [Tooltip("Khoảng cách nâng loot lên so với vị trí zombie khi rớt xuống.")]
     public float dropHeightOffset = 1.5f;
+    [Tooltip("Bật hiệu ứng loot nhảy ra khỏi zombie khi chết.")]
+    public bool popLootOnDeath = true;
+    [Tooltip("Vận tốc đứng (lên) khi loot bị bắn ra (m/s).")]
+    public float lootPopUpwardSpeed = 4.5f;
+    [Tooltip("Vận tốc ngang tối đa khi loot bị bắn ra (m/s).")]
+    public float lootPopHorizontalSpeed = 2.5f;
 
     [Header("Rewards")]
     public float experienceReward = 10f;
@@ -436,20 +462,47 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     void TryDropLoot()
     {
-        if (dropPrefab == null)
-            return;
+        bool usedTable = false;
 
-        float chance =
-            Random.Range(0f, 100f);
-
-        if (chance <= dropChance)
+        if (lootTable != null && lootTable.Length > 0)
         {
-            Vector3 dropPos = transform.position;
-            dropPos.y += dropHeightOffset;
-            Instantiate(
-                dropPrefab,
-                dropPos,
-                Quaternion.identity);
+            usedTable = true;
+            for (int i = 0; i < lootTable.Length; i++)
+            {
+                var entry = lootTable[i];
+                if (entry.prefab == null)
+                    continue;
+
+                if (Random.Range(0f, 100f) <= entry.dropChance)
+                    SpawnLoot(entry.prefab);
+            }
+        }
+
+        // Fallback: legacy single-drop khi lootTable trống.
+        if (!usedTable && dropPrefab != null &&
+            Random.Range(0f, 100f) <= dropChance)
+        {
+            SpawnLoot(dropPrefab);
+        }
+    }
+
+    void SpawnLoot(GameObject prefab)
+    {
+        Vector3 dropPos = transform.position;
+        dropPos.y += dropHeightOffset;
+        GameObject loot = Instantiate(
+            prefab,
+            dropPos,
+            Quaternion.identity);
+
+        if (popLootOnDeath)
+        {
+            var pop = loot.GetComponent<LootPop>();
+            if (pop == null)
+                pop = loot.AddComponent<LootPop>();
+            pop.upwardSpeed = lootPopUpwardSpeed;
+            pop.horizontalSpeed = lootPopHorizontalSpeed;
+            pop.Launch(dropPos);
         }
     }
 
