@@ -80,6 +80,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private Animator animator;
     private NavMeshAgent agent;
     private AudioSource audioSource;
+    private Rigidbody rb;
 
     private int currentHealth;
 
@@ -111,6 +112,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         audioSource = GetComponent<AudioSource>();
+        rb = GetComponent<Rigidbody>();
 
         // Performance: zombies do not cast/receive shadows (large GPU saving at high counts).
         var smrs = GetComponentsInChildren<SkinnedMeshRenderer>(true);
@@ -155,6 +157,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
             agent.avoidancePriority = Random.Range(30, 70);
         }
+
+        // Restore non-kinematic Rigidbody so physics/collision work normally while alive.
+        if (rb != null)
+            rb.isKinematic = false;
 
         Collider col = GetComponent<Collider>();
         if (col != null)
@@ -395,6 +401,15 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         }
 
         PlaySound(deathClip);
+
+        // Freeze the root Rigidbody BEFORE disabling the NavMeshAgent and collider.
+        // Without this, the non-kinematic Rigidbody (gravity on, position unfrozen)
+        // falls freely once the agent/collider are removed, causing the zombie to
+        // sink into the ground until the head sphere collider stops it, then the
+        // death animation makes it appear to "rise back up". Setting kinematic
+        // suspends physics so the death animation plays in place.
+        if (rb != null)
+            rb.isKinematic = true;
 
         agent.isStopped = true;
         agent.enabled = false;
