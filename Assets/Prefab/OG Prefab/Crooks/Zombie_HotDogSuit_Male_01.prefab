@@ -1790,6 +1790,10 @@ MonoBehaviour:
     dropChance: 10
     minQuantity: 1
     maxQuantity: 1
+  - prefab: {fileID: 4788863507091020778, guid: 231461d17abfcdf439fa0418137c3556, type: 3}
+    dropChance: 10
+    minQuantity: 1
+    maxQuantity: 1
   dropPrefab: {fileID: 3821068731288931261, guid: 5144d72f9767e2f4aacd4ed8fdf87ad0, type: 3}
   dropChance: 50
   dropHeightOffset: 0.5
