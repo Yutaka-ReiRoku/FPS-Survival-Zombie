@@ -1531,7 +1531,7 @@ MonoBehaviour:
     minQuantity: 1
     maxQuantity: 1
   - prefab: {fileID: 6866079498763795897, guid: 95fc0a49ed16b614c87d4c0f46c018eb, type: 3}
-    dropChance: 10
+    dropChance: 5
     minQuantity: 1
     maxQuantity: 1
   - prefab: {fileID: 4788863507091020778, guid: 231461d17abfcdf439fa0418137c3556, type: 3}
