@@ -41,7 +41,9 @@ namespace cowsins
             baseRunSpeed = movement.playerSettings.runSpeed;
             baseAirControl = movement.playerSettings.controlAirborne;
             baseGrappleForce = movement.playerSettings.grappleForce;
-            baseMaxJumps = movement.playerSettings.maxJumps;
+            // The skill tree governs double-jump unlock (movement level 5), so
+            // the base jump count is always 1 regardless of the prefab value.
+            baseMaxJumps = 1;
 
             RefreshMovementStats();
         }
