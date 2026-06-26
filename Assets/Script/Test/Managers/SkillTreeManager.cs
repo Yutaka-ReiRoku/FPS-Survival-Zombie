@@ -135,7 +135,15 @@ namespace cowsins
             {
                 movement.playerSettings.runSpeed *= 1.25f;
                 movement.playerSettings.grappleForce *= 1.25f;
-                movement.playerSettings.canDash = true;
+                // Only (re)enable dash and reset charges when it was previously
+                // disabled. Without this, DashBehaviour.currentDashes stays at 0
+                // (the constructor skips initialization when canDash is false), so
+                // CanExecute() would always return false even after unlocking.
+                if (!movement.playerSettings.canDash)
+                {
+                    movement.playerSettings.canDash = true;
+                    movement.dashBehaviour?.ResetDashes();
+                }
             }
         }
 
