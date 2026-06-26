@@ -22,6 +22,7 @@ namespace cowsins
         private float baseRunSpeed;
         private float baseAirControl;
         private float baseGrappleForce;
+        private int baseMaxJumps;
 
         private void Awake()
         {
@@ -40,6 +41,7 @@ namespace cowsins
             baseRunSpeed = movement.playerSettings.runSpeed;
             baseAirControl = movement.playerSettings.controlAirborne;
             baseGrappleForce = movement.playerSettings.grappleForce;
+            baseMaxJumps = movement.playerSettings.maxJumps;
 
             RefreshMovementStats();
         }
@@ -104,6 +106,7 @@ namespace cowsins
             movement.playerSettings.runSpeed = baseRunSpeed;
             movement.playerSettings.controlAirborne = baseAirControl;
             movement.playerSettings.grappleForce = baseGrappleForce;
+            movement.playerSettings.maxJumps = baseMaxJumps;
 
             movement.playerSettings.canWallRun = false;
             movement.playerSettings.canWallBounce = false;
@@ -123,6 +126,16 @@ namespace cowsins
             {
                 movement.playerSettings.controlAirborne =
                     Mathf.Clamp01(baseAirControl * 1.15f);
+                // Dash unlock (moved from level 5). Only (re)enable and reset
+                // charges when it was previously disabled. Without this,
+                // DashBehaviour.currentDashes stays at 0 (the constructor skips
+                // initialization when canDash is false), so CanExecute() would
+                // always return false even after unlocking.
+                if (!movement.playerSettings.canDash)
+                {
+                    movement.playerSettings.canDash = true;
+                    movement.dashBehaviour?.ResetDashes();
+                }
             }
 
             if (movementLevel >= 4)
@@ -135,14 +148,12 @@ namespace cowsins
             {
                 movement.playerSettings.runSpeed *= 1.25f;
                 movement.playerSettings.grappleForce *= 1.25f;
-                // Only (re)enable dash and reset charges when it was previously
-                // disabled. Without this, DashBehaviour.currentDashes stays at 0
-                // (the constructor skips initialization when canDash is false), so
-                // CanExecute() would always return false even after unlocking.
-                if (!movement.playerSettings.canDash)
+                // Double jump unlock: ensure at least 2 jumps. jumpCount is
+                // refreshed automatically by JumpBehaviour.Tick when grounded,
+                // or on the next OnLand event.
+                if (movement.playerSettings.maxJumps < 2)
                 {
-                    movement.playerSettings.canDash = true;
-                    movement.dashBehaviour?.ResetDashes();
+                    movement.playerSettings.maxJumps = 2;
                 }
             }
         }
@@ -250,9 +261,9 @@ namespace cowsins
                     {
                         case 1: return "Walk Speed +5%  +5 Stamina";
                         case 2: return "Run Speed +10%  +5 Stamina";
-                        case 3: return "Air Control +15%  +5 Stamina";
+                        case 3: return "Air Control +15% & Dash unlocked  +5 Stamina";
                         case 4: return "Wall Run & Wall Bounce unlocked  +5 Stamina";
-                        case 5: return "Dash unlocked, Run +25% & Grapple +25%  +5 Stamina";
+                        case 5: return "Double Jump unlocked, Run +25% & Grapple +25%  +5 Stamina";
                     }
                     break;
                 case 1: // Aim
