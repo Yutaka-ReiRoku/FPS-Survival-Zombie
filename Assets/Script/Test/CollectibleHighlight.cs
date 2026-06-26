@@ -13,7 +13,7 @@ namespace cowsins
 
             // IntelligenceSkillSystem lives on a manager GameObject (not the
             // tagged Player root), so search globally instead of via GetComponent.
-            intelligence = FindObjectOfType<IntelligenceSkillSystem>();
+            intelligence = FindAnyObjectByType<IntelligenceSkillSystem>();
 
             if (outline != null)
             {

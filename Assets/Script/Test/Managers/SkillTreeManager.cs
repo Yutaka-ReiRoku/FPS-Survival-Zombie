@@ -26,7 +26,7 @@ namespace cowsins
         private void Awake()
         {
             movement = GetComponent<PlayerMovement>();
-            if (movement == null) movement = FindObjectOfType<PlayerMovement>();
+            if (movement == null) movement = FindAnyObjectByType<PlayerMovement>();
             intelligenceSystem = GetComponent<IntelligenceSkillSystem>();
             aimSystem = GetComponent<AimSkillSystem>();
 
@@ -56,7 +56,7 @@ namespace cowsins
             // TEST ONLY
             if (Input.GetKeyDown(KeyCode.P))
             {
-                ExperienceManager.Instance.AddExperience(100);
+                ExperienceManager.Instance.AddExperience(1000);
             }
 
             if (Input.GetKeyDown(KeyCode.M))

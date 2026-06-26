@@ -66,7 +66,7 @@ public class GameOverManager : MonoBehaviour
         if (subscribed)
             return;
         if (playerStats == null)
-            playerStats = FindObjectOfType<PlayerStats>();
+            playerStats = FindAnyObjectByType<PlayerStats>();
         if (playerStats != null)
         {
             playerStats.AddOnDieListener(OnPlayerDeath);

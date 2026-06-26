@@ -72,7 +72,7 @@ public class BossHealthBar : MonoBehaviour
             if (_reacquireTimer <= 0f)
             {
                 _reacquireTimer = 0.5f;
-                _boss = FindObjectOfType<TankBossAI>();
+                _boss = FindAnyObjectByType<TankBossAI>();
             }
         }
         Refresh();

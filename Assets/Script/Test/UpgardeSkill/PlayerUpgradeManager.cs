@@ -34,7 +34,7 @@ namespace cowsins
             bonusHealth += amount;
             // Apply to the live PlayerStats so maxHealth/health update immediately
             // (PlayerStats.Start only reads bonusHealth once at spawn).
-            var stats = FindObjectOfType<PlayerStats>();
+            var stats = FindAnyObjectByType<PlayerStats>();
             if (stats != null)
             {
                 stats.maxHealth += amount;
@@ -60,7 +60,7 @@ namespace cowsins
         public void AddStamina(float amount)
         {
             bonusStamina += amount;
-            var movement = FindObjectOfType<PlayerMovement>();
+            var movement = FindAnyObjectByType<PlayerMovement>();
             if (movement != null)
             {
                 movement.playerSettings.maxStamina += amount;
@@ -74,7 +74,7 @@ namespace cowsins
         public void AddDamage(float amount)
         {
             bonusDamage += amount;
-            var multipliers = FindObjectOfType<PlayerMultipliers>();
+            var multipliers = FindAnyObjectByType<PlayerMultipliers>();
             if (multipliers != null)
             {
                 multipliers.DamageMultiplier += amount;

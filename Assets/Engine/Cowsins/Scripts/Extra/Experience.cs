@@ -36,7 +36,7 @@ namespace cowsins
 
             // IntelligenceSkillSystem lives on a manager GameObject (not the
             // tagged Player root), so search globally instead of via GetComponent.
-            intelligence = FindObjectOfType<IntelligenceSkillSystem>();
+            intelligence = FindAnyObjectByType<IntelligenceSkillSystem>();
         }
 
         private void Update()
@@ -77,7 +77,7 @@ namespace cowsins
             // IntelligenceSkillSystem lives on a manager GameObject, not on the
             // player collider that entered the trigger, so search globally.
             var intelligenceStats =
-                FindObjectOfType<IntelligenceSkillSystem>();
+                FindAnyObjectByType<IntelligenceSkillSystem>();
 
             if (intelligenceStats != null)
             {

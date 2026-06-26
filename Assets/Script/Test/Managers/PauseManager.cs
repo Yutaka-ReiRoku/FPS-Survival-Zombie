@@ -63,7 +63,7 @@ public class PauseManager : MonoBehaviour
         if (kb != null && kb.escapeKey.wasPressedThisFrame)
         {
             // If the skill-tree panel is open, Esc closes it instead of pausing.
-            var skillTree = FindObjectOfType<SkillTreeWidget>();
+            var skillTree = FindAnyObjectByType<SkillTreeWidget>();
             if (skillTree != null && skillTree.IsOpen)
             {
                 skillTree.Close();

@@ -42,7 +42,7 @@ public class JournalUI : MonoBehaviour
         // Don't open the journal while the pause menu or skill tree is already open.
         bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
         bool skillTreeOpen = false;
-        var skillTree = FindObjectOfType<SkillTreeWidget>();
+        var skillTree = FindAnyObjectByType<SkillTreeWidget>();
         if (skillTree != null) skillTreeOpen = skillTree.IsOpen;
         if (pauseOpen || skillTreeOpen) return;
 

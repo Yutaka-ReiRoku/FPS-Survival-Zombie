@@ -219,7 +219,7 @@ public class SkillTreeWidget : MonoBehaviour
         while ((_mgr == null || _playerControl == null) && timeout > 0f)
         {
             if (_mgr == null)
-                _mgr = FindObjectOfType<SkillTreeManager>();
+                _mgr = FindAnyObjectByType<SkillTreeManager>();
             if (_playerControl == null)
             {
                 var player = GameObject.FindGameObjectWithTag("Player");

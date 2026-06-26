@@ -56,7 +56,7 @@ public class AIDirector : MonoBehaviour
     private void Start()
     {
         if (player == null)
-            player = FindObjectOfType<PlayerStats>();
+            player = FindAnyObjectByType<PlayerStats>();
 
         if (player != null)
             lastPlayerPosition = player.transform.position;

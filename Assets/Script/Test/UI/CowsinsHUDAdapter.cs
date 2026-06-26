@@ -177,10 +177,10 @@ public class CowsinsHUDAdapter : MonoBehaviour
         float timeout = 12f;
         while (timeout > 0f && (_stats == null || _weapon == null))
         {
-            if (_stats == null) _stats = FindObjectOfType<PlayerStats>();
-            if (_weapon == null) _weapon = FindObjectOfType<WeaponController>();
-            if (_deps == null) _deps = FindObjectOfType<PlayerDependencies>();
-            if (_pm == null) _pm = FindObjectOfType<PlayerMovement>();
+            if (_stats == null) _stats = FindAnyObjectByType<PlayerStats>();
+            if (_weapon == null) _weapon = FindAnyObjectByType<WeaponController>();
+            if (_deps == null) _deps = FindAnyObjectByType<PlayerDependencies>();
+            if (_pm == null) _pm = FindAnyObjectByType<PlayerMovement>();
             // Repoint the engine's stamina output to our headless sink as early as
             // possible so the original Cowsins slider is never re-activated.
             if (_pm != null && _staminaSink == null) SetupStaminaSink();
@@ -198,11 +198,11 @@ public class CowsinsHUDAdapter : MonoBehaviour
         Bind();
 
         // Fallback: if the loop broke on stats/weapon before PlayerMovement appeared.
-        if (_pm == null) _pm = FindObjectOfType<PlayerMovement>();
+        if (_pm == null) _pm = FindAnyObjectByType<PlayerMovement>();
         if (_pm != null && _staminaSink == null) SetupStaminaSink();
 
         // Crosshair-supporting providers (populated in PlayerDependencies.Awake).
-        if (_deps == null) _deps = FindObjectOfType<PlayerDependencies>();
+        if (_deps == null) _deps = FindAnyObjectByType<PlayerDependencies>();
         if (_deps != null)
         {
             _moveState = _deps.PlayerMovementState;

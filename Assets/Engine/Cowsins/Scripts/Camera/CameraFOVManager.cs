@@ -8,6 +8,7 @@ namespace cowsins
         private float wallrunningFOV;
         private float runningFOV;
         private Camera cam;
+        private bool defaultOcclusionCulling;
         private IPlayerMovementStateProvider playerMovement; // IPlayerMovementStateProvider is implemented in PlayerMovement.cs
         private IWeaponReferenceProvider weaponReference; // IWeaponReferenceProvider is implemented in WeaponController.cs
         private IWeaponBehaviourProvider weaponBehaviour; // IWeaponBehaviourProvider is implemented in WeaponController.cs
@@ -18,6 +19,7 @@ namespace cowsins
         public void Initialize(PlayerDependencies playerDependencies)
         {
             cam = GetComponent<Camera>();
+            defaultOcclusionCulling = cam.useOcclusionCulling;
             playerMovement = playerDependencies.PlayerMovementState;
             weaponReference = playerDependencies.WeaponReference;
             weaponBehaviour = playerDependencies.WeaponBehaviour;
@@ -70,8 +72,19 @@ namespace cowsins
             lerpSpeed = playerMovement.FadeFOVAmount;
         }
 
-        public void SetFOVToNormal() => SetFOV(normalFOV);
-        public void SetFOVToWallrun() => SetFOV(wallrunningFOV);
+        public void SetFOVToNormal()
+        {
+            SetFOV(normalFOV);
+            cam.useOcclusionCulling = defaultOcclusionCulling;
+        }
+        public void SetFOVToWallrun()
+        {
+            SetFOV(wallrunningFOV);
+            // Disable occlusion culling during wall run: the camera sits very close to
+            // the wall and the roll tilt can place it inside geometry, which causes
+            // Unity's occlusion culling to incorrectly hide visible objects.
+            cam.useOcclusionCulling = false;
+        }
         public void SetFOVToRun() => SetFOV(runningFOV);
         private void OnAimStart(float aimingOutSpeed)
         {
