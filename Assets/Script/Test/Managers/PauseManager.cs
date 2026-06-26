@@ -24,6 +24,11 @@ public class PauseManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        // Clear any stale HUD-hide state from a previous scene/session.
+        // _hudActiveState is static and survives scene reloads (and play-mode
+        // restarts when "Reload Domain" is off), so leftover entries would make
+        // SetHUDVisible(false) skip hiding the HUD on newly-loaded scenes.
+        _hudActiveState.Clear();
         if (pausePanel != null)
             pausePanel.SetActive(false);
         if (resumeButton != null)
