@@ -108,45 +108,68 @@ namespace cowsins
         private void HitscanShot(float spread)
         {
             onShoot?.Invoke();
-        
-            RaycastHit hit;
-            Transform hitObj;
 
             //This defines the first hit on the object
             Vector3 dir = CowsinsUtilities.GetSpreadDirection(spread, mainCamera);
             Ray ray = new Ray(mainCamera.transform.position, dir);
 
-            if (Physics.Raycast(ray, out hit, weapon.bulletRange, hitLayer))
+            if (!TryRaycastSkipPickups(ray, weapon.bulletRange, hitLayer, out RaycastHit hit))
+                return;
+
+            float dmg = id.damage * multipliers.DamageMultiplier;
+            weaponEvents.Events.OnHit?.Invoke(hit.collider.gameObject.layer, dmg, hit, true);
+            Transform hitObj = hit.collider.transform;
+
+            //Handle Penetration
+            Ray newRay = new Ray(hit.point, ray.direction);
+
+            if (TryRaycastSkipPickups(newRay, id.penetrationAmount, hitLayer, out RaycastHit newHit))
             {
-                float dmg = id.damage * multipliers.DamageMultiplier;
-                weaponEvents.Events.OnHit?.Invoke(hit.collider.gameObject.layer, dmg, hit, true);
-                hitObj = hit.collider.transform;
-
-                //Handle Penetration
-                Ray newRay = new Ray(hit.point, ray.direction);
-                RaycastHit newHit;
-
-                if (Physics.Raycast(newRay, out newHit, id.penetrationAmount, hitLayer))
+                if (hitObj != newHit.collider.transform)
                 {
-                    if (hitObj != newHit.collider.transform)
-                    {
-                        float dmg_ = id.damage * multipliers.DamageMultiplier * weapon.penetrationDamageReduction;
-                        weaponEvents.Events.OnHit?.Invoke(newHit.collider.gameObject.layer, dmg_, newHit, true);
-                    }
-                }
-
-                // Handle Bullet Trails
-                if (weapon.bulletTrail == null) return;
-
-                foreach (var p in firePoint)
-                {
-                    if(p == null) continue;
-
-                    TrailRenderer trail = PoolManager.Instance.GetFromPool(weapon.bulletTrail.gameObject, p.position, Quaternion.identity).GetComponent<TrailRenderer>();
-
-                    playerDependencies.StartCoroutine(SpawnTrail(trail, hit));
+                    float dmg_ = id.damage * multipliers.DamageMultiplier * weapon.penetrationDamageReduction;
+                    weaponEvents.Events.OnHit?.Invoke(newHit.collider.gameObject.layer, dmg_, newHit, true);
                 }
             }
+
+            // Handle Bullet Trails
+            if (weapon.bulletTrail == null) return;
+
+            foreach (var p in firePoint)
+            {
+                if(p == null) continue;
+
+                TrailRenderer trail = PoolManager.Instance.GetFromPool(weapon.bulletTrail.gameObject, p.position, Quaternion.identity).GetComponent<TrailRenderer>();
+
+                playerDependencies.StartCoroutine(SpawnTrail(trail, hit));
+            }
+        }
+
+        /// <summary>
+        /// Raycasts forward but skips any colliders belonging to pickups
+        /// (Pickeable / PowerUp) so ammo/health/weapon drops do not block shots.
+        /// Returns the first "real" hit, or false if none was found.
+        /// </summary>
+        private bool TryRaycastSkipPickups(Ray ray, float maxDistance, LayerMask layerMask, out RaycastHit hit)
+        {
+            Vector3 origin = ray.origin;
+            float remainingDist = maxDistance;
+
+            while (Physics.Raycast(origin, ray.direction, out hit, remainingDist, layerMask))
+            {
+                if (hit.collider.GetComponent<Pickeable>() == null && hit.collider.GetComponent<PowerUp>() == null)
+                    return true;
+
+                // Skip this pickup hit and continue past it
+                float hitDist = hit.distance + 0.001f;
+                origin += ray.direction * hitDist;
+                remainingDist -= hitDist;
+
+                if (remainingDist <= 0) break;
+            }
+
+            hit = default;
+            return false;
         }
         private IEnumerator SpawnTrail(TrailRenderer trail, RaycastHit hit)
         {

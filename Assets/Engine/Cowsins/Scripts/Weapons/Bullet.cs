@@ -58,6 +58,10 @@ namespace cowsins
         {
             if (projectileHasAlreadyHit) return;
 
+            // Pickups (ammo, health, weapons, attachments) should not block projectiles
+            if (other.GetComponent<Pickeable>() != null || other.GetComponent<PowerUp>() != null)
+                return;
+
             IDamageable damageable = other.GetComponent<IDamageable>();
 
             if (other.CompareTag("Critical"))
