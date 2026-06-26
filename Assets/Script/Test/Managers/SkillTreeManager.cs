@@ -107,6 +107,7 @@ namespace cowsins
 
             movement.playerSettings.canWallRun = false;
             movement.playerSettings.canWallBounce = false;
+            movement.playerSettings.canDash = false;
 
             if (movementLevel >= 1)
             {
@@ -134,6 +135,7 @@ namespace cowsins
             {
                 movement.playerSettings.runSpeed *= 1.25f;
                 movement.playerSettings.grappleForce *= 1.25f;
+                movement.playerSettings.canDash = true;
             }
         }
 
@@ -242,7 +244,7 @@ namespace cowsins
                         case 2: return "Run Speed +10%  +5 Stamina";
                         case 3: return "Air Control +15%  +5 Stamina";
                         case 4: return "Wall Run & Wall Bounce unlocked  +5 Stamina";
-                        case 5: return "Run +25% & Grapple +25%  +5 Stamina";
+                        case 5: return "Dash unlocked, Run +25% & Grapple +25%  +5 Stamina";
                     }
                     break;
                 case 1: // Aim
