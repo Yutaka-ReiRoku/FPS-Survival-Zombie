@@ -76,6 +76,11 @@ public static class LootDropHelper
             pop.upwardSpeed = popUpwardSpeed;
             pop.horizontalSpeed = popHorizontalSpeed;
             pop.Launch(dropPos);
+
+            // Gắn trail effect (TrailRenderer + glow particle) runtime.
+            // AddComponent tự trigger Awake/OnEnable, không cần gọi thủ công.
+            if (loot.GetComponent<LootTrail>() == null)
+                loot.AddComponent<LootTrail>();
         }
     }
 }

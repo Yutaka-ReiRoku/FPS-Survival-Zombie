@@ -30,6 +30,9 @@ public class LootPop : MonoBehaviour
     private bool landed;
     private float startY;
 
+    /// <summary>True khi loot đã hạ cánh về độ cao xuất phát.</summary>
+    public bool Landed => landed;
+
     void Awake()
     {
         enabled = false;
