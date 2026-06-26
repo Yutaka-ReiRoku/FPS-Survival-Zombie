@@ -13,6 +13,7 @@ namespace cowsins
         bool IsDead { get; }
         bool FreezePlayerOnDeath { get; }
         void Heal(float amount);
+        void HealHealthOnly(float amount);
         bool IsFullyHealed();
 
         void AddOnDieListener(Action callback);

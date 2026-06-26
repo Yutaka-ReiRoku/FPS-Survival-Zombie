@@ -1,5 +1,5 @@
 /// <summary>
-/// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved. 
+/// This script belongs to cowsinsï¿½ as a part of the cowsinsï¿½ FPS Engine. All rights reserved. 
 /// </summary>
 using UnityEngine;
 namespace cowsins
@@ -10,10 +10,10 @@ namespace cowsins
         public override void Interact(PlayerDependencies player)
         {
             IPlayerStatsProvider playerStatsProvider = player.GetComponent<IPlayerStatsProvider>();
-            if (playerStatsProvider.IsFullyHealed()) return;
+            if (playerStatsProvider.Health >= playerStatsProvider.MaxHealth) return;
             used = true;
             timer = reappearTime;
-            playerStatsProvider.Heal(healAmount);
+            playerStatsProvider.HealHealthOnly(healAmount);
         }
     }
 }

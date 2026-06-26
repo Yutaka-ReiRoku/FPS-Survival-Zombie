@@ -1,5 +1,5 @@
 /// <summary>
-/// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved. 
+/// This script belongs to cowsinsï¿½ as a part of the cowsinsï¿½ FPS Engine. All rights reserved. 
 /// </summary>
 using UnityEngine;
 using UnityEngine.Events;
@@ -40,10 +40,24 @@ namespace cowsins
 
         [SerializeField] private float restartAutoHealTime;
 
+        [Header("Shield Regeneration")]
+        [Tooltip("Enable automatic shield regeneration after a delay without taking damage")]
+        [SerializeField] private bool enableShieldRegen = true;
+
+        [Tooltip("Delay in seconds after last damage taken before shield starts regenerating")]
+        [SerializeField, Min(0)] private float shieldRegenDelay = 5f;
+
+        [Tooltip("Time in seconds between each shield regeneration tick")]
+        [SerializeField, Min(0.01f)] private float shieldRegenRate = 0.5f;
+
+        [Tooltip("Amount of shield restored per regeneration tick")]
+        [SerializeField, Min(0)] private float shieldRegenAmount = 10f;
+
 
         // Internal use
 
         private float? currentFallHeight = null;
+        private float lastDamageTime = -999f;
 
         private bool isDead;
 
@@ -89,6 +103,9 @@ namespace cowsins
 
             if (enableAutoHeal)
                 StartAutoHeal();
+
+            if (enableShieldRegen)
+                InvokeRepeating(nameof(ManageShieldRegen), shieldRegenRate, shieldRegenRate);
         }
 
         private void Update()
@@ -96,6 +113,19 @@ namespace cowsins
             // Manage fall damage
             if (!takesFallDamage || player.IsClimbing || IsDead) return;
             ManageFallDamage();
+        }
+
+        /// <summary>
+        /// Regenerates shield over time after a delay without taking damage.
+        /// </summary>
+        private void ManageShieldRegen()
+        {
+            if (!enableShieldRegen || maxShield <= 0 || IsDead) return;
+            if (shield >= maxShield) return;
+            if (Time.time - lastDamageTime < shieldRegenDelay) return;
+
+            shield = Mathf.Min(shield + shieldRegenAmount, maxShield);
+            Events.OnHealthChanged?.Invoke(health, shield, false);
         }
         /// <summary>
         /// Our Player Stats is IDamageable, which means it can be damaged
@@ -113,6 +143,9 @@ namespace cowsins
 
             // Ensure damage is a positive value
             float damage = Mathf.Abs(_damage);
+
+            // Track last damage time for shield regen delay
+            lastDamageTime = Time.time;
 
             // Trigger damage event
             userEvents.OnDamage.Invoke();
@@ -172,6 +205,20 @@ namespace cowsins
             }
 
             // Notify UI about the health change
+            Events.OnHealthChanged?.Invoke(health, shield, false);
+        }
+
+        /// <summary>
+        /// Heals only health, without affecting shield.
+        /// </summary>
+        public void HealHealthOnly(float healAmount)
+        {
+            if (health >= maxHealth) return;
+
+            float adjustedHealAmount = Mathf.Abs(healAmount * multipliers.HealMultiplier);
+            health = Mathf.Min(health + adjustedHealAmount, maxHealth);
+
+            userEvents.OnHeal.Invoke();
             Events.OnHealthChanged?.Invoke(health, shield, false);
         }
 
