@@ -14,7 +14,8 @@ public class UpgradesWidget : MonoBehaviour
 
     private CanvasGroup _group;
     private TMP_Text _label;
-    private int _lastH = int.MinValue, _lastS = int.MinValue, _lastM = int.MinValue;
+    private int _lastH = int.MinValue, _lastS = int.MinValue;
+    private float _lastSta = float.MinValue, _lastDmg = float.MinValue;
     private Color _accent = new Color(0.85f, 0.78f, 0.45f, 1f);
 
     private void Awake()
@@ -55,16 +56,18 @@ public class UpgradesWidget : MonoBehaviour
         var m = PlayerUpgradeManager.Instance;
         int h = m != null ? m.bonusHealth : 0;
         int s = m != null ? m.bonusShield : 0;
-        int mag = m != null ? m.bonusMagazine : 0;
-        if (h == _lastH && s == _lastS && mag == _lastM) return;
-        _lastH = h; _lastS = s; _lastM = mag;
+        float sta = m != null ? m.bonusStamina : 0f;
+        float dmg = m != null ? m.bonusDamage : 0f;
+        if (h == _lastH && s == _lastS && Mathf.Approximately(sta, _lastSta) && Mathf.Approximately(dmg, _lastDmg)) return;
+        _lastH = h; _lastS = s; _lastSta = sta; _lastDmg = dmg;
 
-        if (h == 0 && s == 0 && mag == 0) { _group.alpha = 0f; return; }
+        if (h == 0 && s == 0 && sta <= 0f && dmg <= 0f) { _group.alpha = 0f; return; }
 
-        var parts = new System.Collections.Generic.List<string>(3);
+        var parts = new System.Collections.Generic.List<string>(4);
         if (h > 0) parts.Add("+" + h + " HP");
         if (s > 0) parts.Add("+" + s + " ARMOR");
-        if (mag > 0) parts.Add("+" + mag + " MAG");
+        if (sta > 0f) parts.Add("+" + sta.ToString("0.#") + " STA");
+        if (dmg > 0f) parts.Add("+" + (dmg * 100f).ToString("0.#") + "% DMG");
         _label.text = "PERKS   " + string.Join("   ", parts);
         _group.alpha = 1f;
     }

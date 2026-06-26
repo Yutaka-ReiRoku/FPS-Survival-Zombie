@@ -11,6 +11,8 @@ namespace cowsins
         public int bonusHealth;
         public int bonusShield;
         public int bonusMagazine;
+        public float bonusStamina;
+        public float bonusDamage;
      
         private void Awake()
         {
@@ -49,6 +51,34 @@ namespace cowsins
         public void AddMagazine(int amount)
         {
             bonusMagazine += amount;
+        }
+
+        /// <summary>
+        /// Increases the player's max stamina by <paramref name="amount"/> and
+        /// applies it to the live PlayerMovement so the stamina bar updates immediately.
+        /// </summary>
+        public void AddStamina(float amount)
+        {
+            bonusStamina += amount;
+            var movement = FindObjectOfType<PlayerMovement>();
+            if (movement != null)
+            {
+                movement.playerSettings.maxStamina += amount;
+            }
+        }
+
+        /// <summary>
+        /// Increases the player's damage multiplier by <paramref name="amount"/> and
+        /// applies it to the live PlayerMultipliers so shots deal more damage immediately.
+        /// </summary>
+        public void AddDamage(float amount)
+        {
+            bonusDamage += amount;
+            var multipliers = FindObjectOfType<PlayerMultipliers>();
+            if (multipliers != null)
+            {
+                multipliers.DamageMultiplier += amount;
+            }
         }
 
     }

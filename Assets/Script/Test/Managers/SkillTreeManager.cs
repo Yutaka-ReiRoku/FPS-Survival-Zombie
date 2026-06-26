@@ -88,9 +88,9 @@ namespace cowsins
 
             RefreshMovementStats();
 
-            // Survival bonus folded into this branch: +20 HP per node.
+            // Survival bonus folded into this branch: +stamina per node.
             if (PlayerUpgradeManager.Instance != null)
-                PlayerUpgradeManager.Instance.AddHealth(MovementHealthPerNode);
+                PlayerUpgradeManager.Instance.AddStamina(MovementStaminaPerNode);
 
             Debug.Log($"Movement upgraded to Node {movementLevel}");
 
@@ -153,9 +153,9 @@ namespace cowsins
 
             aimSystem.RefreshStats(aimLevel);
 
-            // Survival bonus folded into this branch: +5 Magazine per node.
+            // Survival bonus folded into this branch: +damage per node.
             if (PlayerUpgradeManager.Instance != null)
-                PlayerUpgradeManager.Instance.AddMagazine(AimMagazinePerNode);
+                PlayerUpgradeManager.Instance.AddDamage(AimDamagePerNode);
 
             Debug.Log($"Aim upgraded to Node {aimLevel}");
 
@@ -179,6 +179,10 @@ namespace cowsins
             intelligenceLevel++;
 
             intelligenceSystem.RefreshStats(intelligenceLevel);
+
+            // Survival bonus folded into this branch: +HP per node.
+            if (PlayerUpgradeManager.Instance != null)
+                PlayerUpgradeManager.Instance.AddHealth(IntelligenceHealthPerNode);
 
             Debug.Log($"Intelligence upgraded to Node {intelligenceLevel}");
 
@@ -212,12 +216,14 @@ namespace cowsins
         public int NextIntelligenceCost => intelligenceLevel < MaxLevel ? GetCost(intelligenceLevel + 1) : 0;
 
         // Survival bonuses folded into each branch (applied per node via PlayerUpgradeManager).
-        public const int MovementHealthPerNode = 20;
-        public const int AimMagazinePerNode = 5;
+        public const float MovementStaminaPerNode = 5f;
+        public const float AimDamagePerNode = 0.05f;
+        public const int IntelligenceHealthPerNode = 20;
 
         // Total survival bonus per branch at max level (for display).
-        public int MovementTotalHealth => movementLevel * MovementHealthPerNode;
-        public int AimTotalMagazine => aimLevel * AimMagazinePerNode;
+        public float MovementTotalStamina => movementLevel * MovementStaminaPerNode;
+        public float AimTotalDamage => aimLevel * AimDamagePerNode;
+        public int IntelligenceTotalHealth => intelligenceLevel * IntelligenceHealthPerNode;
 
         /// <summary>
         /// Short human-readable description of what a given node grants.
@@ -230,31 +236,31 @@ namespace cowsins
                 case 0: // Movement
                     switch (node)
                     {
-                        case 1: return "Walk Speed +5%  +20 HP";
-                        case 2: return "Run Speed +10%  +20 HP";
-                        case 3: return "Air Control +15%  +20 HP";
-                        case 4: return "Wall Run unlocked  +20 HP";
-                        case 5: return "Run +25% & Grapple +25%  +20 HP";
+                        case 1: return "Walk Speed +5%  +5 Stamina";
+                        case 2: return "Run Speed +10%  +5 Stamina";
+                        case 3: return "Air Control +15%  +5 Stamina";
+                        case 4: return "Wall Run unlocked  +5 Stamina";
+                        case 5: return "Run +25% & Grapple +25%  +5 Stamina";
                     }
                     break;
                 case 1: // Aim
                     switch (node)
                     {
-                        case 1: return "Recoil -10%  +5 Mag";
-                        case 2: return "Crit Chance 10%  +5 Mag";
-                        case 3: return "Crit Chance 20%  +5 Mag";
-                        case 4: return "Crit Damage x1.5  +5 Mag";
-                        case 5: return "One-shot Crook & Bonus dmg  +5 Mag";
+                        case 1: return "Recoil -10%  +5% Dmg";
+                        case 2: return "Crit Chance 10%  +5% Dmg";
+                        case 3: return "Crit Chance 20%  +5% Dmg";
+                        case 4: return "Crit Damage x1.5  +5% Dmg";
+                        case 5: return "One-shot Crook & Bonus dmg  +5% Dmg";
                     }
                     break;
                 case 2: // Intelligence
                     switch (node)
                     {
-                        case 1: return "XP Pickup Radius 5";
-                        case 2: return "XP Multiplier x1.10";
-                        case 3: return "XP Pickup Radius 10";
-                        case 4: return "XP Multiplier x1.15";
-                        case 5: return "XP Radius 15 & Highlight";
+                        case 1: return "XP Pickup Radius 5  +20 HP";
+                        case 2: return "XP Multiplier x1.10  +20 HP";
+                        case 3: return "XP Pickup Radius 10  +20 HP";
+                        case 4: return "XP Multiplier x1.15  +20 HP";
+                        case 5: return "XP Radius 15 & Highlight  +20 HP";
                     }
                     break;
             }
@@ -266,9 +272,9 @@ namespace cowsins
         {
             switch (tree)
             {
-                case 0: return "+ HP";
-                case 1: return "+ MAG";
-                case 2: return "";
+                case 0: return "+ STAMINA";
+                case 1: return "+ DAMAGE";
+                case 2: return "+ HP";
             }
             return "";
         }
