@@ -51,6 +51,10 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     [Tooltip("Vận tốc ngang tối đa khi loot bị bắn ra (m/s).")]
     public float lootPopHorizontalSpeed = 4f;
 
+    [Header("Loot Trail Effect")]
+    [Tooltip("Cấu hình vệt trail + glow particle khi loot bay. Chỉnh trực tiếp trên tank boss.")]
+    public LootTrailSettings lootTrailSettings = new LootTrailSettings();
+
     private Animator animator;
     private NavMeshAgent agent;
     private Rigidbody rb;
@@ -495,7 +499,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             dropHeightOffset,
             popLootOnDeath,
             lootPopUpwardSpeed,
-            lootPopHorizontalSpeed);
+            lootPopHorizontalSpeed,
+            lootTrailSettings);
 
         Destroy(
             gameObject,

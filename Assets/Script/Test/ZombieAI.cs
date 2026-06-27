@@ -106,6 +106,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     [Tooltip("Vận tốc ngang tối đa khi loot bị bắn ra (m/s).")]
     public float lootPopHorizontalSpeed = 2.5f;
 
+    [Header("Loot Trail Effect")]
+    [Tooltip("Cấu hình vệt trail + glow particle khi loot bay. Chỉnh trực tiếp trên zombie.")]
+    public LootTrailSettings lootTrailSettings = new LootTrailSettings();
+
     [Header("Rewards")]
     public float experienceReward = 10f;
     public float headshotBonusExperience = 5f;
@@ -477,7 +481,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             dropHeightOffset,
             popLootOnDeath,
             lootPopUpwardSpeed,
-            lootPopHorizontalSpeed);
+            lootPopHorizontalSpeed,
+            lootTrailSettings);
     }
 
     void FaceTarget()

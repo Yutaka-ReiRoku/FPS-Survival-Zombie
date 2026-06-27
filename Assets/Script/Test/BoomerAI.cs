@@ -59,6 +59,10 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     [Tooltip("Vận tốc ngang tối đa khi loot bị bắn ra (m/s).")]
     public float lootPopHorizontalSpeed = 3.5f;
 
+    [Header("Loot Trail Effect")]
+    [Tooltip("Cấu hình vệt trail + glow particle khi loot bay. Chỉnh trực tiếp trên boomer.")]
+    public LootTrailSettings lootTrailSettings = new LootTrailSettings();
+
     [Header("Self-Contained Timing (independent of animation events)")]
     [Tooltip("Delay after the Explode trigger before the blast actually fires.")]
     public float explodeFxDelay = 0.25f;
@@ -472,7 +476,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                 dropHeightOffset,
                 popLootOnDeath,
                 lootPopUpwardSpeed,
-                lootPopHorizontalSpeed);
+                lootPopHorizontalSpeed,
+                lootTrailSettings);
         }
 
         if (prefab != null)

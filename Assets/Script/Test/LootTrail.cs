@@ -6,8 +6,8 @@ using cowsins;
 /// Trail effect runtime cho loot khi zombie drop: TrailRenderer (vệt mờ
 /// phía sau) + child ParticleSystem (glow sparkles) bám theo loot khi bay.
 /// Tự fade khi loot hạ cánh (LootPop landed) và tự dọn dẹp particle khi
-/// loot bị destroy/pickup. Không cần sửa prefab — gắn runtime qua
-/// <see cref="LootDropHelper"/>.
+/// loot bị destroy/pickup. Settings được truyền từ zombie qua
+/// <see cref="LootTrailSettings"/> thông qua <see cref="LootDropHelper"/>.
 /// </summary>
 [RequireComponent(typeof(LootPop))]
 public class LootTrail : MonoBehaviour
@@ -53,17 +53,39 @@ public class LootTrail : MonoBehaviour
     private LootPop pop;
     private Color color;
     private bool fading;
+    private bool initialized;
 
     void Awake()
     {
         pop = GetComponent<LootPop>();
-        color = ResolveColor();
-        BuildTrail();
-        if (enableGlow) BuildGlow();
+    }
+
+    /// <summary>
+    /// Áp dụng settings từ zombie (enemy) và build trail + glow.
+    /// Phải được gọi ngay sau AddComponent, trước khi OnEnable chạy.
+    /// </summary>
+    public void Initialize(LootTrailSettings settings)
+    {
+        if (settings == null) return;
+
+        trailTime = settings.trailTime;
+        startWidth = settings.startWidth;
+        endWidth = settings.endWidth;
+        enableGlow = settings.enableGlow;
+        glowMaxParticles = settings.glowMaxParticles;
+        glowEmissionRate = settings.glowEmissionRate;
+        glowStartSize = settings.glowStartSize;
+        glowStartLifetime = settings.glowStartLifetime;
+        coinColor = settings.coinColor;
+        xpColor = settings.xpColor;
+        defaultColor = settings.defaultColor;
+
+        Build();
     }
 
     void OnEnable()
     {
+        if (!initialized) return;
         // Bật trail/glow khi loot active. LootPop.Launch() set enabled=true.
         if (trail != null) trail.enabled = true;
         if (glow != null) glow.Play(true);
@@ -94,6 +116,14 @@ public class LootTrail : MonoBehaviour
 
     /// <summary>True nếu LootPop đã hạ cánh (expose qua property).</summary>
     public bool IsLanded => pop != null && pop.Landed;
+
+    void Build()
+    {
+        color = ResolveColor();
+        BuildTrail();
+        if (enableGlow) BuildGlow();
+        initialized = true;
+    }
 
     Color ResolveColor()
     {
@@ -213,3 +243,47 @@ public sealed class CoinMarker : MonoBehaviour { }
 
 /// <summary>Marker tùy chọn để nhận diện Experience.</summary>
 public sealed class XPMarker : MonoBehaviour { }
+
+/// <summary>
+/// Cấu hình trail effect, được chỉnh trên zombie (enemy) Inspector.
+/// Truyền qua <see cref="LootDropHelper"/> khi drop loot.
+/// </summary>
+[System.Serializable]
+public class LootTrailSettings
+{
+    [Header("Trail Renderer")]
+    [Tooltip("Thời gian sống của vệt trail (giây).")]
+    public float trailTime = 0.45f;
+
+    [Tooltip("Bán kính đầu vệt (lúc spawn).")]
+    public float startWidth = 0.35f;
+
+    [Tooltip("Bán kính cuối vệt (mờ dần).")]
+    public float endWidth = 0.02f;
+
+    [Header("Glow Particle")]
+    [Tooltip("Bật particle glow bám theo loot.")]
+    public bool enableGlow = true;
+
+    [Tooltip("Số particle tối đa phát ra trong đời.")]
+    public int glowMaxParticles = 60;
+
+    [Tooltip("Tốc độ phát particle (particle/giây).")]
+    public float glowEmissionRate = 35f;
+
+    [Tooltip("Kích thước particle bắt đầu.")]
+    public float glowStartSize = 0.18f;
+
+    [Tooltip("Thời gian sống mỗi particle (giây).")]
+    public float glowStartLifetime = 0.5f;
+
+    [Header("Colors")]
+    [Tooltip("Màu trail mặc định (vàng) — dùng cho Coin.")]
+    public Color coinColor = new Color(1f, 0.85f, 0.25f, 1f);
+
+    [Tooltip("Màu trail cho Experience (tím).")]
+    public Color xpColor = new Color(0.7f, 0.25f, 1f, 1f);
+
+    [Tooltip("Màu trail fallback (loot khác).")]
+    public Color defaultColor = new Color(1f, 0.7f, 0.4f, 1f);
+}

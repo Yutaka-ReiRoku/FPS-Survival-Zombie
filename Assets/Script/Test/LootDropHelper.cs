@@ -3,14 +3,16 @@ using UnityEngine;
 /// <summary>
 /// Helper dùng chung để rơi loot cho mọi enemy (ZombieAI, TankBossAI, BoomerAI, ...).
 /// Hỗ trợ loot table (mỗi entry roll độc lập) + fallback legacy single-drop,
-/// kèm hiệu ứng pop (parabol + spin) qua <see cref="LootPop"/>.
+/// kèm hiệu ứng pop (parabol + spin) qua <see cref="LootPop"/> và trail effect
+/// qua <see cref="LootTrail"/> với settings từ enemy.
 /// </summary>
 public static class LootDropHelper
 {
     /// <summary>
     /// Roll loot table (mỗi entry độc lập) + fallback legacy, spawn tại
     /// <paramref name="position"/> + <paramref name="heightOffset"/>, gắn
-    /// <see cref="LootPop"/> nếu <paramref name="popOnDeath"/>.
+    /// <see cref="LootPop"/> nếu <paramref name="popOnDeath"/> và
+    /// <see cref="LootTrail"/> với <paramref name="trailSettings"/>.
     /// </summary>
     public static void TryDropLoot(
         LootDropEntry[] lootTable,
@@ -20,7 +22,8 @@ public static class LootDropHelper
         float heightOffset,
         bool popOnDeath,
         float popUpwardSpeed,
-        float popHorizontalSpeed)
+        float popHorizontalSpeed,
+        LootTrailSettings trailSettings)
     {
         bool usedTable = false;
 
@@ -40,7 +43,8 @@ public static class LootDropHelper
                     int count = Random.Range(min, max + 1);
                     for (int q = 0; q < count; q++)
                         SpawnLoot(entry.prefab, position, heightOffset,
-                                  popOnDeath, popUpwardSpeed, popHorizontalSpeed);
+                                  popOnDeath, popUpwardSpeed, popHorizontalSpeed,
+                                  trailSettings);
                 }
             }
         }
@@ -49,7 +53,8 @@ public static class LootDropHelper
             Random.Range(0f, 100f) <= fallbackDropChance)
         {
             SpawnLoot(fallbackPrefab, position, heightOffset,
-                      popOnDeath, popUpwardSpeed, popHorizontalSpeed);
+                      popOnDeath, popUpwardSpeed, popHorizontalSpeed,
+                      trailSettings);
         }
     }
 
@@ -59,7 +64,8 @@ public static class LootDropHelper
         float heightOffset,
         bool popOnDeath,
         float popUpwardSpeed,
-        float popHorizontalSpeed)
+        float popHorizontalSpeed,
+        LootTrailSettings trailSettings)
     {
         Vector3 dropPos = position;
         dropPos.y += heightOffset;
@@ -77,10 +83,16 @@ public static class LootDropHelper
             pop.horizontalSpeed = popHorizontalSpeed;
             pop.Launch(dropPos);
 
-            // Gắn trail effect (TrailRenderer + glow particle) runtime.
-            // AddComponent tự trigger Awake/OnEnable, không cần gọi thủ công.
-            if (loot.GetComponent<LootTrail>() == null)
-                loot.AddComponent<LootTrail>();
+            // Gắn trail effect (TrailRenderer + glow particle) runtime với
+            // settings từ enemy. Initialize phải gọi ngay sau AddComponent
+            // để build trail trước khi OnEnable chạy.
+            if (trailSettings != null)
+            {
+                var trail = loot.GetComponent<LootTrail>();
+                if (trail == null)
+                    trail = loot.AddComponent<LootTrail>();
+                trail.Initialize(trailSettings);
+            }
         }
     }
 }
