@@ -17,6 +17,8 @@ namespace cowsins
 
         private WeaponControllerSettings settings;
 
+        private AimSkillSystem aimSystem;
+
         public HitDetectionSystem(WeaponContext context, WeaponControllerSettings settings)
         {
             this.settings = settings;
@@ -36,6 +38,9 @@ namespace cowsins
             this.weaponEvents = context.Dependencies.WeaponEvents;
             this.playerMovement = context.Dependencies.PlayerMovementState;
 
+            if (context.Transform != null)
+                aimSystem = context.Transform.GetComponent<AimSkillSystem>();
+
             context.Dependencies.WeaponEvents.Events.OnHit.AddListener(Hit);
         }
 
@@ -54,6 +59,50 @@ namespace cowsins
             var hitTransform = h.collider.transform;
             float finalDamage = damage * GetDistanceDamageReduction(hitTransform);
 
+            // Aim skill tree: OneShotCrook — instantly kill ICrookEnemy (e.g. zombies)
+            if (aimSystem != null && aimSystem.OneShotCrook)
+            {
+                var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
+                if (damageable == null)
+                    damageable = h.collider.GetComponent<IDamageable>();
+
+                if (damageable is MonoBehaviour enemyMb)
+                {
+                    var crook = enemyMb.GetComponent<ICrookEnemy>();
+                    if (crook != null)
+                    {
+                        damageable.Damage(crook.GetMaxHealth() * 10f, true);
+                        AIDirector.Instance?.RegisterHit();
+                        return;
+                    }
+                }
+            }
+
+            // Aim skill tree: BonusDamageVsSpecial — 2x damage vs ISpecialEnemy (e.g. Boomer, Tank)
+            if (aimSystem != null && aimSystem.BonusDamageVsSpecial)
+            {
+                var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
+                if (damageable == null)
+                    damageable = h.collider.GetComponent<IDamageable>();
+
+                if (damageable is MonoBehaviour enemyMb2)
+                {
+                    var special = enemyMb2.GetComponent<ISpecialEnemy>();
+                    if (special != null)
+                    {
+                        finalDamage *= 2f;
+                    }
+                }
+            }
+
+            // Aim skill tree: random crit roll (levels 2-4)
+            bool isAimCrit = false;
+            if (aimSystem != null && aimSystem.RollCritical())
+            {
+                finalDamage = aimSystem.ApplyCriticalDamage(finalDamage);
+                isAimCrit = true;
+            }
+
             // Determine hit type and apply damage accordingly
             if (hitTransform.CompareTag("Critical"))
             {
@@ -65,12 +114,12 @@ namespace cowsins
             else if (hitTransform.CompareTag("BodyShot"))
             {
                 var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
-                damageable?.Damage(finalDamage, false);
+                damageable?.Damage(finalDamage, isAimCrit);
             }
             else
             {
                 var damageable = h.collider.GetComponent<IDamageable>();
-                damageable?.Damage(finalDamage, false);
+                damageable?.Damage(finalDamage, isAimCrit);
                 AIDirector.Instance?.RegisterHit();
             }
         }
