@@ -3,8 +3,11 @@ using UnityEngine;
 /// <summary>
 /// Hiệu ứng "nhảy ra" cho loot khi zombie chết: bắn loot lên theo quỹ đạo
 /// parabol (vận tốc đứng + hướng ngang ngẫu nhiên), xoay trong lúc bay,
-/// hạ cánh về độ cao xuất phát rồi tiếp tục xoay nhẹ. Không cần Rigidbody,
-/// không sửa prefab — tương thích với trigger-based pickup (Coin, ...).
+/// hạ cánh về mặt đất/mái nhà thực sự. Không cần Rigidbody, không sửa prefab —
+/// tương thích với trigger-based pickup (Coin, ...).
+///
+/// Va chạm dùng SphereCast dọc theo toàn bộ vector di chuyển mỗi frame (cả
+/// ngang lẫn đứng), nên loot không xuyên tường và không lơ lửng trên mái nhà.
 /// </summary>
 public class LootPop : MonoBehaviour
 {
@@ -25,12 +28,29 @@ public class LootPop : MonoBehaviour
     [Tooltip("Tốc độ xoay sau khi hạ cánh (deg/s).")]
     public float idleSpinSpeed = 90f;
 
+    [Header("Collision")]
+    [Tooltip("Layer mask cho spherecast tìm mặt đất/tường. Mặc định hit mọi layer trừ IgnoreRaycast.")]
+    public LayerMask groundMask = ~0;
+
+    [Tooltip("Bán kính spherecast (dùng spherecast để ổn định với bề mặt hẹp).")]
+    public float groundProbeRadius = 0.3f;
+
+    [Tooltip("Cosine góc giữa normal va chạm và trục Y để phân biệt 'sàn' vs 'tường'. Normal.y >= ngưỡng này = sàn.")]
+    [Range(0f, 1f)]
+    public float floorNormalY = 0.6f;
+
+    [Tooltip("Vận tốc đứng tối thiểu để tiếp tục nảy sau khi chạm sàn. Dưới ngưỡng này loot dừng hẳn.")]
+    public float bounceStopThreshold = 1.5f;
+
+    [Tooltip("Hệ số giảm vận tốc khi nảy (0 = không nảy, 1 = nảy nguyên).")]
+    [Range(0f, 1f)]
+    public float bounceDamping = 0.35f;
+
     private Vector3 velocity;
     private float spinSpeed;
     private bool landed;
-    private float startY;
 
-    /// <summary>True khi loot đã hạ cánh về độ cao xuất phát.</summary>
+    /// <summary>True khi loot đã hạ cánh về mặt đất.</summary>
     public bool Landed => landed;
 
     void Awake()
@@ -42,7 +62,6 @@ public class LootPop : MonoBehaviour
     public void Launch(Vector3 spawnPosition)
     {
         transform.position = spawnPosition;
-        startY = spawnPosition.y;
 
         // Hướng ngang ngẫu nhiên trong vòng tròn.
         Vector2 h = Random.insideUnitCircle.normalized * horizontalSpeed;
@@ -60,27 +79,53 @@ public class LootPop : MonoBehaviour
         if (!landed)
         {
             velocity.y -= gravity * dt;
-            Vector3 p = transform.position + velocity * dt;
 
-            if (p.y <= startY && velocity.y <= 0f)
+            Vector3 start = transform.position;
+            Vector3 delta = velocity * dt;
+            float distance = delta.magnitude;
+
+            if (distance > 0.0001f &&
+                Physics.SphereCast(
+                    start,
+                    groundProbeRadius,
+                    delta / distance,
+                    out RaycastHit hit,
+                    distance,
+                    groundMask,
+                    QueryTriggerInteraction.Ignore))
             {
-                // Hạ cánh: chốt về startY, dập nảy nhẹ rồi dừng.
-                p.y = startY;
-                if (Mathf.Abs(velocity.y) > 1.5f)
+                // Đặt loot tại điểm va chạm, hơi lùi ra khỏi bề mặt theo normal
+                // để frame sau spherecast không bắt đầu từ bên trong collider.
+                transform.position = hit.point + hit.normal * groundProbeRadius;
+
+                if (hit.normal.y >= floorNormalY)
                 {
-                    velocity.y = -velocity.y * 0.35f;
-                    velocity.x *= 0.5f;
-                    velocity.z *= 0.5f;
+                    // Chạm SÀN — nảy hoặc dừng.
+                    if (Mathf.Abs(velocity.y) > bounceStopThreshold)
+                    {
+                        velocity.y = -velocity.y * bounceDamping;
+                        velocity.x *= 0.5f;
+                        velocity.z *= 0.5f;
+                    }
+                    else
+                    {
+                        velocity = Vector3.zero;
+                        landed = true;
+                        spinSpeed = idleSpinSpeed;
+                    }
                 }
                 else
                 {
-                    velocity = Vector3.zero;
-                    landed = true;
-                    spinSpeed = idleSpinSpeed;
+                    // Chạm TƯỜNG — triệt tiêu thành phần vận tốc đi vào tường,
+                    // giữ thành phần tiếp tuyến (trượt dọc + rơi) để loot tiếp tục.
+                    Vector3 intoSurface = Vector3.Project(velocity, hit.normal);
+                    velocity -= intoSurface;
                 }
             }
-
-            transform.position = p;
+            else
+            {
+                transform.position = start + delta;
+            }
         }
 
         // Xoay quanh trục Y (và hơi nghiêng khi bay).
