@@ -64,6 +64,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     private float jumpTimer;
 
     private bool isDead;
+    public bool IsDead { get { return isDead; } }
     private bool isHit;
     private bool isAttacking;
     private bool isJumpAttacking;
