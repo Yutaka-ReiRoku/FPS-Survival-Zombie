@@ -1798,6 +1798,18 @@ MonoBehaviour:
   popLootOnDeath: 1
   lootPopUpwardSpeed: 4.5
   lootPopHorizontalSpeed: 2.5
+  lootTrailSettings:
+    trailTime: 0.45
+    startWidth: 0.12
+    endWidth: 0.02
+    enableGlow: 0
+    glowMaxParticles: 60
+    glowEmissionRate: 35
+    glowStartSize: 0.05
+    glowStartLifetime: 0.5
+    coinColor: {r: 1, g: 0.85, b: 0.25, a: 1}
+    xpColor: {r: 0.7, g: 0.25, b: 1, a: 1}
+    defaultColor: {r: 1, g: 0.7, b: 0.4, a: 1}
   experienceReward: 10
   headshotBonusExperience: 5
   coinReward: 5
