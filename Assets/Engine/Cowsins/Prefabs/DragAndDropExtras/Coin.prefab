@@ -172,6 +172,8 @@ GameObject:
   - component: {fileID: 7403018159610325260}
   - component: {fileID: 7403018159610325263}
   - component: {fileID: 7403018159610325259}
+  - component: {fileID: 2846366901358105211}
+  - component: {fileID: 8701213130618131796}
   m_Layer: 2
   m_Name: Coin
   m_TagString: Untagged
@@ -207,7 +209,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3f5648b4fcb7934babbb2a0c0f39131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uniqueID: 74e1abbc-fe54-47e5-b7d6-8048bc11589f
+  uniqueID: 7fe6e75d-8cdc-4053-8eb3-a87b4dd83198
   events:
     onEnter:
       m_PersistentCalls:
@@ -243,6 +245,46 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.5, y: 1.5, z: 1.5}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2846366901358105211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7403018159610325256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 579a88fbf5598a842a34b883e3e83dd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootPop
+  upwardSpeed: 4.5
+  horizontalSpeed: 2.5
+  gravity: 12
+  launchSpinSpeed: 540
+  idleSpinSpeed: 90
+--- !u!114 &8701213130618131796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7403018159610325256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd0017ae432b65b419d963ce59193311, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootTrail
+  trailTime: 0.45
+  startWidth: 0.35
+  endWidth: 0.02
+  enableGlow: 1
+  glowMaxParticles: 60
+  glowEmissionRate: 35
+  glowStartSize: 0.18
+  glowStartLifetime: 0.5
+  coinColor: {r: 1, g: 0.85, b: 0.25, a: 1}
+  xpColor: {r: 0.7, g: 0.25, b: 1, a: 1}
+  defaultColor: {r: 1, g: 0.7, b: 0.4, a: 1}
 --- !u!1001 &2477373021139236770
 PrefabInstance:
   m_ObjectHideFlags: 0

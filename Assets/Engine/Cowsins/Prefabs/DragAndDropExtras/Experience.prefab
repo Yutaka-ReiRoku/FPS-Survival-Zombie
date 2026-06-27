@@ -4996,6 +4996,8 @@ GameObject:
   - component: {fileID: 3821068731288931257}
   - component: {fileID: 1037413120884422589}
   - component: {fileID: 1037413120884422590}
+  - component: {fileID: 6558553443123068263}
+  - component: {fileID: 7179799390081448395}
   m_Layer: 2
   m_Name: Experience
   m_TagString: Untagged
@@ -5011,7 +5013,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3821068731288931261}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -5031,7 +5033,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c69c57fde82f36c4e8d2f0a54a7566fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uniqueID: 92d24d70-3d46-4975-aa4a-208e5249df72
+  uniqueID: a91c2d3f-5572-4e8c-a94b-180661a96c48
   events:
     onEnter:
       m_PersistentCalls:
@@ -5075,3 +5077,43 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.5, y: 0.5, z: 0.5}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6558553443123068263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3821068731288931261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 579a88fbf5598a842a34b883e3e83dd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootPop
+  upwardSpeed: 4.5
+  horizontalSpeed: 2.5
+  gravity: 12
+  launchSpinSpeed: 540
+  idleSpinSpeed: 90
+--- !u!114 &7179799390081448395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3821068731288931261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd0017ae432b65b419d963ce59193311, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootTrail
+  trailTime: 0.45
+  startWidth: 0.35
+  endWidth: 0.02
+  enableGlow: 1
+  glowMaxParticles: 60
+  glowEmissionRate: 35
+  glowStartSize: 0.18
+  glowStartLifetime: 0.5
+  coinColor: {r: 1, g: 0.85, b: 0.25, a: 1}
+  xpColor: {r: 0.7, g: 0.25, b: 1, a: 1}
+  defaultColor: {r: 1, g: 0.7, b: 0.4, a: 1}
