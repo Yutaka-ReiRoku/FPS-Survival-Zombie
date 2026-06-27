@@ -8,6 +8,15 @@ namespace cowsins
     {
         [Tooltip("How many bullets you will get"), SerializeField, SaveField] private int amountOfBullets;
 
+        [Tooltip("If true, the pickup amount for hitscan/custom weapons is scaled by the current weapon's magazine size (magazinesPerPickup). If false, amountOfBullets is used as a flat amount for every weapon."), SerializeField]
+        private bool scaleByMagazineSize = true;
+
+        [Tooltip("How many magazine-worth of bullets a hitscan/custom weapon receives from this pickup (only used when scaleByMagazineSize is true)."), SerializeField, Min(1)]
+        private int magazinesPerPickup = 2;
+
+        [Tooltip("Fixed amount given to projectile weapons (e.g. rocket launchers) since their magazine size is tiny. Kept separate so rockets do not receive dozens of rounds."), SerializeField, Min(1)]
+        private int projectilePickupAmount = 3;
+
         [SerializeField] private BulletsItem_SO bulletsSO;
 
         [SerializeField] private Sprite bulletsIcon;
@@ -15,6 +24,31 @@ namespace cowsins
         [SerializeField] private GameObject bulletsGraphics;
 
         public int AmountOfBullets => amountOfBullets;
+
+        /// <summary>
+        /// Returns the amount of ammo this pickup should grant for the currently equipped weapon.
+        /// Projectile weapons (rocket launchers, etc.) receive a small fixed amount, while
+        /// hitscan/custom weapons receive an amount proportional to their magazine size so
+        /// each weapon type gets a sensible number of rounds.
+        /// </summary>
+        private int GetPickupAmount(Weapon_SO weapon, WeaponIdentification id)
+        {
+            if (weapon == null) return amountOfBullets;
+
+            switch (weapon.shootStyle)
+            {
+                case ShootStyle.Projectile:
+                    return projectilePickupAmount;
+                case ShootStyle.Melee:
+                    return 0;
+                case ShootStyle.Hitscan:
+                case ShootStyle.Custom:
+                default:
+                    if (scaleByMagazineSize && id != null)
+                        return Mathf.Max(1, id.magazineSize * magazinesPerPickup);
+                    return amountOfBullets;
+            }
+        }
 
         public override void Awake()
         {
@@ -54,7 +88,8 @@ namespace cowsins
             alreadyInteracted = true;
             base.Interact(player);
             var wRef = player.GetComponent<IWeaponReferenceProvider>();
-            wRef.Id.totalBullets += amountOfBullets;
+            int granted = GetPickupAmount(wRef.Weapon, wRef.Id);
+            wRef.Id.totalBullets += granted;
             // Fire OnAmmoChanged so HUD updates reserve ammo immediately on pickup.
             var wEvents = player.GetComponent<IWeaponEventsProvider>();
             if (wEvents != null && wEvents.Events != null)
