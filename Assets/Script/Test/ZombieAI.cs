@@ -192,14 +192,29 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             agent.isStopped = false;
             agent.speed = walkSpeed;
             agent.stoppingDistance = attackDistance;
+            // Let the agent control rotation during Wander; ChasePlayer overrides
+            // via FaceTarget() which is fine since both point toward the player/path.
+            agent.updateRotation = true;
             // Performance: HighQuality avoidance is ~quadratic with agent count; use cheap avoidance + varied priority.
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
             agent.avoidancePriority = Random.Range(30, 70);
         }
 
-        // Restore non-kinematic Rigidbody so physics/collision work normally while alive.
+        // Keep the Rigidbody KINEMATIC while alive so the NavMeshAgent fully
+        // controls movement. A non-kinematic Rigidbody with gravity fights the
+        // agent on stairs/slopes: gravity pulls the zombie down, the capsule
+        // collider catches on step edges, and the two systems jitter — the
+        // zombie gets stuck at the foot of stairs. Kinematic mode lets the
+        // agent drive position smoothly while still sending collision events
+        // (for hit detection, triggers, etc.). Die() already sets kinematic
+        // for the death animation, so this just makes it consistent.
         if (rb != null)
-            rb.isKinematic = false;
+        {
+            rb.isKinematic = true;
+            // Keep gravity on so that if the agent is disabled (e.g. on death)
+            // and kinematic is later turned off, the body can fall naturally.
+            rb.useGravity = true;
+        }
 
         Collider col = GetComponent<Collider>();
         if (col != null)
@@ -441,12 +456,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         PlaySound(deathClip);
 
-        // Freeze the root Rigidbody BEFORE disabling the NavMeshAgent and collider.
-        // Without this, the non-kinematic Rigidbody (gravity on, position unfrozen)
-        // falls freely once the agent/collider are removed, causing the zombie to
-        // sink into the ground until the head sphere collider stops it, then the
-        // death animation makes it appear to "rise back up". Setting kinematic
-        // suspends physics so the death animation plays in place.
+        // Rigidbody is already kinematic from OnEnable (so the NavMeshAgent
+        // can drive movement on stairs without physics fighting it). Keep it
+        // kinematic here so the death animation plays in place after the
+        // agent is disabled.
         if (rb != null)
             rb.isKinematic = true;
 
