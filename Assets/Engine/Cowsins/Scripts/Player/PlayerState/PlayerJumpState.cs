@@ -71,7 +71,7 @@ namespace cowsins
                 return;
             }
 
-            if (playerMovement.Grounded && !playerMovement.movementContext.HasJumped || playerMovement.IsWallRunning)
+            if (playerMovement.Grounded || playerMovement.IsWallRunning)
             {
                 SwitchState(_factory.Default());
                 return;

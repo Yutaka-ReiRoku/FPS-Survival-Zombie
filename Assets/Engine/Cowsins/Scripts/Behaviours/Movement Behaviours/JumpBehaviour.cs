@@ -84,12 +84,20 @@ public class JumpBehaviour
             }
         }
 
+        // Reset HasJumped whenever the player is grounded, regardless of
+        // canCoyote. Without this, jumping on a slope (where Grounded stays
+        // true through the jump) leaves HasJumped = true forever because
+        // OnLand never fires, trapping the player in PlayerJumpState.
+        if (playerMovement.Grounded)
+        {
+            context.HasJumped = false;
+        }
+
         if (playerSettings.canCoyote)
         {
             if (playerMovement.Grounded)
             {
                 context.CoyoteTimer = context.CoyoteJumpTime;
-                context.HasJumped = false;
             }
             else
             {
