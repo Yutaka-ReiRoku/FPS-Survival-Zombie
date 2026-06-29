@@ -10,6 +10,10 @@ public class StaminaBehaviour
     private float currentStamina;
     private float lastStaminaValue = -1f; // Cache last Stamina Value to only update UI when necessary
 
+    // When stamina hits 0, the player becomes "exhausted" and cannot run
+    // until stamina regenerates back to at least half of max stamina.
+    private bool isExhausted;
+
     private MovementContext context;
 
     private InputManager inputManager;
@@ -47,13 +51,6 @@ public class StaminaBehaviour
 
         float oldStamina = currentStamina;
 
-        // Check if stamina is above threshold
-        if (currentStamina >= playerSettings.minStaminaRequiredToRun)
-        {
-            context.EnoughStaminaToRun = true;
-            context.EnoughStaminaToJump = true;
-        }
-
         // Regenerate stamina
         if (currentStamina < playerSettings.maxStamina)
         {
@@ -62,6 +59,20 @@ public class StaminaBehaviour
 
             if (allowRegen)
                 currentStamina += deltaTime * playerSettings.staminaRegenMultiplier;
+        }
+
+        // Clear exhausted state once stamina has recovered to at least half of max.
+        // This prevents the player from running again immediately after hitting 0.
+        if (isExhausted && currentStamina >= playerSettings.maxStamina * 0.5f)
+        {
+            isExhausted = false;
+        }
+
+        // Only allow running again if we are not exhausted and have enough stamina.
+        if (!isExhausted && currentStamina >= playerSettings.minStaminaRequiredToRun)
+        {
+            context.EnoughStaminaToRun = true;
+            context.EnoughStaminaToJump = true;
         }
 
         // Drain stamina while running
@@ -104,6 +115,7 @@ public class StaminaBehaviour
             context.EnoughStaminaToRun = false;
             context.EnoughStaminaToJump = false;
             currentStamina = 0;
+            isExhausted = true;
             playerEvents.Events.OnStaminaDepleted?.Invoke();
         }
     }
@@ -113,7 +125,8 @@ public class StaminaBehaviour
         this.currentStamina = playerSettings.maxStamina;
          // Reset to force UI update
         lastStaminaValue = -1f;
-        
+        isExhausted = false;
+
         context.EnoughStaminaToRun = true;
         context.EnoughStaminaToJump = true;
     }
