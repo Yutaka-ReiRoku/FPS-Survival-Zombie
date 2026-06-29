@@ -112,7 +112,7 @@ namespace cowsins
         {
             groundDetectionBehaviour?.FixedTick();
             // Added Gravity, only if we are not climbing to prevent unvoluntary sliding
-            if (!IsClimbing && !movementContext.IsPlayerOnSlope) rb.AddForce(Vector3.down * extraGravityForce, ForceMode.Acceleration);
+            if (!IsClimbing) rb.AddForce(Vector3.down * extraGravityForce, ForceMode.Acceleration);
 
             rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, playerSettings.maxSpeedAllowed);
 

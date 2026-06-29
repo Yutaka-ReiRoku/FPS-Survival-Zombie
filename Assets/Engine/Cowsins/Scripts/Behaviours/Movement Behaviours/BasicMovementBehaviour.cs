@@ -96,8 +96,15 @@ public class BasicMovementBehaviour
         if (context.IsPlayerOnSlope)
         {
             moveDirection = GetSlopeDirection();
-            
-            if (moveDirection.magnitude == 0 && !context.HasJumped) rb.linearVelocity = Vector3.zero;
+
+            if (moveDirection.magnitude == 0 && !context.HasJumped)
+            {
+                // Only zero horizontal velocity to prevent sliding down slopes,
+                // but preserve downward Y velocity so gravity can pull the player
+                // onto the ground. Zeroing Y velocity caused the player to float
+                // and lose the ability to jump when standing still on slopes.
+                rb.linearVelocity = new Vector3(0f, Mathf.Min(rb.linearVelocity.y, 0f), 0f);
+            }
             if (rb.linearVelocity.y != 0 && moveDirection.magnitude != 0) rb.AddForce(Vector3.down * slopeGravityMultiplier);
         }
         else
