@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using cowsins;
 
+[RequireComponent(typeof(AudioSource))]
 public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 {
     [Header("Player")]
@@ -35,6 +36,16 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     [Header("Scream")]
     public float screamDuration = 2.5f;
 
+    [Header("Audio")]
+    [Tooltip("Sound khi tank phát hiện player và bắt đầu scream.")]
+    public AudioClip screamClip;
+    [Tooltip("Sound khi tank thực hiện đòn đánh cận chiến (swipe/punch).")]
+    public AudioClip meleeAttackClip;
+    [Tooltip("Sound khi tank đáp xuống đất sau jump attack.")]
+    public AudioClip jumpLandClip;
+    [Tooltip("Sound khi tank chết.")]
+    public AudioClip deathClip;
+
     [Header("Loot")]
     [Tooltip("Loot table: mỗi entry roll độc lập, có thể rơi 0..N loại cùng lúc.")]
     public LootDropEntry[] lootTable;
@@ -59,6 +70,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     private NavMeshAgent agent;
     private Rigidbody rb;
     private Collider col;
+    private AudioSource audioSource;
 
     private float attackTimer;
     private float jumpTimer;
@@ -82,6 +94,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
+        audioSource = GetComponent<AudioSource>();
 
         FindPlayer();
 
@@ -253,6 +266,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         animator.SetBool("isPlayerNear", true);
         animator.SetTrigger("Scream");
 
+        PlaySound(screamClip);
+
         Invoke(
             nameof(EndScream),
             screamDuration
@@ -283,6 +298,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         );
 
         animator.SetTrigger("Attack");
+
+        PlaySound(meleeAttackClip);
 
         Invoke(
             nameof(ResetAttack),
@@ -355,8 +372,18 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         DamagePlayer(swipeDamage);
     }
 
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip == null || audioSource == null)
+            return;
+
+        audioSource.PlayOneShot(clip);
+    }
+
     public void JumpLand()
     {
+        PlaySound(jumpLandClip);
+
         Collider[] hits =
             Physics.OverlapSphere(
                 transform.position,
@@ -481,6 +508,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         animator.SetTrigger(
             "Death"
         );
+
+        PlaySound(deathClip);
 
         if (col != null)
         {
