@@ -49,6 +49,8 @@ public class LootPop : MonoBehaviour
     private Vector3 velocity;
     private float spinSpeed;
     private bool landed;
+    private Rigidbody rb;
+    private bool rbWasKinematic;
 
     /// <summary>True khi loot đã hạ cánh về mặt đất.</summary>
     public bool Landed => landed;
@@ -56,12 +58,25 @@ public class LootPop : MonoBehaviour
     void Awake()
     {
         enabled = false;
+        rb = GetComponent<Rigidbody>();
     }
 
     /// <summary>Khởi động hiệu ứng bắn ra từ vị trí hiện tại.</summary>
     public void Launch(Vector3 spawnPosition)
     {
         transform.position = spawnPosition;
+
+        // Set Rigidbody kinematic để tránh xung đột với LootPop: Pickeable.
+        // FixedUpdate() gọi rb.AddForce(down) + gravity kéo xuống, nếu để
+        // non-kinematic thì Rigidbody sẽ fight với transform.position do
+        // LootPop set, gây tunneling xuyên sàn.
+        if (rb != null)
+        {
+            rbWasKinematic = rb.isKinematic;
+            rb.isKinematic = true;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
 
         // Hướng ngang ngẫu nhiên trong vòng tròn.
         Vector2 h = Random.insideUnitCircle.normalized * horizontalSpeed;
