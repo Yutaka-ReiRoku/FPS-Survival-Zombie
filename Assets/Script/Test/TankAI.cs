@@ -250,6 +250,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
         agent.isStopped = true;
 
+        animator.SetBool("isPlayerNear", true);
         animator.SetTrigger("Scream");
 
         Invoke(
