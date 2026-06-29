@@ -38,8 +38,10 @@ namespace cowsins
             this.weaponEvents = context.Dependencies.WeaponEvents;
             this.playerMovement = context.Dependencies.PlayerMovementState;
 
-            if (context.Transform != null)
-                aimSystem = context.Transform.GetComponent<AimSkillSystem>();
+            // AimSkillSystem lives on the GeneralManagers GameObject, not on
+            // the player, so GetComponent on the player transform returns null.
+            // Find it globally instead (there is only one instance).
+            aimSystem = UnityEngine.Object.FindAnyObjectByType<AimSkillSystem>();
 
             context.Dependencies.WeaponEvents.Events.OnHit.AddListener(Hit);
         }
@@ -59,8 +61,8 @@ namespace cowsins
             var hitTransform = h.collider.transform;
             float finalDamage = damage * GetDistanceDamageReduction(hitTransform);
 
-            // Aim skill tree: OneShotCrook — instantly kill ICrookEnemy (e.g. zombies)
-            if (aimSystem != null && aimSystem.OneShotCrook)
+            // Aim skill tree: OneShotCrook — 25% chance to instantly kill ICrookEnemy (e.g. zombies)
+            if (aimSystem != null && aimSystem.OneShotCrook && Random.value <= 0.25f)
             {
                 var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
                 if (damageable == null)

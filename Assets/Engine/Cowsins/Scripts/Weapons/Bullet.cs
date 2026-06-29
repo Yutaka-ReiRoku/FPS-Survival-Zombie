@@ -41,10 +41,10 @@ namespace cowsins
         {
             transform.LookAt(destination);
 
-            if (player != null)
-            {
-                aimSystem = player.GetComponent<AimSkillSystem>();
-            }
+            // AimSkillSystem lives on the GeneralManagers GameObject, not on
+            // the player, so GetComponent on the player transform returns null.
+            // Find it globally instead (there is only one instance).
+            aimSystem = UnityEngine.Object.FindAnyObjectByType<AimSkillSystem>();
 
             Invoke(nameof(DestroyProjectile), duration);
         }
@@ -103,7 +103,8 @@ namespace cowsins
                         enemy.GetComponent<ICrookEnemy>();
 
                     if (crook != null &&
-                        aimSystem.OneShotCrook)
+                        aimSystem.OneShotCrook &&
+                        Random.value <= 0.25f)
                     {
                         target.Damage(crook.GetMaxHealth() * 10f, isCritical);
 
