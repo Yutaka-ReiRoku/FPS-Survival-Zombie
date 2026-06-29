@@ -118,9 +118,12 @@ public class JumpBehaviour
         bool hasStamina = context.EnoughStaminaToJump;
         bool hasJumpsLeft = jumpCount > 0;
 
+        // Basic grounded/coyote jump does not require stamina so the player
+        // can always jump even when exhausted. Double jump and wall jump still
+        // require stamina.
         bool isValidJumpCondition =
-            (hasStamina && (playerMovement.Grounded || isCoyoteValid)) ||
-            playerMovement.IsWallRunning ||
+            (playerMovement.Grounded || isCoyoteValid) ||
+            (playerMovement.IsWallRunning && hasStamina) ||
             (hasJumpsLeft && playerSettings.maxJumps > 1 && hasStamina);
 
         return playerSettings.allowJump
