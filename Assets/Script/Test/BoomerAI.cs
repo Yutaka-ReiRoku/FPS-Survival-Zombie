@@ -82,6 +82,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private bool hasExploded;
     private bool hasDestroyed;
     private bool rewardsGranted;
+    private bool isWaitingForExplosion;
+    private float explosionWaitTimer;
 
     private Animator animator;
     private NavMeshAgent agent;
@@ -132,6 +134,13 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     {
         if (isDead)
             return;
+
+        // Poll the death animation and fire the explosion when it is nearly
+        // finished, instead of using a fixed delay that may fire too early.
+        if (isWaitingForExplosion && !hasExploded)
+        {
+            TryFireExplosionFromAnimation();
+        }
 
         if (target == null)
         {
@@ -290,8 +299,49 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         // The authored death clip has no animation events wired, so drive the
         // blast and cleanup from code. Guards make this safe even if events are
         // added later (they would simply no-op the second call).
-        Invoke(nameof(ExplosionEvent), explodeFxDelay);
+        //
+        // The explosion is fired from Update() by polling the death animation
+        // state so the blast syncs with the end of the animation instead of
+        // firing at a fixed delay that may cut the animation short.
+        isWaitingForExplosion = true;
+        explosionWaitTimer = 0f;
         Invoke(nameof(DestroyEvent), cleanupDelay);
+    }
+
+    /// <summary>
+    /// Polls the animator for the Death/Death 0 state and fires the explosion
+    /// when the death animation is nearly finished (>= 90% normalized time).
+    /// Falls back to a timed delay if the death state is never entered
+    /// (e.g. animator missing or transition blocked).
+    /// </summary>
+    private void TryFireExplosionFromAnimation()
+    {
+        explosionWaitTimer += Time.deltaTime;
+
+        if (animator == null)
+        {
+            ExplosionEvent();
+            isWaitingForExplosion = false;
+            return;
+        }
+
+        AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
+
+        if (state.IsName("Death") || state.IsName("Death 0"))
+        {
+            if (state.normalizedTime >= 0.9f)
+            {
+                ExplosionEvent();
+                isWaitingForExplosion = false;
+            }
+        }
+        else if (explosionWaitTimer >= explodeFxDelay + 2f)
+        {
+            // Fallback: if we never entered the Death state within a reasonable
+            // window, fire the explosion anyway so the boomer always explodes.
+            ExplosionEvent();
+            isWaitingForExplosion = false;
+        }
     }
 
     //==================================
