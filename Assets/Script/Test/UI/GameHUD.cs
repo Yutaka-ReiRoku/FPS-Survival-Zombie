@@ -15,8 +15,8 @@ public class GameHUD : MonoBehaviour
     public TMP_Text headshotsText;   // optional
     public TMP_Text survivalTimeText; // optional, MM:SS
     public TMP_Text collectiblesText; // optional, "Journals X/total"
-    [Tooltip("Total collectible journals in the level (CollectibleManager has no public total).")]
-    public int collectiblesTotal = 6;
+    [Tooltip("Manual override for total journals. If <= 0 the HUD reads CollectibleManager.Total (auto-detected from Resources/Journals).")]
+    public int collectiblesTotal = 0;
 
     [Header("Coins")]
     [Tooltip("Coin counter text. Reads from CowsinsHUDAdapter (engine-free).")]
@@ -65,10 +65,11 @@ public class GameHUD : MonoBehaviour
         {
             var cm = CollectibleManager.Instance;
             int c = cm != null ? cm.Count : 0;
+            int total = collectiblesTotal > 0 ? collectiblesTotal : (cm != null ? cm.Total : 0);
             if (c != _lastCollectibles)
             {
                 _lastCollectibles = c;
-                collectiblesText.text = $"Journals : {c}/{collectiblesTotal}";
+                collectiblesText.text = $"Journals : {c}/{total}";
             }
         }
 
