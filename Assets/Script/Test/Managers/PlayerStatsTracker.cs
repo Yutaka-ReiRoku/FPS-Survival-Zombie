@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// Central runtime tracker for player combat/exploration stats that the existing
-/// managers don't already own. Aggregates per-enemy-type kill counts and total
-/// damage dealt, and exposes a unified read API for the stats panel + game-over
-/// screen. Progression stats (coins, XP, level, wave, score, best) are read from
-/// their existing managers on demand to avoid double-tracking.
+/// Central runtime tracker for ALL player stats. Owns every stat directly as
+/// fields so the entire game state can be read from one script. Existing
+/// managers (ScoreManager, AIDirector, CollectibleManager, CowsinsHUDAdapter)
+/// forward their increments here via Register* methods / events, keeping a
+/// single source of truth for the stats panel + game-over screen.
 ///
 /// Placement: lives on the GeneralManagers GameObject alongside the other
 /// singletons (ScoreManager, AIDirector, ...). Singleton via Instance.
@@ -21,6 +21,21 @@ public class PlayerStatsTracker : MonoBehaviour
 
     [Header("Combat")]
     public float totalDamageDealt;
+    public int shotsFired;
+    public int shotsHit;
+    public int crits;
+    public int reloadCount;
+
+    [Header("Score / Progression")]
+    public int score;
+    public int kills;
+    public int coins;
+    public int journalsCollected;
+
+    [Header("Survival")]
+    public float healthLost;
+    public float healthHealed;
+    public int deathCount;
 
     [Header("Exploration")]
     public float playTime;
@@ -32,6 +47,8 @@ public class PlayerStatsTracker : MonoBehaviour
 
     private Vector3 _lastPlayerPos;
     private bool _playerPosInitialized;
+    private float _lastHealth = -1f;
+    private bool _eventsBound;
 
     private void Awake()
     {
@@ -45,6 +62,78 @@ public class PlayerStatsTracker : MonoBehaviour
             GameObject p = GameObject.FindGameObjectWithTag("Player");
             if (p != null) player = p.transform;
         }
+    }
+
+    private void OnEnable()
+    {
+        StartCoroutine(BindAdapterWhenReady());
+    }
+
+    private void OnDisable()
+    {
+        UnbindAdapter();
+    }
+
+    private System.Collections.IEnumerator BindAdapterWhenReady()
+    {
+        float timeout = 12f;
+        while (timeout > 0f && CowsinsHUDAdapter.Instance == null)
+        {
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+        var a = CowsinsHUDAdapter.Instance;
+        if (a == null) yield break;
+        a.OnHealthChanged += HandleHealthChanged;
+        a.OnReloadChanged += HandleReloadChanged;
+        a.OnDied += HandleDied;
+        a.OnCoinsChanged += HandleCoinsChanged;
+        // Seed the last-health baseline + coins from the adapter's current values.
+        _lastHealth = a.Health;
+        coins = a.Coins;
+        _eventsBound = true;
+    }
+
+    private void UnbindAdapter()
+    {
+        if (!_eventsBound) return;
+        var a = CowsinsHUDAdapter.Instance;
+        if (a != null)
+        {
+            a.OnHealthChanged -= HandleHealthChanged;
+            a.OnReloadChanged -= HandleReloadChanged;
+            a.OnDied -= HandleDied;
+            a.OnCoinsChanged -= HandleCoinsChanged;
+        }
+        _eventsBound = false;
+    }
+
+    private void HandleHealthChanged(float hp, float max, bool damaged)
+    {
+        if (_lastHealth < 0f)
+        {
+            _lastHealth = hp;
+            return;
+        }
+        float delta = hp - _lastHealth;
+        if (delta < -0.001f) healthLost += -delta;
+        else if (delta > 0.001f) healthHealed += delta;
+        _lastHealth = hp;
+    }
+
+    private void HandleReloadChanged(bool reloading)
+    {
+        if (reloading) reloadCount++;
+    }
+
+    private void HandleDied()
+    {
+        deathCount++;
+    }
+
+    private void HandleCoinsChanged(int total)
+    {
+        coins = total;
     }
 
     private void Update()
@@ -98,8 +187,47 @@ public class PlayerStatsTracker : MonoBehaviour
         totalDamageDealt += damage;
     }
 
+    // ---- Shot registration (forwarded by AIDirector) ----
+
+    public void RegisterShot()
+    {
+        shotsFired++;
+    }
+
+    public void RegisterHit()
+    {
+        shotsHit++;
+    }
+
+    // ---- Score / kill / crit registration (forwarded by ScoreManager) ----
+
+    public void RegisterKill(int scoreAmount)
+    {
+        kills++;
+        score += scoreAmount;
+    }
+
+    public void RegisterCrit(int scoreAmount)
+    {
+        crits++;
+        score += scoreAmount;
+    }
+
+    public void AddScore(int amount)
+    {
+        score += amount;
+    }
+
+    // ---- Journal registration (forwarded by CollectibleManager) ----
+
+    public void RegisterJournalCollected()
+    {
+        journalsCollected++;
+    }
+
     // ---- Read API for UI ----
 
+    /// <summary>Total kills across all enemy types.</summary>
     public int TotalKills => zombieKills + boomerKills + tankKills;
 
     public int SpecialKills => boomerKills + tankKills;
@@ -120,8 +248,7 @@ public class PlayerStatsTracker : MonoBehaviour
 
     public int GetCoins()
     {
-        var adapter = CowsinsHUDAdapter.Instance;
-        return adapter != null ? adapter.Coins : 0;
+        return coins;
     }
 
     public int GetWaveReached()
@@ -129,9 +256,15 @@ public class PlayerStatsTracker : MonoBehaviour
         return WaveManager.Instance != null ? WaveManager.Instance.currentWave : 0;
     }
 
+    /// <summary>Final score = base score + survival time bonus (mirrors ScoreManager).</summary>
     public int GetScore()
     {
-        return ScoreManager.Instance != null ? ScoreManager.Instance.GetFinalScore() : 0;
+        return score + Mathf.RoundToInt(playTime);
+    }
+
+    public int GetBaseScore()
+    {
+        return score;
     }
 
     public int GetBestScore()
@@ -144,26 +277,57 @@ public class PlayerStatsTracker : MonoBehaviour
         return PlayerPrefs.GetInt("BestWave", 0);
     }
 
-    public int GetHeadshots()
+    public int GetCrits()
     {
-        return ScoreManager.Instance != null ? ScoreManager.Instance.headshots : 0;
+        return crits;
     }
 
     public int GetShotsFired()
     {
-        return AIDirector.Instance != null ? AIDirector.Instance.shotsFired : 0;
+        return shotsFired;
     }
 
     public int GetShotsHit()
     {
-        return AIDirector.Instance != null ? AIDirector.Instance.shotsHit : 0;
+        return shotsHit;
     }
 
     public float GetAccuracy()
     {
-        int fired = GetShotsFired();
-        if (fired <= 0) return 0f;
-        return (float)GetShotsHit() / fired * 100f;
+        if (shotsFired <= 0) return 0f;
+        return (float)shotsHit / shotsFired * 100f;
+    }
+
+    /// <summary>Journals collected so far.</summary>
+    public int GetJournalsCollected()
+    {
+        return journalsCollected;
+    }
+
+    /// <summary>Total journals available in the game (read from CollectibleManager).</summary>
+    public int GetJournalsTotal()
+    {
+        return CollectibleManager.Instance != null ? CollectibleManager.Instance.Total : 0;
+    }
+
+    public float GetHealthLost()
+    {
+        return healthLost;
+    }
+
+    public float GetHealthHealed()
+    {
+        return healthHealed;
+    }
+
+    public int GetDeathCount()
+    {
+        return deathCount;
+    }
+
+    public int GetReloadCount()
+    {
+        return reloadCount;
     }
 
     /// <summary>Formats a time in seconds as MM:SS or H:MM:SS for long sessions.</summary>
@@ -188,5 +352,11 @@ public class PlayerStatsTracker : MonoBehaviour
     public static string FormatDamage(float damage)
     {
         return Mathf.RoundToInt(damage).ToString("N0");
+    }
+
+    /// <summary>Formats a health amount (rounded to integer with thousands separators).</summary>
+    public static string FormatHealth(float amount)
+    {
+        return Mathf.RoundToInt(amount).ToString("N0");
     }
 }

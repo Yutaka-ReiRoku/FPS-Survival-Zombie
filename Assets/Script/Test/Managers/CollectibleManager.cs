@@ -58,6 +58,9 @@ public class CollectibleManager : MonoBehaviour
 
         collected.Add(journal);
 
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterJournalCollected();
+
         if (JournalUI.Instance != null)
             JournalUI.Instance.Show(journal);
         else

@@ -9,7 +9,7 @@ public class ScoreManager : MonoBehaviour
 
     [Header("Stats")]
     public int kills;
-    public int headshots;
+    public int crits;
 
     private float survivalTimer;
 
@@ -27,17 +27,23 @@ public class ScoreManager : MonoBehaviour
     {
         kills++;
         score += amount;
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterKill(amount);
     }
 
-    public void AddHeadshot(int amount = 50)
+    public void AddCrit(int amount = 50)
     {
-        headshots++;
+        crits++;
         score += amount;
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterCrit(amount);
     }
 
     public void AddWaveBonus(int amount)
     {
         score += amount;
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.AddScore(amount);
     }
 
     public int GetSurvivalBonus()

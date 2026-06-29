@@ -227,11 +227,15 @@ public class AIDirector : MonoBehaviour
     public void RegisterShot()
     {
         shotsFired++;
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterShot();
     }
 
     public void RegisterHit()
     {
         shotsHit++;
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterHit();
     }
 
     #endregion

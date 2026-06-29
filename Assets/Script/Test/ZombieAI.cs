@@ -440,7 +440,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         {
             ScoreManager.Instance.AddKill();
             if (lastHitWasHeadshot)
-                ScoreManager.Instance.AddHeadshot();
+                ScoreManager.Instance.AddCrit();
         }
 
         // Player progression via the real Cowsins ExperienceManager (XP -> level -> skill points -> upgrades).

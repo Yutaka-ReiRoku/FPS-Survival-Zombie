@@ -110,19 +110,29 @@ namespace cowsins
             {
                 settings.userEvents.OnCriticalHit?.Invoke();
                 var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
-                damageable?.Damage(finalDamage * weapon.criticalDamageMultiplier, true);
-                AIDirector.Instance?.RegisterHit();
+                if (damageable != null)
+                {
+                    damageable.Damage(finalDamage * weapon.criticalDamageMultiplier, true);
+                    AIDirector.Instance?.RegisterHit();
+                }
             }
             else if (hitTransform.CompareTag("BodyShot"))
             {
                 var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
-                damageable?.Damage(finalDamage, isAimCrit);
+                if (damageable != null)
+                {
+                    damageable.Damage(finalDamage, isAimCrit);
+                    AIDirector.Instance?.RegisterHit();
+                }
             }
             else
             {
                 var damageable = h.collider.GetComponent<IDamageable>();
-                damageable?.Damage(finalDamage, isAimCrit);
-                AIDirector.Instance?.RegisterHit();
+                if (damageable != null)
+                {
+                    damageable.Damage(finalDamage, isAimCrit);
+                    AIDirector.Instance?.RegisterHit();
+                }
             }
         }
 

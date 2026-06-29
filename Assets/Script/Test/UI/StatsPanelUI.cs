@@ -130,7 +130,7 @@ public class StatsPanelUI : MonoBehaviour
         // Card (centered)
         _card = NewChild("Card", _root);
         _card.anchorMin = _card.anchorMax = _card.pivot = new Vector2(0.5f, 0.5f);
-        _card.sizeDelta = new Vector2(620, 580);
+        _card.sizeDelta = new Vector2(620, 800);
         var cardImg = _card.gameObject.AddComponent<Image>();
         cardImg.color = _theme != null ? _theme.surfaceTop : new Color(0.137f, 0.165f, 0.20f, 0.96f);
         cardImg.raycastTarget = true;
@@ -187,10 +187,15 @@ public class StatsPanelUI : MonoBehaviour
         AddRow(grid, "  Boomers");
         AddRow(grid, "  Tanks");
         AddRow(grid, "Total Damage Dealt");
-        AddRow(grid, "Headshots");
+        AddRow(grid, "Health Lost");
+        AddRow(grid, "Health Healed");
+        AddRow(grid, "Crits");
         AddRow(grid, "Shots Fired");
         AddRow(grid, "Shots Hit");
         AddRow(grid, "Accuracy");
+        AddRow(grid, "Reloads");
+        AddRow(grid, "Journals Collected");
+        AddRow(grid, "Deaths");
         AddRow(grid, "Coins");
         AddRow(grid, "Wave Reached");
         AddRow(grid, "Score");
@@ -254,14 +259,21 @@ public class StatsPanelUI : MonoBehaviour
         SetVal(4, t.boomerKills.ToString());
         SetVal(5, t.tankKills.ToString());
         SetVal(6, PlayerStatsTracker.FormatDamage(t.totalDamageDealt));
-        SetVal(7, t.GetHeadshots().ToString());
-        SetVal(8, t.GetShotsFired().ToString());
-        SetVal(9, t.GetShotsHit().ToString());
-        SetVal(10, t.GetAccuracy().ToString("F1") + "%");
-        SetVal(11, t.GetCoins().ToString());
-        SetVal(12, t.GetWaveReached().ToString());
-        SetVal(13, t.GetScore().ToString());
-        SetVal(14, t.GetBestScore().ToString());
+        SetVal(7, PlayerStatsTracker.FormatHealth(t.GetHealthLost()));
+        SetVal(8, PlayerStatsTracker.FormatHealth(t.GetHealthHealed()));
+        SetVal(9, t.GetCrits().ToString());
+        SetVal(10, t.GetShotsFired().ToString());
+        SetVal(11, t.GetShotsHit().ToString());
+        SetVal(12, t.GetAccuracy().ToString("F1") + "%");
+        SetVal(13, t.GetReloadCount().ToString());
+        int jCol = t.GetJournalsCollected();
+        int jTot = t.GetJournalsTotal();
+        SetVal(14, jTot > 0 ? $"{jCol} / {jTot}" : jCol.ToString());
+        SetVal(15, t.GetDeathCount().ToString());
+        SetVal(16, t.GetCoins().ToString());
+        SetVal(17, t.GetWaveReached().ToString());
+        SetVal(18, t.GetScore().ToString());
+        SetVal(19, t.GetBestScore().ToString());
     }
 
     private void SetVal(int index, string value)

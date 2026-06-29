@@ -108,6 +108,8 @@ namespace cowsins
                     {
                         target.Damage(crook.GetMaxHealth() * 10f, isCritical);
 
+                        AIDirector.Instance?.RegisterHit();
+
                         projectileHasAlreadyHit = true;
                         DestroyProjectile();
                         return;
@@ -136,6 +138,8 @@ namespace cowsins
             }
 
             target.Damage(finalDamage, isCritical);
+
+            AIDirector.Instance?.RegisterHit();
 
             projectileHasAlreadyHit = true;
 

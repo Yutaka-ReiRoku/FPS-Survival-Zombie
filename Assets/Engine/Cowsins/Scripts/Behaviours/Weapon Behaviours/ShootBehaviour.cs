@@ -105,6 +105,8 @@ namespace cowsins
         {
             if (weapon == null) return;
 
+            AIDirector.Instance?.RegisterShot();
+
             if (weapon.timeBetweenShots > 0)
             {
                 // Rest the bullets that have just been shot

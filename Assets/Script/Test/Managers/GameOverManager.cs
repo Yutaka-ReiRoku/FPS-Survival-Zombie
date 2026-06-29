@@ -30,9 +30,14 @@ public class GameOverManager : MonoBehaviour
     public TMP_Text zombieKillsText;
     public TMP_Text boomerKillsText;
     public TMP_Text tankKillsText;
-    public TMP_Text headshotsText;
+    public TMP_Text critsText;
     public TMP_Text accuracyText;
     public TMP_Text coinsText;
+    public TMP_Text healthLostText;
+    public TMP_Text healthHealedText;
+    public TMP_Text reloadsText;
+    public TMP_Text journalsText;
+    public TMP_Text deathsText;
 
     [Header("Main Menu")]
     public string mainMenuSceneName = "MainMenu";
@@ -138,12 +143,26 @@ public class GameOverManager : MonoBehaviour
                 boomerKillsText.text = "Boomers : " + tracker.boomerKills;
             if (tankKillsText != null)
                 tankKillsText.text = "Tanks : " + tracker.tankKills;
-            if (headshotsText != null)
-                headshotsText.text = "Headshots : " + tracker.GetHeadshots();
+            if (critsText != null)
+                critsText.text = "Crits : " + tracker.GetCrits();
             if (accuracyText != null)
                 accuracyText.text = "Accuracy : " + tracker.GetAccuracy().ToString("F1") + "%";
             if (coinsText != null)
                 coinsText.text = "Coins : " + tracker.GetCoins();
+            if (healthLostText != null)
+                healthLostText.text = "Health Lost : " + PlayerStatsTracker.FormatHealth(tracker.GetHealthLost());
+            if (healthHealedText != null)
+                healthHealedText.text = "Health Healed : " + PlayerStatsTracker.FormatHealth(tracker.GetHealthHealed());
+            if (reloadsText != null)
+                reloadsText.text = "Reloads : " + tracker.GetReloadCount();
+            if (journalsText != null)
+            {
+                int jCol = tracker.GetJournalsCollected();
+                int jTot = tracker.GetJournalsTotal();
+                journalsText.text = jTot > 0 ? $"Journals : {jCol} / {jTot}" : "Journals : " + jCol;
+            }
+            if (deathsText != null)
+                deathsText.text = "Deaths : " + tracker.GetDeathCount();
         }
 
         if (gameOverPanel != null)

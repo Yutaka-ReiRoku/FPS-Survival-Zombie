@@ -12,7 +12,7 @@ public class GameHUD : MonoBehaviour
     public TMP_Text waveText;        // shows "Wave N · killed/total"
     public TMP_Text killsText;
     public TMP_Text scoreText;
-    public TMP_Text headshotsText;   // optional
+    public TMP_Text critsText;   // optional
     public TMP_Text survivalTimeText; // optional, MM:SS
     public TMP_Text collectiblesText; // optional, "Journals X/total"
     [Tooltip("Manual override for total journals. If <= 0 the HUD reads CollectibleManager.Total (auto-detected from Resources/Journals).")]
@@ -24,7 +24,7 @@ public class GameHUD : MonoBehaviour
     public string coinsPrefix = "Coins : ";
 
     private int _lastWave = -1, _lastKilled = -1, _lastToKill = -1;
-    private int _lastKills = -1, _lastScore = -1, _lastHeadshots = -1, _lastSec = -1;
+    private int _lastKills = -1, _lastScore = -1, _lastCrits = -1, _lastSec = -1;
     private int _lastCollectibles = -1;
     private int _lastCoins = -1;
 
@@ -48,7 +48,7 @@ public class GameHUD : MonoBehaviour
         {
             if (killsText != null && sm.kills != _lastKills) { _lastKills = sm.kills; killsText.text = "Kills : " + sm.kills; }
             if (scoreText != null && sm.score != _lastScore) { _lastScore = sm.score; scoreText.text = "Score : " + sm.score; }
-            if (headshotsText != null && sm.headshots != _lastHeadshots) { _lastHeadshots = sm.headshots; headshotsText.text = "Headshots : " + sm.headshots; }
+            if (critsText != null && sm.crits != _lastCrits) { _lastCrits = sm.crits; critsText.text = "Crits : " + sm.crits; }
             if (survivalTimeText != null)
             {
                 int sec = Mathf.FloorToInt(sm.GetSurvivalTime());
