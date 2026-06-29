@@ -80,7 +80,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18840827a8f682c489a156fbd47c5fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uniqueID: 2143c84a-f2d2-4e39-83ed-d043b737ee00
+  uniqueID: a12ea8ac-672b-4b7d-a5d1-cbabd48e6c2f
   interactable: 0
   interactText: 'Pick up. '
   instantInteraction: 0
@@ -100,6 +100,9 @@ MonoBehaviour:
   graphics: {fileID: 4788863506741489607}
   dropped: 0
   amountOfBullets: 50
+  scaleByMagazineSize: 1
+  magazinesPerPickup: 2
+  projectilePickupAmount: 3
   bulletsSO: {fileID: 11400000, guid: e088ca662720b6743b16dee584dcee54, type: 2}
   bulletsIcon: {fileID: 21300000, guid: 9f4425af637275d438db6030e69e0e23, type: 3}
   bulletsGraphics: {fileID: 6655988485894769444, guid: e7a253d230cd7cc41b2e92f3505fd710, type: 3}

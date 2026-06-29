@@ -385,6 +385,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         currentHealth -= damage;
 
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterDamageDealt(damage);
+
         animator.SetTrigger(HitHash);
 
         PlaySound(hitClip);
@@ -429,6 +432,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         if (WaveManager.Instance != null)
             WaveManager.Instance.RegisterZombieKill();
+
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterZombieKill();
 
         if (ScoreManager.Instance != null)
         {

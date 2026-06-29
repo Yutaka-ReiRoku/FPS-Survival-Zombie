@@ -369,6 +369,9 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
         currentHealth -= damage;
 
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterDamageDealt(damage);
+
         animator.SetTrigger("Hit");
 
         if (OnHealthChanged != null)
@@ -399,6 +402,9 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
         if (AIDirector.Instance != null)
             AIDirector.Instance.RegisterKill();
+
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterBoomerKill();
 
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.AddKill();

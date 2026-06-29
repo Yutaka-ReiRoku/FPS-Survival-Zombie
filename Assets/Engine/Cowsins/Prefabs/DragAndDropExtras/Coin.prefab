@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3f5648b4fcb7934babbb2a0c0f39131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uniqueID: 720d96a7-5694-4f99-8e8b-95e25529f29d
+  uniqueID: d3ca1a05-ab3d-4bdf-8a51-69e7ec805a2a
   events:
     onEnter:
       m_PersistentCalls:
@@ -261,6 +261,13 @@ MonoBehaviour:
   gravity: 12
   launchSpinSpeed: 540
   idleSpinSpeed: 90
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  groundProbeRadius: 0.3
+  floorNormalY: 0.6
+  bounceStopThreshold: 1.5
+  bounceDamping: 0.35
 --- !u!1001 &2477373021139236770
 PrefabInstance:
   m_ObjectHideFlags: 0

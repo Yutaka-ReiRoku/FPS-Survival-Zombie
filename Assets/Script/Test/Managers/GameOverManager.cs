@@ -23,6 +23,17 @@ public class GameOverManager : MonoBehaviour
     public Button mainMenuButton;
     public TMP_Text bestScoreText;
 
+    [Header("Extended Stats (optional — assign for full breakdown)")]
+    public TMP_Text playTimeText;
+    public TMP_Text distanceText;
+    public TMP_Text totalDamageText;
+    public TMP_Text zombieKillsText;
+    public TMP_Text boomerKillsText;
+    public TMP_Text tankKillsText;
+    public TMP_Text headshotsText;
+    public TMP_Text accuracyText;
+    public TMP_Text coinsText;
+
     [Header("Main Menu")]
     public string mainMenuSceneName = "MainMenu";
 
@@ -110,6 +121,30 @@ public class GameOverManager : MonoBehaviour
             killsText.text = "Kills : " + kills;
         if (bestScoreText != null)
             bestScoreText.text = "Best : " + bestScore + "  (Wave " + bestWave + ")";
+
+        // Extended stats breakdown (only if the text fields are assigned).
+        var tracker = PlayerStatsTracker.Instance;
+        if (tracker != null)
+        {
+            if (playTimeText != null)
+                playTimeText.text = "Time : " + PlayerStatsTracker.FormatTime(tracker.GetPlayTime());
+            if (distanceText != null)
+                distanceText.text = "Distance : " + PlayerStatsTracker.FormatDistance(tracker.GetDistanceMoved());
+            if (totalDamageText != null)
+                totalDamageText.text = "Damage : " + PlayerStatsTracker.FormatDamage(tracker.totalDamageDealt);
+            if (zombieKillsText != null)
+                zombieKillsText.text = "Zombies : " + tracker.zombieKills;
+            if (boomerKillsText != null)
+                boomerKillsText.text = "Boomers : " + tracker.boomerKills;
+            if (tankKillsText != null)
+                tankKillsText.text = "Tanks : " + tracker.tankKills;
+            if (headshotsText != null)
+                headshotsText.text = "Headshots : " + tracker.GetHeadshots();
+            if (accuracyText != null)
+                accuracyText.text = "Accuracy : " + tracker.GetAccuracy().ToString("F1") + "%";
+            if (coinsText != null)
+                coinsText.text = "Coins : " + tracker.GetCoins();
+        }
 
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);

@@ -477,6 +477,9 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
         currentHealth -= damage;
 
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterDamageDealt(damage);
+
         animator.SetTrigger("Hit");
 
         if (currentHealth <= 0)
@@ -497,6 +500,18 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         isDead = true;
 
         CancelInvoke();
+
+        if (CombatFeedbackHUD.Instance != null)
+            CombatFeedbackHUD.Instance.ShowKill("Tank");
+
+        if (AIDirector.Instance != null)
+            AIDirector.Instance.RegisterKill();
+
+        if (PlayerStatsTracker.Instance != null)
+            PlayerStatsTracker.Instance.RegisterTankKill();
+
+        if (ScoreManager.Instance != null)
+            ScoreManager.Instance.AddKill(500);
 
         agent.enabled = false;
 
