@@ -177,7 +177,10 @@ namespace cowsins
                         EditorGUILayout.EndHorizontal();
                         GUILayout.Space(5);
 
-                        EditorGUILayout.PropertyField(playerSettings.FindPropertyRelative("controlsResponsiveness"));                        
+                        EditorGUILayout.PropertyField(playerSettings.FindPropertyRelative("controlsResponsiveness"));
+
+                        EditorGUILayout.PropertyField(playerSettings.FindPropertyRelative("stepHeight"));
+                        EditorGUILayout.PropertyField(playerSettings.FindPropertyRelative("stepAssistForce"));
 
                         break;
                     case "Sliding":

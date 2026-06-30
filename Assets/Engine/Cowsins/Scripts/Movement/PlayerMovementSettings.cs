@@ -119,6 +119,12 @@ namespace cowsins
         [Range(0, 1f), Tooltip("Previously named Friction Force Amount (<1.3.6). Controls the snappiness of the character. The higher, the more responsive.")]
         public float controlsResponsiveness = 0.175f;
 
+        [Tooltip("Maximum height of steps/stairs the player can climb without jumping. The player will be assisted over obstacles up to this height."), Min(0)]
+        public float stepHeight = 0.5f;
+
+        [Tooltip("Force applied to lift the player over steps. Higher = snappier step climbing."), Min(0)]
+        public float stepAssistForce = 6f;
+
         // ---------------- CROUCH SETTINGS ---------------- //
 
         [Tooltip("Set to true to enable the player to crouch")] public bool allowCrouch;

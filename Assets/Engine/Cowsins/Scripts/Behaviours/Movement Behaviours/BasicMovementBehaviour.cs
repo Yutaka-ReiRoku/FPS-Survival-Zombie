@@ -25,6 +25,7 @@ public class BasicMovementBehaviour
     private const float slopeGravityMultiplier = 150;
     private const float extraGravityMultiplier = 10f;
     private bool wasMovingLastFrame;
+    private float stepAssistCooldown;
     public BasicMovementBehaviour(MovementContext context)
     {
         this.context = context;
@@ -61,7 +62,12 @@ public class BasicMovementBehaviour
         //If speed is larger than maxspeed, clamp the velocity so you don't go over max speed
         LimitDiagonalVelocity();
 
-        if (rb.linearVelocity.magnitude < .1f) rb.linearVelocity = Vector3.zero;
+        // Only zero horizontal velocity when grounded and not on a slope/stairs.
+        // Zeroing Y velocity on stairs causes the player to lose momentum on each step.
+        if (rb.linearVelocity.magnitude < .1f && playerMovement.Grounded && !context.IsPlayerOnSlope)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        }
 
         if (!playerControl.IsControllable)
         {
@@ -89,6 +95,9 @@ public class BasicMovementBehaviour
         movementMultipliers *= isCrouchSliding ? playerSettings.slideSteerMultiplier : 1; 
 
         rb.AddForce(moveDirection * movementMultipliers);
+
+        // Help the player climb stairs and small obstacles without jumping
+        StepAssist();
     }
 
     private void CalculateMoveDirection()
@@ -205,5 +214,62 @@ public class BasicMovementBehaviour
         {
             rb.AddForce(playerSettings.acceleration * orientation.Forward * Time.deltaTime * -mag.y * friction);
         }
+    }
+
+    /// <summary>
+    /// Helps the player climb stairs and small obstacles by detecting step edges
+    /// with a forward SphereCast and snapping the capsule up onto the step.
+    /// </summary>
+    private void StepAssist()
+    {
+        if (stepAssistCooldown > 0)
+        {
+            stepAssistCooldown -= Time.fixedDeltaTime;
+            return;
+        }
+
+        if (playerMovement.IsCrouching || playerMovement.IsSliding) return;
+        if (context.HasJumped || inputManager.Jumping) return;
+
+        // Need horizontal input
+        Vector3 inputDir = (orientation.Forward * inputManager.Y + orientation.Right * inputManager.X);
+        inputDir.y = 0;
+        if (inputDir.magnitude < 0.1f) return;
+        inputDir = inputDir.normalized;
+
+        float stepH = playerSettings.stepHeight;
+        if (stepH <= 0) return;
+
+        float radius = playerCapsuleCollider.radius;
+        // Use a smaller sphere to detect step edges without hitting the ground
+        float sphereRadius = radius * 0.5f;
+
+        // Cast forward from the player's feet level
+        Vector3 sphereOrigin = rb.position + Vector3.up * (sphereRadius + 0.05f);
+        float castDist = radius + 0.3f;
+
+        if (!Physics.SphereCast(sphereOrigin, sphereRadius, inputDir, out var hit, castDist, context.WhatIsGround))
+            return;
+
+        // Height of the hit point relative to the player's feet
+        float playerFeetY = rb.position.y + playerCapsuleCollider.center.y
+            - playerCapsuleCollider.height * 0.5f + playerCapsuleCollider.radius;
+        float hitHeight = hit.point.y - playerFeetY;
+
+        // Only step up if the obstacle is low enough and actually requires climbing
+        if (hitHeight <= 0.02f || hitHeight > stepH) return;
+
+        // Check that there's space above the obstacle to step onto it
+        Vector3 aboveOrigin = hit.point + Vector3.up * (stepH + 0.1f) + inputDir * 0.1f;
+        if (Physics.Raycast(aboveOrigin, inputDir, 0.3f, context.WhatIsGround))
+            return; // Something is blocking above — obstacle is too tall
+
+        // Don't assist if already moving upward fast (e.g. mid-jump)
+        if (rb.linearVelocity.y > stepH * 3f) return;
+
+        // Snap the player up so the capsule bottom clears the step
+        float climbAmount = hitHeight + 0.05f;
+        rb.MovePosition(rb.position + Vector3.up * climbAmount);
+        stepAssistCooldown = 0.08f;
     }
 }
