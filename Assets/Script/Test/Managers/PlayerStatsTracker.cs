@@ -77,7 +77,17 @@ public class PlayerStatsTracker : MonoBehaviour
     private System.Collections.IEnumerator BindAdapterWhenReady()
     {
         float timeout = 12f;
-        while (timeout > 0f && CowsinsHUDAdapter.Instance == null)
+        // Wait until the adapter exists AND has pulled real health data. The adapter
+        // sets Instance in Awake (before PullHealth runs), so Health is still 0 at
+        // that point. Additionally, Cowsins' PlayerStats sets maxHealth in the
+        // inspector but only sets health = maxHealth inside Start() — so before
+        // Start() runs, MaxHealth is already 100 but Health is still 0. If we seed
+        // _lastHealth from 0, the first real PullHealth (100) would be miscounted as
+        // 100 "healed". Requiring BOTH Health > 0 AND MaxHealth > 0 guarantees
+        // PlayerStats.Start() has run and health is the authoritative value.
+        while (timeout > 0f && (CowsinsHUDAdapter.Instance == null
+            || CowsinsHUDAdapter.Instance.MaxHealth <= 0f
+            || CowsinsHUDAdapter.Instance.Health <= 0f))
         {
             timeout -= Time.unscaledDeltaTime;
             yield return null;
