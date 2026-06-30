@@ -1,6 +1,6 @@
 #if UNITY_EDITOR
 /// <summary>
-/// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved. 
+/// This script belongs to cowsinsï¿½ as a part of the cowsinsï¿½ FPS Engine. All rights reserved. 
 /// </summary>
 using UnityEngine;
 using UnityEditor;
@@ -10,7 +10,7 @@ namespace cowsins
     [CustomEditor(typeof(PlayerStats))]
     public class PlayerStatsEditor : Editor
     {
-        private string[] tabs = { "Player Stats", "Fall Damage", "Auto Heal", "Events" };
+        private string[] tabs = { "Player Stats", "Fall Damage", "Auto Heal", "Shield Regen", "Events" };
         private int currentTab = 0;
 
         override public void OnInspectorGUI()
@@ -65,6 +65,18 @@ namespace cowsins
                                 EditorGUILayout.PropertyField(serializedObject.FindProperty("restartAutoHealTime"));
                                 EditorGUI.indentLevel--;
                             }
+                            EditorGUI.indentLevel--;
+                        }
+                        break;
+                    case "Shield Regen":
+                        EditorGUILayout.LabelField("SHIELD REGENERATION", EditorStyles.boldLabel);
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("enableShieldRegen"));
+                        if (myScript.EnableShieldRegen)
+                        {
+                            EditorGUI.indentLevel++;
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty("shieldRegenDelay"));
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty("shieldRegenRate"));
+                            EditorGUILayout.PropertyField(serializedObject.FindProperty("shieldRegenAmount"));
                             EditorGUI.indentLevel--;
                         }
                         break;

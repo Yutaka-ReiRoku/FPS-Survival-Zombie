@@ -48,10 +48,10 @@ namespace cowsins
         [SerializeField, Min(0)] private float shieldRegenDelay = 5f;
 
         [Tooltip("Time in seconds between each shield regeneration tick")]
-        [SerializeField, Min(0.01f)] private float shieldRegenRate = 0.5f;
+        [SerializeField, Min(0.01f)] private float shieldRegenRate = 2f;
 
         [Tooltip("Amount of shield restored per regeneration tick")]
-        [SerializeField, Min(0)] private float shieldRegenAmount = 10f;
+        [SerializeField, Min(0)] private float shieldRegenAmount = 2.5f;
 
 
         // Internal use
@@ -80,6 +80,7 @@ namespace cowsins
         public bool TakesFallDamage => takesFallDamage;
         public bool EnableAutoHeal => enableAutoHeal;
         public bool RestartAutoHealAfterBeingDamaged => restartAutoHealAfterBeingDamaged;
+        public bool EnableShieldRegen => enableShieldRegen;
 
         public PlayerStatsEvents Events { get; } = new PlayerStatsEvents();
 
