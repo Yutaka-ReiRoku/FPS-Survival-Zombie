@@ -202,12 +202,12 @@ public class CowsinsHUDAdapter : MonoBehaviour
         if (_pm != null && _staminaSink == null) SetupStaminaSink();
 
         // Crosshair-supporting providers (populated in PlayerDependencies.Awake).
+        // NOTE: This adapter has [DefaultExecutionOrder(-50)], so our OnEnable/AcquireAndBind
+        // can run BEFORE PlayerDependencies.Awake() has populated these interface properties.
+        // We therefore defer the cache into a wait-until-ready coroutine (same pattern as
+        // BindDashWhenReady / BindInteractWhenReady) instead of reading them eagerly here.
         if (_deps == null) _deps = FindAnyObjectByType<PlayerDependencies>();
-        if (_deps != null)
-        {
-            _moveState = _deps.PlayerMovementState;
-            _weaponBehaviourProv = _deps.WeaponBehaviour;
-        }
+        StartCoroutine(BindCrosshairProvidersWhenReady());
 
         // Pull authoritative current values (init events may have fired in Start before we bound).
         PullHealth(false);
@@ -240,6 +240,25 @@ public class CowsinsHUDAdapter : MonoBehaviour
         _interactEvents.OnDisableInteraction.AddListener(HandleInteractHide);
         _interactEvents.OnFinishInteraction.AddListener(HandleInteractHide);
         _interactEvents.OnInteractionProgressChanged.AddListener(HandleInteractProgress);
+    }
+
+    // Crosshair-supporting providers (PlayerMovementState, WeaponBehaviour) are assigned in
+    // PlayerDependencies.Awake(). Since this adapter runs at DefaultExecutionOrder(-50),
+    // Awake on PlayerDependencies may not have run yet when AcquireAndBind reaches the
+    // provider-cache section. This coroutine waits until those interfaces are non-null,
+    // then caches them so the CrosshairWidget can read IsAiming / movement state live.
+    private IEnumerator BindCrosshairProvidersWhenReady()
+    {
+        float timeout = 12f;
+        while (timeout > 0f && (_deps == null || _deps.PlayerMovementState == null || _deps.WeaponBehaviour == null))
+        {
+            if (_deps == null) _deps = FindAnyObjectByType<PlayerDependencies>();
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+        if (_deps == null) yield break;
+        _moveState = _deps.PlayerMovementState;
+        _weaponBehaviourProv = _deps.WeaponBehaviour;
     }
 
     private void HandleAllowed(string text) { InteractText = text; OnInteractPrompt?.Invoke(true, text); }
