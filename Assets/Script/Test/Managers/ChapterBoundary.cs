@@ -51,6 +51,24 @@ public class ChapterBoundary : MonoBehaviour
             // Barrier starts closed if the chapter isn't complete yet.
             UpdateBarrier();
         }
+
+        // If the player is already inside the boundary at start (e.g. the player
+        // spawns inside Chapter 1), enable spawners immediately since
+        // OnTriggerEnter won't fire for an object that's already inside.
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            var col = GetComponent<Collider>();
+            if (col != null && col.bounds.Contains(player.transform.position))
+            {
+                SetSpawnersActive(true);
+                if (StoryManager.Instance != null && StoryManager.Instance.CurrentChapter != chapter)
+                {
+                    Debug.Log($"[ChapterBoundary] Player started inside Chapter {chapter} (current: {StoryManager.Instance.CurrentChapter}).");
+                }
+                if (exitBarrier != null) UpdateBarrier();
+            }
+        }
     }
 
     private void OnEnable()

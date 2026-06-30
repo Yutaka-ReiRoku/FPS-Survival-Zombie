@@ -30,16 +30,19 @@ public class QuestTrackerUI : MonoBehaviour
     private void Awake()
     {
         Build();
-        UpdateDisplay();
     }
 
-    private void OnEnable()
+    private void Start()
     {
+        // Subscribe in Start (not OnEnable) so StoryManager.Awake has definitely
+        // run and set Instance. Otherwise the subscription silently fails when
+        // QuestTrackerUI initializes before StoryManager.
         if (StoryManager.Instance != null)
         {
             StoryManager.Instance.OnActiveQuestChanged += HandleQuestChanged;
             StoryManager.Instance.OnChapterChanged += HandleChapterChanged;
         }
+        UpdateDisplay();
     }
 
     private void OnDisable()

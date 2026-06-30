@@ -107,25 +107,49 @@ public class GameOverManager : MonoBehaviour
 
     private void ShowGameOver()
     {
+        var sm = StoryManager.Instance;
+        bool isStoryMode = sm != null;
+
         int finalScore = ScoreManager.Instance != null ? ScoreManager.Instance.GetFinalScore() : 0;
         int wave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 0;
         int kills = ScoreManager.Instance != null ? ScoreManager.Instance.kills : 0;
 
-        // High score persistence (best score + best wave).
-        int bestScore = PlayerPrefs.GetInt("BestScore", 0);
-        int bestWave = PlayerPrefs.GetInt("BestWave", 0);
-        if (finalScore > bestScore) { bestScore = finalScore; PlayerPrefs.SetInt("BestScore", bestScore); }
-        if (wave > bestWave) { bestWave = wave; PlayerPrefs.SetInt("BestWave", bestWave); }
-        PlayerPrefs.Save();
+        if (isStoryMode)
+        {
+            // Story mode: show chapter/quest/journal stats instead of deathmatch score.
+            int chapter = sm.CurrentChapter;
+            int questsDone = sm.TotalQuestsCompleted;
+            int journals = CollectibleManager.Instance != null ? CollectibleManager.Instance.Count : 0;
+            int journalsTotal = CollectibleManager.Instance != null ? CollectibleManager.Instance.Total : 0;
 
-        if (finalScoreText != null)
-            finalScoreText.text = "Score : " + finalScore;
-        if (waveReachedText != null)
-            waveReachedText.text = "Wave : " + wave;
-        if (killsText != null)
-            killsText.text = "Kills : " + kills;
-        if (bestScoreText != null)
-            bestScoreText.text = "Best : " + bestScore + "  (Wave " + bestWave + ")";
+            if (finalScoreText != null)
+                finalScoreText.text = "Chương : " + chapter;
+            if (waveReachedText != null)
+                waveReachedText.text = "Nhiệm vụ : " + questsDone;
+            if (killsText != null)
+                killsText.text = "Nhật ký : " + journals + (journalsTotal > 0 ? " / " + journalsTotal : "");
+            if (bestScoreText != null)
+                bestScoreText.text = sm.StoryComplete ? "Cốt truyện hoàn thành" : "Tiến độ: Chương " + chapter;
+        }
+        else
+        {
+            // Deathmatch mode: original score/wave/kills/best display.
+            // High score persistence (best score + best wave).
+            int bestScore = PlayerPrefs.GetInt("BestScore", 0);
+            int bestWave = PlayerPrefs.GetInt("BestWave", 0);
+            if (finalScore > bestScore) { bestScore = finalScore; PlayerPrefs.SetInt("BestScore", bestScore); }
+            if (wave > bestWave) { bestWave = wave; PlayerPrefs.SetInt("BestWave", bestWave); }
+            PlayerPrefs.Save();
+
+            if (finalScoreText != null)
+                finalScoreText.text = "Score : " + finalScore;
+            if (waveReachedText != null)
+                waveReachedText.text = "Wave : " + wave;
+            if (killsText != null)
+                killsText.text = "Kills : " + kills;
+            if (bestScoreText != null)
+                bestScoreText.text = "Best : " + bestScore + "  (Wave " + bestWave + ")";
+        }
 
         // Extended stats breakdown (only if the text fields are assigned).
         var tracker = PlayerStatsTracker.Instance;

@@ -124,6 +124,23 @@ public class CutscenePlayer : MonoBehaviour
         _canvas.gameObject.SetActive(true);
         _group.blocksRaycasts = true;
 
+        // Zero out the player's velocity so residual downward force can't make
+        // them sink while the cutscene plays. We don't set isKinematic=true because
+        // other scripts (e.g. WeaponShootingState) may try to set velocity on the
+        // Rigidbody during the cutscene, which errors on kinematic bodies.
+        // With Time.timeScale=0, FixedUpdate won't run, so gravity won't accumulate.
+        Rigidbody playerRb = null;
+        var playerGo = GameObject.FindGameObjectWithTag("Player");
+        if (playerGo != null)
+        {
+            playerRb = playerGo.GetComponent<Rigidbody>();
+            if (playerRb != null)
+            {
+                playerRb.linearVelocity = Vector3.zero;
+                playerRb.angularVelocity = Vector3.zero;
+            }
+        }
+
         // Pause gameplay while the cutscene plays (restored on exit).
         float prevTimeScale = Time.timeScale;
         Time.timeScale = 0f;
@@ -161,6 +178,13 @@ public class CutscenePlayer : MonoBehaviour
         bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
         if (!pauseOpen && !gameOver)
             Time.timeScale = prevTimeScale > 0f ? prevTimeScale : 1f;
+
+        // Zero velocity again on exit in case any force was applied during the pause.
+        if (playerRb != null)
+        {
+            playerRb.linearVelocity = Vector3.zero;
+            playerRb.angularVelocity = Vector3.zero;
+        }
 
         _routine = null;
         onComplete?.Invoke();
