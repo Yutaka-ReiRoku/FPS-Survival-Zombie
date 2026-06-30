@@ -46,11 +46,21 @@ public class LootPop : MonoBehaviour
     [Range(0f, 1f)]
     public float bounceDamping = 0.35f;
 
+    [Tooltip("Độ cao nâng thêm so với mặt đất khi loot hạ cánh xong. Giúp loot "
+             + "không bị chìm vào sàn khi pivot nằm ở giữa mesh/collider.")]
+    public float restHeightOffset = 0.1f;
+
+    [Tooltip("Tốc độ lerp mượt từ vị trí chạm sàn lên vị trí nghỉ "
+             + "(restHeightOffset). Tránh bước nhảy visual khi hạ cánh.")]
+    public float restSettleSpeed = 8f;
+
     private Vector3 velocity;
     private float spinSpeed;
     private bool landed;
     private Rigidbody rb;
     private bool rbWasKinematic;
+    private Vector3 restTargetPos;
+    private bool settling;
 
     /// <summary>True khi loot đã hạ cánh về mặt đất.</summary>
     public bool Landed => landed;
@@ -84,6 +94,7 @@ public class LootPop : MonoBehaviour
 
         spinSpeed = launchSpinSpeed;
         landed = false;
+        settling = false;
         enabled = true;
     }
 
@@ -127,6 +138,13 @@ public class LootPop : MonoBehaviour
                         velocity = Vector3.zero;
                         landed = true;
                         spinSpeed = idleSpinSpeed;
+                        // Vị trí chạm sàn hiện tại (chỉ groundProbeRadius).
+                        // Lerp mượt lên restHeightOffset trong các frame sau
+                        // để tránh bước nhảy visual khi hạ cánh.
+                        restTargetPos =
+                            hit.point + hit.normal *
+                            (groundProbeRadius + restHeightOffset);
+                        settling = true;
                     }
                 }
                 else
@@ -140,6 +158,21 @@ public class LootPop : MonoBehaviour
             else
             {
                 transform.position = start + delta;
+            }
+        }
+        else if (settling)
+        {
+            // Lerp mượt từ vị trí chạm sàn lên vị trí nghỉ (restHeightOffset)
+            // để tránh bước nhảy visual ngay khi hạ cánh.
+            transform.position = Vector3.Lerp(
+                transform.position,
+                restTargetPos,
+                restSettleSpeed * dt);
+
+            if (Vector3.SqrMagnitude(transform.position - restTargetPos) < 0.0001f)
+            {
+                transform.position = restTargetPos;
+                settling = false;
             }
         }
 

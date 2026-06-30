@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3f5648b4fcb7934babbb2a0c0f39131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uniqueID: d3ca1a05-ab3d-4bdf-8a51-69e7ec805a2a
+  uniqueID: b20a69d3-914f-41dc-b717-3dc2a50aaa33
   events:
     onEnter:
       m_PersistentCalls:
@@ -220,8 +220,8 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   rememberTriggerState: 0
-  minCoins: 100
-  maxCoins: 200
+  minCoins: 10
+  maxCoins: 50
   collectCoinSFX: {fileID: 8300000, guid: b277c9855a4daf144bc8840c346ec1a0, type: 3}
 --- !u!65 &7403018159610325259
 BoxCollider:
@@ -268,6 +268,8 @@ MonoBehaviour:
   floorNormalY: 0.6
   bounceStopThreshold: 1.5
   bounceDamping: 0.35
+  restHeightOffset: 0.1
+  restSettleSpeed: 8
 --- !u!1001 &2477373021139236770
 PrefabInstance:
   m_ObjectHideFlags: 0
