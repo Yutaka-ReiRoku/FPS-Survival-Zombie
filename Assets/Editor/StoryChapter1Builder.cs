@@ -36,11 +36,11 @@ public static class StoryChapter1Builder
             QuestFolder + "/Quest_02_TutorialShooting.asset",
             questId: 2, chapter: 1,
             title: "Làm quen thao tác bắn súng",
-            description: "Học cách ngắm bắn và tiêu diệt zombie đầu tiên xuất hiện trong trò chơi.",
-            objective: "Tiêu diệt zombie đầu tiên",
+            description: "Người chơi học cách ngắm bắn và tiêu diệt zombie đầu tiên. Nhiệm vụ này giúp người chơi chuyển từ trạng thái làm quen điều khiển sang trạng thái bắt đầu chiến đấu thực sự.",
+            objective: "Tiêu diệt toàn bộ zombie xung quanh khu lều",
             expReward: 100f,
             journalReward: soldierJournal,
-            notification: "Zombie bị tiêu diệt! Nhận Nhật ký người lính #1.");
+            notification: "Zombie bị tiêu diệt! Nhận Nhật ký người lính #1. Chuyển sang bệnh viện...");
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -96,24 +96,22 @@ public static class StoryChapter1Builder
             cutscene.fadeOut = 0.8f;
             qt.cutscene = cutscene;
 
-            // Spawn a zombie after Quest 1 completes.
+            // Spawn 3 zombies after Quest 1 completes — they rush out from around
+            // the tent. The player must kill all of them to complete Q2.
             var spawner = GetOrAdd<SpawnOnQuestEvent>(q1TriggerGO);
             spawner.onQuestComplete = q1;
             spawner.fireOnQuestActive = false;
-            var zombiePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
-                "Assets/Prefab/OG Prefab/Crooks/Zombie_Bellboy_Male_01.prefab");
-            spawner.prefabs = zombiePrefab != null
-                ? new GameObject[] { zombiePrefab }
-                : new GameObject[0];
-            // Spawn behind the tent (relative to the trigger).
+            var zombiePrefabs = LoadTutorialZombiePrefabs();
+            spawner.prefabs = zombiePrefabs;
+            // Spawn at the trigger and at two offsets so they come from different sides.
             spawner.spawnPoints = new Transform[] { q1TriggerGO.transform };
             spawner.delay = 1.5f;
 
             EditorUtility.SetDirty(q1TriggerGO);
-            Debug.Log("[StoryChapter1Builder] Q1_ReachTrigger wired (QuestTrigger + Cutscene + ZombieSpawn).");
+            Debug.Log($"[StoryChapter1Builder] Q1_ReachTrigger wired (QuestTrigger + Cutscene + {zombiePrefabs.Length} zombies).");
         }
 
-        // 4) Add a KillCountObjective for Quest 2 (kill 1 zombie).
+        // 4) Add a KillCountObjective for Quest 2 (kill all zombies around the tent).
         var killObjGO = FindChild(ch1, "Q2_KillObjective");
         if (killObjGO == null)
         {
@@ -122,9 +120,21 @@ public static class StoryChapter1Builder
         }
         var killObj = GetOrAdd<KillCountObjective>(killObjGO);
         killObj.targetQuest = q2;
-        killObj.targetCount = 1;
+        killObj.targetCount = 3; // Must kill all 3 zombies around the tent.
+
+        // Transition cutscene to hospital — plays when Q2 completes, before the
+        // chapter advances. Per Level Design doc: "Kích hoạt Cutscene chuyển cảnh
+        // sang bệnh viện."
+        var q2Cutscene = GetOrAdd<CutscenePlayer>(killObjGO);
+        q2Cutscene.title = "CHƯƠNG 2 — BỆNH VIỆN";
+        q2Cutscene.body = "Sau khi rời lều trại với Nhật ký người lính #1, bạn phát hiện manh mối dẫn đến bệnh viện trung tâm thành phố. Tiếng rên rỉ vọng ra từ bên trong...";
+        q2Cutscene.fadeIn = 0.8f;
+        q2Cutscene.hold = 4f;
+        q2Cutscene.fadeOut = 1.2f;
+        killObj.completionCutscene = q2Cutscene;
+
         EditorUtility.SetDirty(killObjGO);
-        Debug.Log("[StoryChapter1Builder] Q2_KillObjective wired (kill 1 zombie).");
+        Debug.Log("[StoryChapter1Builder] Q2_KillObjective wired (kill 3 zombies + transition cutscene).");
 
         // 5) Place a Pistol Pickeable at the Q1 trigger location.
         PlacePistolPickeable(q1TriggerGO);
@@ -151,24 +161,20 @@ public static class StoryChapter1Builder
             Debug.Log("[StoryChapter1Builder] SaveRoom_Ch1 wired.");
         }
 
-        // 8) Add ChapterBoundary to Ch1 (BoxCollider first, since ChapterBoundary
-        //    requires a Collider via [RequireComponent]).
+        // 8) Add ChapterBoundary to Ch1 (BoxCollider trigger volume).
         var box = GetOrAddBoxCollider(ch1);
         box.size = new Vector3(60f, 20f, 60f);
         box.center = new Vector3(0f, 5f, -5f);
         box.isTrigger = true;
         var boundary = GetOrAdd<ChapterBoundary>(ch1);
         boundary.chapter = 1;
-        // Wire the main Spawner as the chapter's spawner.
-        var spawnerGO = GameObject.Find("Spawner");
-        if (spawnerGO != null)
-        {
-            var spawmComp = spawnerGO.GetComponent<Spawm>();
-            if (spawmComp != null)
-                boundary.spawners = new MonoBehaviour[] { spawmComp };
-        }
+        // Ch1 is a tutorial — no continuous spawner. Zombies are spawned via
+        // SpawnOnQuestEvent (3 zombies after Q1 completes). Leave spawners empty
+        // so the main Spawner doesn't interfere with the kill count.
+        boundary.spawners = new MonoBehaviour[0];
+        // No walls — the boundary trigger volume handles one-way locking.
         EditorUtility.SetDirty(ch1);
-        Debug.Log("[StoryChapter1Builder] ChapterBoundary wired for Ch1.");
+        Debug.Log("[StoryChapter1Builder] ChapterBoundary wired for Ch1 (trigger volume, no walls).");
 
         // 9) Add QuestTrackerUI to the QuestTrackerWidget.
         var qtwGO = GameObject.Find("=== UI ===/GameUICanvas/QuestTrackerWidget");
@@ -179,7 +185,8 @@ public static class StoryChapter1Builder
             Debug.Log("[StoryChapter1Builder] QuestTrackerUI added to QuestTrackerWidget.");
         }
 
-        // 10) Disable the main Spawner at start (ChapterBoundary will enable it on enter).
+        // 10) Disable the main Spawner at start — Ch1 uses SpawnOnQuestEvent only.
+        var spawnerGO = GameObject.Find("Spawner");
         if (spawnerGO != null)
         {
             var spawmComp = spawnerGO.GetComponent<Spawm>();
@@ -269,6 +276,25 @@ public static class StoryChapter1Builder
     }
 
     // ---- Helpers ----
+
+    private static GameObject[] LoadTutorialZombiePrefabs()
+    {
+        // 3 tutorial zombies — mix of types for variety.
+        string[] names = {
+            "Zombie_Bellboy_Male_01",
+            "Zombie_Biker_Male_01",
+            "Zombie_Hobo_Male_01",
+        };
+        var list = new System.Collections.Generic.List<GameObject>();
+        foreach (var n in names)
+        {
+            var p = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Prefab/OG Prefab/Crooks/" + n + ".prefab");
+            if (p != null) list.Add(p);
+            else Debug.LogWarning($"[StoryChapter1Builder] Zombie prefab not found: {n}");
+        }
+        return list.ToArray();
+    }
 
     private static QuestData CreateOrUpdateQuest(
         string path, int questId, int chapter, string title,

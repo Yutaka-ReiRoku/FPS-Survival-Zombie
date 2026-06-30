@@ -22,6 +22,10 @@ public class KillCountObjective : MonoBehaviour
     [Tooltip("If true and targetQuest is null, start listening as soon as this component is enabled.")]
     public bool startOnEnable = false;
 
+    [Header("Optional Completion Cutscene")]
+    [Tooltip("Cutscene to play before completing the quest (e.g. chapter transition). Optional.")]
+    public CutscenePlayer completionCutscene;
+
     private bool _listening;
     private int _startKills;
     private bool _done;
@@ -72,7 +76,10 @@ public class KillCountObjective : MonoBehaviour
             _done = true;
             _listening = false;
             Debug.Log($"[KillCountObjective] Target reached ({current - _startKills}/{targetCount}). Completing quest.");
-            sm.CompleteActiveQuest();
+            if (completionCutscene != null)
+                completionCutscene.Play(() => sm.CompleteActiveQuest());
+            else
+                sm.CompleteActiveQuest();
         }
     }
 }

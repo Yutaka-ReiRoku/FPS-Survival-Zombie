@@ -185,17 +185,15 @@ public static class StoryChapter2Builder
         EditorUtility.SetDirty(q4TriggerGO);
         Debug.Log("[StoryChapter2Builder] Q4_FinalTrigger wired (QuestTrigger + Cutscene).");
 
-        // 7) Wire ChapterBoundary for Ch2 (spawners + exit barrier).
+        // 7) Wire ChapterBoundary for Ch2 (spawners, trigger volume — no walls).
         var boundary = ch2.GetComponent<ChapterBoundary>();
         if (boundary != null)
         {
             boundary.chapter = 2;
             boundary.spawners = new MonoBehaviour[] { spawm };
-            // No exit barrier for Ch2 (open chapter — player can proceed to Ch3
-            // after Q4 completes; ChapterBoundary for Ch3 will gate further).
-            boundary.exitBarrier = null;
+            // No walls — the boundary trigger volume handles one-way locking.
             EditorUtility.SetDirty(ch2);
-            Debug.Log("[StoryChapter2Builder] ChapterBoundary wired for Ch2 (spawner: Ch2_Spawner).");
+            Debug.Log("[StoryChapter2Builder] ChapterBoundary wired for Ch2 (trigger volume, no walls).");
         }
 
         // 8) Configure SaveRoom_Ch2 (suppress Ch2 spawner while resting).
@@ -207,9 +205,9 @@ public static class StoryChapter2Builder
             sr.healRate = 25f;
             sr.restoreShield = true;
             sr.spawnersToSuppress = new MonoBehaviour[] { spawm };
-            sr.chapterTransitionOnEnter = 2; // Play "CHƯƠNG 2" cutscene on first enter.
+            sr.chapterTransitionOnEnter = 0; // Transition cutscene plays at Q2 completion (Ch1 builder).
             EditorUtility.SetDirty(saveRoomGO);
-            Debug.Log("[StoryChapter2Builder] SaveRoom_Ch2 wired (heal + suppress Ch2_Spawner + chapter transition).");
+            Debug.Log("[StoryChapter2Builder] SaveRoom_Ch2 wired (heal + suppress Ch2_Spawner).");
         }
 
         // 9) Place QuestBeacons to guide the player through Ch2.

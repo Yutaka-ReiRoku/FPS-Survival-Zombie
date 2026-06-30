@@ -79,6 +79,14 @@ public class StoryManager : MonoBehaviour
     /// <summary>Quests completed in the current chapter so far.</summary>
     public int QuestsCompletedThisChapter { get; private set; }
 
+    /// <summary>
+    /// True after advancing to a new chapter but before the player has entered
+    /// that chapter's boundary. While true, the first quest of the new chapter
+    /// is NOT yet active — it activates when the player enters the chapter area
+    /// (ChapterBoundary calls ActivatePendingChapterQuest).
+    /// </summary>
+    public bool PendingChapterEntry { get; private set; }
+
     private readonly List<QuestData> _completedQuests = new List<QuestData>();
 
     // ---- Events ----
@@ -98,6 +106,7 @@ public class StoryManager : MonoBehaviour
         CurrentQuestIndex = 0;
         QuestsCompletedThisChapter = 0;
         StoryComplete = false;
+        PendingChapterEntry = false; // Player starts inside Ch1 — no pending entry.
     }
 
     private void Start()
@@ -181,13 +190,29 @@ public class StoryManager : MonoBehaviour
         CurrentChapter++;
         CurrentQuestIndex = 0;
         QuestsCompletedThisChapter = 0;
-        Debug.Log($"[StoryManager] Advancing to Chapter {CurrentChapter}.");
+        PendingChapterEntry = true; // Wait for player to enter the new chapter area.
+        Debug.Log($"[StoryManager] Advancing to Chapter {CurrentChapter}. Waiting for player to enter the chapter area before activating quests.");
 
         // Advance silently — the chapter transition cutscene is played when the
         // player reaches the new chapter's Save Room (see SaveRoom.chapterTransitionOnEnter).
         OnChapterChanged?.Invoke(oldChapter, CurrentChapter);
+        // Do NOT set the active quest here — it will be activated when the player
+        // enters the new chapter's boundary (ChapterBoundary.OnTriggerEnter).
+        SetActiveQuest(null);
+    }
+
+    /// <summary>
+    /// Activates the first quest of the current chapter if we're in a pending
+    /// state (chapter advanced but player hasn't entered the area yet). Called
+    /// by ChapterBoundary when the player enters the current chapter's boundary.
+    /// </summary>
+    public void ActivatePendingChapterQuest()
+    {
+        if (!PendingChapterEntry) return;
+        PendingChapterEntry = false;
         var list = GetCurrentChapterQuests();
         SetActiveQuest(list != null && list.Length > 0 ? list[0] : null);
+        Debug.Log($"[StoryManager] Player entered Chapter {CurrentChapter} area. Activating first quest.");
     }
 
     /// <summary>

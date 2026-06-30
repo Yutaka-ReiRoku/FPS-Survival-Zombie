@@ -1,18 +1,23 @@
 using UnityEngine;
 
 /// <summary>
-/// Marks a chapter's playable area and gates the player's progress. The boundary
-/// is a trigger volume that:
-/// - Activates the chapter's zombie spawners (Spawm components listed in
-///   `spawners`) when the player enters, and deactivates them when the player
-///   leaves — so only the active chapter spawns zombies.
-/// - Optionally blocks the player from leaving the chapter until its quests are
-///   done, by toggling the `exitBarrier` collider.
-/// - Notifies StoryManager when the player enters the chapter (used to sync the
-///   current chapter if the player wandered in without a quest trigger).
+/// Marks a chapter's playable area and gates the player's progress using a
+/// trigger volume (no walls). The boundary:
+/// - Activates the chapter's zombie spawners when the player enters, and
+///   deactivates them when the player leaves.
+/// - Activates the pending chapter's first quest when the player enters (see
+///   StoryManager.PendingChapterEntry).
+/// - Enforces ONE-WAY progression: once the player has completed this chapter
+///   and left, the boundary locks — the player cannot re-enter. A velocity
+///   push-back keeps them out without teleporting (which could drop them
+///   through the ground).
+/// - Enforces LINEAR progression: the player cannot enter a future chapter
+///   (chapter number > StoryManager.CurrentChapter). If they try, they are
+///   pushed back.
 ///
 /// Place one ChapterBoundary per chapter, sized to cover that chapter's area.
-/// The exit barrier is a separate child collider placed at the chapter exit.
+/// The boundary's BoxCollider should be a trigger and cover the full chapter
+/// zone. No separate wall colliders are needed.
 /// </summary>
 [RequireComponent(typeof(Collider))]
 public class ChapterBoundary : MonoBehaviour
@@ -25,15 +30,16 @@ public class ChapterBoundary : MonoBehaviour
     [Tooltip("Zombie spawners (Spawm components) that should be active while the player is inside this chapter.")]
     public MonoBehaviour[] spawners;
 
-    [Header("Exit Barrier")]
-    [Tooltip("Collider that blocks the player from leaving until the chapter's quests are done. Leave null for open chapters.")]
-    public Collider exitBarrier;
-
-    [Tooltip("Renderer(s) on the exit barrier to toggle visibility. Optional.")]
-    public Renderer[] exitBarrierRenderers;
+    [Header("Push Back")]
+    [Tooltip("Force applied to push the player out of a locked or future chapter (units/sec).")]
+    public float pushBackForce = 12f;
 
     [Header("Debug")]
     public Color gizmoColor = new Color(0.2f, 0.8f, 0.3f, 0.25f);
+
+    /// <summary>True once the player has left this chapter after completing it (one-way lock).</summary>
+    private bool _locked;
+    private Collider _col;
 
     private void Reset()
     {
@@ -41,32 +47,24 @@ public class ChapterBoundary : MonoBehaviour
         if (c != null) c.isTrigger = true;
     }
 
+    private void Awake()
+    {
+        _col = GetComponent<Collider>();
+    }
+
     private void Start()
     {
-        // Start with spawners disabled; they activate when the player enters.
         SetSpawnersActive(false);
 
-        if (exitBarrier != null)
-        {
-            // Barrier starts closed if the chapter isn't complete yet.
-            UpdateBarrier();
-        }
-
-        // If the player is already inside the boundary at start (e.g. the player
-        // spawns inside Chapter 1), enable spawners immediately since
-        // OnTriggerEnter won't fire for an object that's already inside.
         var player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        if (player != null && _col != null && _col.bounds.Contains(player.transform.position))
         {
-            var col = GetComponent<Collider>();
-            if (col != null && col.bounds.Contains(player.transform.position))
+            SetSpawnersActive(true);
+            if (StoryManager.Instance != null
+                && StoryManager.Instance.CurrentChapter == chapter
+                && StoryManager.Instance.PendingChapterEntry)
             {
-                SetSpawnersActive(true);
-                if (StoryManager.Instance != null && StoryManager.Instance.CurrentChapter != chapter)
-                {
-                    Debug.Log($"[ChapterBoundary] Player started inside Chapter {chapter} (current: {StoryManager.Instance.CurrentChapter}).");
-                }
-                if (exitBarrier != null) UpdateBarrier();
+                StoryManager.Instance.ActivatePendingChapterQuest();
             }
         }
     }
@@ -74,46 +72,130 @@ public class ChapterBoundary : MonoBehaviour
     private void OnEnable()
     {
         if (StoryManager.Instance != null)
+        {
             StoryManager.Instance.OnQuestCompleted += HandleQuestCompleted;
+            StoryManager.Instance.OnChapterChanged += HandleChapterChanged;
+        }
     }
 
     private void OnDisable()
     {
         if (StoryManager.Instance != null)
+        {
             StoryManager.Instance.OnQuestCompleted -= HandleQuestCompleted;
+            StoryManager.Instance.OnChapterChanged -= HandleChapterChanged;
+        }
     }
 
-    private void HandleQuestCompleted(QuestData quest)
+    private void HandleQuestCompleted(QuestData quest) { }
+
+    private void HandleChapterChanged(int oldChapter, int newChapter)
     {
-        if (exitBarrier != null)
-            UpdateBarrier();
+        // Don't lock here — the player is still inside this chapter. The lock
+        // happens in OnTriggerExit when the player actually leaves. We only
+        // mark the chapter as "completed" so OnTriggerExit knows to lock.
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        SetSpawnersActive(true);
 
-        // Sync the StoryManager's chapter if the player entered a different chapter.
-        if (StoryManager.Instance != null && StoryManager.Instance.CurrentChapter != chapter)
+        var sm = StoryManager.Instance;
+
+        // Block entry to a future chapter — force linear progression.
+        if (sm != null && chapter > sm.CurrentChapter)
         {
-            // Only auto-advance forward; don't regress.
-            if (chapter > StoryManager.Instance.CurrentChapter)
-            {
-                // Let the StoryManager handle advancement via quest triggers normally;
-                // we just log here in case the player skipped a trigger.
-                Debug.Log($"[ChapterBoundary] Player entered Chapter {chapter} (current: {StoryManager.Instance.CurrentChapter}).");
-            }
+            PushPlayerOut(other);
+            Debug.Log($"[ChapterBoundary] Blocked entry to Ch{chapter} (current: Ch{sm.CurrentChapter}). Must complete current chapter first.");
+            return;
         }
 
-        if (exitBarrier != null) UpdateBarrier();
+        // Block re-entry to a locked (completed + left) chapter.
+        if (_locked)
+        {
+            PushPlayerOut(other);
+            Debug.Log($"[ChapterBoundary] Blocked re-entry to locked Ch{chapter}.");
+            return;
+        }
+
+        SetSpawnersActive(true);
+
+        // Activate pending quest if this is the current chapter.
+        if (sm != null && sm.CurrentChapter == chapter && sm.PendingChapterEntry)
+        {
+            sm.ActivatePendingChapterQuest();
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        var sm = StoryManager.Instance;
+
+        // Continuously push the player out if they're trying to stay in a
+        // locked or future chapter. This prevents them from sneaking in
+        // during a single frame.
+        bool shouldBlock = (sm != null && chapter > sm.CurrentChapter) || _locked;
+        if (shouldBlock)
+        {
+            PushPlayerOut(other);
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        // Deactivate spawners when the player leaves so zombies don't spawn in an empty area.
         SetSpawnersActive(false);
+
+        // Lock this chapter once the player leaves AND it's completed (or the
+        // player has advanced past it). This prevents re-entry.
+        var sm = StoryManager.Instance;
+        bool done = sm != null && (sm.CurrentChapter > chapter || IsChapterComplete(sm));
+        if (done)
+        {
+            _locked = true;
+            Debug.Log($"[ChapterBoundary] Ch{chapter} locked after player left (completed).");
+        }
+    }
+
+    /// <summary>True if this chapter's quests are all done.</summary>
+    private bool IsChapterComplete(StoryManager sm)
+    {
+        if (sm == null) return false;
+        if (sm.CurrentChapter != chapter) return false;
+        return sm.GetCurrentQuest() == null && sm.QuestsCompletedThisChapter > 0;
+    }
+
+    /// <summary>
+    /// Pushes the player out of the boundary by applying a velocity away from
+    /// the boundary center. Does NOT teleport — this keeps the player on the
+    /// ground and avoids falling through geometry. The push is horizontal only
+    /// (y velocity is preserved so gravity/jumping still work).
+    /// </summary>
+    private void PushPlayerOut(Collider player)
+    {
+        if (_col == null) return;
+
+        // The player collider may be on a child; the Rigidbody is on the root.
+        var rb = player.GetComponentInParent<Rigidbody>();
+        if (rb == null) return;
+
+        var playerPos = rb.position;
+        var bounds = _col.bounds;
+        var center = bounds.center;
+
+        // Direction from boundary center to player — push them outward.
+        Vector3 dir = new Vector3(playerPos.x - center.x, 0f, playerPos.z - center.z);
+        if (dir.sqrMagnitude < 0.01f)
+        {
+            // Player is exactly at center — push toward the nearest edge.
+            dir = new Vector3(1f, 0f, 0f);
+        }
+        dir.Normalize();
+
+        // Apply horizontal push velocity, preserve vertical velocity (gravity).
+        rb.linearVelocity = new Vector3(dir.x * pushBackForce, rb.linearVelocity.y, dir.z * pushBackForce);
     }
 
     private void SetSpawnersActive(bool active)
@@ -123,36 +205,6 @@ public class ChapterBoundary : MonoBehaviour
         {
             if (s != null) s.enabled = active;
         }
-    }
-
-    /// <summary>
-    /// Opens the exit barrier if the current chapter's quests are all done,
-    /// otherwise closes it. Called on enter and on quest completion.
-    /// </summary>
-    private void UpdateBarrier()
-    {
-        if (exitBarrier == null) return;
-
-        var sm = StoryManager.Instance;
-        bool chapterDone = sm != null && sm.CurrentChapter == chapter && sm.GetCurrentQuest() == null && sm.QuestsCompletedThisChapter > 0;
-        // Also open if the player has advanced past this chapter.
-        if (sm != null && sm.CurrentChapter > chapter) chapterDone = true;
-
-        exitBarrier.isTrigger = chapterDone;
-        exitBarrier.gameObject.SetActive(!chapterDone || AnyBarrierRendererAlwaysVisible());
-
-        if (exitBarrierRenderers != null)
-        {
-            foreach (var r in exitBarrierRenderers)
-            {
-                if (r != null) r.enabled = !chapterDone;
-            }
-        }
-    }
-
-    private bool AnyBarrierRendererAlwaysVisible()
-    {
-        return false;
     }
 
     private void OnDrawGizmos()

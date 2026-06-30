@@ -22,7 +22,7 @@ MonoBehaviour:
   objective: "Kh\xE1m ph\xE1 3 t\xF2a nh\xE0 v\xE0 thu th\u1EADp h\u1ED3 s\u01A1
     th\xED nghi\u1EC7m"
   expReward: 250
-  journalReward: {fileID: 0}
+  journalReward: {fileID: 11400000, guid: f27725d180d14af9b85aa4fa2bd9c44b, type: 2}
   completionNotification: "\u0110\xE3 thu th\u1EADp \u0111\u1EA7y \u0111\u1EE7 h\u1ED3
     s\u01A1! Nh\u1EADn B\xE1o c\xE1o th\xED nghi\u1EC7m ho\xE0n ch\u1EC9nh. M\u1EDF
     kh\xF3a khu v\u1EF1c ti\u1EBFp theo."
