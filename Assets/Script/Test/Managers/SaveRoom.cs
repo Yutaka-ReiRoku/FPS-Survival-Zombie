@@ -34,8 +34,15 @@ public class SaveRoom : MonoBehaviour
     [Tooltip("Optional glow/vignette object toggled on while inside.")]
     public GameObject restIndicator;
 
+    [Header("Chapter Transition")]
+    [Tooltip("If > 0, plays the chapter transition cutscene for this chapter number " +
+             "when the player enters this save room for the first time. " +
+             "Set to 2 on SaveRoom_Ch2, 3 on SaveRoom_Ch3, etc. 0 = no cutscene.")]
+    public int chapterTransitionOnEnter = 0;
+
     private PlayerStats _playerStats;
     private bool _inside;
+    private bool _cutscenePlayed;
     private Vector3 _checkpointPos;
 
     private void Reset()
@@ -63,6 +70,15 @@ public class SaveRoom : MonoBehaviour
         if (healRate <= 0f && _playerStats != null)
         {
             _playerStats.HealFull();
+        }
+
+        // Play chapter transition cutscene the first time the player enters this
+        // save room (e.g. SaveRoom_Ch2 triggers the "CHƯƠNG 2" banner).
+        if (chapterTransitionOnEnter > 0 && !_cutscenePlayed)
+        {
+            _cutscenePlayed = true;
+            if (StoryManager.Instance != null)
+                StoryManager.Instance.PlayChapterTransitionCutscene(chapterTransitionOnEnter);
         }
 
         Debug.Log($"[SaveRoom] Player entered save room at {_checkpointPos}.");

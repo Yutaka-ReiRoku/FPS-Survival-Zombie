@@ -35,9 +35,38 @@ public class StoryManager : MonoBehaviour
     [Tooltip("Chapter the player starts in. Usually 1.")]
     public int startingChapter = 1;
 
-    [Header("Chapter Transition")]
-    [Tooltip("Seconds the chapter-complete banner stays on screen.")]
-    public float chapterBannerHold = 3.5f;
+    [Header("Chapter Transition Cutscene")]
+    [Tooltip("If true, play a full-screen cutscene when advancing to a new chapter.")]
+    public bool playChapterTransitionCutscene = true;
+
+    [Tooltip("Title shown for each chapter transition. Index 0 = Ch1->Ch2, etc. " +
+             "If the array is too short or an entry is empty, falls back to \"CHƯƠNG N\".")]
+    [TextArea(1, 2)]
+    public string[] chapterTransitionTitles = new string[]
+    {
+        "CHƯƠNG 2 — BỆNH VIỆN",
+        "CHƯƠNG 3 — CÔNG TRƯỜNG",
+        "CHƯƠNG 4 — KHU DÂN CƯ",
+        "CHƯƠNG 5 — CHUNG CƯ"
+    };
+
+    [Tooltip("Body/subtitle shown for each chapter transition. Index 0 = Ch1->Ch2, etc.")]
+    [TextArea(2, 4)]
+    public string[] chapterTransitionBodies = new string[]
+    {
+        "Sau khi rời lều trại, bạn đến một bệnh viện bỏ hoang. Tiếng rên rỉ vọng ra từ bên trong...",
+        "Bên kia bệnh viện là một công trường. Tiếng máy gầm vang vọng giữa đống đổ nát.",
+        "Qua công trường, khu dân cư im ắng. Nhưng không có nghĩa là an toàn...",
+        "Đỉnh chung cư — nơi cuối cùng. Phải tìm thuốc giải trước khi mọi thứ kết thúc."
+    };
+
+    [Tooltip("Cutscene timing for chapter transitions.")]
+    public float chapterCutsceneFadeIn = 0.8f;
+    public float chapterCutsceneHold = 4f;
+    public float chapterCutsceneFadeOut = 1.2f;
+
+    [Tooltip("Optional CutscenePlayer used for chapter transitions. If null, a temporary one is created at runtime.")]
+    public CutscenePlayer chapterCutscenePlayer;
 
     // ---- Runtime state ----
     public int CurrentChapter { get; private set; }
@@ -153,10 +182,60 @@ public class StoryManager : MonoBehaviour
         CurrentQuestIndex = 0;
         QuestsCompletedThisChapter = 0;
         Debug.Log($"[StoryManager] Advancing to Chapter {CurrentChapter}.");
-        OnChapterChanged?.Invoke(oldChapter, CurrentChapter);
 
+        // Advance silently — the chapter transition cutscene is played when the
+        // player reaches the new chapter's Save Room (see SaveRoom.chapterTransitionOnEnter).
+        OnChapterChanged?.Invoke(oldChapter, CurrentChapter);
         var list = GetCurrentChapterQuests();
         SetActiveQuest(list != null && list.Length > 0 ? list[0] : null);
+    }
+
+    /// <summary>
+    /// Plays the chapter transition cutscene for the given chapter number.
+    /// Called by SaveRoom when the player enters the new chapter's save room.
+    /// Does nothing if playChapterTransitionCutscene is false or the cutscene
+    /// is already playing.
+    /// </summary>
+    public void PlayChapterTransitionCutscene(int chapterNumber)
+    {
+        if (!playChapterTransitionCutscene || !isActiveAndEnabled) return;
+        StartCoroutine(PlayChapterTransitionCutsceneRoutine(chapterNumber));
+    }
+
+    /// <summary>True while a chapter transition cutscene is playing.</summary>
+    public bool IsChapterTransitionPlaying { get; private set; }
+
+    private System.Collections.IEnumerator PlayChapterTransitionCutsceneRoutine(int chapterNumber)
+    {
+        if (IsChapterTransitionPlaying) yield break;
+        IsChapterTransitionPlaying = true;
+
+        // Get or create a CutscenePlayer for the transition.
+        var cp = chapterCutscenePlayer;
+        if (cp == null)
+        {
+            cp = GetComponent<CutscenePlayer>();
+            if (cp == null) cp = gameObject.AddComponent<CutscenePlayer>();
+        }
+
+        // Configure the cutscene content for this chapter.
+        int idx = chapterNumber - 2; // Ch1->Ch2 = index 0
+        cp.title = (chapterTransitionTitles != null && idx >= 0 && idx < chapterTransitionTitles.Length && !string.IsNullOrEmpty(chapterTransitionTitles[idx]))
+            ? chapterTransitionTitles[idx]
+            : $"CHƯƠNG {chapterNumber}";
+        cp.body = (chapterTransitionBodies != null && idx >= 0 && idx < chapterTransitionBodies.Length)
+            ? chapterTransitionBodies[idx]
+            : "";
+        cp.fadeIn = chapterCutsceneFadeIn;
+        cp.hold = chapterCutsceneHold;
+        cp.fadeOut = chapterCutsceneFadeOut;
+
+        bool cutsceneDone = false;
+        cp.Play(() => cutsceneDone = true);
+
+        while (!cutsceneDone) yield return null;
+
+        IsChapterTransitionPlaying = false;
     }
 
     private void SetActiveQuest(QuestData quest)
