@@ -39,6 +39,12 @@ public class ChapterBoundary : MonoBehaviour
     private Collider _triggerCol;
     /// <summary>Runtime-created physical (non-trigger) wall collider. Enabled when the chapter is locked or is a future chapter.</summary>
     private BoxCollider _wallCol;
+    /// <summary>True while an external system (e.g. WaveQuestInteractable) has locked the player in. Prevents OnTriggerExit from re-locking.</summary>
+    private bool _externallyLocked;
+    /// <summary>Last known position of the player while inside this boundary (for teleport-back on external lock).</summary>
+    private Vector3 _lastInsidePos;
+    /// <summary>Last known forward direction of the player while inside (for teleport-back orientation).</summary>
+    private Quaternion _lastInsideRot;
 
     private void Reset()
     {
@@ -122,6 +128,27 @@ public class ChapterBoundary : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        // Safety: if externally locked and the player is somehow outside the
+        // boundary (e.g. respawned outside after dying during waves), teleport
+        // them back inside. This catches edge cases that OnTriggerExit might miss.
+        if (!_externallyLocked || _triggerCol == null) return;
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
+        if (!_triggerCol.bounds.Contains(player.transform.position))
+        {
+            Debug.Log($"[ChapterBoundary] Ch{chapter} player outside during external lock — teleporting back.");
+            var rb = player.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+            player.transform.position = _lastInsidePos != Vector3.zero ? _lastInsidePos : transform.position;
+        }
+    }
+
     private void HandleQuestCompleted(QuestData quest) { }
 
     private void HandleChapterChanged(int oldChapter, int newChapter)
@@ -157,9 +184,28 @@ public class ChapterBoundary : MonoBehaviour
         }
     }
 
+    private void OnTriggerStay(Collider other)
+    {
+        if (!other.CompareTag("Player")) return;
+        // Track the player's last known position inside the boundary so we can
+        // teleport them back if they try to leave while externally locked.
+        _lastInsidePos = other.transform.position;
+        _lastInsideRot = other.transform.rotation;
+    }
+
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player")) return;
+
+        // If an external system (e.g. WaveQuestInteractable) has locked the
+        // player in, teleport them back inside — do NOT enable the full-area
+        // wall collider (that would trap the player inside a solid box).
+        if (_externallyLocked)
+        {
+            TeleportPlayerBack(other);
+            return;
+        }
+
         SetSpawnersActive(false);
 
         // Lock this chapter once the player leaves AND it's completed (or the
@@ -174,6 +220,57 @@ public class ChapterBoundary : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Teleports the player back to the last known position inside the boundary.
+    /// Used when the player tries to leave during an external lock (e.g. Q7 waves).
+    /// Falls back to the boundary center if no inside position was recorded.
+    /// </summary>
+    private void TeleportPlayerBack(Collider playerCol)
+    {
+        Vector3 target = _lastInsidePos != Vector3.zero ? _lastInsidePos : transform.position;
+        var rb = playerCol.GetComponentInParent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+        playerCol.transform.position = target;
+        Debug.Log($"[ChapterBoundary] Ch{chapter} player teleported back inside to {target} (external lock).");
+    }
+
+    /// <summary>
+    /// Externally lock the player inside the chapter area. Used by wave-based
+    /// quests (e.g. Q7 generator) to prevent the player from leaving until all
+    /// waves are cleared.
+    ///
+    /// IMPORTANT: This does NOT enable the full-area wall collider — that would
+    /// trap the player inside a solid box (the collider covers the entire chapter
+    /// area). Instead, it relies on OnTriggerExit to teleport the player back
+    /// inside if they try to leave.
+    /// </summary>
+    public void LockExternal()
+    {
+        _externallyLocked = true;
+        // Record the player's current position as the teleport-back point.
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            _lastInsidePos = player.transform.position;
+            _lastInsideRot = player.transform.rotation;
+        }
+        Debug.Log($"[ChapterBoundary] Ch{chapter} externally locked — player cannot leave (teleport-back on exit).");
+    }
+
+    /// <summary>
+    /// Release an external lock. After calling this, normal boundary behavior
+    /// resumes and the player can leave the chapter area freely.
+    /// </summary>
+    public void UnlockExternal()
+    {
+        _externallyLocked = false;
+        Debug.Log($"[ChapterBoundary] Ch{chapter} external lock released — player can leave.");
+    }
+
     /// <summary>True if this chapter's quests are all done.</summary>
     private bool IsChapterComplete(StoryManager sm)
     {
@@ -182,7 +279,7 @@ public class ChapterBoundary : MonoBehaviour
         return sm.GetCurrentQuest() == null && sm.QuestsCompletedThisChapter > 0;
     }
 
-    private void SetSpawnersActive(bool active)
+    public void SetSpawnersActive(bool active)
     {
         if (spawners == null) return;
         foreach (var s in spawners)

@@ -48,6 +48,9 @@ public class GameOverManager : MonoBehaviour
 
     public bool IsGameOver => isGameOver;
 
+    /// <summary>Fired when the player dies (before the game over panel shows). Other systems (e.g. WaveQuestInteractable) use this to abort and reset.</summary>
+    public event System.Action OnPlayerDied;
+
     private bool isGameOver;
     private bool subscribed;
 
@@ -95,6 +98,7 @@ public class GameOverManager : MonoBehaviour
         if (isGameOver)
             return;
         isGameOver = true;
+        OnPlayerDied?.Invoke();
         StartCoroutine(ShowAfterDelay());
     }
 
