@@ -15,15 +15,22 @@ namespace cowsins
         [Tooltip("Smoothing speed for vertical camera movement on stairs/rough terrain. Higher = more responsive, lower = smoother."), SerializeField, Min(0.1f)]
         private float verticalSmoothSpeed = 15f;
 
+        [Tooltip("Vertical velocity threshold above which smoothing is disabled (jumping/falling). Below this, the camera smooths Y for stairs."), SerializeField, Min(0.1f)]
+        private float snapVelocityThreshold = 2f;
+
         private float smoothedY;
         private bool initialized;
-        private bool wasSmoothingLastFrame;
         private PlayerMovement playerMovement;
+        private Rigidbody playerRb;
 
         private void Awake()
         {
             if (cameraHead != null)
+            {
                 playerMovement = cameraHead.GetComponentInParent<PlayerMovement>();
+                if (playerMovement != null)
+                    playerRb = playerMovement.GetComponent<Rigidbody>();
+            }
         }
 
         private void Update()
@@ -31,27 +38,27 @@ namespace cowsins
             if (cameraHead == null) return;
 
             if (playerMovement == null)
+            {
                 playerMovement = cameraHead.GetComponentInParent<PlayerMovement>();
+                if (playerMovement != null)
+                    playerRb = playerMovement.GetComponent<Rigidbody>();
+            }
 
             Vector3 targetPos = cameraHead.position;
 
-            // Determine whether to smooth this frame.
-            // Only smooth when grounded and not in special movement states.
+            // Smooth Y only when the player is on the ground AND moving slowly vertically.
+            // This covers walking up stairs/rough terrain (small Y changes per frame).
+            // When jumping/falling (high vertical velocity), snap instantly for responsiveness.
+            // Using velocity instead of Grounded avoids the 1-2 frame delay where Grounded
+            // is still true but the player is already launching upward.
             bool shouldSmooth = playerMovement != null && playerMovement.Grounded
-                && !playerMovement.IsClimbing && !playerMovement.IsWallRunning;
+                && !playerMovement.IsClimbing && !playerMovement.IsWallRunning
+                && playerRb != null && Mathf.Abs(playerRb.linearVelocity.y) < snapVelocityThreshold;
 
             if (!initialized)
             {
                 smoothedY = targetPos.y;
                 initialized = true;
-                wasSmoothingLastFrame = shouldSmooth;
-            }
-            else if (shouldSmooth != wasSmoothingLastFrame)
-            {
-                // State transition (grounded<->airborne): snap to current target
-                // to avoid a visual jump from the smoothed position.
-                smoothedY = targetPos.y;
-                wasSmoothingLastFrame = shouldSmooth;
             }
             else if (shouldSmooth)
             {
@@ -59,6 +66,7 @@ namespace cowsins
             }
             else
             {
+                // Snap instantly — no smoothing when airborne or moving fast vertically
                 smoothedY = targetPos.y;
             }
 
