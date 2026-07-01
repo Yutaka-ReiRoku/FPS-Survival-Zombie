@@ -1,5 +1,5 @@
 /// <summary>
-/// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved. 
+/// This script belongs to cowsinsï¿½ as a part of the cowsinsï¿½ FPS Engine. All rights reserved. 
 /// </summary>
 using UnityEngine.UI;
 using UnityEngine;
@@ -51,7 +51,8 @@ namespace cowsins
         /// </summary>
         private void Movement()
         {
-            rb?.AddForce(Vector3.down * 15, ForceMode.Force);
+            if (rb != null && !rb.isKinematic)
+                rb.AddForce(Vector3.down * 15, ForceMode.Force);
             if (graphics == null) return;
 
             // Rotation

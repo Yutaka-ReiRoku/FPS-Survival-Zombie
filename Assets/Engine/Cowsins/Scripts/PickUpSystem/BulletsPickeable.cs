@@ -57,6 +57,36 @@ namespace cowsins
             Destroy(graphics.transform.GetChild(0).gameObject);
             Instantiate(bulletsGraphics, graphics);
         }
+
+        private void Start()
+        {
+            SnapToGround();
+        }
+
+        /// <summary>
+        /// Since the collider is a trigger and the Rigidbody is kinematic (so the player
+        /// can walk through the pickup without getting stuck), gravity no longer pulls the
+        /// object to the ground. This raycasts downward against the Ground layer and snaps
+        /// the object to the correct resting height at startup.
+        /// </summary>
+        private void SnapToGround()
+        {
+            var col = GetComponent<Collider>();
+            if (col == null) return;
+
+            int groundLayer = LayerMask.GetMask("Ground");
+            if (groundLayer == 0) return;
+
+            // Raycast from slightly above the object downward to find the ground surface.
+            Vector3 origin = transform.position + Vector3.up * 2f;
+            if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, 10f, groundLayer, QueryTriggerInteraction.Ignore))
+            {
+                float halfHeight = col.bounds.extents.y;
+                Vector3 pos = transform.position;
+                pos.y = hit.point.y + halfHeight;
+                transform.position = pos;
+            }
+        }
         public override void Interact(Transform player)
         {
             if (bulletsSO == null)
