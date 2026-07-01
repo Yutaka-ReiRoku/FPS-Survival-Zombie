@@ -25,7 +25,7 @@ public class BasicMovementBehaviour
     private const float slopeGravityMultiplier = 150;
     private const float extraGravityMultiplier = 10f;
     private bool wasMovingLastFrame;
-    private float stepAssistCooldown;
+    private const float stepClimbSpeed = 10f;
     public BasicMovementBehaviour(MovementContext context)
     {
         this.context = context;
@@ -96,7 +96,7 @@ public class BasicMovementBehaviour
 
         rb.AddForce(moveDirection * movementMultipliers);
 
-        // Help the player climb stairs and small obstacles without jumping
+        // Proactively follow ground height ahead for smooth stair/terrain climbing
         StepAssist();
     }
 
@@ -217,19 +217,17 @@ public class BasicMovementBehaviour
     }
 
     /// <summary>
-    /// Helps the player climb stairs and small obstacles by detecting step edges
-    /// with a forward SphereCast and snapping the capsule up onto the step.
+    /// Helps the player climb stairs and rough terrain by testing whether the capsule
+    /// can physically fit at increasing heights. When the player is blocked at ground
+    /// level but CAN fit when raised slightly, the player is lifted to that height.
+    /// This directly tests collision geometry rather than guessing from raycasts,
+    /// making it reliable with any mesh shape (solid stairs, rough terrain, etc.)
     /// </summary>
     private void StepAssist()
     {
-        if (stepAssistCooldown > 0)
-        {
-            stepAssistCooldown -= Time.fixedDeltaTime;
-            return;
-        }
-
         if (playerMovement.IsCrouching || playerMovement.IsSliding) return;
         if (context.HasJumped || inputManager.Jumping) return;
+        if (!playerMovement.Grounded) return;
 
         // Need horizontal input
         Vector3 inputDir = (orientation.Forward * inputManager.Y + orientation.Right * inputManager.X);
@@ -240,36 +238,39 @@ public class BasicMovementBehaviour
         float stepH = playerSettings.stepHeight;
         if (stepH <= 0) return;
 
+        // Only assist when the player is actually blocked (low horizontal velocity despite input)
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        if (horizontalVel.magnitude > 1.5f) return;
+
+        // Don't assist if already moving upward (e.g. mid-jump)
+        if (rb.linearVelocity.y > 0.5f) return;
+
+        // Capsule dimensions for CheckCapsule
         float radius = playerCapsuleCollider.radius;
-        // Use a smaller sphere to detect step edges without hitting the ground
-        float sphereRadius = radius * 0.5f;
+        Vector3 center = rb.position + playerCapsuleCollider.center;
+        float halfHeight = Mathf.Max(0, (playerCapsuleCollider.height * 0.5f) - radius);
+        Vector3 point0 = center + Vector3.up * halfHeight;
+        Vector3 point1 = center - Vector3.up * halfHeight;
 
-        // Cast forward from the player's feet level
-        Vector3 sphereOrigin = rb.position + Vector3.up * (sphereRadius + 0.05f);
-        float castDist = radius + 0.3f;
+        // Test at increasing heights to find the minimum lift needed to clear the obstacle.
+        // At each height, check if the capsule can fit AND move forward (no collision ahead).
+        float testIncrement = 0.1f;
+        float forwardCheck = 0.1f;
 
-        if (!Physics.SphereCast(sphereOrigin, sphereRadius, inputDir, out var hit, castDist, context.WhatIsGround))
-            return;
+        for (float testLift = testIncrement; testLift <= stepH; testLift += testIncrement)
+        {
+            // Check if the capsule can fit at this raised position + slightly forward
+            Vector3 testCenter = center + Vector3.up * testLift + inputDir * forwardCheck;
+            Vector3 testP0 = testCenter + Vector3.up * halfHeight;
+            Vector3 testP1 = testCenter - Vector3.up * halfHeight;
 
-        // Height of the hit point relative to the player's feet
-        float playerFeetY = rb.position.y + playerCapsuleCollider.center.y
-            - playerCapsuleCollider.height * 0.5f + playerCapsuleCollider.radius;
-        float hitHeight = hit.point.y - playerFeetY;
-
-        // Only step up if the obstacle is low enough and actually requires climbing
-        if (hitHeight <= 0.02f || hitHeight > stepH) return;
-
-        // Check that there's space above the obstacle to step onto it
-        Vector3 aboveOrigin = hit.point + Vector3.up * (stepH + 0.1f) + inputDir * 0.1f;
-        if (Physics.Raycast(aboveOrigin, inputDir, 0.3f, context.WhatIsGround))
-            return; // Something is blocking above — obstacle is too tall
-
-        // Don't assist if already moving upward fast (e.g. mid-jump)
-        if (rb.linearVelocity.y > stepH * 3f) return;
-
-        // Snap the player up so the capsule bottom clears the step
-        float climbAmount = hitHeight + 0.05f;
-        rb.MovePosition(rb.position + Vector3.up * climbAmount);
-        stepAssistCooldown = 0.08f;
+            if (!Physics.CheckCapsule(testP0, testP1, radius, context.WhatIsGround, QueryTriggerInteraction.Ignore))
+            {
+                // The capsule fits at this height! Lift the player up gradually.
+                float liftThisFrame = Mathf.Min(stepClimbSpeed * Time.fixedDeltaTime, testLift);
+                rb.MovePosition(rb.position + Vector3.up * liftThisFrame);
+                return;
+            }
+        }
     }
 }

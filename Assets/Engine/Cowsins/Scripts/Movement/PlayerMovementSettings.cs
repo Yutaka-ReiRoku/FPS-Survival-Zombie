@@ -120,7 +120,7 @@ namespace cowsins
         public float controlsResponsiveness = 0.175f;
 
         [Tooltip("Maximum height of steps/stairs the player can climb without jumping. The player will be assisted over obstacles up to this height."), Min(0)]
-        public float stepHeight = 0.5f;
+        public float stepHeight = 1.5f;
 
         [Tooltip("Force applied to lift the player over steps. Higher = snappier step climbing."), Min(0)]
         public float stepAssistForce = 6f;
