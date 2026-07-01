@@ -17,10 +17,10 @@ MonoBehaviour:
   title: "T\xECm ki\u1EBFm b\u1EC7nh nh\xE2n"
   description: "T\xECm ki\u1EBFm h\u1ED3 s\u01A1 b\u1EC7nh nh\xE2n th\u1EED nghi\u1EC7m
     trong b\u1EC7nh vi\u1EC7n. \u0110i qua t\u1EEBng t\xF2a nh\xE0, x\u1EED l\xFD
-    \u0111\u1ED1i th\u1EE7 v\xE0 gom \u0111\u1EE7 th\xF4ng tin c\xF2n thi\u1EBFu.
-    T\xF2a nh\xE0 2 c\xF3 Boomer v\xE0 SMG."
-  objective: "Kh\xE1m ph\xE1 3 t\xF2a nh\xE0 v\xE0 thu th\u1EADp h\u1ED3 s\u01A1
-    th\xED nghi\u1EC7m"
+    \u0111\u1ED1i th\u1EE7 v\xE0 thu th\u1EADp \u0111\u1EE7 5 cu\u1ED1n nh\u1EADt
+    k\xFD/h\u1ED3 s\u01A1 c\xF2n thi\u1EBFu. T\xF2a nh\xE0 2 c\xF3 Boomer v\xE0 SMG."
+  objective: "Thu th\u1EADp \u0111\u1EE7 5 nh\u1EADt k\xFD/h\u1ED3 s\u01A1 trong
+    b\u1EC7nh vi\u1EC7n"
   expReward: 250
   journalReward: {fileID: 11400000, guid: f27725d180d14af9b85aa4fa2bd9c44b, type: 2}
   completionNotification: "\u0110\xE3 thu th\u1EADp \u0111\u1EA7y \u0111\u1EE7 h\u1ED3

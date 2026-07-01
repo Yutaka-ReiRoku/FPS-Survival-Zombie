@@ -10,8 +10,9 @@ using cowsins;
 ///
 /// Chapter 2 — Bệnh viện (Hospital):
 ///   Quest 3: Dọn dẹp — clear zombies outside the hospital (kill-count objective).
-///   Quest 4: Tìm kiếm bệnh nhân — explore 3 buildings, collect experiment
-///            reports, defeat a Boomer, reach the final building.
+///   Quest 4: Tìm kiếm bệnh nhân — explore the buildings, defeat a Boomer, and
+///            collect all 5 journals/records in the hospital to complete the quest
+///            (collectible-count objective).
 /// </summary>
 public static class StoryChapter2Builder
 {
@@ -44,8 +45,8 @@ public static class StoryChapter2Builder
             QuestFolder + "/Quest_04_SearchPatients.asset",
             questId: 4, chapter: 2,
             title: "Tìm kiếm bệnh nhân",
-            description: "Tìm kiếm hồ sơ bệnh nhân thử nghiệm trong bệnh viện. Đi qua từng tòa nhà, xử lý đối thủ và gom đủ thông tin còn thiếu. Tòa nhà 2 có Boomer và SMG.",
-            objective: "Khám phá 3 tòa nhà và thu thập hồ sơ thí nghiệm",
+            description: "Tìm kiếm hồ sơ bệnh nhân thử nghiệm trong bệnh viện. Đi qua từng tòa nhà, xử lý đối thủ và thu thập đủ 5 cuốn nhật ký/hồ sơ còn thiếu. Tòa nhà 2 có Boomer và SMG.",
+            objective: "Thu thập đủ 5 nhật ký/hồ sơ trong bệnh viện",
             expReward: 250f,
             journalReward: expReportFull,
             notification: "Đã thu thập đầy đủ hồ sơ! Nhận Báo cáo thí nghiệm hoàn chỉnh. Mở khóa khu vực tiếp theo.");
@@ -156,34 +157,46 @@ public static class StoryChapter2Builder
         // 5) Place SMG Pickeable in Building 2.
         PlaceSMGPickeable(ch2, new Vector3(-10f, 1f, 10f));
 
-        // 6) Create Q4_FinalTrigger at Building 3 (completes Q4 on player enter).
-        var q4TriggerGO = FindChild(ch2, "Q4_FinalTrigger");
-        if (q4TriggerGO == null)
+        // 6) Create Q4_CollectibleObjective — completes Q4 when every Ch2
+        //    collectible (journal) has been picked up by the player.
+        var q4ObjGO = FindChild(ch2, "Q4_CollectibleObjective");
+        if (q4ObjGO == null)
         {
-            q4TriggerGO = new GameObject("Q4_FinalTrigger");
-            q4TriggerGO.transform.SetParent(ch2.transform, false);
+            q4ObjGO = new GameObject("Q4_CollectibleObjective");
+            q4ObjGO.transform.SetParent(ch2.transform, false);
         }
-        q4TriggerGO.transform.localPosition = new Vector3(-16f, 1f, 0f); // Building 3 (Journal_15)
-        var q4Box = GetOrAddBoxCollider(q4TriggerGO);
-        q4Box.size = new Vector3(10f, 4f, 10f);
-        q4Box.isTrigger = true;
-        q4TriggerGO.layer = 2; // Ignore Raycast
+        q4ObjGO.transform.localPosition = Vector3.zero;
 
-        var q4Trigger = GetOrAdd<QuestTrigger>(q4TriggerGO);
-        q4Trigger.targetQuest = q4;
-        q4Trigger.mode = QuestTrigger.Mode.OnPlayerEnter;
-        q4Trigger.oneShot = true;
+        // Gather every Collectible under Ch2 (the journals the player must find).
+        var required = new System.Collections.Generic.List<Collectible>();
+        for (int i = 0; i < ch2.transform.childCount; i++)
+        {
+            var col = ch2.transform.GetChild(i).GetComponent<Collectible>();
+            if (col != null) required.Add(col);
+        }
 
-        // Cutscene when reaching the final building.
-        var q4Cutscene = GetOrAdd<CutscenePlayer>(q4TriggerGO);
+        var collectObj = GetOrAdd<CollectibleQuestObjective>(q4ObjGO);
+        collectObj.targetQuest = q4;
+        collectObj.requiredCollectibles = required.ToArray();
+
+        // Cutscene played once all records are collected (story beat).
+        var q4Cutscene = GetOrAdd<CutscenePlayer>(q4ObjGO);
         q4Cutscene.title = "Báo cáo thí nghiệm hoàn chỉnh";
         q4Cutscene.body = "Bạn đã thu thập đủ hồ sơ. Bệnh nhân số 001... chính là anh trai mình. Phải tìm anh ấy trước khi quá muộn.";
         q4Cutscene.fadeIn = 0.6f;
         q4Cutscene.hold = 4f;
         q4Cutscene.fadeOut = 1.0f;
-        q4Trigger.cutscene = q4Cutscene;
-        EditorUtility.SetDirty(q4TriggerGO);
-        Debug.Log("[StoryChapter2Builder] Q4_FinalTrigger wired (QuestTrigger + Cutscene).");
+        collectObj.completionCutscene = q4Cutscene;
+        EditorUtility.SetDirty(q4ObjGO);
+        Debug.Log($"[StoryChapter2Builder] Q4_CollectibleObjective wired (need {required.Count} collectibles).");
+
+        // Remove the legacy Q4_FinalTrigger if it still exists in the scene.
+        var legacyQ4Trigger = FindChild(ch2, "Q4_FinalTrigger");
+        if (legacyQ4Trigger != null)
+        {
+            UnityEngine.Object.DestroyImmediate(legacyQ4Trigger);
+            Debug.Log("[StoryChapter2Builder] Removed legacy Q4_FinalTrigger.");
+        }
 
         // 7) Wire ChapterBoundary for Ch2 (spawners, trigger volume — no walls).
         var boundary = ch2.GetComponent<ChapterBoundary>();
@@ -260,36 +273,24 @@ public static class StoryChapter2Builder
             Debug.Log("[StoryChapter2Builder] Beacon placed for Q3 (red, combat area).");
         }
 
-        // Beacon C: Building 1 (Journal_1_Doctor) — first stop in Q4.
-        var journal1 = FindChild(ch2, "Journal_1_Doctor");
-        if (journal1 != null)
+        // Beacon C: every Ch2 collectible — guides the player to each journal
+        // while Q4 is active. Green beams mark exploration targets.
+        for (int i = 0; i < ch2.transform.childCount; i++)
         {
-            var beaconC = GetOrAdd<QuestBeacon>(journal1);
-            beaconC.showOnQuest = q4;
-            beaconC.showOnChapter = 0;
-            beaconC.beamColor = new Color(0.4f, 1f, 0.5f, 0.5f); // Green for exploration.
-            beaconC.iconColor = new Color(0.5f, 1f, 0.6f, 1f);
-            beaconC.ringColor = new Color(0.4f, 1f, 0.5f, 0.6f);
-            beaconC.beamHeight = 10f;
-            beaconC.hideDistance = 3f;
-            EditorUtility.SetDirty(journal1);
-            Debug.Log("[StoryChapter2Builder] Beacon placed on Journal_1_Doctor (green, Building 1).");
-        }
+            var child = ch2.transform.GetChild(i);
+            var col = child.GetComponent<Collectible>();
+            if (col == null) continue;
 
-        // Beacon D: Building 3 / Q4_FinalTrigger — final destination.
-        var q4TriggerGO = FindChild(ch2, "Q4_FinalTrigger");
-        if (q4TriggerGO != null)
-        {
-            var beaconD = GetOrAdd<QuestBeacon>(q4TriggerGO);
-            beaconD.showOnQuest = q4;
-            beaconD.showOnChapter = 0;
-            beaconD.beamColor = new Color(1f, 0.85f, 0.3f, 0.5f); // Gold for final objective.
-            beaconD.iconColor = new Color(1f, 0.9f, 0.4f, 1f);
-            beaconD.ringColor = new Color(1f, 0.85f, 0.3f, 0.6f);
-            beaconD.beamHeight = 14f;
-            beaconD.hideDistance = 3f;
-            EditorUtility.SetDirty(q4TriggerGO);
-            Debug.Log("[StoryChapter2Builder] Beacon placed on Q4_FinalTrigger (gold, Building 3).");
+            var beacon = GetOrAdd<QuestBeacon>(child.gameObject);
+            beacon.showOnQuest = q4;
+            beacon.showOnChapter = 0;
+            beacon.beamColor = new Color(0.4f, 1f, 0.5f, 0.5f); // Green for exploration.
+            beacon.iconColor = new Color(0.5f, 1f, 0.6f, 1f);
+            beacon.ringColor = new Color(0.4f, 1f, 0.5f, 0.6f);
+            beacon.beamHeight = 10f;
+            beacon.hideDistance = 3f;
+            EditorUtility.SetDirty(child.gameObject);
+            Debug.Log($"[StoryChapter2Builder] Beacon placed on {child.name} (green, Q4 collectible).");
         }
     }
 
