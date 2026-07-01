@@ -200,6 +200,46 @@ public class GameOverManager : MonoBehaviour
     public void RestartGame()
     {
         Time.timeScale = 1f;
+
+        // Story mode: respawn at the last save room checkpoint instead of
+        // reloading the scene. This preserves quest progress, killed zombies,
+        // collected journals, etc. If no checkpoint was ever set (player died
+        // before reaching any save room), fall back to a full scene reload.
+        var sm = StoryManager.Instance;
+        if (sm != null && SaveRoom.LastCheckpoint.HasValue)
+        {
+            isGameOver = false;
+            if (gameOverPanel != null) gameOverPanel.SetActive(false);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
+            var playerStats = FindAnyObjectByType<PlayerStats>();
+            if (playerStats != null)
+            {
+                playerStats.Respawn(SaveRoom.LastCheckpoint.Value);
+
+                // Respawn() calls TeleportPlayer which ForceChangeState(Default),
+                // but PlayerDeadState.EnterState() called LoseControl() — that is
+                // NOT undone by the state switch. We must explicitly restore control
+                // so the player can move/look again.
+                var playerGO = GameObject.FindGameObjectWithTag("Player");
+                if (playerGO != null)
+                {
+                    var control = playerGO.GetComponentInChildren<PlayerControl>();
+                    if (control != null) control.GrantControl();
+                }
+
+                Debug.Log($"[GameOverManager] Respawned at save room checkpoint {SaveRoom.LastCheckpoint.Value}.");
+            }
+            else
+            {
+                // No PlayerStats found — fall back to scene reload.
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+            return;
+        }
+
+        // Deathmatch or no checkpoint: full scene reload.
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

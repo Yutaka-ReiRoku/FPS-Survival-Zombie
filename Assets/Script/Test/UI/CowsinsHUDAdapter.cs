@@ -296,6 +296,10 @@ public class CowsinsHUDAdapter : MonoBehaviour
         }
         _stats.AddOnDieListener(HandleDied);
 
+        // Listen for respawn to reset the death state (restores crosshair).
+        if (_moveEvents != null)
+            _moveEvents.OnRespawn.AddListener(HandleRespawn);
+
         var e = _weapon.Events;
         if (e != null)
         {
@@ -323,6 +327,9 @@ public class CowsinsHUDAdapter : MonoBehaviour
             _statsEvents.OnInitializeHealth.RemoveListener(HandleInitializeHealth);
         }
         if (_stats != null) _stats.RemoveOnDieListener(HandleDied);
+
+        if (_moveEvents != null)
+            _moveEvents.OnRespawn.RemoveListener(HandleRespawn);
 
         if (_weapon != null && _weapon.Events != null)
         {
@@ -382,6 +389,11 @@ public class CowsinsHUDAdapter : MonoBehaviour
     {
         IsDead = true;
         OnDied?.Invoke();
+    }
+
+    private void HandleRespawn(Vector3 pos, Quaternion rot, bool resetStamina, bool resetDashes)
+    {
+        IsDead = false;
     }
 
     // ---- Ammo ----

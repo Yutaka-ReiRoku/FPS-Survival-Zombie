@@ -45,6 +45,14 @@ public class SaveRoom : MonoBehaviour
     private bool _cutscenePlayed;
     private Vector3 _checkpointPos;
 
+    /// <summary>
+    /// Last save room checkpoint the player entered, scene-persistent (static).
+    /// Used by GameOverManager to respawn the player at the save room instead
+    /// of reloading the whole scene (which would lose quest/zombie progress).
+    /// </summary>
+    public static Vector3? LastCheckpoint { get; private set; }
+    public static Quaternion LastCheckpointRotation { get; private set; }
+
     private void Reset()
     {
         var c = GetComponent<Collider>();
@@ -66,6 +74,11 @@ public class SaveRoom : MonoBehaviour
 
         SetSpawners(false);
         if (restIndicator != null) restIndicator.SetActive(true);
+
+        // Update the global checkpoint so GameOverManager can respawn here.
+        LastCheckpoint = _checkpointPos;
+        LastCheckpointRotation = transform.rotation;
+        Debug.Log($"[SaveRoom] Checkpoint updated to {_checkpointPos}.");
 
         if (healRate <= 0f && _playerStats != null)
         {
