@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -34,14 +35,63 @@ public class MainMenuManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        if (bestScoreText != null)
+        RefreshBestScore();
+        StartCoroutine(BindToPlayFab());
+    }
+
+    private IEnumerator BindToPlayFab()
+    {
+        // Wait for PlayFabManager to be ready (it may live in a bootstrap
+        // scene and load slightly after this MainMenu scene).
+        float timeout = 10f;
+        while (PlayFabManager.Instance == null && timeout > 0f)
         {
-            int bestScore = PlayerPrefs.GetInt("BestScore", 0);
-            int bestWave = PlayerPrefs.GetInt("BestWave", 0);
-            bestScoreText.text = bestScore > 0
-                ? ("Best  " + bestScore + "    Wave " + bestWave)
-                : "No record yet";
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
         }
+
+        var pm = PlayFabManager.Instance;
+        if (pm != null)
+        {
+            pm.OnLoginSuccess += HandleLoginSuccess;
+            pm.OnCloudDataLoaded += HandleCloudDataLoaded;
+            // If already logged in (e.g. returning to main menu), refresh now.
+            if (pm.IsLoggedIn) RefreshBestScore();
+        }
+    }
+
+    private void OnDisable()
+    {
+        var pm = PlayFabManager.Instance;
+        if (pm != null)
+        {
+            pm.OnLoginSuccess -= HandleLoginSuccess;
+            pm.OnCloudDataLoaded -= HandleCloudDataLoaded;
+        }
+    }
+
+    private void HandleLoginSuccess(string username)
+    {
+        RefreshBestScore();
+    }
+
+    private void HandleCloudDataLoaded(bool success)
+    {
+        if (success) RefreshBestScore();
+    }
+
+    /// <summary>
+    /// Refresh the best score text from PlayerPrefs. Call this after cloud
+    /// data has been merged so the UI reflects the logged-in account's stats.
+    /// </summary>
+    public void RefreshBestScore()
+    {
+        if (bestScoreText == null) return;
+        int bestScore = PlayerPrefs.GetInt("BestScore", 0);
+        int bestWave = PlayerPrefs.GetInt("BestWave", 0);
+        bestScoreText.text = bestScore > 0
+            ? ("Best  " + bestScore + "    Wave " + bestWave)
+            : "No record yet";
     }
 
     public void PlayGame()
