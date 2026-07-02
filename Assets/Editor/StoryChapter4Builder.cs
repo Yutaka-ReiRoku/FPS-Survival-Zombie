@@ -117,7 +117,12 @@ public static class StoryChapter4Builder
         var q8Box = q8TriggerGO.GetComponent<BoxCollider>();
         if (q8Box != null)
         {
-            q8Box.size = new Vector3(20f, 5f, 8f);
+            // Q8_ReachSaveRoom is at local (16,1,5.41); SaveRoom_Ch4 is at local
+            // (10.72,1,4.24). The trigger must cover BOTH so the player completes
+            // Q8 by entering the save room. Center the box between them and size
+            // it generously.
+            q8Box.center = new Vector3(-0.5f, 0f, 0.1f);
+            q8Box.size = new Vector3(22f, 5f, 14f);
             q8Box.isTrigger = true;
         }
         q8TriggerGO.layer = 2; // Ignore Raycast

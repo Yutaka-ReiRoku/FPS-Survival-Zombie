@@ -83,6 +83,9 @@ public class ChapterBoundary : MonoBehaviour
 
     private void Start()
     {
+        // Fallback: re-subscribe in case OnEnable ran before StoryManager.Awake.
+        Subscribe();
+
         SetSpawnersActive(false);
 
         var sm = StoryManager.Instance;
@@ -112,11 +115,7 @@ public class ChapterBoundary : MonoBehaviour
 
     private void OnEnable()
     {
-        if (StoryManager.Instance != null)
-        {
-            StoryManager.Instance.OnQuestCompleted += HandleQuestCompleted;
-            StoryManager.Instance.OnChapterChanged += HandleChapterChanged;
-        }
+        Subscribe();
     }
 
     private void OnDisable()
@@ -126,6 +125,22 @@ public class ChapterBoundary : MonoBehaviour
             StoryManager.Instance.OnQuestCompleted -= HandleQuestCompleted;
             StoryManager.Instance.OnChapterChanged -= HandleChapterChanged;
         }
+    }
+
+    /// <summary>
+    /// Subscribe to StoryManager events. Called from OnEnable and again from
+    /// Start as a fallback — if OnEnable ran before StoryManager.Awake (which
+    /// sets Instance), the subscription was silently skipped. Start is
+    /// guaranteed to run after all Awake calls, so Instance is always set.
+    /// </summary>
+    private void Subscribe()
+    {
+        if (StoryManager.Instance == null) return;
+        // Avoid double-subscription.
+        StoryManager.Instance.OnQuestCompleted -= HandleQuestCompleted;
+        StoryManager.Instance.OnChapterChanged -= HandleChapterChanged;
+        StoryManager.Instance.OnQuestCompleted += HandleQuestCompleted;
+        StoryManager.Instance.OnChapterChanged += HandleChapterChanged;
     }
 
     private void Update()
