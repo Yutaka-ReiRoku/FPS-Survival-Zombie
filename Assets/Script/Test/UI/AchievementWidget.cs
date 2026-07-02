@@ -325,7 +325,7 @@ public class AchievementWidget : MonoBehaviour
                                  new Vector2(80f, 24f), _bodyFont,
                                  unlocked ? _accent : _textMuted);
             badge.alignment = TextAlignmentOptions.Right;
-            badge.text = unlocked ? "✓" : "🔒";
+            badge.text = unlocked ? "✓" : "[ ]";
 
             yCursor += rowHeight + rowSpacing;
         }

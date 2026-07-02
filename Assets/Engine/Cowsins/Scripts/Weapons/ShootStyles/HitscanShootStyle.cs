@@ -147,8 +147,9 @@ namespace cowsins
 
         /// <summary>
         /// Raycasts forward but skips any colliders belonging to pickups
-        /// (Pickeable / PowerUp) so ammo/health/weapon drops do not block shots.
-        /// Returns the first "real" hit, or false if none was found.
+        /// (Pickeable / PowerUp) or environmental triggers (Trigger, e.g. acid
+        /// pools, jump pads) so they do not block shots. Returns the first
+        /// "real" hit, or false if none was found.
         /// </summary>
         private bool TryRaycastSkipPickups(Ray ray, float maxDistance, LayerMask layerMask, out RaycastHit hit)
         {
@@ -157,10 +158,12 @@ namespace cowsins
 
             while (Physics.Raycast(origin, ray.direction, out hit, remainingDist, layerMask))
             {
-                if (hit.collider.GetComponent<Pickeable>() == null && hit.collider.GetComponent<PowerUp>() == null)
+                if (hit.collider.GetComponent<Pickeable>() == null
+                    && hit.collider.GetComponent<PowerUp>() == null
+                    && hit.collider.GetComponent<Trigger>() == null)
                     return true;
 
-                // Skip this pickup hit and continue past it
+                // Skip this non-solid hit and continue past it
                 float hitDist = hit.distance + 0.001f;
                 origin += ray.direction * hitDist;
                 remainingDist -= hitDist;
