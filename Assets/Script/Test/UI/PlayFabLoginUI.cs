@@ -24,6 +24,12 @@ public class PlayFabLoginUI : MonoBehaviour
     [Tooltip("Assign a TMP_FontAsset to use for all text. If null, falls back to default.")]
     public TMP_FontAsset fontAsset;
 
+    [Header("Main Menu (optional — auto-detected if null)")]
+    [Tooltip("The main menu content (Title/Play/Quit/BestChip). Hidden until login succeeds. If null, auto-detected as the sibling 'Content' under the same Canvas.")]
+    public GameObject mainMenuContent;
+    [Tooltip("The player profile widget. Hidden until login succeeds. If null, auto-detected via GetComponentInChildren on the canvas.")]
+    public GameObject profileWidget;
+
     private GameObject _panel;
     private TMP_InputField _usernameInput;
     private TMP_InputField _passwordInput;
@@ -53,7 +59,60 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void OnEnable()
     {
+        AutoDetectMainMenu();
+        // Hide the main menu immediately so it never flashes on screen while
+        // we wait for PlayFabManager. It will be re-shown only after a
+        // successful login (or if already logged in).
+        HideMainMenu();
         StartCoroutine(BindAndShow());
+    }
+
+    /// <summary>
+    /// Auto-detect the main menu content and profile widget if not assigned.
+    /// Looks for a sibling named "Content" under the same Canvas, and a
+    /// "PlayerProfileWidget" sibling.
+    /// </summary>
+    private void AutoDetectMainMenu()
+    {
+        if (mainMenuContent == null)
+        {
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas != null)
+            {
+                var contentTr = canvas.transform.Find("Content");
+                if (contentTr != null)
+                    mainMenuContent = contentTr.gameObject;
+            }
+        }
+
+        if (profileWidget == null)
+        {
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas != null)
+            {
+                var widgetTr = canvas.transform.Find("PlayerProfileWidget");
+                if (widgetTr != null)
+                    profileWidget = widgetTr.gameObject;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Hide the main menu content + profile widget (called when showing the login panel).
+    /// </summary>
+    private void HideMainMenu()
+    {
+        if (mainMenuContent != null) mainMenuContent.SetActive(false);
+        if (profileWidget != null) profileWidget.SetActive(false);
+    }
+
+    /// <summary>
+    /// Show the main menu content + profile widget (called after a successful login).
+    /// </summary>
+    private void ShowMainMenu()
+    {
+        if (mainMenuContent != null) mainMenuContent.SetActive(true);
+        if (profileWidget != null) profileWidget.SetActive(true);
     }
 
     private void OnDisable()
@@ -294,20 +353,24 @@ public class PlayFabLoginUI : MonoBehaviour
         if (pm == null)
         {
             Debug.LogWarning("[PlayFabLoginUI] PlayFabManager not found.");
-            _panel.SetActive(false);
+            ShowStatus("PlayFabManager not found.", ErrorColor);
+            _panel.SetActive(true);
             yield break;
         }
 
         pm.OnLoginSuccess += HandleLoginSuccess;
         pm.OnLoginError += HandleLoginError;
 
-        // If already logged in, hide panel
+        // If already logged in, hide login panel and show main menu
         if (pm.IsLoggedIn)
         {
             _panel.SetActive(false);
+            ShowMainMenu();
             yield break;
         }
 
+        // Not logged in: hide main menu, show login panel
+        HideMainMenu();
         _panel.SetActive(true);
         UpdateUI();
     }
@@ -395,13 +458,15 @@ public class PlayFabLoginUI : MonoBehaviour
         PlayFabManager.Instance?.Logout();
         _panel.SetActive(true);
         _logoutButton.gameObject.SetActive(false);
+        HideMainMenu();
         ShowStatus("Logged out.", TextMuted);
     }
 
     private void HandleLoginSuccess(string username)
     {
         ShowStatus($"Welcome, {username}!", SuccessColor);
-        // Hide panel after a short delay so the user sees the success message
+        // Hide panel after a short delay so the user sees the success message,
+        // then reveal the main menu.
         StartCoroutine(HideAfterDelay(0.8f));
         _logoutButton.gameObject.SetActive(true);
     }
@@ -416,6 +481,7 @@ public class PlayFabLoginUI : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(delay);
         _panel.SetActive(false);
+        ShowMainMenu();
     }
 
     private void ShowStatus(string message, Color color)
