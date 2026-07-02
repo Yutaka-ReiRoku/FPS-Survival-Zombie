@@ -140,8 +140,11 @@ public class PlayFabManager : MonoBehaviour
                 PlayFabId = result.PlayFabId;
                 Username = result.Username;
                 IsLoggedIn = true;
+                // Clear any local data left over from a previous account so the
+                // new account starts at 0 (no inherited BestScore / achievements).
+                ClearLocalPlayerData();
                 OnLoginSuccess?.Invoke(Username);
-                // Upload current local data to the new account
+                // Upload the (now clean) local data to the new account
                 SaveAllToCloud();
                 callback?.Invoke(true, null);
             },
@@ -184,6 +187,11 @@ public class PlayFabManager : MonoBehaviour
                 Username = username;
                 IsLoggedIn = true;
 
+                // Clear any local data left over from a previous account so the
+                // merge below starts from a clean slate (no stale BestScore /
+                // achievements from another user).
+                ClearLocalPlayerData();
+
                 // Merge cloud data into PlayerPrefs
                 MergeCloudDataToLocal(result.InfoResultPayload);
 
@@ -208,6 +216,9 @@ public class PlayFabManager : MonoBehaviour
         IsLoggedIn = false;
         PlayFabId = null;
         Username = null;
+        // Clear local player data so the next account starts fresh and does
+        // not inherit the previous user's BestScore / BestWave / achievements.
+        ClearLocalPlayerData();
         Debug.Log("[PlayFab] Logged out.");
         OnLogout?.Invoke();
     }
@@ -215,6 +226,37 @@ public class PlayFabManager : MonoBehaviour
     // =========================================================================
     //  Cloud Save / Load
     // =========================================================================
+
+    /// <summary>
+    /// Clear all player-specific local data (PlayerPrefs + AchievementManager
+    /// in-memory cache). Call this when switching accounts so the new account
+    /// does not inherit the previous user's BestScore / BestWave / achievements.
+    /// </summary>
+    public void ClearLocalPlayerData()
+    {
+        PlayerPrefs.DeleteKey("BestScore");
+        PlayerPrefs.DeleteKey("BestWave");
+
+        var am = AchievementManager.Instance;
+        if (am != null && am.achievements != null)
+        {
+            foreach (var ach in am.achievements)
+            {
+                if (ach == null) continue;
+                PlayerPrefs.DeleteKey(ach.UnlockedKey);
+                PlayerPrefs.DeleteKey(ach.ProgressKey);
+            }
+        }
+
+        PlayerPrefs.Save();
+
+        // Reload AchievementManager's in-memory cache so it reflects the
+        // now-cleared PlayerPrefs (all achievements locked, progress at 0).
+        if (am != null)
+            am.ReloadState();
+
+        Debug.Log("[PlayFab] Cleared local player data (PlayerPrefs + achievements).");
+    }
 
     /// <summary>Upload all local player data to PlayFab cloud.</summary>
     public void SaveAllToCloud()
@@ -408,6 +450,12 @@ public class PlayFabManager : MonoBehaviour
                 Debug.Log($"[PlayFab] Merged {cloud.entries.Count} achievement entries from cloud.");
             }
         }
+
+        // Reload AchievementManager's in-memory cache so it reflects the
+        // freshly merged PlayerPrefs values (unlock state + progress).
+        var amReload = AchievementManager.Instance;
+        if (amReload != null)
+            amReload.ReloadState();
 
         OnCloudDataLoaded?.Invoke(true);
     }

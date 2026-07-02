@@ -85,6 +85,16 @@ public class AchievementManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Reload unlock state and progress from PlayerPrefs. Call this after
+    /// PlayerPrefs has been cleared/replaced (e.g. after switching PlayFab
+    /// accounts) so the in-memory cache matches the new account's data.
+    /// </summary>
+    public void ReloadState()
+    {
+        LoadState();
+    }
+
     private void SaveUnlocked(AchievementData ach)
     {
         PlayerPrefs.SetInt(ach.UnlockedKey, 1);
