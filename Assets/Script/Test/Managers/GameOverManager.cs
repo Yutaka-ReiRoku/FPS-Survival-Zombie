@@ -145,6 +145,10 @@ public class GameOverManager : MonoBehaviour
             if (wave > bestWave) { bestWave = wave; PlayerPrefs.SetInt("BestWave", bestWave); }
             PlayerPrefs.Save();
 
+            // Upload to PlayFab cloud if logged in
+            if (PlayFabManager.Instance != null && PlayFabManager.Instance.IsLoggedIn)
+                PlayFabManager.Instance.SaveAllToCloud();
+
             if (finalScoreText != null)
                 finalScoreText.text = "Score : " + finalScore;
             if (waveReachedText != null)

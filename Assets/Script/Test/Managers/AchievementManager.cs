@@ -126,6 +126,9 @@ public class AchievementManager : MonoBehaviour
         SaveUnlocked(ach);
         Debug.Log($"[AchievementManager] UNLOCKED: {ach.title}");
         OnAchievementUnlocked?.Invoke(ach);
+        // Upload to PlayFab cloud if logged in
+        if (PlayFabManager.Instance != null && PlayFabManager.Instance.IsLoggedIn)
+            PlayFabManager.Instance.SaveAllToCloud();
     }
 
     private void SetProgress(AchievementData ach, int value)
