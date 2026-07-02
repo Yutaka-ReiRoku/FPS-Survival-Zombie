@@ -45,6 +45,16 @@ namespace cowsins
         private Vector3 origPos;
         private Quaternion origRot;
 
+        // Effect offsets — applied as absolute offsets from origPos/origRot each frame.
+        // This prevents the accumulation bug where world position/rotation was incremented
+        // every frame, causing the camera to drift and then snap back when the player stopped.
+        private Vector3 headBobPosOffset = Vector3.zero;
+        private Quaternion headBobRotOffset = Quaternion.identity;
+        private Vector3 breathingPosOffset = Vector3.zero;
+        private Quaternion breathingRotOffset = Quaternion.identity;
+        private Quaternion tiltRot = Quaternion.identity;
+        private Vector3 landingPosOffset = Vector3.zero;
+
         public void Initialize(PlayerDependencies playerDependencies)
         {
             player = playerDependencies.PlayerMovementState;
@@ -85,15 +95,36 @@ namespace cowsins
             UpdateHeadBob();
             UpdateBreathing();
 
+            // Apply combined position and rotation as absolute offsets from the original
+            // transform values. This prevents frame-over-frame accumulation that caused
+            // the camera to drift and then jerk back when the player stopped moving.
+            playerCamera.localPosition = origPos + headBobPosOffset + breathingPosOffset + landingPosOffset;
+            playerCamera.localRotation = origRot * tiltRot * headBobRotOffset * breathingRotOffset;
+
             HandleCamShake();
         }
 
         private void UpdateTilt()
         {
-            if (player.CurrentSpeed == 0) return;
+            // Use actual horizontal velocity to scale tilt intensity, so quick taps
+            // (which produce near-zero velocity) don't cause a sudden tilt snap.
+            Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            float velMagnitude = horizontalVel.magnitude;
+            float walkSpeed = player.WalkSpeed;
+            float tiltScale = walkSpeed > 0f ? Mathf.Clamp01(velMagnitude / walkSpeed) : 0f;
+
+            if (tiltScale < 0.01f)
+            {
+                // Lerp tilt back to identity when (nearly) stopped so the camera doesn't hold a stale tilt
+                tiltRot = Quaternion.Lerp(tiltRot, Quaternion.identity, Time.deltaTime * tiltSpeed);
+                return;
+            }
 
             Quaternion rot = CalculateTilt();
-            playerCamera.localRotation = Quaternion.Lerp(playerCamera.localRotation, rot, Time.deltaTime * tiltSpeed);
+            // Scale the tilt by how fast the player is actually moving. This smooths
+            // the transition when tapping movement keys (velocity ramps up/down gradually).
+            rot = Quaternion.Slerp(Quaternion.identity, rot, tiltScale);
+            tiltRot = Quaternion.Lerp(tiltRot, rot, Time.deltaTime * tiltSpeed);
         }
 
         private Quaternion CalculateTilt()
@@ -110,8 +141,9 @@ namespace cowsins
         {
             if (player.IsIdle || inputManager.Jumping)
             {
-                playerCamera.localPosition = Vector3.Lerp(playerCamera.localPosition, origPos, Time.deltaTime * 2f);
-                playerCamera.localRotation = Quaternion.Lerp(playerCamera.localRotation, origRot, Time.deltaTime * 2f);
+                // Smoothly return offsets to zero instead of snapping localPosition to origPos
+                headBobPosOffset = Vector3.Lerp(headBobPosOffset, Vector3.zero, Time.deltaTime * 2f);
+                headBobRotOffset = Quaternion.Lerp(headBobRotOffset, Quaternion.identity, Time.deltaTime * 2f);
                 return;
             }
 
@@ -120,8 +152,9 @@ namespace cowsins
             float distanceY = amplitude * Mathf.Sin(angle) / 400f;
             float distanceX = amplitude * Mathf.Cos(angle) / 100f;
 
-            playerCamera.position = new Vector3(playerCamera.position.x, playerCamera.position.y + distanceY, playerCamera.position.z);
-            playerCamera.Rotate(distanceX, 0, 0, Space.Self);
+            // Set absolute offset from original — no accumulation
+            headBobPosOffset = new Vector3(0f, distanceY, 0f);
+            headBobRotOffset = Quaternion.Euler(distanceX, 0f, 0f);
         }
 
         private void UpdateBreathing()
@@ -130,12 +163,9 @@ namespace cowsins
             float distance = breathingAmplitude * Mathf.Sin(angle) / 400f;
             float distanceRot = breathingAmplitude * Mathf.Cos(angle) / 100f;
 
-            playerCamera.position = new Vector3(playerCamera.position.x, playerCamera.position.y + distance, playerCamera.position.z);
-
-            if (applyBreathingRotation)
-            {
-                playerCamera.Rotate(distanceRot, 0, 0, Space.Self);
-            }
+            // Set absolute offset from original — no accumulation
+            breathingPosOffset = new Vector3(0f, distance, 0f);
+            breathingRotOffset = applyBreathingRotation ? Quaternion.Euler(distanceRot, 0f, 0f) : Quaternion.identity;
         }
 
         #region CameraShake
@@ -203,7 +233,6 @@ namespace cowsins
             if (playerCamera == null) yield return null;
 
             float elapsed = 0f;
-            Vector3 startPos = playerCamera.localPosition;
 
             while (elapsed < duration)
             {
@@ -216,17 +245,14 @@ namespace cowsins
                 float decay = 1f - (normalized * normalized);
                 float displacement = curve * decay * -intensity;
 
-                // Apply displacement in world space
-                Vector3 worldDisplacement = Vector3.up * displacement;
-                Vector3 localDisplacement = playerCamera.parent.InverseTransformDirection(worldDisplacement);
-
-                playerCamera.localPosition = startPos + localDisplacement;
+                // Store as offset — applied in Update() alongside head bob and breathing
+                landingPosOffset = Vector3.up * displacement;
 
                 yield return null;
             }
 
             // Ensure reset
-            playerCamera.localPosition = startPos;
+            landingPosOffset = Vector3.zero;
         }
 
         #endregion
