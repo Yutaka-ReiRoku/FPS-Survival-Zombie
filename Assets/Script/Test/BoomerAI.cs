@@ -428,6 +428,10 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
         hasExploded = true;
 
+        // Achievement tracking: check if the player was close to the explosion.
+        if (AchievementManager.Instance != null)
+            AchievementManager.Instance.NotifyBoomerCloseExplosion(transform.position);
+
         //--------------------------------
         // VFX
         //--------------------------------

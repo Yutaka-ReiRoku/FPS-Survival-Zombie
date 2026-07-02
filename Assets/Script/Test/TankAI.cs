@@ -510,6 +510,9 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         if (PlayerStatsTracker.Instance != null)
             PlayerStatsTracker.Instance.RegisterTankKill();
 
+        if (AchievementManager.Instance != null)
+            AchievementManager.Instance.NotifyTankKill();
+
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.AddKill(500);
 

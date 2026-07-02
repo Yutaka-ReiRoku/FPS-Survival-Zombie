@@ -436,6 +436,16 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         if (PlayerStatsTracker.Instance != null)
             PlayerStatsTracker.Instance.RegisterZombieKill();
 
+        // Achievement tracking: check wall-run state before the kill is fully processed.
+        if (AchievementManager.Instance != null)
+        {
+            AchievementManager.Instance.NotifyZombieKill();
+            // Check if the player is currently wall-running.
+            var pm = FindAnyObjectByType<PlayerMovement>();
+            if (pm != null && pm.IsWallRunning)
+                AchievementManager.Instance.NotifyZombieKillWhileWallRunning();
+        }
+
         if (ScoreManager.Instance != null)
         {
             ScoreManager.Instance.AddKill();
