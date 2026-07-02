@@ -206,7 +206,7 @@ public class PlayerProfileWidget : MonoBehaviour
         SetLayoutElement(headerRow, minHeight: 32);
 
         _closeButton = CreateButton("CloseBtn", headerRow.transform, "X", new Color(0.5f, 0.2f, 0.2f, 1f), 36f);
-        _closeButton.onClick.AddListener(() => { _panelVisible = false; _panel.SetActive(false); });
+        _closeButton.onClick.AddListener(() => SetPanelVisible(false));
 
         // Divider
         CreateDivider(_panel.transform);
@@ -287,8 +287,7 @@ public class PlayerProfileWidget : MonoBehaviour
         // the profile panel. Closes the profile panel if it was open.
         if (!loggedIn)
         {
-            _panelVisible = false;
-            _panel.SetActive(false);
+            SetPanelVisible(false);
             var loginUI = FindLoginUI();
             if (loginUI != null)
                 loginUI.ShowLoginPanel();
@@ -297,9 +296,40 @@ public class PlayerProfileWidget : MonoBehaviour
             return;
         }
 
-        _panelVisible = !_panelVisible;
-        _panel.SetActive(_panelVisible);
-        if (_panelVisible) RefreshPanel();
+        SetPanelVisible(!_panelVisible);
+    }
+
+    /// <summary>
+    /// Show or hide the profile panel. When the panel is visible, the main
+    /// menu content (sibling "Content" under the same Canvas) is hidden so
+    /// the profile panel is the only thing on screen. When the panel is
+    /// hidden, the main menu content is restored.
+    /// </summary>
+    private void SetPanelVisible(bool visible)
+    {
+        _panelVisible = visible;
+        _panel.SetActive(visible);
+        if (visible) RefreshPanel();
+
+        var mainMenu = FindMainMenuContent();
+        if (mainMenu != null)
+            mainMenu.SetActive(!visible);
+    }
+
+    /// <summary>
+    /// Find the main menu content (sibling "Content" under the same Canvas).
+    /// This is the same convention used by PlayFabLoginUI.
+    /// </summary>
+    private GameObject FindMainMenuContent()
+    {
+        var canvas = GetComponentInParent<Canvas>();
+        if (canvas != null)
+        {
+            var contentTr = canvas.transform.Find("Content");
+            if (contentTr != null)
+                return contentTr.gameObject;
+        }
+        return null;
     }
 
     /// <summary>
