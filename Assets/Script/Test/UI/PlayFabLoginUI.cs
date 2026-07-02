@@ -122,6 +122,7 @@ public class PlayFabLoginUI : MonoBehaviour
         {
             pm.OnLoginSuccess -= HandleLoginSuccess;
             pm.OnLoginError -= HandleLoginError;
+            pm.OnLogout -= HandleLogout;
         }
     }
 
@@ -360,6 +361,7 @@ public class PlayFabLoginUI : MonoBehaviour
 
         pm.OnLoginSuccess += HandleLoginSuccess;
         pm.OnLoginError += HandleLoginError;
+        pm.OnLogout += HandleLogout;
 
         // If already logged in, hide login panel and show main menu
         if (pm.IsLoggedIn)
@@ -460,6 +462,34 @@ public class PlayFabLoginUI : MonoBehaviour
         _logoutButton.gameObject.SetActive(false);
         HideMainMenu();
         ShowStatus("Logged out.", TextMuted);
+    }
+
+    /// <summary>
+    /// Called automatically when PlayFabManager fires OnLogout (e.g. when the
+    /// player logs out from the PlayerProfileWidget). Re-shows the login panel
+    /// and hides the main menu so the player can log in again.
+    /// </summary>
+    private void HandleLogout()
+    {
+        _isRegisterMode = false;
+        _isBusy = false;
+        if (_usernameInput != null) _usernameInput.text = "";
+        if (_passwordInput != null) _passwordInput.text = "";
+        if (_actionButton != null) _actionButton.interactable = true;
+        _logoutButton.gameObject.SetActive(false);
+        HideMainMenu();
+        _panel.SetActive(true);
+        UpdateUI();
+        ShowStatus("Logged out. Please log in again.", TextMuted);
+    }
+
+    /// <summary>
+    /// Public entry point to programmatically show the login panel (e.g. when
+    /// the player clicks the profile chip while not logged in).
+    /// </summary>
+    public void ShowLoginPanel()
+    {
+        HandleLogout();
     }
 
     private void HandleLoginSuccess(string username)

@@ -280,9 +280,37 @@ public class PlayerProfileWidget : MonoBehaviour
 
     private void TogglePanel()
     {
+        var pm = PlayFabManager.Instance;
+        bool loggedIn = pm != null && pm.IsLoggedIn;
+
+        // If not logged in, redirect to the login panel instead of opening
+        // the profile panel. Closes the profile panel if it was open.
+        if (!loggedIn)
+        {
+            _panelVisible = false;
+            _panel.SetActive(false);
+            var loginUI = FindLoginUI();
+            if (loginUI != null)
+                loginUI.ShowLoginPanel();
+            else
+                Debug.LogWarning("[PlayerProfileWidget] PlayFabLoginUI not found; cannot show login panel.");
+            return;
+        }
+
         _panelVisible = !_panelVisible;
         _panel.SetActive(_panelVisible);
         if (_panelVisible) RefreshPanel();
+    }
+
+    /// <summary>
+    /// Find the PlayFabLoginUI on the same canvas (sibling search).
+    /// </summary>
+    private PlayFabLoginUI FindLoginUI()
+    {
+        var canvas = GetComponentInParent<Canvas>();
+        if (canvas != null)
+            return canvas.GetComponentInChildren<PlayFabLoginUI>(true);
+        return null;
     }
 
     private void HandleLoginSuccess(string username)

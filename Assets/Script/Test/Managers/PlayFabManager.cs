@@ -50,6 +50,9 @@ public class PlayFabManager : MonoBehaviour
     /// <summary>Fired when cloud data has been uploaded. (success)</summary>
     public event Action<bool> OnCloudDataSaved;
 
+    /// <summary>Fired when the player has logged out.</summary>
+    public event Action OnLogout;
+
     // ---- Cloud data keys ----
     private const string KeyPlayerStats = "player_stats";
     private const string KeyAchievements = "achievements";
@@ -206,6 +209,7 @@ public class PlayFabManager : MonoBehaviour
         PlayFabId = null;
         Username = null;
         Debug.Log("[PlayFab] Logged out.");
+        OnLogout?.Invoke();
     }
 
     // =========================================================================
