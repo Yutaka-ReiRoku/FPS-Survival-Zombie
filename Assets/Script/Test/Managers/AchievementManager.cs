@@ -86,9 +86,38 @@ public class AchievementManager : MonoBehaviour
             if (ach == null) continue;
             if (PlayerPrefs.GetInt(ach.UnlockedKey, 0) == 1)
                 _unlocked.Add(ach.id);
+            // Progress is NOT loaded from PlayerPrefs — it is per-match only
+            // and resets at the start of each playthrough (see ResetProgress).
             if (ach.isProgression)
-                _progress[ach.id] = PlayerPrefs.GetInt(ach.ProgressKey, 0);
+                _progress[ach.id] = 0;
         }
+    }
+
+    /// <summary>
+    /// Reset all progression achievements' progress to 0. Call this at the start
+    /// of each match/playthrough so progress is only tracked within a single run.
+    /// Unlock state is preserved (once unlocked, stays unlocked).
+    /// </summary>
+    public void ResetProgress()
+    {
+        _progress.Clear();
+        if (achievements == null) return;
+        foreach (var ach in achievements)
+        {
+            if (ach == null || !ach.isProgression) continue;
+            if (!_unlocked.Contains(ach.id))
+                _progress[ach.id] = 0;
+        }
+        // Notify UI subscribers so progress bars reset visually.
+        if (achievements != null)
+        {
+            foreach (var ach in achievements)
+            {
+                if (ach == null || !ach.isProgression) continue;
+                OnProgressChanged?.Invoke(ach, 0, ach.targetValue);
+            }
+        }
+        Debug.Log("[AchievementManager] Progress reset for new playthrough.");
     }
 
     /// <summary>
@@ -109,8 +138,8 @@ public class AchievementManager : MonoBehaviour
 
     private void SaveProgress(AchievementData ach, int value)
     {
-        PlayerPrefs.SetInt(ach.ProgressKey, value);
-        PlayerPrefs.Save();
+        // Progress is per-match only — intentionally not persisted to PlayerPrefs.
+        // It lives in the in-memory _progress dictionary and resets each playthrough.
     }
 
     // ---- Public read API ----

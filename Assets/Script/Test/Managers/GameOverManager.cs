@@ -209,6 +209,10 @@ public class GameOverManager : MonoBehaviour
     {
         Time.timeScale = 1f;
 
+        // Reset achievement progress so it only tracks the new playthrough.
+        if (AchievementManager.Instance != null)
+            AchievementManager.Instance.ResetProgress();
+
         // Story mode: respawn at the last save room checkpoint instead of
         // reloading the scene. This preserves quest progress, killed zombies,
         // collected journals, etc. If no checkpoint was ever set (player died

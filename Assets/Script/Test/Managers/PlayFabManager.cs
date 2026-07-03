@@ -357,7 +357,8 @@ public class PlayFabManager : MonoBehaviour
                 {
                     id = ach.id,
                     unlocked = PlayerPrefs.GetInt(ach.UnlockedKey, 0) == 1,
-                    progress = PlayerPrefs.GetInt(ach.ProgressKey, 0)
+                    // Progress is per-match only — not synced to cloud.
+                    progress = 0
                 });
             }
         }
@@ -438,9 +439,7 @@ public class PlayFabManager : MonoBehaviour
                             {
                                 if (entry.unlocked)
                                     PlayerPrefs.SetInt(ach.UnlockedKey, 1);
-                                int localProgress = PlayerPrefs.GetInt(ach.ProgressKey, 0);
-                                if (entry.progress > localProgress)
-                                    PlayerPrefs.SetInt(ach.ProgressKey, entry.progress);
+                                // Progress is per-match only — do not restore from cloud.
                                 break;
                             }
                         }

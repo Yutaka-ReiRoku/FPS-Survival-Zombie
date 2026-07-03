@@ -97,6 +97,9 @@ public class MainMenuManager : MonoBehaviour
     public void PlayGame()
     {
         Time.timeScale = 1f;
+        // Reset achievement progress so it only tracks the upcoming playthrough.
+        if (AchievementManager.Instance != null)
+            AchievementManager.Instance.ResetProgress();
         SceneManager.LoadScene(gameSceneName);
     }
 
