@@ -75,6 +75,26 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     public float wanderRadius = 15f;
     public float wanderInterval = 5f;
 
+    [Header("Erratic / Unpredictable Behavior")]
+    [Tooltip("Khoảng cách mất dấu player. Lon hon detectDistance de chong flip-flop (hysteresis).")]
+    public float loseSightDistance = 28f;
+    [Tooltip("Sau khi mat dau, zombie van duoi theo alertMemoryDuration giay truoc khi quay ve Wander.")]
+    public float alertMemoryDuration = 6f;
+    [Tooltip("Kha nang trigger mot dot lunge (sprint dot ngot) moi giay khi dang duoi o mid-range (0-1).")]
+    [Range(0f, 1f)]
+    public float lungeChancePerSecond = 0.25f;
+    [Tooltip("Toc do lunge = runSpeed * lungeSpeedMultiplier.")]
+    public float lungeSpeedMultiplier = 1.8f;
+    [Tooltip("Thoi luong moi dot lunge (giay).")]
+    public float lungeDuration = 0.7f;
+    [Tooltip("Kha nang trigger mot dot feint pause (dung dot ngot) moi giay khi dang duoi (0-1).")]
+    [Range(0f, 1f)]
+    public float feintPauseChancePerSecond = 0.12f;
+    [Tooltip("Thoi luong moi dot feint pause (giay).")]
+    public float feintPauseDuration = 0.4f;
+    [Tooltip("Bien do jitter (zigzag) them vao path duoi player (met). 0 = tat.")]
+    public float chaseJitterRadius = 2.5f;
+
     [Header("Attack")]
     public float attackCooldown = 1.5f;
     public int attackDamage = 20;
@@ -131,6 +151,14 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private bool hasDetectedPlayer;
     private bool lastHitWasHeadshot;
 
+    // --- Erratic behavior runtime state ---
+    private float alertMemoryTimer;     // counts down after losing sight; >0 means keep chasing
+    private float lungeTimer;           // >0 while a lunge burst is active
+    private float feintPauseTimer;      // >0 while a feint pause is active
+    private float erraticRollTimer;     // accumulates dt to roll lunge/feint once per second
+    private Vector3 chaseJitterOffset;  // current jitter offset applied to chase destination
+    private float chaseJitterTimer;     // when to pick a new jitter offset
+
     private static readonly int SpeedHash =
         Animator.StringToHash("Speed");
 
@@ -176,6 +204,14 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         currentHealth = maxHealth;
         attackTimer = 0f;
         wanderTimer = wanderInterval;
+
+        // Reset erratic behavior state on (re)spawn.
+        alertMemoryTimer = 0f;
+        lungeTimer = 0f;
+        feintPauseTimer = 0f;
+        erraticRollTimer = 0f;
+        chaseJitterOffset = Vector3.zero;
+        chaseJitterTimer = 0f;
 
         if (target == null)
         {
@@ -260,6 +296,21 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         if (cachedDistance <= detectDistance)
         {
+            // Player within detect range: chase and (re)arm alert memory.
+            alertMemoryTimer = alertMemoryDuration;
+            ChasePlayer(cachedDistance);
+        }
+        else if (hasDetectedPlayer && cachedDistance <= loseSightDistance)
+        {
+            // Hysteresis: once detected, keep chasing while player is still
+            // within the larger loseSightDistance (prevents flip-flop at the
+            // detectDistance edge).
+            ChasePlayer(cachedDistance);
+        }
+        else if (alertMemoryTimer > 0f)
+        {
+            // Lost sight but still in alert memory: keep chasing for a while.
+            alertMemoryTimer -= Time.deltaTime;
             ChasePlayer(cachedDistance);
         }
         else
@@ -285,6 +336,45 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             hasDetectedPlayer = true;
         }
 
+        // --- Roll lunge / feint once per second for unpredictability ---
+        erraticRollTimer += Time.deltaTime;
+        if (erraticRollTimer >= 1f)
+        {
+            erraticRollTimer = 0f;
+
+            // Only roll lunge when at mid-range (not too close, not too far) and not already lunging.
+            if (lungeTimer <= 0f &&
+                distance > attackDistance + 1.5f &&
+                distance < detectDistance * 0.8f &&
+                Random.value < lungeChancePerSecond)
+            {
+                lungeTimer = lungeDuration;
+            }
+
+            // Only roll feint when actively moving toward player and not already pausing/lunging.
+            if (feintPauseTimer <= 0f &&
+                lungeTimer <= 0f &&
+                distance > attackDistance + 2f &&
+                Random.value < feintPauseChancePerSecond)
+            {
+                feintPauseTimer = feintPauseDuration;
+            }
+        }
+
+        // Tick down active burst/pause timers.
+        if (lungeTimer > 0f)
+            lungeTimer -= Time.deltaTime;
+        if (feintPauseTimer > 0f)
+            feintPauseTimer -= Time.deltaTime;
+
+        // --- Feint pause: stop abruptly, face the player, then resume ---
+        if (feintPauseTimer > 0f)
+        {
+            agent.isStopped = true;
+            FaceTarget();
+            return;
+        }
+
         FaceTarget();
 
         if (distance <= attackDistance)
@@ -300,12 +390,29 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         else
         {
             agent.isStopped = false;
-            agent.speed = runSpeed;
-            
+
+            // Lunge burst: sudden sprint faster than normal run.
+            float speed = runSpeed;
+            if (lungeTimer > 0f)
+                speed = runSpeed * lungeSpeedMultiplier;
+            agent.speed = speed;
+
+            // --- Jitter the chase destination so the zombie doesn't run in a straight line ---
             pathTimer += Time.deltaTime;
+            chaseJitterTimer -= Time.deltaTime;
+            if (chaseJitterTimer <= 0f)
+            {
+                // Pick a new lateral jitter offset around the player.
+                Vector3 rand = Random.insideUnitSphere * chaseJitterRadius;
+                rand.y = 0f;
+                chaseJitterOffset = rand;
+                chaseJitterTimer = Random.Range(0.4f, 0.9f);
+            }
+
             if (pathTimer >= 0.25f)
             {
-                agent.SetDestination(target.position);
+                Vector3 dest = target.position + chaseJitterOffset;
+                agent.SetDestination(dest);
                 pathTimer = 0f;
             }
         }
