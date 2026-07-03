@@ -46,10 +46,22 @@ public class QuestInteractable : Interactable
     /// <summary>
     /// Called by InteractManager when the player presses the interact key.
     /// Completes the quest, optionally spawns prefabs, and cleans up.
+    /// 
+    /// Gated: if questTrigger.targetQuest is set, the interaction is refused
+    /// unless that quest is the StoryManager's active quest. This enforces
+    /// linear quest progression — the player cannot interact with a future
+    /// quest's objective before completing the prior quest.
     /// </summary>
     public override void Interact(Transform player)
     {
         if (_used) return;
+
+        if (!IsTargetQuestActive())
+        {
+            Debug.Log($"[QuestInteractable] {name}: target quest not active — interaction blocked (linear progression).");
+            return;
+        }
+
         _used = true;
 
         // Fire base Interact (UnityEvents, alreadyInteracted flag, etc.)
@@ -113,6 +125,19 @@ public class QuestInteractable : Interactable
             go.SetActive(true);
             Debug.Log($"[QuestInteractable] Spawned {go.name} at {pos}.");
         }
+    }
+
+    /// <summary>
+    /// Returns true if the target quest is the active quest (or if no specific
+    /// quest is assigned, in which case there is no gate). Used to enforce
+    /// linear quest progression.
+    /// </summary>
+    private bool IsTargetQuestActive()
+    {
+        var sm = StoryManager.Instance;
+        if (sm == null) return false;
+        if (questTrigger == null || questTrigger.targetQuest == null) return true;
+        return sm.ActiveQuest == questTrigger.targetQuest;
     }
 
     private static Transform _runtimeContainer;

@@ -71,21 +71,67 @@ public class WaveQuestInteractable : Interactable
     [Tooltip("If true, also disable the chapter's continuous spawners while waves are active so only the wave-spawned enemies count toward the kill goal.")]
     public bool suppressChapterSpawners = true;
 
+    [Header("Second Interaction (Post-Wave Activation)")]
+    [Tooltip("If true, after all waves are cleared the quest does NOT auto-complete. " +
+             "Instead the collider is re-enabled and the player must interact a second time " +
+             "to complete the quest (e.g. activate the bomb after defeating the Tank boss).")]
+    public bool requireSecondInteraction = false;
+
+    [Tooltip("Interaction text shown for the second interaction (after waves are cleared).")]
+    public string secondInteractText = "Kích hoạt quả bom";
+
+    [Tooltip("Optional cutscene played when the player performs the second interaction (quest completion).")]
+    public CutscenePlayer completionCutscene;
+
     [Header("Cleanup")]
     [Tooltip("If true, disable the collider after use so the prompt disappears.")]
     public bool disableColliderAfterUse = true;
 
     private bool _used;
+    private bool _wavesCleared; // True after all waves are cleared (phase 2 ready).
     private Coroutine _waveRoutine;
+    private string _originalInteractText;
 
     /// <summary>
     /// Called by InteractManager when the player presses the interact key.
     /// Starts the wave sequence. The quest completes after all waves are cleared.
+    ///
+    /// Gated: if questTrigger.targetQuest is set, the interaction is refused
+    /// unless that quest is the StoryManager's active quest. This enforces
+    /// linear quest progression — the player cannot trigger a future quest's
+    /// wave fight (and get locked into the chapter boundary) before completing
+    /// the prior quest.
     /// </summary>
     public override void Interact(Transform player)
     {
         if (_used) return;
+
+        if (!IsTargetQuestActive())
+        {
+            Debug.Log($"[WaveQuestInteractable] {name}: target quest not active — interaction blocked (linear progression).");
+            return;
+        }
+
+        // Phase 2: waves already cleared — second interaction completes the quest.
+        if (_wavesCleared)
+        {
+            _used = true;
+            base.Interact(player);
+
+            if (disableColliderAfterUse)
+            {
+                var col = GetComponent<Collider>();
+                if (col != null) col.enabled = false;
+            }
+
+            CompleteQuest();
+            return;
+        }
+
+        // Phase 1: start the wave sequence.
         _used = true;
+        if (string.IsNullOrEmpty(_originalInteractText))
+            _originalInteractText = interactText;
 
         base.Interact(player);
 
@@ -100,6 +146,11 @@ public class WaveQuestInteractable : Interactable
 
     private void OnEnable()
     {
+        // Cache the original interaction text so we can restore it after phase 2
+        // or after a death reset.
+        if (string.IsNullOrEmpty(_originalInteractText))
+            _originalInteractText = interactText;
+
         // Subscribe to player death so we can abort the wave sequence and reset.
         if (GameOverManager.Instance != null)
             GameOverManager.Instance.OnPlayerDied += HandlePlayerDeath;
@@ -117,7 +168,7 @@ public class WaveQuestInteractable : Interactable
     /// </summary>
     private void HandlePlayerDeath()
     {
-        if (!_used) return;
+        if (!_used && !_wavesCleared) return;
 
         Debug.Log("[WaveQuestInteractable] Player died during waves — aborting and resetting.");
 
@@ -130,11 +181,19 @@ public class WaveQuestInteractable : Interactable
         // Unlock the boundary so the player can move freely after respawning.
         if (lockBoundary != null) lockBoundary.UnlockExternal();
 
+        // Re-enable the chapter spawners if they were suppressed.
+        if (lockBoundary != null && suppressChapterSpawners)
+            lockBoundary.SetSpawnersActive(true);
+
         // Re-enable the collider so the player can interact again.
         var col = GetComponent<Collider>();
         if (col != null) col.enabled = true;
 
+        // Restore the original interaction text in case it was changed for phase 2.
+        interactText = _originalInteractText;
+
         _used = false;
+        _wavesCleared = false;
     }
 
     private IEnumerator RunWaveSequence()
@@ -190,16 +249,71 @@ public class WaveQuestInteractable : Interactable
             }
         }
 
-        // All waves cleared — release the boundary lock so the player can leave.
+        // All waves cleared — release the boundary lock so the player can move freely.
         if (lockBoundary != null)
         {
             lockBoundary.UnlockExternal();
             Debug.Log("[WaveQuestInteractable] Boundary unlocked — player can leave.");
         }
 
-        // Complete the quest.
-        Debug.Log("[WaveQuestInteractable] All waves cleared. Completing quest.");
         _waveRoutine = null;
+
+        if (requireSecondInteraction)
+        {
+            // Phase 2: re-enable the collider and wait for the player to interact
+            // again to complete the quest (e.g. activate the bomb after defeating Tank).
+            _wavesCleared = true;
+            _used = false; // Allow the second interaction.
+
+            // Restore chapter spawners so the area isn't dead quiet during phase 2.
+            if (lockBoundary != null && suppressChapterSpawners)
+                lockBoundary.SetSpawnersActive(true);
+
+            // Show a banner telling the player to activate the bomb.
+            ShowBanner("TANK ĐÃ BỊ TIÊU DIỆT", "Kích hoạt lại quả bom để hoàn tất!");
+
+            // Swap the interaction text and re-enable the collider.
+            interactText = secondInteractText;
+            var col = GetComponent<Collider>();
+            if (col != null) col.enabled = true;
+
+            Debug.Log("[WaveQuestInteractable] Waves cleared — waiting for second interaction to complete quest.");
+        }
+        else
+        {
+            // No second interaction required — complete the quest immediately.
+            CompleteQuest();
+        }
+    }
+
+    /// <summary>
+    /// Completes the quest via the QuestTrigger (handles cutscene + advancement),
+    /// or falls back to StoryManager.CompleteActiveQuest if no trigger is assigned.
+    /// </summary>
+    private void CompleteQuest()
+    {
+        Debug.Log("[WaveQuestInteractable] Completing quest.");
+
+        if (completionCutscene != null)
+        {
+            StartCoroutine(PlayCompletionCutsceneThenComplete());
+        }
+        else if (questTrigger != null)
+        {
+            questTrigger.Complete();
+        }
+        else
+        {
+            StoryManager.Instance?.CompleteActiveQuest();
+        }
+    }
+
+    private IEnumerator PlayCompletionCutsceneThenComplete()
+    {
+        bool done = false;
+        completionCutscene.Play(() => done = true);
+        while (!done) yield return null;
+
         if (questTrigger != null)
             questTrigger.Complete();
         else
@@ -251,5 +365,18 @@ public class WaveQuestInteractable : Interactable
             _runtimeContainer = go.transform;
         }
         return _runtimeContainer;
+    }
+
+    /// <summary>
+    /// Returns true if the target quest is the active quest (or if no specific
+    /// quest is assigned, in which case there is no gate). Used to enforce
+    /// linear quest progression.
+    /// </summary>
+    private bool IsTargetQuestActive()
+    {
+        var sm = StoryManager.Instance;
+        if (sm == null) return false;
+        if (questTrigger == null || questTrigger.targetQuest == null) return true;
+        return sm.ActiveQuest == questTrigger.targetQuest;
     }
 }
