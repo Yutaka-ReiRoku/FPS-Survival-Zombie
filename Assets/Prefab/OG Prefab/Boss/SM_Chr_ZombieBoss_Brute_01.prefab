@@ -1283,10 +1283,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TankAI
   target: {fileID: 0}
-  maxHealth: 100
+  maxHealth: 350
   currentHealth: 0
   detectRange: 20
-  runSpeed: 6
+  runSpeed: 8
   rotationSpeed: 10
   meleeRange: 3
   jumpAttackRange: 12
