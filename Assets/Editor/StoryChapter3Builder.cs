@@ -182,11 +182,11 @@ public static class StoryChapter3Builder
 
         // 5) Place Shotgun Pickeable near the loot crate + ammo caches for the big waves.
         PlaceShotgunPickeable(ch3, new Vector3(15f, 1f, 62f));
-        PlaceShotgunAmmo(ch3, new Vector3(15f, 1f, 64f));
-        PlaceShotgunAmmo(ch3, new Vector3(17f, 1f, 62f));
+        PlaceShotgunAmmo(ch3, new Vector3(15f, 1f, 64f), 1);
+        PlaceShotgunAmmo(ch3, new Vector3(17f, 1f, 62f), 2);
         // Ammo cache near the generator for wave resupply.
-        PlaceShotgunAmmo(ch3, new Vector3(-5f, 1f, 50f));
-        PlaceShotgunAmmo(ch3, new Vector3(5f, 1f, 50f));
+        PlaceShotgunAmmo(ch3, new Vector3(-5f, 1f, 50f), 3);
+        PlaceShotgunAmmo(ch3, new Vector3(5f, 1f, 50f), 4);
 
         // 6) Wire Q7_Generator as a WaveQuestInteractable — 3 EXTREME waves,
         //    wave 3 has a Boomer boss. Player is locked inside Ch3 during waves.
@@ -416,8 +416,16 @@ public static class StoryChapter3Builder
         Debug.Log($"[StoryChapter3Builder] Shotgun Pickeable placed at local {localPos}.");
     }
 
-    private static void PlaceShotgunAmmo(GameObject ch3, Vector3 localPos)
+    private static void PlaceShotgunAmmo(GameObject ch3, Vector3 localPos, int index)
     {
+        var name = $"Shotgun Ammo (Ch3) {index:00}";
+        var existing = FindChild(ch3, name);
+        if (existing != null)
+        {
+            existing.transform.localPosition = localPos;
+            return;
+        }
+
         var bulletPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
             "Assets/Engine/Cowsins/Prefabs/DragAndDropExtras/Bullet Pickeable.prefab");
         if (bulletPrefab == null)
@@ -427,10 +435,10 @@ public static class StoryChapter3Builder
         }
 
         var ammo = (GameObject)PrefabUtility.InstantiatePrefab(bulletPrefab, ch3.scene);
-        ammo.name = "Shotgun Ammo (Ch3)";
+        ammo.name = name;
         ammo.transform.SetParent(ch3.transform, true);
         ammo.transform.localPosition = localPos;
-        Debug.Log($"[StoryChapter3Builder] Shotgun Ammo placed at local {localPos}.");
+        Debug.Log($"[StoryChapter3Builder] {name} placed at local {localPos}.");
     }
 
     private static GameObject[] LoadConstructionZombiePrefabs()

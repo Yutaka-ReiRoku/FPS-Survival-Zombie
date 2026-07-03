@@ -229,11 +229,11 @@ public static class StoryChapter5Builder
         Debug.Log($"[StoryChapter5Builder] Q11_BombObjective wired (Tank boss + {bossWavePrefabs.Length - 1} minions, player locked in).");
 
         // 5) Place ammo and health caches near the bomb for the boss fight.
-        PlaceAmmo(ch5, new Vector3(-50f, 1f, -40f));
-        PlaceAmmo(ch5, new Vector3(-60f, 1f, -45f));
-        PlaceAmmo(ch5, new Vector3(-55f, 1f, -35f));
-        PlaceHealth(ch5, new Vector3(-52f, 1f, -38f));
-        PlaceHealth(ch5, new Vector3(-58f, 1f, -42f));
+        PlaceAmmo(ch5, new Vector3(-50f, 1f, -40f), 1);
+        PlaceAmmo(ch5, new Vector3(-60f, 1f, -45f), 2);
+        PlaceAmmo(ch5, new Vector3(-55f, 1f, -35f), 3);
+        PlaceHealth(ch5, new Vector3(-52f, 1f, -38f), 1);
+        PlaceHealth(ch5, new Vector3(-58f, 1f, -42f), 2);
 
         // 6) Wire Q12_EscapeTrigger — reach trigger at the broken bridge.
         var q12GO = FindChild(ch5, "Q12_EscapeTrigger");
@@ -371,8 +371,16 @@ public static class StoryChapter5Builder
         }
     }
 
-    private static void PlaceAmmo(GameObject ch5, Vector3 localPos)
+    private static void PlaceAmmo(GameObject ch5, Vector3 localPos, int index)
     {
+        var name = $"Boss Fight Ammo (Ch5) {index:00}";
+        var existing = FindChild(ch5, name);
+        if (existing != null)
+        {
+            existing.transform.localPosition = localPos;
+            return;
+        }
+
         var bulletPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
             "Assets/Engine/Cowsins/Prefabs/DragAndDropExtras/Bullet Pickeable.prefab");
         if (bulletPrefab == null)
@@ -382,14 +390,22 @@ public static class StoryChapter5Builder
         }
 
         var ammo = (GameObject)PrefabUtility.InstantiatePrefab(bulletPrefab, ch5.scene);
-        ammo.name = "Boss Fight Ammo (Ch5)";
+        ammo.name = name;
         ammo.transform.SetParent(ch5.transform, true);
         ammo.transform.localPosition = localPos;
-        Debug.Log($"[StoryChapter5Builder] Ammo placed at local {localPos}.");
+        Debug.Log($"[StoryChapter5Builder] {name} placed at local {localPos}.");
     }
 
-    private static void PlaceHealth(GameObject ch5, Vector3 localPos)
+    private static void PlaceHealth(GameObject ch5, Vector3 localPos, int index)
     {
+        var name = $"Boss Fight Health (Ch5) {index:00}";
+        var existing = FindChild(ch5, name);
+        if (existing != null)
+        {
+            existing.transform.localPosition = localPos;
+            return;
+        }
+
         var healthPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
             "Assets/Engine/Cowsins/Prefabs/DragAndDropExtras/PowerUps/Healthpack.prefab");
         if (healthPrefab == null)
@@ -399,10 +415,10 @@ public static class StoryChapter5Builder
         }
 
         var health = (GameObject)PrefabUtility.InstantiatePrefab(healthPrefab, ch5.scene);
-        health.name = "Boss Fight Health (Ch5)";
+        health.name = name;
         health.transform.SetParent(ch5.transform, true);
         health.transform.localPosition = localPos;
-        Debug.Log($"[StoryChapter5Builder] Health placed at local {localPos}.");
+        Debug.Log($"[StoryChapter5Builder] {name} placed at local {localPos}.");
     }
 
     private static GameObject[] LoadApartmentZombiePrefabs()
