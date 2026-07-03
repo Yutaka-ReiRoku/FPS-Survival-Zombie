@@ -83,6 +83,8 @@ public class PlayerProfileWidget : MonoBehaviour
         {
             pm.OnLoginSuccess -= HandleLoginSuccess;
             pm.OnLoginError -= HandleLoginError;
+            pm.OnCloudDataLoaded -= HandleCloudDataLoaded;
+            pm.OnLogout -= HandleLogout;
         }
         StopAllCoroutines();
     }
@@ -101,6 +103,8 @@ public class PlayerProfileWidget : MonoBehaviour
         {
             pm.OnLoginSuccess += HandleLoginSuccess;
             pm.OnLoginError += HandleLoginError;
+            pm.OnCloudDataLoaded += HandleCloudDataLoaded;
+            pm.OnLogout += HandleLogout;
         }
 
         RefreshChip();
@@ -352,6 +356,27 @@ public class PlayerProfileWidget : MonoBehaviour
     private void HandleLoginError(string error)
     {
         RefreshChip();
+    }
+
+    /// <summary>
+    /// Called when cloud data has been downloaded and merged into PlayerPrefs.
+    /// Refreshes both the chip and the panel (if visible) so achievement
+    /// progress and best score reflect the freshly merged cloud data.
+    /// </summary>
+    private void HandleCloudDataLoaded(bool success)
+    {
+        RefreshChip();
+        if (_panelVisible) RefreshPanel();
+    }
+
+    /// <summary>
+    /// Called when the player logs out. Refreshes the chip and panel so the
+    /// UI reflects the logged-out state (no achievements / best score shown).
+    /// </summary>
+    private void HandleLogout()
+    {
+        RefreshChip();
+        if (_panelVisible) RefreshPanel();
     }
 
     private void OnLogoutClicked()
