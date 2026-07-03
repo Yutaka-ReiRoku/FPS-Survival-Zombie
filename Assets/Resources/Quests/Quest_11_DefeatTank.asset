@@ -22,7 +22,6 @@ MonoBehaviour:
     \u0111\u1EA7u!"
   objective: "Ti\xEAu di\u1EC7t Tank v\xE0 k\xEDch ho\u1EA1t l\u1EA1i qu\u1EA3 bom"
   expReward: 1000
-  journalReward: {fileID: 0}
-  completionNotification: "Qu\u1EA3 bom \u0111\xE3 \u0111\u01B0\u1EE3c k\xEDch ho\u1EA1t
-    ho\xE0n to\xE0n! CH\u1EA0Y NGAY \u0111\u1EBFn c\u1EA7u g\xE3y tr\u01B0\u1EDBc
-    khi v\u1EE5 n\u1ED5!"
+  journalReward: {fileID: 11400000, guid: 0bbe99901c95c5c46a6498b1a2d9e3e8, type: 2}
+  completionNotification: "Nh\u1EADn \u0111\u01B0\u1EE3c: Nh\u1EADt k\xFD anh trai
+    #4 \u2014 L\u1EDDi t\u1EF1 th\xFA cu\u1ED1i c\xF9ng"

@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public class QuestTrackerUI : MonoBehaviour
 {
     [Header("Layout")]
-    public Vector2 panelSize = new Vector2(420f, 110f);
+    public Vector2 panelSize = new Vector2(420f, 140f);
     public Vector2 anchoredPosition = new Vector2(24f, -180f);
 
     [Header("Colors")]
@@ -21,11 +21,14 @@ public class QuestTrackerUI : MonoBehaviour
     public Color chapterColor = new Color(0.85f, 0.78f, 0.45f, 1f);
     public Color titleColor = new Color(0.96f, 0.96f, 0.96f, 1f);
     public Color objectiveColor = new Color(0.62f, 0.66f, 0.72f, 1f);
+    public Color collectibleColor = new Color(0.4f, 0.85f, 1f, 1f);
 
     private RectTransform _panel;
     private TMP_Text _chapter;
     private TMP_Text _title;
     private TMP_Text _objective;
+    private TMP_Text _collectibles;
+    private int _lastCollectibleCount = -1;
 
     private void Awake()
     {
@@ -87,6 +90,12 @@ public class QuestTrackerUI : MonoBehaviour
             TextAlignmentOptions.Left, th != null ? th.bodyFont : null);
         _objective.color = objectiveColor;
         ((RectTransform)_objective.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, panelSize.x - 32f);
+
+        // Collectible counter
+        _collectibles = MakeText(_panel, "Collectibles", 20f, new Vector2(16f, -104f),
+            TextAlignmentOptions.Left, th != null ? th.bodyFont : null);
+        _collectibles.color = collectibleColor;
+        ((RectTransform)_collectibles.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, panelSize.x - 32f);
     }
 
     private TMP_Text MakeText(RectTransform parent, string n, float size, Vector2 pos, TextAlignmentOptions align, TMP_FontAsset font)
@@ -116,6 +125,25 @@ public class QuestTrackerUI : MonoBehaviour
         UpdateDisplay();
     }
 
+    private void Update()
+    {
+        // Poll collectible count — CollectibleManager doesn't fire an event,
+        // so we check for changes each frame (cheap int comparison).
+        var cm = CollectibleManager.Instance;
+        if (cm != null && cm.Count != _lastCollectibleCount)
+        {
+            _lastCollectibleCount = cm.Count;
+            UpdateCollectibleDisplay();
+        }
+    }
+
+    private void UpdateCollectibleDisplay()
+    {
+        var cm = CollectibleManager.Instance;
+        if (cm == null || _collectibles == null) return;
+        _collectibles.text = $"Nhật ký: {cm.Count}/{cm.Total}";
+    }
+
     private void UpdateDisplay()
     {
         var sm = StoryManager.Instance;
@@ -132,6 +160,7 @@ public class QuestTrackerUI : MonoBehaviour
             _chapter.text = "CỐT TRUYỆN HOÀN THÀNH";
             _title.text = "";
             _objective.text = "";
+            UpdateCollectibleDisplay();
             return;
         }
 
@@ -142,6 +171,7 @@ public class QuestTrackerUI : MonoBehaviour
         {
             _title.text = q.title;
             _objective.text = q.objective;
+            UpdateCollectibleDisplay();
         }
         else
         {

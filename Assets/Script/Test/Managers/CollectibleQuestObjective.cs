@@ -45,8 +45,18 @@ public class CollectibleQuestObjective : MonoBehaviour
         }
     }
 
-    /// <summary>Total number of required collectibles.</summary>
-    public int RequiredCount => requiredCollectibles != null ? requiredCollectibles.Length : 0;
+    /// <summary>Total number of non-null required collectibles.</summary>
+    public int RequiredCount
+    {
+        get
+        {
+            if (requiredCollectibles == null) return 0;
+            int n = 0;
+            for (int i = 0; i < requiredCollectibles.Length; i++)
+                if (requiredCollectibles[i] != null) n++;
+            return n;
+        }
+    }
 
     private void OnEnable()
     {
@@ -93,6 +103,17 @@ public class CollectibleQuestObjective : MonoBehaviour
         if (_listening) return;
         _listening = true;
         _done = false;
+
+        // Warn about any null entries in the required collectibles array.
+        if (requiredCollectibles != null)
+        {
+            for (int i = 0; i < requiredCollectibles.Length; i++)
+            {
+                if (requiredCollectibles[i] == null)
+                    Debug.LogWarning($"[CollectibleQuestObjective] {name}: requiredCollectibles[{i}] is null! Quest may not complete.");
+            }
+        }
+
         Debug.Log($"[CollectibleQuestObjective] Started. Need {RequiredCount} collectible(s); already picked {PickedCount}.");
     }
 

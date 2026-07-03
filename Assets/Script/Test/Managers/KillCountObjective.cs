@@ -29,19 +29,35 @@ public class KillCountObjective : MonoBehaviour
     private bool _listening;
     private int _startKills;
     private bool _done;
+    private bool _subscribed;
 
     private void OnEnable()
     {
-        if (StoryManager.Instance != null)
-            StoryManager.Instance.OnActiveQuestChanged += HandleQuestChanged;
+        Subscribe();
         if (startOnEnable && targetQuest == null)
             StartListening();
+    }
+
+    private void Start()
+    {
+        // Fallback: if OnEnable ran before StoryManager.Awake (which sets
+        // Instance), the subscription was silently skipped. Start is
+        // guaranteed to run after all Awake calls, so Instance is always set.
+        Subscribe();
+    }
+
+    private void Subscribe()
+    {
+        if (_subscribed || StoryManager.Instance == null) return;
+        StoryManager.Instance.OnActiveQuestChanged += HandleQuestChanged;
+        _subscribed = true;
     }
 
     private void OnDisable()
     {
         if (StoryManager.Instance != null)
             StoryManager.Instance.OnActiveQuestChanged -= HandleQuestChanged;
+        _subscribed = false;
         _listening = false;
     }
 

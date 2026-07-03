@@ -22,6 +22,6 @@ MonoBehaviour:
   objective: "Ch\u1EA1y \u0111\u1EBFn c\u1EA7u g\xE3y v\xE0 tho\xE1t kh\u1ECFi th\u1ECB
     tr\u1EA5n"
   expReward: 500
-  journalReward: {fileID: 0}
-  completionNotification: "B\u1EA1n \u0111\xE3 tho\xE1t kh\u1ECFi th\u1ECB tr\xE1n!
-    To\xE0n b\u1ED9 zombie b\u1ECB ti\xEAu di\u1EC7t. H\xE0nh tr\xECnh kh\xE9p l\u1EA1i..."
+  journalReward: {fileID: 11400000, guid: 01097ae9c9adefb4183357b9d1b946a3, type: 2}
+  completionNotification: "Nh\u1EADn \u0111\u01B0\u1EE3c: Ghi ch\xE9p thu\u1ED1c
+    gi\u1EA3i #3 \u2014 Ph\xE1c \u0111\u1ED3 cu\u1ED1i c\xF9ng"

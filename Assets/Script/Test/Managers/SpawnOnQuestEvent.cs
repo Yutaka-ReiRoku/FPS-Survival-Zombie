@@ -34,14 +34,28 @@ public class SpawnOnQuestEvent : MonoBehaviour
 
     private static Transform _runtimeContainer;
 
+    private bool _subscribed;
+
     private void OnEnable()
     {
-        if (StoryManager.Instance != null)
-        {
-            StoryManager.Instance.OnQuestCompleted += HandleQuestCompleted;
-            if (fireOnQuestActive)
-                StoryManager.Instance.OnActiveQuestChanged += HandleQuestActive;
-        }
+        Subscribe();
+    }
+
+    private void Start()
+    {
+        // Fallback: if OnEnable ran before StoryManager.Awake (which sets
+        // Instance), the subscription was silently skipped. Start is
+        // guaranteed to run after all Awake calls, so Instance is always set.
+        Subscribe();
+    }
+
+    private void Subscribe()
+    {
+        if (_subscribed || StoryManager.Instance == null) return;
+        StoryManager.Instance.OnQuestCompleted += HandleQuestCompleted;
+        if (fireOnQuestActive)
+            StoryManager.Instance.OnActiveQuestChanged += HandleQuestActive;
+        _subscribed = true;
     }
 
     private void OnDisable()
@@ -52,17 +66,24 @@ public class SpawnOnQuestEvent : MonoBehaviour
             if (fireOnQuestActive)
                 StoryManager.Instance.OnActiveQuestChanged -= HandleQuestActive;
         }
+        _subscribed = false;
     }
 
     private void HandleQuestCompleted(QuestData quest)
     {
-        if (onQuestComplete != null && quest != onQuestComplete) return;
+        if (onQuestComplete != null && quest != onQuestComplete)
+        {
+            Debug.Log($"[SpawnOnQuestEvent] {name}: quest '{quest?.title}' != '{onQuestComplete.title}'. Skipped.");
+            return;
+        }
+        Debug.Log($"[SpawnOnQuestEvent] {name}: quest '{quest?.title}' matched. Spawning {prefabs?.Length ?? 0} prefab(s).");
         DoSpawn();
     }
 
     private void HandleQuestActive(QuestData oldQuest, QuestData newQuest)
     {
         if (onQuestComplete != null && newQuest != onQuestComplete) return;
+        Debug.Log($"[SpawnOnQuestEvent] {name}: quest '{newQuest?.title}' became active. Spawning {prefabs?.Length ?? 0} prefab(s).");
         DoSpawn();
     }
 

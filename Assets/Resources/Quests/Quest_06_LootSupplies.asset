@@ -15,11 +15,15 @@ MonoBehaviour:
   questId: 6
   chapter: 3
   title: "Loot v\u1EADt t\u01B0"
-  description: "T\xECm th\xF9ng v\u1EADt t\u01B0 trong c\xF4ng tr\u01B0\u1EDDng.
-    B\xEAn trong c\xF3 \u0111\u1EA1n, thu\u1ED1c v\xE0 c\xF3 th\u1EC3 c\xF3 v\u0169
-    kh\xED m\u1EDBi. Nh\u1EA5n E \u0111\u1EC3 t\u01B0\u01A1ng t\xE1c v\u1EDBi th\xF9ng
-    loot."
-  objective: "T\xECm v\xE0 loot th\xF9ng v\u1EADt t\u01B0"
+  description: "T\xECm th\xF9ng v\u1EADt t\u01B0 trong c\xF4ng tr\u01B0\u1EDDng v\xE0
+    thu th\u1EADp 4 t\xE0i li\u1EC7u quan tr\u1ECDng (nh\u1EADt k\xFD b\xE1c s\u0129
+    #2, nh\u1EADt k\xFD ng\u01B0\u1EDDi l\xEDnh #2, b\xE1o c\xE1o qu\xE2n \u0111\u1ED9i
+    #1, b\xE1o c\xE1o th\xED nghi\u1EC7m ho\xE0n ch\u1EC9nh #1). Nh\u1EA5n E \u0111\u1EC3
+    t\u01B0\u01A1ng t\xE1c v\u1EDBi th\xF9ng loot. C\xF3 th\u1EC3 ho\xE0n th\xE0nh
+    b\u1EB1ng c\xE1ch thu th\u1EADp \u0111\u1EE7 t\xE0i li\u1EC7u ho\u1EB7c t\u01B0\u01A1ng
+    t\xE1c th\xF9ng loot."
+  objective: "Thu th\u1EADp 4 t\xE0i li\u1EC7u trong c\xF4ng tr\u01B0\u1EDDng HO\u1EB6C
+    loot th\xF9ng v\u1EADt t\u01B0"
   expReward: 200
   journalReward: {fileID: 11400000, guid: 948e0bf6a3bb475180245bcc99fd58a1, type: 2}
   completionNotification: "\u0110\xE3 loot xong v\u1EADt t\u01B0! Nh\u1EADn B\xE1o
