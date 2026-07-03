@@ -9,6 +9,27 @@ public class Spawm : MonoBehaviour
     public int maxZombie = 30;
     public float spawnInterval = 3f;
 
+    [Header("Director Override")]
+    [Tooltip("If true, this spawner ignores the AIDirector's dynamic spawnInterval and always uses the value set above. Use for chapter spawners where you want tight control over pacing.")]
+    public bool ignoreDirectorInterval = false;
+
+    [Tooltip("Multiplier applied to the AIDirector's spawnInterval when ignoreDirectorInterval is false. <1 = faster spawns, >1 = slower. 1 = use director value as-is.")]
+    public float directorIntervalMultiplier = 1f;
+
+    [Header("Per-Spawner Cap")]
+    [Tooltip("If true, maxZombie counts only zombies spawned by THIS spawner (tracked locally), not the global AIDirector count. Prevents one chapter's spawner from blocking another's.")]
+    public bool useLocalCap = true;
+
+    [Header("Roaming")]
+    [Tooltip("If true, spawned zombies get a random wander destination within spawnAreaSize so they patrol the area instead of standing still.")]
+    public bool enableRoaming = true;
+
+    [Tooltip("How often (seconds) to assign a new wander destination to each spawned zombie.")]
+    public float wanderInterval = 5f;
+
+    [Tooltip("Range from the spawner center within which zombies wander.")]
+    public float wanderRadius = 30f;
+
     [Header("Spawn Area")]
     public Vector3 spawnAreaSize =
         new Vector3(50f, 0f, 50f);
@@ -29,6 +50,14 @@ public class Spawm : MonoBehaviour
     private Transform zombieContainer;
 
     private float timer;
+
+    // Locally-tracked zombies spawned by THIS spawner (for per-spawner cap).
+    private readonly System.Collections.Generic.List<ZombieAI> _localActiveZombies =
+        new System.Collections.Generic.List<ZombieAI>();
+
+    // Roaming: maps each zombie to its next wander time.
+    private readonly System.Collections.Generic.Dictionary<ZombieAI, float> _wanderTimers =
+        new System.Collections.Generic.Dictionary<ZombieAI, float>();
 
     private void Start()
     {
@@ -92,6 +121,7 @@ public class Spawm : MonoBehaviour
         }
 
         CheckCamperPunishment();
+        UpdateRoaming();
     }
 
     private void UpdateDirectorSettings()
@@ -99,24 +129,35 @@ public class Spawm : MonoBehaviour
         if (AIDirector.Instance == null)
             return;
 
+        // If the designer wants full control, don't touch spawnInterval.
+        if (ignoreDirectorInterval)
+            return;
+
+        float baseInterval;
         switch (AIDirector.Instance.currentState)
         {
             case AIDirector.DirectorState.Calm:
-                spawnInterval = 5f;
+                baseInterval = 5f;
                 break;
 
             case AIDirector.DirectorState.BuildUp:
-                spawnInterval = 3f;
+                baseInterval = 3f;
                 break;
 
             case AIDirector.DirectorState.Attack:
-                spawnInterval = 1f;
+                baseInterval = 1f;
                 break;
 
             case AIDirector.DirectorState.Recovery:
-                spawnInterval = 8f;
+                baseInterval = 8f;
+                break;
+
+            default:
+                baseInterval = spawnInterval;
                 break;
         }
+
+        spawnInterval = baseInterval * directorIntervalMultiplier;
     }
 
     private void SpawnWave()
@@ -131,10 +172,12 @@ public class Spawm : MonoBehaviour
             return;
         }
 
-        int currentZombie =
-            AIDirector.Instance != null
-            ? AIDirector.Instance.GetZombieCount()
-            : 0;
+        // Clean up destroyed/null entries from our local tracking list.
+        CleanupLocalList();
+
+        int currentZombie = useLocalCap
+            ? _localActiveZombies.Count
+            : (AIDirector.Instance != null ? AIDirector.Instance.GetZombieCount() : 0);
 
         int cap = EffectiveMaxZombie();
 
@@ -143,36 +186,29 @@ public class Spawm : MonoBehaviour
 
         int spawnAmount = 1;
 
-        if (AIDirector.Instance != null)
+        if (!useLocalCap && AIDirector.Instance != null)
         {
             spawnAmount =
                 AIDirector.Instance
                 .GetRecommendedSpawnCount();
         }
+        else if (useLocalCap)
+        {
+            // Spawn a small batch each tick to fill the area quickly.
+            spawnAmount = Mathf.Min(3, cap - currentZombie);
+        }
 
         for (int i = 0; i < spawnAmount; i++)
         {
-            currentZombie =
-                AIDirector.Instance != null
-                ? AIDirector.Instance.GetZombieCount()
-                : currentZombie;
+            currentZombie = useLocalCap
+                ? _localActiveZombies.Count
+                : (AIDirector.Instance != null ? AIDirector.Instance.GetZombieCount() : currentZombie);
 
             if (currentZombie >= cap)
                 break;
 
             SpawnZombie();
         }
-        if (AIDirector.Instance != null)
-        {
-            Debug.Log(
-                "Director State = " +
-                AIDirector.Instance.currentState
-            );
-        }
-        Debug.Log(
-            "Spawn Amount = " +
-            spawnAmount
-        );
     }
 
     private void SpawnZombie()
@@ -220,6 +256,64 @@ public class Spawm : MonoBehaviour
             zombie.transform.position = randomPos;
             zombie.transform.rotation = Quaternion.identity;
             zombie.SetActive(true);
+
+            // Track locally for per-spawner cap.
+            var ai = zombie.GetComponent<ZombieAI>();
+            if (ai != null)
+            {
+                _localActiveZombies.Add(ai);
+                if (enableRoaming)
+                    _wanderTimers[ai] = Time.time + Random.Range(0f, wanderInterval);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Removes destroyed/null entries from the local zombie list so the
+    /// per-spawner cap stays accurate.
+    /// </summary>
+    private void CleanupLocalList()
+    {
+        for (int i = _localActiveZombies.Count - 1; i >= 0; i--)
+        {
+            var z = _localActiveZombies[i];
+            if (z == null || z.gameObject == null || !z.gameObject.activeInHierarchy)
+            {
+                _localActiveZombies.RemoveAt(i);
+                _wanderTimers.Remove(z);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Assigns random wander destinations to spawned zombies so they patrol
+    /// the area instead of standing still. Called every frame.
+    /// </summary>
+    private void UpdateRoaming()
+    {
+        if (!enableRoaming) return;
+
+        foreach (var z in _localActiveZombies)
+        {
+            if (z == null) continue;
+            if (!_wanderTimers.TryGetValue(z, out float nextTime)) continue;
+            if (Time.time < nextTime) continue;
+
+            // Pick a random point within wanderRadius of the spawner center.
+            Vector3 wanderPos = transform.position + new Vector3(
+                Random.Range(-wanderRadius, wanderRadius),
+                0f,
+                Random.Range(-wanderRadius, wanderRadius)
+            );
+
+            // Set the zombie's destination via its NavMeshAgent if available.
+            var agent = z.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.SetDestination(wanderPos);
+            }
+
+            _wanderTimers[z] = Time.time + wanderInterval + Random.Range(-1f, 2f);
         }
     }
 
@@ -234,8 +328,11 @@ public class Spawm : MonoBehaviour
         if (player == null)
             return;
 
-        if (AIDirector.Instance.GetZombieCount()
-            >= EffectiveMaxZombie())
+        int currentCount = useLocalCap
+            ? _localActiveZombies.Count
+            : AIDirector.Instance.GetZombieCount();
+
+        if (currentCount >= EffectiveMaxZombie())
             return;
 
         SpawnBehindPlayer();
@@ -270,6 +367,15 @@ public class Spawm : MonoBehaviour
             zombie.transform.position = spawnPos;
             zombie.transform.rotation = Quaternion.identity;
             zombie.SetActive(true);
+
+            // Track locally for per-spawner cap.
+            var ai = zombie.GetComponent<ZombieAI>();
+            if (ai != null)
+            {
+                _localActiveZombies.Add(ai);
+                if (enableRoaming)
+                    _wanderTimers[ai] = Time.time + Random.Range(0f, wanderInterval);
+            }
 
             Debug.Log(
                 "[DIRECTOR] Camper Punishment Spawn!"
