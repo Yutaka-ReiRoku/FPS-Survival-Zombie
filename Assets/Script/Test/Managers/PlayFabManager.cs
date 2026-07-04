@@ -53,9 +53,15 @@ public class PlayFabManager : MonoBehaviour
     /// <summary>Fired when the player has logged out.</summary>
     public event Action OnLogout;
 
+    /// <summary>Fired when a leaderboard has been downloaded. (success)</summary>
+    public event Action<bool> OnLeaderboardLoaded;
+
     // ---- Cloud data keys ----
     private const string KeyPlayerStats = "player_stats";
     private const string KeyAchievements = "achievements";
+
+    // ---- Leaderboard statistic name ----
+    private const string LeaderboardStatName = "BestScore";
 
     private float _autoSaveTimer;
 
@@ -143,6 +149,8 @@ public class PlayFabManager : MonoBehaviour
                 // Clear any local data left over from a previous account so the
                 // new account starts at 0 (no inherited BestScore / achievements).
                 ClearLocalPlayerData();
+                // Set display name so the player shows up on leaderboards.
+                UpdateDisplayName(username);
                 OnLoginSuccess?.Invoke(Username);
                 // Upload the (now clean) local data to the new account
                 SaveAllToCloud();
@@ -194,6 +202,9 @@ public class PlayFabManager : MonoBehaviour
 
                 // Merge cloud data into PlayerPrefs
                 MergeCloudDataToLocal(result.InfoResultPayload);
+
+                // Ensure display name matches username (for leaderboards).
+                UpdateDisplayName(username);
 
                 OnLoginSuccess?.Invoke(Username);
                 callback?.Invoke(true, null);
@@ -285,6 +296,11 @@ public class PlayFabManager : MonoBehaviour
                 Debug.LogWarning($"[PlayFab] Cloud save failed: {ParseError(error)}");
                 OnCloudDataSaved?.Invoke(false);
             });
+
+        // Also submit the best score as a statistic so it appears on leaderboards.
+        int bestScore = PlayerPrefs.GetInt("BestScore", 0);
+        if (bestScore > 0)
+            UpdatePlayerStatistic(LeaderboardStatName, bestScore);
     }
 
     /// <summary>Download player data from PlayFab cloud and merge into PlayerPrefs.</summary>
@@ -314,6 +330,89 @@ public class PlayFabManager : MonoBehaviour
                 OnCloudDataLoaded?.Invoke(false);
                 callback?.Invoke(false);
             });
+    }
+
+    // =========================================================================
+    //  Leaderboard
+    // =========================================================================
+
+    /// <summary>
+    /// Fetch the top players for the BestScore leaderboard.
+    /// Callback receives a list of LeaderboardEntry (rank, displayName, score).
+    /// </summary>
+    public void GetLeaderboard(int maxResults, Action<List<LeaderboardEntry>> callback = null)
+    {
+        if (!IsLoggedIn)
+        {
+            Debug.LogWarning("[PlayFab] Cannot get leaderboard: not logged in.");
+            OnLeaderboardLoaded?.Invoke(false);
+            callback?.Invoke(null);
+            return;
+        }
+
+        var request = new GetLeaderboardRequest
+        {
+            StatisticName = LeaderboardStatName,
+            StartPosition = 0,
+            MaxResultsCount = maxResults
+        };
+
+        PlayFabClientAPI.GetLeaderboard(request,
+            result =>
+            {
+                var entries = new List<LeaderboardEntry>();
+                if (result.Leaderboard != null)
+                {
+                    foreach (var item in result.Leaderboard)
+                    {
+                        entries.Add(new LeaderboardEntry
+                        {
+                            rank = item.Position + 1, // 0-based to 1-based
+                            playFabId = item.PlayFabId,
+                            displayName = string.IsNullOrEmpty(item.DisplayName) ? ("Player " + (item.Position + 1)) : item.DisplayName,
+                            score = item.StatValue
+                        });
+                    }
+                }
+                Debug.Log($"[PlayFab] Leaderboard loaded: {entries.Count} entries.");
+                OnLeaderboardLoaded?.Invoke(true);
+                callback?.Invoke(entries);
+            },
+            error =>
+            {
+                Debug.LogWarning($"[PlayFab] Leaderboard failed: {ParseError(error)}");
+                OnLeaderboardLoaded?.Invoke(false);
+                callback?.Invoke(null);
+            });
+    }
+
+    /// <summary>Submit a player statistic value (updates the leaderboard).</summary>
+    public void UpdatePlayerStatistic(string statisticName, int value)
+    {
+        if (!IsLoggedIn) return;
+
+        var request = new UpdatePlayerStatisticsRequest
+        {
+            Statistics = new List<StatisticUpdate>
+            {
+                new StatisticUpdate { StatisticName = statisticName, Value = value }
+            }
+        };
+
+        PlayFabClientAPI.UpdatePlayerStatistics(request,
+            result => Debug.Log($"[PlayFab] Statistic '{statisticName}' updated to {value}."),
+            error => Debug.LogWarning($"[PlayFab] Statistic update failed: {ParseError(error)}"));
+    }
+
+    /// <summary>Set the player's display name (shown on leaderboards).</summary>
+    public void UpdateDisplayName(string displayName)
+    {
+        if (!IsLoggedIn || string.IsNullOrEmpty(displayName)) return;
+
+        var request = new UpdateUserTitleDisplayNameRequest { DisplayName = displayName };
+        PlayFabClientAPI.UpdateUserTitleDisplayName(request,
+            result => Debug.Log($"[PlayFab] Display name set to '{displayName}'."),
+            error => Debug.LogWarning($"[PlayFab] Display name update failed: {ParseError(error)}"));
     }
 
     // =========================================================================
@@ -496,5 +595,14 @@ public class PlayFabManager : MonoBehaviour
         public string id;
         public bool unlocked;
         public int progress;
+    }
+
+    [Serializable]
+    public class LeaderboardEntry
+    {
+        public int rank;
+        public string playFabId;
+        public string displayName;
+        public int score;
     }
 }
