@@ -20,7 +20,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
     [Header("Explosion")]
     public float explodeRange = 3f;
-    public float screamDuration = 1.5f;
+    [Tooltip("Thời gian cảnh báo (scream) trước khi nổ. Đặt rất nhỏ (vd 0.1s) để boomer gần như nổ ngay lập tức khi lại gần player.")]
+    public float screamDuration = 0.1f;
 
     [Header("Explosion Damage")]
     public float explosionDamage = 50f;
@@ -136,7 +137,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             return;
 
         // Poll the death animation and fire the explosion when it is nearly
-        // finished, instead of using a fixed delay that may fire too early.
+        // finished, so the blast syncs with the end of the animation instead
+        // of firing too early (cutting the animation short).
         if (isWaitingForExplosion && !hasExploded)
         {
             TryFireExplosionFromAnimation();
@@ -296,10 +298,6 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             "Explode"
         );
 
-        // The authored death clip has no animation events wired, so drive the
-        // blast and cleanup from code. Guards make this safe even if events are
-        // added later (they would simply no-op the second call).
-        //
         // The explosion is fired from Update() by polling the death animation
         // state so the blast syncs with the end of the animation instead of
         // firing at a fixed delay that may cut the animation short.
