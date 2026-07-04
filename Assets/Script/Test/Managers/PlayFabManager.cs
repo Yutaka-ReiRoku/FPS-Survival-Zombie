@@ -206,6 +206,14 @@ public class PlayFabManager : MonoBehaviour
                 // Ensure display name matches username (for leaderboards).
                 UpdateDisplayName(username);
 
+                // Submit BestScore as a statistic so the player appears on the
+                // leaderboard. This is needed because older accounts may have a
+                // BestScore in UserData but never submitted it as a statistic
+                // (the leaderboard feature was added later).
+                int bestScore = PlayerPrefs.GetInt("BestScore", 0);
+                if (bestScore > 0)
+                    UpdatePlayerStatistic(LeaderboardStatName, bestScore);
+
                 OnLoginSuccess?.Invoke(Username);
                 callback?.Invoke(true, null);
             },
