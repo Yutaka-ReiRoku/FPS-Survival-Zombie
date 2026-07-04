@@ -69,6 +69,8 @@ public class LeaderboardWidget : MonoBehaviour
         BuildPanel();
         _panel.SetActive(false);
         _scrim.SetActive(false);
+        // Chip is hidden until the player logs in.
+        _chip.SetActive(false);
     }
 
     private void OnEnable()
@@ -80,7 +82,10 @@ public class LeaderboardWidget : MonoBehaviour
     {
         var pm = PlayFabManager.Instance;
         if (pm != null)
+        {
             pm.OnLoginSuccess -= HandleLoginSuccess;
+            pm.OnLogout -= HandleLogout;
+        }
         StopAllCoroutines();
     }
 
@@ -95,14 +100,39 @@ public class LeaderboardWidget : MonoBehaviour
 
         var pm = PlayFabManager.Instance;
         if (pm != null)
+        {
             pm.OnLoginSuccess += HandleLoginSuccess;
+            pm.OnLogout += HandleLogout;
+            // If already logged in (e.g. returning to main menu), show chip now.
+            UpdateChipVisibility();
+        }
     }
 
     private void HandleLoginSuccess(string username)
     {
+        UpdateChipVisibility();
         // If the panel is open, refresh the leaderboard after login.
         if (_panelVisible)
             RefreshLeaderboard();
+    }
+
+    private void HandleLogout()
+    {
+        UpdateChipVisibility();
+        // Close the panel if it was open.
+        if (_panelVisible)
+            SetPanelVisible(false);
+    }
+
+    /// <summary>
+    /// Show the leaderboard chip only when the player is logged in.
+    /// </summary>
+    private void UpdateChipVisibility()
+    {
+        var pm = PlayFabManager.Instance;
+        bool loggedIn = pm != null && pm.IsLoggedIn;
+        if (_chip != null)
+            _chip.SetActive(loggedIn);
     }
 
     // =========================================================================
@@ -278,19 +308,7 @@ public class LeaderboardWidget : MonoBehaviour
 
     private void TogglePanel()
     {
-        var pm = PlayFabManager.Instance;
-        bool loggedIn = pm != null && pm.IsLoggedIn;
-
-        if (!loggedIn)
-        {
-            // Not logged in — show a message but still open the panel so the
-            // player sees the prompt to log in.
-            SetPanelVisible(true);
-            _statusText.text = "Vui lòng đăng nhập để xem bảng xếp hạng.";
-            ClearRows();
-            return;
-        }
-
+        // Chip is only visible when logged in, so no login check needed here.
         SetPanelVisible(!_panelVisible);
     }
 
