@@ -58,6 +58,13 @@ public class SpecialEnemyDirector : MonoBehaviour
     [Tooltip("Farthest a Tank may spawn from the player (XZ).")]
     public float tankMaxDistanceFromPlayer = 40f;
 
+    [Header("Tank Spawn Warning")]
+    [Tooltip("Tiếng gầm cảnh báo phát ra khi Tank spawn (2D, nghe toàn map).")]
+    public AudioClip tankSpawnWarningClip;
+    [Tooltip("Âm lượng tiếng gầm cảnh báo (0-1).")]
+    [Range(0f, 1f)]
+    public float tankSpawnWarningVolume = 0.8f;
+
     [Header("Tank Scaling Per Wave")]
     [Tooltip("Wave used as the baseline (no scaling) for Tank stats. At this wave the Tank uses its prefab defaults.")]
     public int tankBaseWave = 5;
@@ -79,10 +86,16 @@ public class SpecialEnemyDirector : MonoBehaviour
 
     private readonly List<GameObject> _aliveTanks = new List<GameObject>();
     private float _tankTimer;
+    private AudioSource _audioSource;
 
     private void Awake()
     {
         Instance = this;
+        _audioSource = GetComponent<AudioSource>();
+        if (_audioSource == null)
+            _audioSource = gameObject.AddComponent<AudioSource>();
+        _audioSource.playOnAwake = false;
+        _audioSource.spatialBlend = 0f; // 2D — nghe toàn map
     }
 
     private void Start()
@@ -195,6 +208,10 @@ public class SpecialEnemyDirector : MonoBehaviour
         Vector3 spawnPos;
         if (!TryGetSpawnPosition(out spawnPos, tankMinDistanceFromPlayer, tankMaxDistanceFromPlayer))
             return;
+
+        // Phát tiếng gầm cảnh báo khi Tank spawn (2D, nghe toàn map).
+        if (tankSpawnWarningClip != null && _audioSource != null)
+            _audioSource.PlayOneShot(tankSpawnWarningClip, tankSpawnWarningVolume);
 
         GameObject tank = Instantiate(
             tankPrefab,
