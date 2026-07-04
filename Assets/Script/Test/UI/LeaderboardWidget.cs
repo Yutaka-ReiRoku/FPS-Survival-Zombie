@@ -268,24 +268,58 @@ public class LeaderboardWidget : MonoBehaviour
         var scoreHeader = CreateText("ScoreHeader", colHeader.transform, "ĐIỂM", 14, TextMuted, TextAlignmentOptions.Right);
         SetLayoutElement(scoreHeader.gameObject, minWidth: 100, flexibleWidth: 0);
 
-        // List container (scrollable area)
-        var listGo = new GameObject("ListContainer", typeof(RectTransform));
-        listGo.transform.SetParent(_panel.transform, false);
-        SetLayoutElement(listGo, minHeight: 200, flexibleHeight: 1);
-        var listImg = listGo.AddComponent<Image>();
-        listImg.color = CardColor;
+        // Scrollable list: ScrollRect > Viewport(Mask) > Content(VLayout+Fitter)
+        var scrollGo = new GameObject("LeaderboardScroll", typeof(RectTransform));
+        scrollGo.transform.SetParent(_panel.transform, false);
+        SetLayoutElement(scrollGo, minHeight: 200, flexibleHeight: 1);
+        var scrollImg = scrollGo.AddComponent<Image>();
+        scrollImg.color = CardColor;
 
-        var listVlg = listGo.AddComponent<VerticalLayoutGroup>();
+        var scrollRect = scrollGo.AddComponent<ScrollRect>();
+        scrollRect.horizontal = false;
+        scrollRect.vertical = true;
+        scrollRect.scrollSensitivity = 20f;
+        scrollRect.verticalScrollbarSpacing = 4f;
+
+        // Viewport (clips content via Mask)
+        var viewportGo = new GameObject("Viewport", typeof(RectTransform));
+        viewportGo.transform.SetParent(scrollGo.transform, false);
+        var vrt = (RectTransform)viewportGo.transform;
+        vrt.anchorMin = Vector2.zero;
+        vrt.anchorMax = Vector2.one;
+        vrt.pivot = new Vector2(0.5f, 0.5f);
+        vrt.sizeDelta = Vector2.zero;
+        var viewportImg = viewportGo.AddComponent<Image>();
+        viewportImg.color = new Color(1f, 1f, 1f, 0.01f); // Mask needs a graphic
+        viewportImg.raycastTarget = true;
+        var mask = viewportGo.AddComponent<Mask>();
+        mask.showMaskGraphic = false;
+
+        // Content (the actual list container, grows with rows)
+        var contentGo = new GameObject("ListContent", typeof(RectTransform));
+        contentGo.transform.SetParent(viewportGo.transform, false);
+        var crt = (RectTransform)contentGo.transform;
+        crt.anchorMin = new Vector2(0f, 1f); // top
+        crt.anchorMax = Vector2.one;          // top, full width
+        crt.pivot = new Vector2(0.5f, 1f);    // top-center
+        crt.sizeDelta = Vector2.zero;
+
+        var listVlg = contentGo.AddComponent<VerticalLayoutGroup>();
         listVlg.padding = new RectOffset(8, 8, 8, 8);
         listVlg.spacing = rowSpacing;
         listVlg.childAlignment = TextAnchor.UpperLeft;
         listVlg.childControlWidth = true;
         listVlg.childForceExpandWidth = true;
+        listVlg.childForceExpandHeight = false;
 
-        var fitter = listGo.AddComponent<ContentSizeFitter>();
+        var fitter = contentGo.AddComponent<ContentSizeFitter>();
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        _listContainer = listGo.transform;
+        // Wire ScrollRect
+        scrollRect.content = crt;
+        scrollRect.viewport = vrt;
+
+        _listContainer = contentGo.transform;
 
         // Status text (loading / error / empty)
         _statusText = CreateText("Status", _panel.transform, "", 16, TextMuted, TextAlignmentOptions.Center);
