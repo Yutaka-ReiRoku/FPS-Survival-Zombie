@@ -22,7 +22,7 @@ public class LeaderboardWidget : MonoBehaviour
     public float panelHeight = 600f;
     public float rowHeight = 56f;
     public float rowSpacing = 6f;
-    public int maxResults = 20;
+    public int maxResults = 10;
 
     [Header("Chip Position (anchored, relative to parent)")]
     public Vector2 chipAnchoredPos = new Vector2(20f, -20f);
