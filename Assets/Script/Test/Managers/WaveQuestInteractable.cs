@@ -37,6 +37,12 @@ public class WaveQuestInteractable : Interactable
 
         [Tooltip("Delay (seconds) after this wave is cleared before the next wave spawns. Gives the player a breather.")]
         public float breatherDelay = 3f;
+
+        [Tooltip("If true, this wave only counts as cleared when a boss (ISpecialEnemy) " +
+                 "spawned in this wave is dead — the kill count is ignored. " +
+                 "Use for boss waves where many regular zombies spawn alongside the boss, " +
+                 "so the player only needs to kill the boss, not all the trash mobs.")]
+        public bool requireBossKill = false;
     }
 
     [Header("Quest")]
@@ -226,20 +232,36 @@ public class WaveQuestInteractable : Interactable
             ShowBanner(wave.waveTitle, wave.waveSubtitle);
             yield return new WaitForSecondsRealtime(1f); // Let the banner fade in.
 
-            // Spawn all prefabs for this wave.
-            SpawnWave(wave);
+            // Spawn all prefabs for this wave. If the wave requires a boss
+            // kill, SpawnWave returns the tracked boss (ISpecialEnemy) so we
+            // can gate wave completion on its death, not on the kill count —
+            // otherwise the player would have to kill all 40+ trash mobs.
+            cowsins.ISpecialEnemy trackedBoss = null;
+            SpawnWave(wave, wave.requireBossKill, out trackedBoss);
 
-            // Wait until the required kills are reached.
+            // Wait until the wave is cleared. If requireBossKill is true,
+            // we only need the boss to be dead (kill count is ignored).
+            // Otherwise, wait for the required kill count.
             int startKills = ScoreManager.Instance != null ? ScoreManager.Instance.kills : 0;
             int target = startKills + wave.killsRequired;
             while (true)
             {
-                int current = ScoreManager.Instance != null ? ScoreManager.Instance.kills : 0;
-                if (current >= target) break;
+                if (wave.requireBossKill)
+                {
+                    // Boss-kill mode: only the boss needs to die.
+                    if (trackedBoss == null || trackedBoss.IsDead) break;
+                }
+                else
+                {
+                    // Kill-count mode: reach the required kills.
+                    int current = ScoreManager.Instance != null ? ScoreManager.Instance.kills : 0;
+                    if (current >= target) break;
+                }
                 yield return null;
             }
 
-            Debug.Log($"[WaveQuestInteractable] Wave {i + 1} cleared ({wave.killsRequired} kills).");
+            Debug.Log($"[WaveQuestInteractable] Wave {i + 1} cleared" +
+                      (wave.requireBossKill ? " (boss dead)" : $" ({wave.killsRequired} kills)") + ".");
 
             // Breather between waves (not after the last wave).
             if (i < waves.Length - 1 && wave.breatherDelay > 0f)
@@ -320,8 +342,15 @@ public class WaveQuestInteractable : Interactable
             StoryManager.Instance?.CompleteActiveQuest();
     }
 
-    private void SpawnWave(Wave wave)
+    /// <summary>
+    /// Spawns all prefabs for a wave. If <paramref name="trackBoss"/> is true,
+    /// the first spawned ISpecialEnemy (boss) is returned via
+    /// <paramref name="trackedBoss"/> so the caller can gate wave completion on
+    /// the boss actually dying.
+    /// </summary>
+    private void SpawnWave(Wave wave, bool trackBoss, out cowsins.ISpecialEnemy trackedBoss)
     {
+        trackedBoss = null;
         if (wave.prefabs == null) return;
         var container = GetRuntimeContainer();
         for (int i = 0; i < wave.prefabs.Length; i++)
@@ -336,10 +365,57 @@ public class WaveQuestInteractable : Interactable
                     Random.Range(-spawnSpread, spawnSpread))
                 : Vector3.zero;
             Vector3 pos = transform.position + spawnOffset + spread;
+
+            // Validate the spawn position on the NavMesh. Without this, enemies
+            // (especially the Tank boss) can spawn inside walls or furniture and
+            // get permanently stuck. Try a few nearby positions if the exact
+            // spot is not on the NavMesh.
+            pos = FindValidNavMeshPosition(pos, 8f);
+
             var go = Instantiate(prefab, pos, Quaternion.identity, container);
             go.SetActive(true);
             Debug.Log($"[WaveQuestInteractable] Spawned {go.name} at {pos}.");
+
+            // Track the first boss (ISpecialEnemy) spawned in this wave if
+            // the wave requires a boss kill to clear.
+            if (trackBoss && trackedBoss == null)
+            {
+                trackedBoss = go.GetComponent<cowsins.ISpecialEnemy>();
+                if (trackedBoss != null)
+                    Debug.Log($"[WaveQuestInteractable] Tracking boss {go.name} for wave completion (requireBossKill).");
+            }
         }
+    }
+
+    /// <summary>
+    /// Finds a valid NavMesh position near the requested spawn point. Tries
+    /// the exact position first, then samples outward in a spiral. Falls back
+    /// to the original position if no NavMesh point is found (the enemy's
+    /// own stuck-recovery logic will handle it at runtime).
+    /// </summary>
+    private Vector3 FindValidNavMeshPosition(Vector3 requested, float searchRadius)
+    {
+        // Try the exact position first with a small tolerance.
+        UnityEngine.AI.NavMeshHit hit;
+        if (UnityEngine.AI.NavMesh.SamplePosition(requested, out hit, 2f, UnityEngine.AI.NavMesh.AllAreas))
+            return hit.position;
+
+        // Spiral outward: try several positions at increasing distances.
+        for (float r = 2f; r <= searchRadius; r += 2f)
+        {
+            for (int a = 0; a < 8; a++)
+            {
+                float angle = a * (Mathf.PI * 2f / 8f);
+                Vector3 candidate = requested + new Vector3(Mathf.Cos(angle) * r, 0f, Mathf.Sin(angle) * r);
+                if (UnityEngine.AI.NavMesh.SamplePosition(candidate, out hit, 2f, UnityEngine.AI.NavMesh.AllAreas))
+                    return hit.position;
+            }
+        }
+
+        // Fallback: return the original position. The enemy's own stuck-recovery
+        // logic (if any) will handle it at runtime.
+        Debug.LogWarning($"[WaveQuestInteractable] No NavMesh position found near {requested} — using fallback.");
+        return requested;
     }
 
     private void ShowBanner(string title, string subtitle)
