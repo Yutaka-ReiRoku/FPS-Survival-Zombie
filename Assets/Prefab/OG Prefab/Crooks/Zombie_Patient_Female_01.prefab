@@ -245,9 +245,25 @@ MonoBehaviour:
   walkSpeed: 1.3
   runSpeed: 3.2
   detectDistance: 20
-  attackDistance: 1.8
+  attackDistance: 2.5
   wanderRadius: 15
   wanderInterval: 5
+  loseSightDistance: 28
+  alertMemoryDuration: 6
+  lungeChancePerSecond: 0.6
+  lungeSpeedMultiplier: 2.5
+  lungeDuration: 1
+  feintPauseChancePerSecond: 0.02
+  feintPauseDuration: 0.4
+  chaseJitterRadius: 0.5
+  requireLineOfSight: 1
+  sightObstructionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  sightEyeHeight: 1.5
+  stuckTimeThreshold: 1.5
+  stuckMoveThreshold: 1
+  stuckRepathRadius: 5
   attackCooldown: 1.5
   attackDamage: 20
   maxHealth: 10

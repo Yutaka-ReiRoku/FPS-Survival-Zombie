@@ -56,6 +56,16 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     }
 
     /// <summary>
+    /// True while the zombie is actively chasing the player (detected + within
+    /// hysteresis/alert memory). External systems (e.g. Spawm roaming) should
+    /// check this before overriding the NavMeshAgent destination.
+    /// </summary>
+    public bool IsChasing
+    {
+        get { return !isDead && (hasDetectedPlayer || alertMemoryTimer > 0f); }
+    }
+
+    /// <summary>
     /// Raised whenever health changes (damage or death). Argument is the new
     /// <see cref="HealthFraction"/> in [0,1]. Subscribers must null-check the
     /// zombie's <see cref="IsDead"/> state to decide show/hide.
@@ -94,6 +104,22 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     public float feintPauseDuration = 0.4f;
     [Tooltip("Bien do jitter (zigzag) them vao path duoi player (met). 0 = tat.")]
     public float chaseJitterRadius = 2.5f;
+
+    [Header("Line of Sight")]
+    [Tooltip("If true, zombies require an unobstructed line of sight to the player before initial detection. Once detected, hysteresis and alert memory work as normal (no LOS needed).")]
+    public bool requireLineOfSight = true;
+    [Tooltip("Layer mask for objects that block the zombie's sight (walls, floors, furniture). Defaults to everything; the player and the zombie's own layer are automatically excluded from the check.")]
+    public LayerMask sightObstructionMask = ~0;
+    [Tooltip("Eye height offset from the zombie's pivot for the LOS raycast.")]
+    public float sightEyeHeight = 1.5f;
+
+    [Header("Stuck Recovery")]
+    [Tooltip("How long (seconds) the zombie must be nearly stationary while chasing before it is considered stuck. Higher = more patient (less likely to re-path abruptly).")]
+    public float stuckTimeThreshold = 3f;
+    [Tooltip("If the zombie moves less than this distance (meters) over stuckTimeThreshold, it is considered stuck.")]
+    public float stuckMoveThreshold = 1f;
+    [Tooltip("How far to search for an intermediate re-path position when stuck (no teleport — just re-pathing).")]
+    public float stuckRepathRadius = 5f;
 
     [Header("Attack")]
     public float attackCooldown = 1.5f;
@@ -159,6 +185,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private Vector3 chaseJitterOffset;  // current jitter offset applied to chase destination
     private float chaseJitterTimer;     // when to pick a new jitter offset
 
+    // --- Stuck recovery runtime state ---
+    private Vector3 _lastStuckCheckPos;
+    private float _stuckTimer;
+    private bool _wasInAttackRange;     // tracks isStopped transition (attack→chase)
+    private int _noPathRetryCount;      // counts consecutive SetDestinationRobust failures when hasPath=false
+
     private static readonly int SpeedHash =
         Animator.StringToHash("Speed");
 
@@ -212,6 +244,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         erraticRollTimer = 0f;
         chaseJitterOffset = Vector3.zero;
         chaseJitterTimer = 0f;
+
+        // Reset stuck recovery state on (re)spawn.
+        _stuckTimer = 0f;
+        _lastStuckCheckPos = transform.position;
+        _wasInAttackRange = false;
+        _noPathRetryCount = 0;
 
         if (target == null)
         {
@@ -294,7 +332,13 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             distanceTimer = 0f;
         }
 
-        if (cachedDistance <= detectDistance)
+        // First-time detection requires both distance AND line of sight (if
+        // requireLineOfSight is enabled). Hysteresis and alert memory below do
+        // NOT require LOS — once the zombie has detected the player, it keeps
+        // chasing based on distance/memory even if the player briefly breaks
+        // LOS (ducking behind cover, etc.).
+        if (cachedDistance <= detectDistance &&
+            (!requireLineOfSight || HasLineOfSight()))
         {
             // Player within detect range: chase and (re)arm alert memory.
             alertMemoryTimer = alertMemoryDuration;
@@ -380,6 +424,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         if (distance <= attackDistance)
         {
             agent.isStopped = true;
+            _wasInAttackRange = true;
 
             if (!isAttacking &&
                 attackTimer >= attackCooldown)
@@ -389,7 +434,22 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         }
         else
         {
-            agent.isStopped = false;
+            // Transitioning from attack range to chase: the agent's previous
+            // path was completed while isStopped=true, so hasPath is false and
+            // SetDestination alone may silently fail to create a new path
+            // (a known Unity NavMeshAgent issue). Reset the path state and
+            // force an immediate re-path on this frame.
+            if (_wasInAttackRange)
+            {
+                _wasInAttackRange = false;
+                agent.ResetPath();
+                agent.isStopped = false;
+                pathTimer = 0.25f; // force SetDestination this frame
+            }
+            else
+            {
+                agent.isStopped = false;
+            }
 
             // Lunge burst: sudden sprint faster than normal run.
             float speed = runSpeed;
@@ -412,15 +472,25 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             if (pathTimer >= 0.25f)
             {
                 Vector3 dest = target.position + chaseJitterOffset;
-                agent.SetDestination(dest);
+                SetDestinationRobust(dest);
                 pathTimer = 0f;
             }
+
+            // --- Stuck detection: if the zombie isn't making progress toward
+            // the player while it should be chasing, try to recover by finding
+            // a nearby valid NavMesh position and re-pathing. Handles cases
+            // where the zombie is wedged against a wall, furniture, or door.
+            HandleStuckDetection(distance);
         }
     }
 
     void Wander()
     {
         agent.speed = walkSpeed;
+
+        // Not chasing — reset stuck detection state.
+        _stuckTimer = 0f;
+        _lastStuckCheckPos = transform.position;
 
         if (wanderTimer < wanderInterval)
             return;
@@ -430,7 +500,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
                 transform.position,
                 wanderRadius);
 
-        agent.SetDestination(destination);
+        SetDestinationRobust(destination);
 
         wanderTimer = 0f;
     }
@@ -619,6 +689,195 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             lootPopUpwardSpeed,
             lootPopHorizontalSpeed,
             lootTrailSettings);
+    }
+
+    //==================================================
+    // STUCK DETECTION & RECOVERY
+    //==================================================
+
+    /// <summary>
+    /// Tracks whether the zombie is actually making progress toward the player.
+    /// If it stays nearly stationary for too long while chasing (not in attack
+    /// range), it tries to recover by snapping to a nearby valid NavMesh
+    /// position and re-pathing. Handles cases where the zombie is wedged
+    /// against a wall, furniture, or door.
+    /// </summary>
+    private void HandleStuckDetection(float distanceToPlayer)
+    {
+        // Only check for stuck while actively chasing (far enough to need
+        // movement). If we're in attack range, being stationary is expected.
+        if (distanceToPlayer <= attackDistance + 0.5f)
+        {
+            _stuckTimer = 0f;
+            _lastStuckCheckPos = transform.position;
+            _noPathRetryCount = 0;
+            return;
+        }
+
+        // CRITICAL: If the agent has no path while it should be chasing, it
+        // will stand forever without moving. This happens after the agent's
+        // previous path completes (e.g. it was stopped in attack range, the
+        // path finished, and then the player moved away). SetDestination
+        // alone may silently fail to create a new path in this state.
+        if (agent != null && agent.isOnNavMesh && !agent.hasPath && !agent.isStopped)
+        {
+            _noPathRetryCount++;
+            SetDestinationRobust(target.position);
+
+            // If SetDestinationRobust keeps failing (agent still has no path
+            // after multiple attempts), the agent is in a broken state. Try
+            // a full agent reset: disable/re-enable/warp to snap it out. This
+            // is NOT a teleport to the player — it warps to the zombie's OWN
+            // position to force the agent to re-initialize.
+            if (_noPathRetryCount >= 10 && !agent.hasPath)
+            {
+                Vector3 currentPos = transform.position;
+                agent.enabled = false;
+                agent.enabled = true;
+                if (agent.isOnNavMesh)
+                {
+                    agent.Warp(currentPos);
+                    agent.isStopped = false;
+                    SetDestinationRobust(target.position);
+                }
+                _noPathRetryCount = 0;
+            }
+
+            _stuckTimer = 0f;
+            _lastStuckCheckPos = transform.position;
+            return;
+        }
+
+        // Agent has a path but isn't moving — could be avoidance deadlock.
+        _noPathRetryCount = 0;
+
+        float moved = Vector3.Distance(transform.position, _lastStuckCheckPos);
+
+        if (moved < stuckMoveThreshold * 0.33f)
+        {
+            _stuckTimer += Time.deltaTime;
+        }
+        else
+        {
+            _stuckTimer = 0f;
+            _lastStuckCheckPos = transform.position;
+        }
+
+        if (_stuckTimer >= stuckTimeThreshold)
+        {
+            TryRecoverFromStuck();
+            _stuckTimer = 0f;
+            _lastStuckCheckPos = transform.position;
+        }
+    }
+
+    /// <summary>
+    /// Attempts to unstick the zombie by re-pathing toward the player. Does NOT
+    /// warp/teleport the zombie — that looks jarring to the player. Instead it
+    /// tries multiple re-path strategies (SetDestination, SetPath, intermediate
+    /// waypoint) to get the agent moving again from its current position.
+    /// </summary>
+    private void TryRecoverFromStuck()
+    {
+        if (agent == null || target == null) return;
+
+        // Strategy 1: robust re-path directly to the player.
+        SetDestinationRobust(target.position);
+        if (agent.hasPath) return;
+
+        // Strategy 2: path to an intermediate point halfway to the player,
+        // then re-path to the player once the zombie reaches it. This helps
+        // when a direct path fails but a shorter leg succeeds.
+        Vector3 toPlayer = target.position - transform.position;
+        Vector3 midPoint = transform.position + toPlayer * 0.5f;
+
+        UnityEngine.AI.NavMeshHit midHit;
+        if (UnityEngine.AI.NavMesh.SamplePosition(midPoint, out midHit, 3f, UnityEngine.AI.NavMesh.AllAreas))
+        {
+            UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
+            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, midHit.position, UnityEngine.AI.NavMesh.AllAreas, path)
+                && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+            {
+                agent.SetPath(path);
+                return;
+            }
+        }
+
+        // Strategy 3: path to a random nearby NavMesh position (small offset,
+        // NOT a teleport — just a nudge in a different direction to break out
+        // of avoidance deadlock).
+        for (int attempt = 0; attempt < 3; attempt++)
+        {
+            Vector2 rand = Random.insideUnitCircle * 2f;
+            Vector3 candidate = transform.position + new Vector3(rand.x, 0f, rand.y);
+
+            UnityEngine.AI.NavMeshHit hit;
+            if (!UnityEngine.AI.NavMesh.SamplePosition(candidate, out hit, 1.5f, UnityEngine.AI.NavMesh.AllAreas))
+                continue;
+
+            UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
+            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, path)
+                && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+            {
+                agent.SetPath(path);
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Robust destination setter that works around a Unity NavMeshAgent issue
+    /// where SetDestination returns true but doesn't actually create a path
+    /// (happens after the agent's previous path completed while isStopped was
+    /// true). Falls back to manually calculating the path and assigning it via
+    /// SetPath, which reliably creates a new path.
+    /// </summary>
+    private void SetDestinationRobust(Vector3 destination)
+    {
+        if (agent == null || !agent.isOnNavMesh) return;
+
+        agent.isStopped = false;
+        agent.SetDestination(destination);
+
+        // If SetDestination didn't create a path (known Unity issue after
+        // isStopped toggle + path completion), calculate one manually.
+        if (!agent.hasPath)
+        {
+            UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
+            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, destination, UnityEngine.AI.NavMesh.AllAreas, path)
+                && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+            {
+                agent.SetPath(path);
+            }
+        }
+    }
+
+    //==================================================
+    // LINE OF SIGHT
+    //==================================================
+
+    /// <summary>
+    /// Checks whether there is an unobstructed line from the zombie's eyes to
+    /// the player's eyes. Uses a raycast against sightObstructionMask; the
+    /// player and the zombie's own layer are automatically excluded so they
+    /// don't block their own LOS check.
+    /// </summary>
+    private bool HasLineOfSight()
+    {
+        if (target == null) return false;
+
+        Vector3 start = transform.position + Vector3.up * sightEyeHeight;
+        Vector3 end = target.position + Vector3.up * sightEyeHeight;
+        Vector3 dir = end - start;
+        float dist = dir.magnitude;
+        if (dist <= 0.1f) return true;
+
+        // Exclude the player and this zombie from the obstruction mask.
+        int mask = sightObstructionMask
+            & ~(1 << target.gameObject.layer)
+            & ~(1 << gameObject.layer);
+
+        return !Physics.Raycast(start, dir.normalized, dist, mask, QueryTriggerInteraction.Ignore);
     }
 
     void FaceTarget()

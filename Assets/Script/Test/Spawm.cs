@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Spawm : MonoBehaviour
 {
@@ -40,6 +41,8 @@ public class Spawm : MonoBehaviour
     [Header("Spawn Safety")]
     [Tooltip("Zombies will not spawn closer than this XZ distance to the player (prevents spawn-on-top kills).")]
     public float minDistanceFromPlayer = 8f;
+    [Tooltip("How far to search the NavMesh for a valid spawn position if the random point is off the NavMesh. 0 = skip NavMesh validation (legacy behavior).")]
+    public float navMeshSpawnSearchRadius = 8f;
 
     [Header("Object Pool")]
     public int poolSize = 60;
@@ -244,6 +247,10 @@ public class Spawm : MonoBehaviour
             }
         }
 
+        // Validate the spawn position on the NavMesh so zombies don't spawn
+        // inside walls or off-mesh and get stuck immediately.
+        randomPos = FindValidNavMeshPosition(randomPos, navMeshSpawnSearchRadius);
+
         int randomIndex = Random.Range(0, zombiePrefabs.Length);
         GameObject selectedPrefab = zombiePrefabs[randomIndex];
 
@@ -288,6 +295,11 @@ public class Spawm : MonoBehaviour
     /// <summary>
     /// Assigns random wander destinations to spawned zombies so they patrol
     /// the area instead of standing still. Called every frame.
+    /// IMPORTANT: Only wanders zombies that are NOT actively chasing the player.
+    /// Once a zombie has detected the player, its ZombieAI.ChasePlayer controls
+    /// the destination — roaming must not override it (otherwise the zombie
+    /// runs to a random wander point instead of chasing, which looks like
+    /// teleporting/erratic movement).
     /// </summary>
     private void UpdateRoaming()
     {
@@ -298,6 +310,11 @@ public class Spawm : MonoBehaviour
             if (z == null) continue;
             if (!_wanderTimers.TryGetValue(z, out float nextTime)) continue;
             if (Time.time < nextTime) continue;
+
+            // Skip zombies that are actively chasing the player — their
+            // ZombieAI.ChasePlayer owns the destination. Roaming is only for
+            // idle/wandering zombies that haven't detected the player yet.
+            if (z.IsDead || z.IsChasing) continue;
 
             // Pick a random point within wanderRadius of the spawner center.
             Vector3 wanderPos = transform.position + new Vector3(
@@ -355,6 +372,10 @@ public class Spawm : MonoBehaviour
                 Random.Range(-3f, 3f)
             );
 
+        // Validate the spawn position on the NavMesh so the camper-punishment
+        // zombie doesn't spawn inside a wall behind the player.
+        spawnPos = FindValidNavMeshPosition(spawnPos, navMeshSpawnSearchRadius);
+
         int randomIndex = Random.Range(0, zombiePrefabs.Length);
         GameObject selectedPrefab = zombiePrefabs[randomIndex];
 
@@ -381,6 +402,74 @@ public class Spawm : MonoBehaviour
                 "[DIRECTOR] Camper Punishment Spawn!"
             );
         }
+    }
+
+    /// <summary>
+    /// Finds a valid NavMesh position near the requested spawn point. Tries
+    /// the exact position first, then samples outward in a spiral. Falls back
+    /// to the original position if no NavMesh point is found (the zombie's own
+    /// stuck-recovery logic will handle it at runtime). If searchRadius is 0,
+    /// validation is skipped (legacy behavior).
+    /// </summary>
+    private Vector3 FindValidNavMeshPosition(Vector3 requested, float searchRadius)
+    {
+        if (searchRadius <= 0f)
+            return requested;
+
+        // Player position for path-connectivity validation. If the player
+        // isn't available yet, fall back to NavMesh-only validation.
+        Vector3 playerNavMeshPos;
+        bool hasPlayerNavMesh = false;
+        if (player != null)
+        {
+            NavMeshHit playerHit;
+            hasPlayerNavMesh = NavMesh.SamplePosition(player.position, out playerHit, 10f, NavMesh.AllAreas);
+            playerNavMeshPos = hasPlayerNavMesh ? playerHit.position : Vector3.zero;
+        }
+        else
+        {
+            playerNavMeshPos = Vector3.zero;
+        }
+
+        // Try the exact position first with a small tolerance.
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(requested, out hit, 2f, NavMesh.AllAreas))
+        {
+            if (!hasPlayerNavMesh || HasPathToPlayer(hit.position, playerNavMeshPos))
+                return hit.position;
+        }
+
+        // Spiral outward: try several positions at increasing distances.
+        for (float r = 2f; r <= searchRadius; r += 2f)
+        {
+            for (int a = 0; a < 8; a++)
+            {
+                float angle = a * (Mathf.PI * 2f / 8f);
+                Vector3 candidate = requested + new Vector3(Mathf.Cos(angle) * r, 0f, Mathf.Sin(angle) * r);
+                if (NavMesh.SamplePosition(candidate, out hit, 2f, NavMesh.AllAreas))
+                {
+                    if (!hasPlayerNavMesh || HasPathToPlayer(hit.position, playerNavMeshPos))
+                        return hit.position;
+                }
+            }
+        }
+
+        // Fallback: return the original position. The zombie's own stuck-recovery
+        // logic will handle it at runtime.
+        Debug.LogWarning($"[Spawm] No NavMesh position with path to player found near {requested} — using fallback.");
+        return requested;
+    }
+
+    /// <summary>
+    /// Checks whether a complete NavMesh path exists from the given spawn
+    /// position to the player's NavMesh position. Returns false if the path
+    /// is partial (disconnected NavMesh island) or invalid.
+    /// </summary>
+    private bool HasPathToPlayer(Vector3 fromPos, Vector3 playerNavMeshPos)
+    {
+        NavMeshPath path = new NavMeshPath();
+        NavMesh.CalculatePath(fromPos, playerNavMeshPos, NavMesh.AllAreas, path);
+        return path.status == NavMeshPathStatus.PathComplete;
     }
 
     private void OnDrawGizmosSelected()
