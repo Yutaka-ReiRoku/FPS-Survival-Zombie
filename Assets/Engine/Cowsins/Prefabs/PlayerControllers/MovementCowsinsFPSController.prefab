@@ -4972,6 +4972,18 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1382937911995782287, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: crosshair
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1382937911995782287, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: uIEffects
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1382937911995782287, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: uiController
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1748505780739125627, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -5566,7 +5578,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.runSpeed
-      value: 16
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: wallrunCameraTiltAmount
@@ -5578,7 +5590,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.walkSpeed
-      value: 8
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: whatIsWallRunWall.m_Bits
@@ -5606,11 +5618,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.canWallRun
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.dashMethod
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: playerSettings.maxStamina
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.speedLines
@@ -5633,8 +5649,12 @@ PrefabInstance:
       value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: playerSettings.crouchSpeed
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.usesStamina
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: wallRunSettings.canWallRun
@@ -5687,6 +5707,10 @@ PrefabInstance:
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.canWallBounce
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: playerSettings.staminaSlider
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.useSpeedLines
@@ -5767,6 +5791,10 @@ PrefabInstance:
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: movementSettings.maxSpeedAllowed
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: playerSettings.staminaLossOnJump
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.wallMinimumHeight
@@ -5857,6 +5885,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: 9a8b9c1819fb153429432b8bc88cd132, type: 3}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: playerSettings.staminaRegenMultiplier
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.stopWallRunningImpulse
       value: 10
       objectReference: {fileID: 0}
@@ -5871,6 +5903,10 @@ PrefabInstance:
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.minSpeedToUseSpeedLines
       value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: playerSettings.minStaminaRequiredToRun
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.sounds.grappleImpactSFX
@@ -5985,6 +6021,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: freezePlayerOnDeath
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: fallDamageMultiplier
       value: 2
       objectReference: {fileID: 0}
@@ -5995,6 +6035,38 @@ PrefabInstance:
     - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: minimumHeightDifferenceToApplyDamage
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: userEvents.OnDeath.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: userEvents.OnDamage.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: userEvents.OnDamage.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: userEvents.OnDamage.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1514895984708282677}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: userEvents.OnDamage.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: userEvents.OnDamage.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Shake
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: userEvents.OnDamage.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: CameraShake, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: userEvents.OnDamage.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630899, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: reloadUI
@@ -6085,6 +6157,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630899, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: settings.initialWeapons.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630899, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'settings.initialWeapons.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 6553d6d464f4c3d489647f8005b06c2e, type: 2}
+    - target: {fileID: 4612824603642630899, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: events.OnShoot.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -6174,7 +6254,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603648159582, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.8
+      value: 1.241
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603706259681, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -6215,6 +6295,10 @@ PrefabInstance:
     - target: {fileID: 4612824603769077297, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: yTiltAmount
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603769077298, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.75
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603769077298, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6570,7 +6654,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4612824604642224939, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 2.74
       objectReference: {fileID: 0}
     - target: {fileID: 4612824604642224939, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_LocalPosition.z
@@ -6668,10 +6752,6 @@ PrefabInstance:
       propertyPath: playerMovement
       value: 
       objectReference: {fileID: 1195374612628124382}
-    - target: {fileID: 4612824604957690213, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
-      propertyPath: dashUIContainer
-      value: 
-      objectReference: {fileID: 2309376664778758226}
     - target: {fileID: 4612824605049336393, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
@@ -6686,7 +6766,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4612824605049336406, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_ClearFlags
-      value: 1
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824605049336406, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: far clip plane
+      value: 2000
       objectReference: {fileID: 0}
     - target: {fileID: 4612824605049336406, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_RenderingPath
@@ -6697,16 +6781,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4612824605049336406, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824605049336406, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_BackGroundColor.b
-      value: 0
+      value: 0.6132076
       objectReference: {fileID: 0}
     - target: {fileID: 4612824605049336406, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_BackGroundColor.g
-      value: 0
+      value: 0.46650445
       objectReference: {fileID: 0}
     - target: {fileID: 4612824605049336406, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_BackGroundColor.r
-      value: 0
+      value: 0.38470098
       objectReference: {fileID: 0}
     - target: {fileID: 4612824605049336406, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_CullingMask.m_Bits
@@ -6715,6 +6803,10 @@ PrefabInstance:
     - target: {fileID: 4612824605082341566, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824605084164853, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.7500001
       objectReference: {fileID: 0}
     - target: {fileID: 4612824605135139713, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -6875,6 +6967,10 @@ PrefabInstance:
     - target: {fileID: 4612824605511955322, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_CullingMask.m_Bits
       value: 65632
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824605511955327, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 4635499744410864489, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: m_Enabled
@@ -7243,13 +7339,62 @@ PrefabInstance:
     - {fileID: 5174029695855361062, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
     - {fileID: 4635499744410864489, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
     - {fileID: 4612824603844780550, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 7231731121837101369, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 8955822680203393107, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 8955822680242189001, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 8955822681758587895, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 8955822680231064787, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 8955822681212366354, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 6965268008865525542, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 1241503892959139679, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 7675480093499381787, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 724573993349866110, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 5207389495127096880, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 5642465347847712267, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 1518098034539745014, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 8955822681163747963, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 8955822680632843691, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 8955822680134967312, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+    - {fileID: 4612824604957690215, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 4612824603648159582, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       insertIndex: -1
       addedObject: {fileID: 455936966}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4612824605049336392, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1514895984708282677}
+    - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      insertIndex: 5
+      addedObject: {fileID: 7169236379904593824}
+    - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      insertIndex: 6
+      addedObject: {fileID: 7878127921540468036}
+    - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      insertIndex: 7
+      addedObject: {fileID: 5771681412245359686}
+    - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      insertIndex: 8
+      addedObject: {fileID: 7339998796345618518}
   m_SourcePrefab: {fileID: 100100000, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+--- !u!1 &1195374611354653309 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4612824605049336392, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+  m_PrefabInstance: {fileID: 5805941918662991925}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1514895984708282677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195374611354653309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c2cee8bc36cc80408adad2b6d2c5c01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraShake
 --- !u!114 &1195374612628124359 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
@@ -7282,11 +7427,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4835873352967447369, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
   m_PrefabInstance: {fileID: 5805941918662991925}
   m_PrefabAsset: {fileID: 0}
---- !u!224 &2309376664778758226 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 8115016756755691623, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
-  m_PrefabInstance: {fileID: 5805941918662991925}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &4874011754039407802 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1382937911995782287, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
@@ -7298,3 +7438,71 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29d092dc546c8054987142f771ea77cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &8721749980173825586 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+  m_PrefabInstance: {fileID: 5805941918662991925}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7169236379904593824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8721749980173825586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b270a30c30de974aaebb99c1bd1dd2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::cowsins.SkillTreeManager
+  currentLevel: 0
+  currentSkillPoints: 0
+  movementLevel: 0
+  aimLevel: 0
+  intelligenceLevel: 0
+--- !u!114 &7878127921540468036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8721749980173825586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cf5f7330898604428dedf0c0af31e24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::cowsins.IntelligenceSkillSystem
+  xpPickupRadius: 0
+  xpMultiplier: 1
+  highlightCollectibles: 0
+--- !u!114 &5771681412245359686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8721749980173825586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ab45fc95d7148844baabdfdab2ca3b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::cowsins.AimSkillSystem
+  critChance: 0
+  critMultiplier: 1
+  recoilMultiplier: 1
+  oneShotCrook: 0
+  bonusDamageVsSpecial: 0
+--- !u!114 &7339998796345618518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8721749980173825586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44106e98d04080340afbaef345728c00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CollectibleManager
+  resourcesFolder: Journals
+  totalOverride: 0
