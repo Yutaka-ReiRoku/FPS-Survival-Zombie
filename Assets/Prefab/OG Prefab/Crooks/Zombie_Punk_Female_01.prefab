@@ -1666,9 +1666,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZombieAI
   target: {fileID: 0}
   walkSpeed: 1.3
-  runSpeed: 3.2
+  runSpeed: 2.5
   detectDistance: 20
-  attackDistance: 2.5
+  attackDistance: 2
   wanderRadius: 15
   wanderInterval: 5
   loseSightDistance: 28
