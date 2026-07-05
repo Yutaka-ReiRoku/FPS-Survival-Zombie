@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4193683576745232}
   - component: {fileID: 33277737982283732}
   - component: {fileID: 23012339718728070}
-  - component: {fileID: 3802523391909373270}
   m_Layer: 3
   m_Name: SM_Env_Overgrowth_01
   m_TagString: Untagged
@@ -92,25 +91,3 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &3802523391909373270
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1822765171362998}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: 0f3e6fd9075e4ee4e84dd6d8b36ca70e, type: 3}
