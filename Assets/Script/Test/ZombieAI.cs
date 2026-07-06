@@ -213,11 +213,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         audioSource = GetComponent<AudioSource>();
         rb = GetComponent<Rigidbody>();
 
-        // Performance: zombies do not cast/receive shadows (large GPU saving at high counts).
+        // Zombies cast shadows (so they are visible on the ground during daytime)
+        // but do not receive shadows (GPU saving at high counts).
         var smrs = GetComponentsInChildren<SkinnedMeshRenderer>(true);
         for (int i = 0; i < smrs.Length; i++)
         {
-            smrs[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            smrs[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             smrs[i].receiveShadows = false;
         }
 

@@ -264,6 +264,11 @@ public class DayNightCycle : MonoBehaviour
         if (sunLight != null)
         {
             sunLight.type = LightType.Directional;
+            // Force the sun to always be a pixel light so it can cast shadows in
+            // Forward rendering. Without this, point lights with higher priority
+            // (closer/stronger) can take the limited pixel-light slots and demote
+            // the sun to a vertex light, which cannot cast shadows.
+            sunLight.renderMode = LightRenderMode.ForcePixel;
             // Capture the sun's azimuth (Y) once so we can drive pitch (X) without
             // the euler Y/Z representation flipping around gimbal lock.
             _sunBaseYaw = sunLight.transform.localEulerAngles.y;
