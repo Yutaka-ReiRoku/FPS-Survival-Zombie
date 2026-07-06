@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Map/PolygonApocalypse/Scenes/Demo_City_Test.unity
     guid: 9d524e5463df8b947a104fff529348a5
+  - enabled: 1
+    path: Assets/Scenes/Story mode.unity
+    guid: 5e560812d199b65419e0230ac16f2676
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 33f591010f343104f853b337a1fca25a, type: 2}
   m_UseUCBPForAssetBundles: 0
