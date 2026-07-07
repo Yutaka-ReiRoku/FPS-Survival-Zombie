@@ -6122,6 +6122,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: shieldRegenRate
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: takesFallDamage
       value: 1
       objectReference: {fileID: 0}
@@ -6132,6 +6136,10 @@ PrefabInstance:
     - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: healthTextDisplay
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: shieldRegenAmount
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4612824603642630898, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: shieldTextDisplay
@@ -7503,18 +7511,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       insertIndex: 8
       addedObject: {fileID: 584642609425110740}
-    - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
-      insertIndex: 9
-      addedObject: {fileID: 7169236379904593824}
-    - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
-      insertIndex: 10
-      addedObject: {fileID: 7878127921540468036}
-    - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
-      insertIndex: 11
-      addedObject: {fileID: 5771681412245359686}
-    - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
-      insertIndex: 12
-      addedObject: {fileID: 7339998796345618518}
   m_SourcePrefab: {fileID: 100100000, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
 --- !u!4 &1195374611354653308 stripped
 Transform:
@@ -7674,69 +7670,6 @@ MonoBehaviour:
   oneShotCrook: 0
   bonusDamageVsSpecial: 0
 --- !u!114 &584642609425110740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8721749980173825586}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44106e98d04080340afbaef345728c00, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CollectibleManager
-  resourcesFolder: Journals
-  totalOverride: 0
---- !u!114 &7169236379904593824
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8721749980173825586}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b270a30c30de974aaebb99c1bd1dd2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::cowsins.SkillTreeManager
-  currentLevel: 0
-  currentSkillPoints: 0
-  movementLevel: 0
-  aimLevel: 0
-  intelligenceLevel: 0
---- !u!114 &7878127921540468036
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8721749980173825586}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9cf5f7330898604428dedf0c0af31e24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::cowsins.IntelligenceSkillSystem
-  xpPickupRadius: 0
-  xpMultiplier: 1
-  highlightCollectibles: 0
---- !u!114 &5771681412245359686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8721749980173825586}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ab45fc95d7148844baabdfdab2ca3b0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::cowsins.AimSkillSystem
-  critChance: 0
-  critMultiplier: 1
-  recoilMultiplier: 1
-  oneShotCrook: 0
-  bonusDamageVsSpecial: 0
---- !u!114 &7339998796345618518
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
