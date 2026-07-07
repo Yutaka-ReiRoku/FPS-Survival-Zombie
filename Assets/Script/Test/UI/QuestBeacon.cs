@@ -144,6 +144,10 @@ public class QuestBeacon : MonoBehaviour
         Shader shader = Shader.Find("Sprites/Default");
         if (shader == null) shader = Shader.Find("Unlit/Transparent");
 
+        // Reusable primitive meshes (avoid CreatePrimitive which leaks GameObjects).
+        Mesh cylinderMesh = GetPrimitiveMesh(PrimitiveType.Cylinder);
+        Mesh quadMesh = GetPrimitiveMesh(PrimitiveType.Quad);
+
         // ---- Beam (vertical cylinder) ----
         _beam = new GameObject("Beacon_Beam");
         _beam.transform.SetParent(transform, false);
@@ -151,14 +155,13 @@ public class QuestBeacon : MonoBehaviour
         _beam.transform.localScale = new Vector3(beamRadius * 2f, beamHeight * 0.5f, beamRadius * 2f);
 
         var beamFilter = _beam.AddComponent<MeshFilter>();
-        beamFilter.sharedMesh = GameObject.CreatePrimitive(PrimitiveType.Cylinder).GetComponent<MeshFilter>().sharedMesh;
+        beamFilter.sharedMesh = cylinderMesh;
         var beamRenderer = _beam.AddComponent<MeshRenderer>();
         _beamMat = new Material(shader) { name = "BeaconBeam_Runtime" };
         _beamMat.color = beamColor;
         beamRenderer.material = _beamMat;
         beamRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         beamRenderer.receiveShadows = false;
-        DestroyIfExists(_beam.GetComponent<Collider>());
 
         // ---- Floating icon (quad that always faces camera) ----
         _icon = new GameObject("Beacon_Icon");
@@ -166,14 +169,13 @@ public class QuestBeacon : MonoBehaviour
         _icon.transform.localPosition = new Vector3(0f, iconHeight, 0f);
 
         var iconFilter = _icon.AddComponent<MeshFilter>();
-        iconFilter.sharedMesh = GameObject.CreatePrimitive(PrimitiveType.Quad).GetComponent<MeshFilter>().sharedMesh;
+        iconFilter.sharedMesh = quadMesh;
         var iconRenderer = _icon.AddComponent<MeshRenderer>();
         _iconMat = new Material(shader) { name = "BeaconIcon_Runtime" };
         _iconMat.color = iconColor;
         iconRenderer.material = _iconMat;
         iconRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         iconRenderer.receiveShadows = false;
-        DestroyIfExists(_icon.GetComponent<Collider>());
 
         // ---- Ground ring (flat cylinder) ----
         if (showGroundRing)
@@ -184,20 +186,34 @@ public class QuestBeacon : MonoBehaviour
             _ring.transform.localScale = new Vector3(ringRadius * 2f, 0.05f, ringRadius * 2f);
 
             var ringFilter = _ring.AddComponent<MeshFilter>();
-            ringFilter.sharedMesh = GameObject.CreatePrimitive(PrimitiveType.Cylinder).GetComponent<MeshFilter>().sharedMesh;
+            ringFilter.sharedMesh = cylinderMesh;
             var ringRenderer = _ring.AddComponent<MeshRenderer>();
             _ringMat = new Material(shader) { name = "BeaconRing_Runtime" };
             _ringMat.color = ringColor;
             ringRenderer.material = _ringMat;
             ringRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             ringRenderer.receiveShadows = false;
-            DestroyIfExists(_ring.GetComponent<Collider>());
         }
     }
 
-    private void DestroyIfExists(Component c)
+    /// <summary>
+    /// Returns the built-in primitive mesh without creating a GameObject.
+    /// Uses a temporary primitive once and caches the mesh statically so
+    /// subsequent calls don't leak GameObjects into the scene.
+    /// </summary>
+    private static Mesh _cylinderMesh;
+    private static Mesh _quadMesh;
+    private static Mesh GetPrimitiveMesh(PrimitiveType type)
     {
-        if (c != null) DestroyImmediate(c);
+        if (type == PrimitiveType.Cylinder && _cylinderMesh != null) return _cylinderMesh;
+        if (type == PrimitiveType.Quad && _quadMesh != null) return _quadMesh;
+
+        var temp = GameObject.CreatePrimitive(type);
+        var mesh = temp.GetComponent<MeshFilter>().sharedMesh;
+        Object.DestroyImmediate(temp);
+        if (type == PrimitiveType.Cylinder) _cylinderMesh = mesh;
+        else if (type == PrimitiveType.Quad) _quadMesh = mesh;
+        return mesh;
     }
 
     private void EnsurePlayer()
