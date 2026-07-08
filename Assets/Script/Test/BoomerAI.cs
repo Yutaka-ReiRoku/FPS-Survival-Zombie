@@ -116,6 +116,18 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private Vector3 _lastStuckCheckPos;
     private float _stuckTimer;
     private int _noPathRetryCount;
+    private float _noPathRetryTimer;
+
+    // --- Cached reusable objects (avoid per-frame allocation) ---
+    private UnityEngine.AI.NavMeshPath _reusablePath;
+    private int _cachedLOSMask = -1;
+    private int _cachedLOSCacheKey = -1;
+
+    // --- Cached animator parameter hashes (avoid per-call string hashing) ---
+    private static readonly int SpeedHash = Animator.StringToHash("Speed");
+    private static readonly int HitHash = Animator.StringToHash("Hit");
+    private static readonly int IsWarningHash = Animator.StringToHash("isWarning");
+    private static readonly int ExplodeHash = Animator.StringToHash("Explode");
 
     private enum ExplosionType
     {
@@ -133,6 +145,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
+        _reusablePath = new UnityEngine.AI.NavMeshPath();
 
         FindPlayer();
 
@@ -147,6 +160,24 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             // avoidance system when many regular zombies are also active.
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
             agent.avoidancePriority = 15; // Special enemy — slightly higher priority than regular zombies.
+
+            // UNDERGROUND NAVMESH FIX: 31% of the NavMesh triangles are
+            // underground (y=-2 to -1385) and disconnected from the main
+            // surface. If the boomer spawns on an underground NavMesh island,
+            // it can never reach the player. Sample a ground-level NavMesh
+            // position above the boomer and warp there if the current
+            // position is too far below y=0.
+            if (transform.position.y < -1f)
+            {
+                UnityEngine.AI.NavMeshHit groundHit;
+                Vector3 searchFrom = new Vector3(transform.position.x, 0f, transform.position.z);
+                if (UnityEngine.AI.NavMesh.SamplePosition(searchFrom, out groundHit, 10f, UnityEngine.AI.NavMesh.AllAreas)
+                    && groundHit.position.y >= -1f)
+                {
+                    agent.Warp(groundHit.position);
+                    transform.position = groundHit.position;
+                }
+            }
         }
 
         // Keep the Rigidbody KINEMATIC while alive so the NavMeshAgent fully
@@ -255,7 +286,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             moveSpeed;
 
         animator.SetFloat(
-            "Speed",
+            SpeedHash,
             speed,
             0.2f,
             Time.deltaTime
@@ -307,13 +338,24 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         }
 
         // CRITICAL: If the agent has no path while it should be chasing, it
-        // will stand forever without moving. Force an immediate robust re-path.
-        if (agent != null && agent.isOnNavMesh && !agent.hasPath && !agent.isStopped)
+        // will stand forever without moving. Force a robust re-path, but
+        // throttle to every 0.5s to avoid spamming SetDestination every frame
+        // (which floods the async pathfinding queue and can cause frame stalls
+        // on a large NavMesh).
+        if (agent != null && agent.isOnNavMesh && !agent.hasPath && !agent.pathPending && !agent.isStopped)
         {
             _noPathRetryCount++;
-            SetDestinationRobust(target.position);
+            _noPathRetryTimer += Time.deltaTime;
+            if (_noPathRetryTimer >= 0.5f)
+            {
+                SetDestinationRobust(target.position);
+                _noPathRetryTimer = 0f;
+            }
 
-            // If SetDestinationRobust keeps failing, try a full agent reset.
+            // If the agent still has no path after ~5 seconds of retries,
+            // it's in a broken state. Try a full agent reset: disable/re-enable/
+            // warp to snap it out. This is NOT a teleport to the player — it
+            // warps to the boomer's OWN position to force re-initialization.
             if (_noPathRetryCount >= 10 && !agent.hasPath)
             {
                 Vector3 currentPos = transform.position;
@@ -326,6 +368,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                     SetDestinationRobust(target.position);
                 }
                 _noPathRetryCount = 0;
+                _noPathRetryTimer = 0f;
             }
 
             _stuckTimer = 0f;
@@ -380,11 +423,11 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         UnityEngine.AI.NavMeshHit midHit;
         if (UnityEngine.AI.NavMesh.SamplePosition(midPoint, out midHit, 3f, UnityEngine.AI.NavMesh.AllAreas))
         {
-            UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
-            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, midHit.position, UnityEngine.AI.NavMesh.AllAreas, path)
-                && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+            _reusablePath.ClearCorners();
+            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, midHit.position, UnityEngine.AI.NavMesh.AllAreas, _reusablePath)
+                && _reusablePath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
             {
-                agent.SetPath(path);
+                agent.SetPath(_reusablePath);
                 return;
             }
         }
@@ -400,11 +443,11 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             if (!UnityEngine.AI.NavMesh.SamplePosition(candidate, out hit, 1.5f, UnityEngine.AI.NavMesh.AllAreas))
                 continue;
 
-            UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
-            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, path)
-                && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+            _reusablePath.ClearCorners();
+            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, _reusablePath)
+                && _reusablePath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
             {
-                agent.SetPath(path);
+                agent.SetPath(_reusablePath);
                 return;
             }
         }
@@ -412,23 +455,40 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
     /// <summary>
     /// Robust destination setter that works around a Unity NavMeshAgent issue
-    /// where SetDestination returns true but doesn't actually create a path.
-    /// Falls back to manually calculating the path and assigning it via SetPath.
+    /// where SetDestination returns true but doesn't actually create a path
+    /// (happens after the agent's previous path completed while isStopped was
+    /// true). Falls back to manually calculating the path and assigning it via
+    /// SetPath, which reliably creates a new path.
+    ///
+    /// IMPORTANT: The fallback (CalculatePath) is only used when the agent
+    /// has NO path from a PREVIOUS frame — NOT immediately after
+    /// SetDestination. SetDestination is async: it queues a path request but
+    /// doesn't compute it synchronously, so hasPath is false on the same frame.
+    /// Checking hasPath immediately would trigger CalculatePath every call
+    /// (synchronous pathfinding on every frame = frame stalls = sliding).
     /// </summary>
     private void SetDestinationRobust(Vector3 destination)
     {
         if (agent == null || !agent.isOnNavMesh) return;
 
+        // Remember whether the agent had a path BEFORE this call. If it
+        // didn't, SetDestination alone may silently fail (Unity issue after
+        // isStopped + path completion), so we need the CalculatePath fallback.
+        bool hadNoPath = !agent.hasPath && !agent.pathPending;
+
         agent.isStopped = false;
         agent.SetDestination(destination);
 
-        if (!agent.hasPath)
+        // Only use the synchronous CalculatePath fallback when the agent was
+        // in the broken no-path state before this call. This avoids running
+        // expensive synchronous pathfinding on every SetDestination call.
+        if (hadNoPath && !agent.pathPending)
         {
-            UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
-            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, destination, UnityEngine.AI.NavMesh.AllAreas, path)
-                && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+            _reusablePath.ClearCorners();
+            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, destination, UnityEngine.AI.NavMesh.AllAreas, _reusablePath)
+                && _reusablePath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
             {
-                agent.SetPath(path);
+                agent.SetPath(_reusablePath);
             }
         }
     }
@@ -452,11 +512,20 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         float dist = dir.magnitude;
         if (dist <= 0.1f) return true;
 
-        int mask = sightObstructionMask
-            & ~(1 << target.gameObject.layer)
-            & ~(1 << gameObject.layer);
+        // Cache the LOS mask — it only changes when the target or this boomer's
+        // layer changes (rare). Recompute only if the cached value is stale.
+        int myLayer = gameObject.layer;
+        int targetLayer = target.gameObject.layer;
+        int cacheKey = (myLayer << 8) | targetLayer;
+        if (_cachedLOSMask == -1 || _cachedLOSCacheKey != cacheKey)
+        {
+            _cachedLOSMask = sightObstructionMask
+                & ~(1 << targetLayer)
+                & ~(1 << myLayer);
+            _cachedLOSCacheKey = cacheKey;
+        }
 
-        return !Physics.Raycast(start, dir.normalized, dist, mask, QueryTriggerInteraction.Ignore);
+        return !Physics.Raycast(start, dir.normalized, dist, _cachedLOSMask, QueryTriggerInteraction.Ignore);
     }
 
     private void FaceTarget()
@@ -504,7 +573,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         }
 
         animator.SetBool(
-            "isWarning",
+            IsWarningHash,
             true
         );
 
@@ -517,12 +586,12 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private void PlayDeath()
     {
         animator.SetBool(
-            "isWarning",
+            IsWarningHash,
             false
         );
 
         animator.SetTrigger(
-            "Explode"
+            ExplodeHash
         );
 
         // The explosion is fired from Update() by polling the death animation
@@ -597,7 +666,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         if (PlayerStatsTracker.Instance != null)
             PlayerStatsTracker.Instance.RegisterDamageDealt(damage);
 
-        animator.SetTrigger("Hit");
+        animator.SetTrigger(HitHash);
 
         if (OnHealthChanged != null)
             OnHealthChanged(HealthFraction);

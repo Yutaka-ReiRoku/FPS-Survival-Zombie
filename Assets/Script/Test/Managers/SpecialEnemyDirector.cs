@@ -270,6 +270,12 @@ public class SpecialEnemyDirector : MonoBehaviour
             NavMeshHit hit;
             if (NavMesh.SamplePosition(candidate, out hit, navSampleRadius, NavMesh.AllAreas))
             {
+                // Reject underground NavMesh positions (disconnected islands
+                // at y<-1 that cover 31% of the NavMesh). Special enemies
+                // spawning there can never reach the player.
+                if (hit.position.y < -1f)
+                    continue;
+
                 result = hit.position;
                 return true;
             }

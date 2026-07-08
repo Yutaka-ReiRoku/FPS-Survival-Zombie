@@ -74,6 +74,9 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
     private float attackTimer;
     private float jumpTimer;
+    private float _pathTimer;
+    private float _distanceTimer;
+    private float _cachedDistance;
 
     private bool isDead;
     public bool IsDead { get { return isDead; } }
@@ -85,6 +88,20 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     private bool isScreaming;
 
     private int attackIndex;
+
+    // --- Reusable buffer for OverlapSphere (avoid per-explosion allocation) ---
+    private static readonly Collider[] _overlapBuffer = new Collider[64];
+
+    // --- Cached animator parameter hashes (avoid per-call string hashing) ---
+    private static readonly int SpeedHash = Animator.StringToHash("Speed");
+    private static readonly int AttackIndexHash = Animator.StringToHash("AttackIndex");
+    private static readonly int AttackHash = Animator.StringToHash("Attack");
+    private static readonly int HitHash = Animator.StringToHash("Hit");
+    private static readonly int ScreamHash = Animator.StringToHash("Scream");
+    private static readonly int IsPlayerNearHash = Animator.StringToHash("isPlayerNear");
+    private static readonly int IsDeathHash = Animator.StringToHash("isDeath");
+    private static readonly int DeathHash = Animator.StringToHash("Death");
+    private static readonly int JumpAttackStateHash = Animator.StringToHash("Mutant Jump Attack");
 
     private void Start()
     {
@@ -103,7 +120,12 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             agent.speed = runSpeed;
             agent.acceleration = 20f;
             agent.angularSpeed = 300f;
-            agent.stoppingDistance = meleeRange;
+            // Use half meleeRange as stopping distance — same fix as ZombieAI:
+            // stoppingDistance == meleeRange causes a chase-stop-chase flip-flop
+            // when the agent stops exactly at meleeRange (distance == meleeRange
+            // triggers attack, but the agent stops slightly outside due to
+            // stopping distance, so it never enters attack range).
+            agent.stoppingDistance = meleeRange * 0.5f;
             agent.updateRotation = false;
             // Performance: HighQuality avoidance is ~quadratic with agent count;
             // use cheap avoidance so the Tank doesn't overload the avoidance
@@ -147,12 +169,21 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
         attackTimer += Time.deltaTime;
         jumpTimer += Time.deltaTime;
+        _distanceTimer += Time.deltaTime;
 
-        float distance =
-            Vector3.Distance(
-                transform.position,
-                target.position
-            );
+        // Cache distance — recompute every 0.2s instead of every frame.
+        // The Tank is slow and the player rarely teleports, so 0.2s is plenty.
+        if (_distanceTimer >= 0.2f)
+        {
+            _cachedDistance =
+                Vector3.Distance(
+                    transform.position,
+                    target.position
+                );
+            _distanceTimer = 0f;
+        }
+
+        float distance = _cachedDistance;
 
         HandleJumpState();
 
@@ -184,9 +215,18 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         {
             agent.isStopped = false;
 
-            agent.SetDestination(
-                target.position
-            );
+            // Throttle SetDestination to every 0.3s — the Tank is slow and
+            // the player rarely changes direction fast enough to need more
+            // frequent re-pathing. This also reduces async pathfinding load
+            // on the NavMesh (which is shared with 50+ regular zombies).
+            _pathTimer += Time.deltaTime;
+            if (_pathTimer >= 0.3f)
+            {
+                agent.SetDestination(
+                    target.position
+                );
+                _pathTimer = 0f;
+            }
         }
 
         //------------------------------------------------
@@ -281,8 +321,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
         agent.isStopped = true;
 
-        animator.SetBool("isPlayerNear", true);
-        animator.SetTrigger("Scream");
+        animator.SetBool(IsPlayerNearHash, true);
+        animator.SetTrigger(ScreamHash);
 
         PlaySound(screamClip);
 
@@ -311,11 +351,11 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             Random.Range(0, 2);
 
         animator.SetInteger(
-            "AttackIndex",
+            AttackIndexHash,
             attackIndex
         );
 
-        animator.SetTrigger("Attack");
+        animator.SetTrigger(AttackHash);
 
         PlaySound(meleeAttackClip);
 
@@ -356,7 +396,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         }
 
         animator.Play(
-            "Mutant Jump Attack"
+            JumpAttackStateHash
         );
     }
 
@@ -404,14 +444,17 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     {
         PlaySound(jumpLandClip);
 
-        Collider[] hits =
-            Physics.OverlapSphere(
+        // Use NonAlloc variant with a static reusable buffer to avoid
+        // per-explosion GC allocation (OverlapSphere allocates an array).
+        int numHits = Physics.OverlapSphereNonAlloc(
                 transform.position,
-                jumpRadius
+                jumpRadius,
+                _overlapBuffer
             );
 
-        foreach (Collider hit in hits)
+        for (int i = 0; i < numHits; i++)
         {
+            Collider hit = _overlapBuffer[i];
             if (hit.transform == transform)
                 continue;
 
@@ -500,7 +543,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         if (PlayerStatsTracker.Instance != null)
             PlayerStatsTracker.Instance.RegisterDamageDealt(damage);
 
-        animator.SetTrigger("Hit");
+        animator.SetTrigger(HitHash);
 
         if (currentHealth <= 0)
         {
@@ -539,12 +582,12 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         agent.enabled = false;
 
         animator.SetBool(
-            "isDeath",
+            IsDeathHash,
             true
         );
 
         animator.SetTrigger(
-            "Death"
+            DeathHash
         );
 
         PlaySound(deathClip);

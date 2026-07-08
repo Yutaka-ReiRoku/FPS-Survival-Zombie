@@ -166,6 +166,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private NavMeshAgent agent;
     private AudioSource audioSource;
     private Rigidbody rb;
+    private Collider _collider;
+    private IDamageable _targetDamageable;
 
     private int currentHealth;
 
@@ -191,6 +193,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private bool _wasInAttackRange;     // tracks isStopped transition (attack→chase)
     private int _noPathRetryCount;      // counts consecutive SetDestinationRobust failures when hasPath=false
 
+    // --- Cached reusable objects (avoid per-frame allocation) ---
+    private UnityEngine.AI.NavMeshPath _reusablePath;
+    private int _cachedLOSMask = -1;
+    private int _cachedLOSCacheKey = -1;
+
     private static readonly int SpeedHash =
         Animator.StringToHash("Speed");
 
@@ -212,6 +219,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         agent = GetComponent<NavMeshAgent>();
         audioSource = GetComponent<AudioSource>();
         rb = GetComponent<Rigidbody>();
+        _collider = GetComponent<Collider>();
+        _reusablePath = new UnityEngine.AI.NavMeshPath();
 
         // Zombies cast shadows (so they are visible on the ground during daytime)
         // but do not receive shadows (GPU saving at high counts).
@@ -260,6 +269,13 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             if (player != null)
                 target = player.transform;
         }
+
+        // Cache the player's IDamageable once per spawn so AttackHit doesn't
+        // call GetComponent every hit (50+ zombies * 1.5s cooldown = ~33 hits/s).
+        if (target != null)
+            _targetDamageable = target.GetComponent<IDamageable>();
+        else
+            _targetDamageable = null;
 
         if (agent != null)
         {
@@ -310,7 +326,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             rb.useGravity = true;
         }
 
-        Collider col = GetComponent<Collider>();
+        Collider col = _collider;
         if (col != null)
             col.enabled = true;
 
@@ -579,8 +595,14 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         if (distance > attackDistance + 0.5f)
             return;
 
-        IDamageable damageable =
-            target.GetComponent<IDamageable>();
+        // Use the cached IDamageable from OnEnable. Re-resolve only as a fallback
+        // (e.g. if the player was swapped at runtime).
+        IDamageable damageable = _targetDamageable;
+        if (damageable == null && target != null)
+        {
+            damageable = target.GetComponent<IDamageable>();
+            _targetDamageable = damageable;
+        }
 
         if (damageable != null)
         {
@@ -656,10 +678,15 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         if (AchievementManager.Instance != null)
         {
             AchievementManager.Instance.NotifyZombieKill();
-            // Check if the player is currently wall-running.
-            var pm = FindAnyObjectByType<PlayerMovement>();
-            if (pm != null && pm.IsWallRunning)
-                AchievementManager.Instance.NotifyZombieKillWhileWallRunning();
+            // Check if the player is currently wall-running. Use the cached
+            // target's PlayerMovement instead of FindAnyObjectByType (which
+            // scans the whole hierarchy on every zombie death).
+            if (target != null)
+            {
+                var pm = target.GetComponent<PlayerMovement>();
+                if (pm != null && pm.IsWallRunning)
+                    AchievementManager.Instance.NotifyZombieKillWhileWallRunning();
+            }
         }
 
         if (ScoreManager.Instance != null)
@@ -700,8 +727,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         animator.SetTrigger(DeathHash);
 
-        Collider col =
-            GetComponent<Collider>();
+        Collider col = _collider;
 
         if (col != null)
             col.enabled = false;
@@ -837,11 +863,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         UnityEngine.AI.NavMeshHit midHit;
         if (UnityEngine.AI.NavMesh.SamplePosition(midPoint, out midHit, 3f, UnityEngine.AI.NavMesh.AllAreas))
         {
-            UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
-            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, midHit.position, UnityEngine.AI.NavMesh.AllAreas, path)
-                && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+            _reusablePath.ClearCorners();
+            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, midHit.position, UnityEngine.AI.NavMesh.AllAreas, _reusablePath)
+                && _reusablePath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
             {
-                agent.SetPath(path);
+                agent.SetPath(_reusablePath);
                 return;
             }
         }
@@ -858,11 +884,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             if (!UnityEngine.AI.NavMesh.SamplePosition(candidate, out hit, 1.5f, UnityEngine.AI.NavMesh.AllAreas))
                 continue;
 
-            UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
-            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, path)
-                && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+            _reusablePath.ClearCorners();
+            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, _reusablePath)
+                && _reusablePath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
             {
-                agent.SetPath(path);
+                agent.SetPath(_reusablePath);
                 return;
             }
         }
@@ -902,11 +928,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         // expensive synchronous pathfinding on every SetDestination call.
         if (hadNoPath && !agent.pathPending)
         {
-            UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
-            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, destination, UnityEngine.AI.NavMesh.AllAreas, path)
-                && path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+            _reusablePath.ClearCorners();
+            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, destination, UnityEngine.AI.NavMesh.AllAreas, _reusablePath)
+                && _reusablePath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
             {
-                agent.SetPath(path);
+                agent.SetPath(_reusablePath);
             }
         }
     }
@@ -931,12 +957,20 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         float dist = dir.magnitude;
         if (dist <= 0.1f) return true;
 
-        // Exclude the player and this zombie from the obstruction mask.
-        int mask = sightObstructionMask
-            & ~(1 << target.gameObject.layer)
-            & ~(1 << gameObject.layer);
+        // Cache the LOS mask — it only changes when the target or this zombie's
+        // layer changes (rare). Recompute only if the cached value is stale.
+        int myLayer = gameObject.layer;
+        int targetLayer = target.gameObject.layer;
+        int cacheKey = (myLayer << 8) | targetLayer;
+        if (_cachedLOSMask == -1 || _cachedLOSCacheKey != cacheKey)
+        {
+            _cachedLOSMask = sightObstructionMask
+                & ~(1 << targetLayer)
+                & ~(1 << myLayer);
+            _cachedLOSCacheKey = cacheKey;
+        }
 
-        return !Physics.Raycast(start, dir.normalized, dist, mask, QueryTriggerInteraction.Ignore);
+        return !Physics.Raycast(start, dir.normalized, dist, _cachedLOSMask, QueryTriggerInteraction.Ignore);
     }
 
     void FaceTarget()
