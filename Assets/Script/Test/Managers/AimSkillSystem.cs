@@ -63,9 +63,11 @@ namespace cowsins
                 bonusDamageVsSpecial = true;
             }
 
+#if UNITY_EDITOR
             Debug.Log(
                 $"AIM LVL {aimLevel} | Crit:{critChance:P0} | CritDmg:{critMultiplier}x | Recoil:{recoilMultiplier}"
             );
+#endif
         }
 
         public bool RollCritical()

@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace cowsins
 {
@@ -13,7 +12,15 @@ namespace cowsins
         public int bonusMagazine;
         public float bonusStamina;
         public float bonusDamage;
-     
+
+        // Cached player-side references — AddHealth/AddStamina/AddDamage are
+        // called once per skill node purchase, but FindAnyObjectByType scans
+        // the entire hierarchy each time. Cache them on first use and re-resolve
+        // only if the cached reference went null (e.g. player respawned).
+        private PlayerStats _cachedStats;
+        private PlayerMovement _cachedMovement;
+        private PlayerMultipliers _cachedMultipliers;
+
         private void Awake()
         {
             if (Instance == null)
@@ -34,7 +41,8 @@ namespace cowsins
             bonusHealth += amount;
             // Apply to the live PlayerStats so maxHealth/health update immediately
             // (PlayerStats.Start only reads bonusHealth once at spawn).
-            var stats = FindAnyObjectByType<PlayerStats>();
+            var stats = _cachedStats;
+            if (stats == null) { stats = FindAnyObjectByType<PlayerStats>(); _cachedStats = stats; }
             if (stats != null)
             {
                 stats.maxHealth += amount;
@@ -60,7 +68,8 @@ namespace cowsins
         public void AddStamina(float amount)
         {
             bonusStamina += amount;
-            var movement = FindAnyObjectByType<PlayerMovement>();
+            var movement = _cachedMovement;
+            if (movement == null) { movement = FindAnyObjectByType<PlayerMovement>(); _cachedMovement = movement; }
             if (movement != null)
             {
                 movement.playerSettings.maxStamina += amount;
@@ -74,7 +83,8 @@ namespace cowsins
         public void AddDamage(float amount)
         {
             bonusDamage += amount;
-            var multipliers = FindAnyObjectByType<PlayerMultipliers>();
+            var multipliers = _cachedMultipliers;
+            if (multipliers == null) { multipliers = FindAnyObjectByType<PlayerMultipliers>(); _cachedMultipliers = multipliers; }
             if (multipliers != null)
             {
                 multipliers.DamageMultiplier += amount;

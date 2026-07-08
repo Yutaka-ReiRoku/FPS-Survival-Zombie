@@ -48,13 +48,23 @@ namespace cowsins
             RefreshMovementStats();
         }
 
+        private float _debugUpdateTimer;
+
         private void Update()
         {
             if (ExperienceManager.Instance == null)
                 return;
 
-            currentLevel = ExperienceManager.Instance.GetPlayerLevel();
-            currentSkillPoints = ExperienceManager.Instance.SkillPoints;
+            // The debug serialized fields (currentLevel, currentSkillPoints)
+            // are only for inspector display — throttle to 4x/sec instead of
+            // every frame to avoid calling GetPlayerLevel() 60+ times/sec.
+            _debugUpdateTimer += Time.deltaTime;
+            if (_debugUpdateTimer >= 0.25f)
+            {
+                currentLevel = ExperienceManager.Instance.GetPlayerLevel();
+                currentSkillPoints = ExperienceManager.Instance.SkillPoints;
+                _debugUpdateTimer = 0f;
+            }
 
 #if UNITY_EDITOR
             // TEST ONLY
@@ -216,17 +226,12 @@ namespace cowsins
 
         #endregion
 
+        private static readonly int[] NodeCosts = { 0, 2, 3, 5, 8, 12 };
+
         private int GetCost(int node)
         {
-            switch (node)
-            {
-                case 1: return 2;
-                case 2: return 3;
-                case 3: return 5;
-                case 4: return 8;
-                case 5: return 12;
-            }
-
+            if (node >= 0 && node < NodeCosts.Length)
+                return NodeCosts[node];
             return 999;
         }
 

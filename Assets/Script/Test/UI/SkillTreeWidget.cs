@@ -29,6 +29,12 @@ public class SkillTreeWidget : MonoBehaviour
     private SkillTreeManager _mgr;
     private PlayerControl _playerControl;
     private bool _open;
+    private Canvas _rootCanvas;
+
+    // Cached theme colors — Refresh() is called every frame while open, so
+    // reading UITheme.Active and constructing new Color structs each call
+    // is wasteful. Refreshed only when the panel opens.
+    private Color _cAccent, _cCardBottom, _cCardTop, _cTextMuted, _cReady, _cDimLine;
 
     /// <summary>True while the skill-tree panel is visible.</summary>
     public bool IsOpen => _open;
@@ -211,7 +217,12 @@ public class SkillTreeWidget : MonoBehaviour
         return t;
     }
 
-    private void OnEnable() { StartCoroutine(Bind()); }
+    private void OnEnable()
+    {
+        if (_rootCanvas == null)
+            _rootCanvas = GetComponentInParent<Canvas>();
+        StartCoroutine(Bind());
+    }
 
     private IEnumerator Bind()
     {
@@ -249,6 +260,7 @@ public class SkillTreeWidget : MonoBehaviour
     private void Open()
     {
         _open = true;
+        CacheThemeColors();
         _panel.alpha = 1f; _panel.interactable = true; _panel.blocksRaycasts = true;
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
@@ -257,8 +269,8 @@ public class SkillTreeWidget : MonoBehaviour
         if (_playerControl != null)
             _playerControl.LoseControl();
         // Hide gameplay HUD while the skill tree is open.
-        var canvas = GetComponentInParent<Canvas>();
-        PauseManager.SetHUDVisible(canvas != null ? canvas.transform : transform.parent, false);
+        if (_rootCanvas == null) _rootCanvas = GetComponentInParent<Canvas>();
+        PauseManager.SetHUDVisible(_rootCanvas != null ? _rootCanvas.transform : transform.parent, false);
         if (_transition != null) _transition.Play();
         Refresh();
     }
@@ -278,9 +290,20 @@ public class SkillTreeWidget : MonoBehaviour
             if (_playerControl != null)
                 _playerControl.GrantControl();
             // Restore gameplay HUD when no other overlay is holding it.
-            var canvas = GetComponentInParent<Canvas>();
-            PauseManager.SetHUDVisible(canvas != null ? canvas.transform : transform.parent, true);
+            if (_rootCanvas == null) _rootCanvas = GetComponentInParent<Canvas>();
+            PauseManager.SetHUDVisible(_rootCanvas != null ? _rootCanvas.transform : transform.parent, true);
         }
+    }
+
+    private void CacheThemeColors()
+    {
+        var th = UITheme.Active;
+        _cAccent = th != null ? th.accent : new Color(0.85f, 0.78f, 0.45f, 1f);
+        _cCardBottom = th != null ? th.cardBottom : new Color(0.075f, 0.09f, 0.11f, 1f);
+        _cCardTop = th != null ? th.cardTop : new Color(0.122f, 0.149f, 0.18f, 1f);
+        _cTextMuted = th != null ? th.textMuted : new Color(0.62f, 0.66f, 0.72f, 1f);
+        _cReady = th != null ? th.successTop : new Color(0.31f, 0.878f, 0.541f, 1f);
+        _cDimLine = new Color(_cTextMuted.r, _cTextMuted.g, _cTextMuted.b, 0.3f);
     }
 
     private void TryUpgrade(int tree)
@@ -292,13 +315,10 @@ public class SkillTreeWidget : MonoBehaviour
 
     private void Refresh()
     {
-        var th = UITheme.Active;
-        Color accent = th != null ? th.accent : new Color(0.85f, 0.78f, 0.45f, 1f);
-        Color cardBottom = th != null ? th.cardBottom : new Color(0.075f, 0.09f, 0.11f, 1f);
-        Color cardTop = th != null ? th.cardTop : new Color(0.122f, 0.149f, 0.18f, 1f);
-        Color textMuted = th != null ? th.textMuted : new Color(0.62f, 0.66f, 0.72f, 1f);
-        Color ready = th != null ? th.successTop : new Color(0.31f, 0.878f, 0.541f, 1f);
-        Color dimLine = new Color(textMuted.r, textMuted.g, textMuted.b, 0.3f);
+        // Use cached theme colors (refreshed in Open()) instead of reading
+        // UITheme.Active and constructing new Color structs every frame.
+        Color accent = _cAccent, cardBottom = _cCardBottom, cardTop = _cCardTop;
+        Color textMuted = _cTextMuted, ready = _cReady, dimLine = _cDimLine;
 
         int sp = _mgr != null ? _mgr.CurrentSkillPoints : 0;
         _sp.text = "SKILL POINTS : " + sp;
@@ -334,7 +354,8 @@ public class SkillTreeWidget : MonoBehaviour
                     _nodeLabel[idx].color = textMuted;
                     _nodeBtn[idx].interactable = false;
                 }
-                _nodeLabel[idx].text = (n + 1).ToString();
+                // Node label text ("1".."5") is set once in Build() and never
+                // changes — no need to reassign it every frame.
             }
 
             // connection lines: accent if both endpoints unlocked, ready if upper is next+affordable, dim if both locked

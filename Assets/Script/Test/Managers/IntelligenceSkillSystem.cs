@@ -43,12 +43,13 @@ namespace cowsins
             {
                 xpPickupRadius = 15f;
                 highlightCollectibles = true;
-                Debug.Log("HIGHLIGHT ON");
             }
 
+#if UNITY_EDITOR
             Debug.Log(
                 $"INT {intelligenceLevel} | Radius: {xpPickupRadius} | XP: x{xpMultiplier:F2}"
             );
+#endif
         }
     }
 }
