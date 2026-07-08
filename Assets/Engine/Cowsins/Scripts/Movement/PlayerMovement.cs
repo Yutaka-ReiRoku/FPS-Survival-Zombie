@@ -156,9 +156,9 @@ namespace cowsins
             rb.angularDamping = 0.05f;
 
             // Increase contact offset for more stable collisions on mesh colliders (stairs, rough terrain)
-            if (playerCapsuleCollider != null && playerCapsuleCollider.contactOffset < 0.01f)
+            if (playerCapsuleCollider != null && playerCapsuleCollider.contactOffset < 0.05f)
             {
-                playerCapsuleCollider.contactOffset = 0.01f;
+                playerCapsuleCollider.contactOffset = 0.05f;
             }
         }
 

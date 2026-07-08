@@ -227,7 +227,7 @@ namespace cowsins
                 ? playerCapsuleCollider.height * 0.5f
                 : playerCapsuleCollider.height;
 
-            float radius = playerCapsuleCollider.radius * 0.8f;
+            float radius = playerCapsuleCollider.radius * 0.95f;
             float halfHeight = Mathf.Max(0, (height * 0.5f) - radius);
 
             // Calculate capsule endpoints from center

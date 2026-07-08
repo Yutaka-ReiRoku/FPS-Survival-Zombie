@@ -25,7 +25,7 @@ public class BasicMovementBehaviour
     private const float slopeGravityMultiplier = 150;
     private const float extraGravityMultiplier = 10f;
     private bool wasMovingLastFrame;
-    private const float stepClimbSpeed = 10f;
+
     public BasicMovementBehaviour(MovementContext context)
     {
         this.context = context;
@@ -238,9 +238,10 @@ public class BasicMovementBehaviour
         float stepH = playerSettings.stepHeight;
         if (stepH <= 0) return;
 
-        // Only assist when the player is actually blocked (low horizontal velocity despite input)
+        // Only assist when the player is actually blocked (velocity significantly below target speed)
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        if (horizontalVel.magnitude > 1.5f) return;
+        float currentTargetSpeed = playerMovement.CurrentSpeed;
+        if (currentTargetSpeed > 0 && horizontalVel.magnitude > currentTargetSpeed * 0.7f) return;
 
         // Don't assist if already moving upward (e.g. mid-jump)
         if (rb.linearVelocity.y > 0.5f) return;
@@ -267,7 +268,7 @@ public class BasicMovementBehaviour
             if (!Physics.CheckCapsule(testP0, testP1, radius, context.WhatIsGround, QueryTriggerInteraction.Ignore))
             {
                 // The capsule fits at this height! Lift the player up gradually.
-                float liftThisFrame = Mathf.Min(stepClimbSpeed * Time.fixedDeltaTime, testLift);
+                float liftThisFrame = Mathf.Min(playerSettings.stepAssistForce * Time.fixedDeltaTime, testLift);
                 rb.MovePosition(rb.position + Vector3.up * liftThisFrame);
                 return;
             }
