@@ -39,6 +39,12 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     [Tooltip("Thời gian cảnh báo (scream) trước khi nổ. Đặt rất nhỏ (vd 0.1s) để boomer gần như nổ ngay lập tức khi lại gần player.")]
     public float screamDuration = 0.1f;
 
+    [Header("Chase Re-path (Responsiveness)")]
+    [Tooltip("Khoảng cách tối thiểu (m) player phải di chuyển so với destination cuối cùng trước khi Boomer re-path ngay lập tức.")]
+    public float playerMovedRepathThreshold = 1f;
+    [Tooltip("Interval tối đa (giây) giữa các lần re-path khi player đứng yên.")]
+    public float maxRepathInterval = 0.1f;
+
     [Header("Explosion Damage")]
     public float explosionDamage = 50f;
     public float explosionRadius = 5f;
@@ -117,6 +123,10 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private float _stuckTimer;
     private int _noPathRetryCount;
     private float _noPathRetryTimer;
+
+    // --- Chase re-path throttling ---
+    private float _pathTimer;
+    private Vector3 _lastSetDestination = Vector3.zero;
 
     // --- Cached reusable objects (avoid per-frame allocation) ---
     private UnityEngine.AI.NavMeshPath _reusablePath;
@@ -202,6 +212,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         _stuckTimer = 0f;
         _lastStuckCheckPos = transform.position;
         _noPathRetryCount = 0;
+        _lastSetDestination = transform.position;
+        _pathTimer = maxRepathInterval; // force immediate first re-path
     }
 
     private void Update()
@@ -249,9 +261,19 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         {
             agent.isStopped = false;
 
-            SetDestinationRobust(
-                target.position
-            );
+            // Re-path when the throttle interval elapses OR the player has
+            // moved far enough from the last destination that the current
+            // path is stale. Calling SetDestination every frame floods the
+            // async pathfinding queue (each call cancels the previous pending
+            // path), so the boomer ends up with no usable path and slides.
+            _pathTimer += Time.deltaTime;
+            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+            if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+            {
+                SetDestinationRobust(target.position);
+                _lastSetDestination = target.position;
+                _pathTimer = 0f;
+            }
 
             // Stuck detection: if the boomer isn't making progress toward the
             // player while it should be chasing, try to recover.

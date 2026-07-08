@@ -836,10 +836,20 @@ MonoBehaviour:
   maxHealth: 70
   currentHealth: 0
   detectRange: 25
+  requireLineOfSight: 1
+  sightObstructionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  sightEyeHeight: 1.5
   moveSpeed: 1.5
   rotationSpeed: 10
+  stuckTimeThreshold: 3
+  stuckMoveThreshold: 1
+  stuckRepathRadius: 5
   explodeRange: 3
   screamDuration: 1.5
+  playerMovedRepathThreshold: 0.01
+  maxRepathInterval: 0.01
   explosionDamage: 50
   explosionRadius: 5
   explosionPrefab: {fileID: 5018994898019192216, guid: ab977a440365d1c4092c15552e5ff157, type: 3}
@@ -872,6 +882,18 @@ MonoBehaviour:
   popLootOnDeath: 1
   lootPopUpwardSpeed: 5
   lootPopHorizontalSpeed: 3.5
+  lootTrailSettings:
+    trailTime: 0.45
+    startWidth: 0.35
+    endWidth: 0.02
+    enableGlow: 1
+    glowMaxParticles: 60
+    glowEmissionRate: 35
+    glowStartSize: 0.18
+    glowStartLifetime: 0.5
+    coinColor: {r: 1, g: 0.85, b: 0.25, a: 1}
+    xpColor: {r: 0.7, g: 0.25, b: 1, a: 1}
+    defaultColor: {r: 1, g: 0.7, b: 0.4, a: 1}
   explodeFxDelay: 0.25
   cleanupDelay: 2.5
 --- !u!195 &7774266083722105626

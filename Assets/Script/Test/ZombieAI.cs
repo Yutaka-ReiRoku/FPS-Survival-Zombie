@@ -121,6 +121,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     [Tooltip("How far to search for an intermediate re-path position when stuck (no teleport — just re-pathing).")]
     public float stuckRepathRadius = 5f;
 
+    [Header("Chase Re-path (Responsiveness)")]
+    [Tooltip("Khoảng cách tối thiểu (m) player phải di chuyển so với destination cuối cùng trước khi zombie re-path ngay lập tức. Nhỏ hơn = truy cập vị trí mới nhanh hơn nhưng tốn CPU pathfinding hơn.")]
+    public float playerMovedRepathThreshold = 1f;
+    [Tooltip("Interval tối đa (giây) giữa các lần re-path khi player đứng yên. Re-path ngay khi player di chuyển quá playerMovedRepathThreshold.")]
+    public float maxRepathInterval = 0.1f;
+
     [Header("Attack")]
     public float attackCooldown = 1.5f;
     public int attackDamage = 20;
@@ -260,6 +266,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         _lastStuckCheckPos = transform.position;
         _wasInAttackRange = false;
         _noPathRetryCount = 0;
+        _lastSetDestination = transform.position;
+        pathTimer = maxRepathInterval; // force immediate first re-path
 
         if (target == null)
         {
@@ -347,7 +355,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     }
 
 
-    private float distanceTimer = 0f;
     private float cachedDistance = 100f;
 
     void Update()
@@ -357,16 +364,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         attackTimer += Time.deltaTime;
         wanderTimer += Time.deltaTime;
-        distanceTimer += Time.deltaTime;
 
-        if (distanceTimer >= 0.2f)
-        {
-            cachedDistance =
-                Vector3.Distance(
-                    transform.position,
-                    target.position);
-            distanceTimer = 0f;
-        }
+        // Compute distance every frame — Vector3.Distance is extremely cheap
+        // (a few arithmetic ops) and using a stale 0.2s cache causes the zombie
+        // to react late when the player moves in/out of detect/attack range.
+        cachedDistance = Vector3.Distance(transform.position, target.position);
 
         // First-time detection requires both distance AND line of sight (if
         // requireLineOfSight is enabled). Hysteresis and alert memory below do
@@ -407,6 +409,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     }
 
     private float pathTimer = 0f;
+    private Vector3 _lastSetDestination = Vector3.zero;
 
     void ChasePlayer(float distance)
     {
@@ -506,7 +509,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // stops at stoppingDistance from the jittered dest (which may be
             // further from the player than attackDistance), then the code sees
             // distance > attackDistance and chases again -> micro-sliding.
-            pathTimer += Time.deltaTime;
             chaseJitterTimer -= Time.deltaTime;
             if (chaseJitterTimer <= 0f)
             {
@@ -517,13 +519,21 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
                 chaseJitterTimer = Random.Range(0.4f, 0.9f);
             }
 
-            if (pathTimer >= 0.5f)
+            pathTimer += Time.deltaTime;
+
+            // Re-path when the throttle interval elapses OR the player has
+            // moved far enough from the last destination that the current
+            // path is stale. This keeps zombies responsive when the player
+            // changes direction without flooding the async pathfinding queue.
+            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+            if (pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
             {
                 // Disable jitter when close to attack range to prevent flip-flop.
                 Vector3 dest = target.position;
                 if (distance > attackDistance + chaseJitterRadius + 1f)
                     dest += chaseJitterOffset;
                 SetDestinationRobust(dest);
+                _lastSetDestination = dest;
                 pathTimer = 0f;
             }
 

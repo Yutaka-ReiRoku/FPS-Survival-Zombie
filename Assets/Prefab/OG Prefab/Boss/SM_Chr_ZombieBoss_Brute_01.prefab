@@ -1298,6 +1298,8 @@ MonoBehaviour:
   jumpRadius: 10
   shakeCameraOnLand: 1
   screamDuration: 2.5
+  playerMovedRepathThreshold: 0.01
+  maxRepathInterval: 0.01
   screamClip: {fileID: 8300000, guid: decad48e66c9e3a418c89849e2d9dc5d, type: 3}
   meleeAttackClip: {fileID: 8300000, guid: 3aa049bb077689345a82a44125e24046, type: 3}
   jumpLandClip: {fileID: 8300000, guid: 3aa049bb077689345a82a44125e24046, type: 3}

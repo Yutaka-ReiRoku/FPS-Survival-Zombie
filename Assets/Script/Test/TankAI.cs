@@ -36,6 +36,12 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     [Header("Scream")]
     public float screamDuration = 2.5f;
 
+    [Header("Chase Re-path (Responsiveness)")]
+    [Tooltip("Khoảng cách tối thiểu (m) player phải di chuyển so với destination cuối cùng trước khi Tank re-path ngay lập tức.")]
+    public float playerMovedRepathThreshold = 1f;
+    [Tooltip("Interval tối đa (giây) giữa các lần re-path khi player đứng yên.")]
+    public float maxRepathInterval = 0.1f;
+
     [Header("Audio")]
     [Tooltip("Sound khi tank phát hiện player và bắt đầu scream.")]
     public AudioClip screamClip;
@@ -75,8 +81,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     private float attackTimer;
     private float jumpTimer;
     private float _pathTimer;
-    private float _distanceTimer;
     private float _cachedDistance;
+    private Vector3 _lastSetDestination = Vector3.zero;
 
     private bool isDead;
     public bool IsDead { get { return isDead; } }
@@ -149,6 +155,9 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
         animator.speed =
             Random.Range(0.95f, 1.05f);
+
+        _lastSetDestination = transform.position;
+        _pathTimer = maxRepathInterval; // force immediate first re-path
     }
 
     private void Update()
@@ -169,19 +178,11 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
         attackTimer += Time.deltaTime;
         jumpTimer += Time.deltaTime;
-        _distanceTimer += Time.deltaTime;
 
-        // Cache distance — recompute every 0.2s instead of every frame.
-        // The Tank is slow and the player rarely teleports, so 0.2s is plenty.
-        if (_distanceTimer >= 0.2f)
-        {
-            _cachedDistance =
-                Vector3.Distance(
-                    transform.position,
-                    target.position
-                );
-            _distanceTimer = 0f;
-        }
+        // Compute distance every frame — Vector3.Distance is extremely cheap
+        // and a stale 0.2s cache causes the Tank to react late when the player
+        // moves in/out of detect/attack range.
+        _cachedDistance = Vector3.Distance(transform.position, target.position);
 
         float distance = _cachedDistance;
 
@@ -215,16 +216,16 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         {
             agent.isStopped = false;
 
-            // Throttle SetDestination to every 0.3s — the Tank is slow and
-            // the player rarely changes direction fast enough to need more
-            // frequent re-pathing. This also reduces async pathfinding load
-            // on the NavMesh (which is shared with 50+ regular zombies).
+            // Re-path when the throttle interval elapses OR the player has
+            // moved far enough from the last destination that the current
+            // path is stale. This keeps the Tank responsive when the player
+            // changes direction without flooding the async pathfinding queue.
             _pathTimer += Time.deltaTime;
-            if (_pathTimer >= 0.3f)
+            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+            if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
             {
-                agent.SetDestination(
-                    target.position
-                );
+                agent.SetDestination(target.position);
+                _lastSetDestination = target.position;
                 _pathTimer = 0f;
             }
         }

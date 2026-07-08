@@ -566,8 +566,10 @@ MonoBehaviour:
     m_Bits: 4294967295
   sightEyeHeight: 1.5
   stuckTimeThreshold: 3
-  stuckMoveThreshold: 1
+  stuckMoveThreshold: 0.5
   stuckRepathRadius: 5
+  playerMovedRepathThreshold: 0.01
+  maxRepathInterval: 0.01
   attackCooldown: 1.5
   attackDamage: 20
   maxHealth: 10
