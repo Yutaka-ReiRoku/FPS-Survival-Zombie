@@ -273,6 +273,25 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // Performance: HighQuality avoidance is ~quadratic with agent count; use cheap avoidance + varied priority.
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
             agent.avoidancePriority = Random.Range(30, 70);
+
+            // UNDERGROUND NAVMESH FIX: 31% of the NavMesh triangles are
+            // underground (y=-2 to -1385, from beach/rocks/sewers) and
+            // disconnected from the main surface. If the zombie spawns on
+            // an underground NavMesh island, it can never reach the player
+            // and will slide around forever. Sample a ground-level NavMesh
+            // position above the zombie and warp there if the current
+            // position is too far below y=0.
+            if (transform.position.y < -1f)
+            {
+                UnityEngine.AI.NavMeshHit groundHit;
+                Vector3 searchFrom = new Vector3(transform.position.x, 0f, transform.position.z);
+                if (UnityEngine.AI.NavMesh.SamplePosition(searchFrom, out groundHit, 10f, UnityEngine.AI.NavMesh.AllAreas)
+                    && groundHit.position.y >= -1f)
+                {
+                    agent.Warp(groundHit.position);
+                    transform.position = groundHit.position;
+                }
+            }
         }
 
         // Keep the Rigidbody KINEMATIC while alive so the NavMeshAgent fully
@@ -965,12 +984,29 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         NavMeshHit hit;
 
-        NavMesh.SamplePosition(
+        // Reject underground NavMesh positions (disconnected islands at
+        // y<-1 that cover 31% of the NavMesh). Search at ground level.
+        if (NavMesh.SamplePosition(
             randomDirection,
             out hit,
             distance,
-            NavMesh.AllAreas);
+            NavMesh.AllAreas))
+        {
+            // If the sampled position is underground, try again at ground level.
+            if (hit.position.y < -1f)
+            {
+                Vector3 groundLevel = new Vector3(randomDirection.x, 0f, randomDirection.z);
+                if (NavMesh.SamplePosition(groundLevel, out hit, distance, NavMesh.AllAreas)
+                    && hit.position.y >= -1f)
+                    return hit.position;
+            }
+            else
+            {
+                return hit.position;
+            }
+        }
 
-        return hit.position;
+        // Fallback: return origin if no valid ground-level position found.
+        return origin;
     }
 }

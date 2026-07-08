@@ -388,6 +388,13 @@ public class Spawm : MonoBehaviour
     /// to the original position if no NavMesh point is found (the zombie's own
     /// stuck-recovery logic will handle it at runtime). If searchRadius is 0,
     /// validation is skipped (legacy behavior).
+    ///
+    /// Y-HEIGHT FILTER: NavMesh.SamplePosition searches in a 3D sphere, so it
+    /// can snap to underground NavMesh surfaces (sewers, basements, beach rocks
+    /// at y=-2 to -1385). 31% of the NavMesh triangles are underground and
+    /// disconnected from the main surface. Zombies spawning there can never
+    /// reach the player and slide around on a disconnected island. We reject
+    /// any NavMesh position more than 2m below the requested position's Y.
     /// </summary>
     private Vector3 FindValidNavMeshPosition(Vector3 requested, float searchRadius)
     {
@@ -409,11 +416,16 @@ public class Spawm : MonoBehaviour
             playerNavMeshPos = Vector3.zero;
         }
 
+        // Maximum allowed Y difference — reject underground NavMesh positions.
+        const float maxBelowY = 2f;
+        float requestY = requested.y;
+
         // Try the exact position first with a small tolerance.
         NavMeshHit hit;
         if (NavMesh.SamplePosition(requested, out hit, 2f, NavMesh.AllAreas))
         {
-            if (!hasPlayerNavMesh || HasPathToPlayer(hit.position, playerNavMeshPos))
+            if (hit.position.y >= requestY - maxBelowY &&
+                (!hasPlayerNavMesh || HasPathToPlayer(hit.position, playerNavMeshPos)))
                 return hit.position;
         }
 
@@ -426,7 +438,8 @@ public class Spawm : MonoBehaviour
                 Vector3 candidate = requested + new Vector3(Mathf.Cos(angle) * r, 0f, Mathf.Sin(angle) * r);
                 if (NavMesh.SamplePosition(candidate, out hit, 2f, NavMesh.AllAreas))
                 {
-                    if (!hasPlayerNavMesh || HasPathToPlayer(hit.position, playerNavMeshPos))
+                    if (hit.position.y >= requestY - maxBelowY &&
+                        (!hasPlayerNavMesh || HasPathToPlayer(hit.position, playerNavMeshPos)))
                         return hit.position;
                 }
             }
