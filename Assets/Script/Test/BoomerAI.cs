@@ -143,6 +143,23 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             agent.angularSpeed = 300f;
             agent.stoppingDistance = explodeRange;
             agent.updateRotation = false;
+            // Performance: use cheap avoidance so Boomers don't overload the
+            // avoidance system when many regular zombies are also active.
+            agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+            agent.avoidancePriority = 15; // Special enemy — slightly higher priority than regular zombies.
+        }
+
+        // Keep the Rigidbody KINEMATIC while alive so the NavMeshAgent fully
+        // controls movement. A non-kinematic Rigidbody with gravity fights the
+        // agent on stairs/slopes/bridges (Ch5 = ApartmentBridge): gravity pulls
+        // the Boomer down, the capsule collider catches on step edges, and the
+        // two systems jitter — the Boomer slides in one direction. Kinematic
+        // mode lets the agent drive position smoothly while still sending
+        // collision events (for hit detection, triggers, etc.).
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = true; // kept on so the body can fall if the agent is disabled later.
         }
 
         if (animator != null)

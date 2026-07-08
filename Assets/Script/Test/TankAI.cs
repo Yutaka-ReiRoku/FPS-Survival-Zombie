@@ -105,6 +105,24 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             agent.angularSpeed = 300f;
             agent.stoppingDistance = meleeRange;
             agent.updateRotation = false;
+            // Performance: HighQuality avoidance is ~quadratic with agent count;
+            // use cheap avoidance so the Tank doesn't overload the avoidance
+            // system when many regular zombies are also active (Ch5 boss wave).
+            agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+            agent.avoidancePriority = 10; // Boss gets high priority so regular zombies yield.
+        }
+
+        // Keep the Rigidbody KINEMATIC while alive so the NavMeshAgent fully
+        // controls movement. A non-kinematic Rigidbody with gravity fights the
+        // agent on stairs/slopes/bridges (Ch5 = ApartmentBridge): gravity pulls
+        // the Tank down, the capsule collider catches on step edges, and the two
+        // systems jitter — the Tank slides in one direction. Kinematic mode lets
+        // the agent drive position smoothly while still sending collision events.
+        // Die() sets kinematic again for the death animation, so this is consistent.
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = true; // kept on so the body can fall if the agent is disabled later.
         }
 
         animator.speed =
@@ -325,10 +343,14 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
         agent.isStopped = true;
 
+        // The Rigidbody is already kinematic from Start(), so there is no need
+        // to toggle gravity/velocity here — the agent is stopped and the
+        // animation drives the visual. Previously this disabled gravity on a
+        // non-kinematic body, which caused the Tank to slide after the jump
+        // ended (gravity was re-enabled but the agent was still stopped, so
+        // physics pulled it down a slope/stairs).
         if (rb != null)
         {
-            rb.useGravity = false;
-
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
@@ -351,10 +373,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             isJumpAttacking = false;
             isAttacking = false;
 
-            if (rb != null)
-            {
-                rb.useGravity = true;
-            }
+            // Nothing to restore — the Rigidbody stayed kinematic throughout
+            // the jump. The agent will resume driving movement next Update.
         }
     }
 

@@ -310,7 +310,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
@@ -348,9 +348,9 @@ NavMeshAgent:
   m_AgentTypeID: 0
   m_Radius: 0.25
   m_Speed: 3.5
-  m_Acceleration: 8
+  m_Acceleration: 6
   avoidancePriority: 50
-  m_AngularSpeed: 120
+  m_AngularSpeed: 360
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
@@ -358,7 +358,7 @@ NavMeshAgent:
   m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
+  m_ObstacleAvoidanceType: 1
 --- !u!114 &13525777925114385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,24 +374,24 @@ MonoBehaviour:
   target: {fileID: 0}
   walkSpeed: 1.3
   runSpeed: 2.5
-  detectDistance: 20
+  detectDistance: 30
   attackDistance: 2
   wanderRadius: 15
   wanderInterval: 5
-  loseSightDistance: 28
+  loseSightDistance: 40
   alertMemoryDuration: 6
-  lungeChancePerSecond: 0.6
-  lungeSpeedMultiplier: 2.5
-  lungeDuration: 1
+  lungeChancePerSecond: 0.15
+  lungeSpeedMultiplier: 1.5
+  lungeDuration: 0.5
   feintPauseChancePerSecond: 0.02
   feintPauseDuration: 0.4
   chaseJitterRadius: 0.5
-  requireLineOfSight: 1
+  requireLineOfSight: 0
   sightObstructionMask:
     serializedVersion: 2
     m_Bits: 4294967295
   sightEyeHeight: 1.5
-  stuckTimeThreshold: 1.5
+  stuckTimeThreshold: 3
   stuckMoveThreshold: 1
   stuckRepathRadius: 5
   attackCooldown: 1.5

@@ -266,7 +266,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             agent.enabled = true;
             agent.isStopped = false;
             agent.speed = walkSpeed;
-            agent.stoppingDistance = attackDistance;
+            agent.stoppingDistance = attackDistance * 0.5f;
             // Let the agent control rotation during Wander; ChasePlayer overrides
             // via FaceTarget() which is fine since both point toward the player/path.
             agent.updateRotation = true;
@@ -381,6 +381,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             hasDetectedPlayer = true;
         }
 
+        // Take over rotation from the agent so FaceTarget() and the agent
+        // don't fight over transform.rotation (causes visual sliding when
+        // the zombie faces the player while the path moves it sideways).
+        if (agent.updateRotation)
+            agent.updateRotation = false;
+
         // --- Roll lunge / feint once per second for unpredictability ---
         erraticRollTimer += Time.deltaTime;
         if (erraticRollTimer >= 1f)
@@ -459,6 +465,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             agent.speed = speed;
 
             // --- Jitter the chase destination so the zombie doesn't run in a straight line ---
+            // Only apply jitter when far enough from the player. Near attack range,
+            // jitter causes the destination to shift by up to chaseJitterRadius,
+            // which combined with stoppingDistance creates a flip-flop: the agent
+            // stops at stoppingDistance from the jittered dest (which may be
+            // further from the player than attackDistance), then the code sees
+            // distance > attackDistance and chases again -> micro-sliding.
             pathTimer += Time.deltaTime;
             chaseJitterTimer -= Time.deltaTime;
             if (chaseJitterTimer <= 0f)
@@ -470,9 +482,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
                 chaseJitterTimer = Random.Range(0.4f, 0.9f);
             }
 
-            if (pathTimer >= 0.25f)
+            if (pathTimer >= 0.5f)
             {
-                Vector3 dest = target.position + chaseJitterOffset;
+                // Disable jitter when close to attack range to prevent flip-flop.
+                Vector3 dest = target.position;
+                if (distance > attackDistance + chaseJitterRadius + 1f)
+                    dest += chaseJitterOffset;
                 SetDestinationRobust(dest);
                 pathTimer = 0f;
             }
@@ -488,6 +503,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     void Wander()
     {
         agent.speed = walkSpeed;
+
+        // Let the agent handle rotation during wander (ChasePlayer disabled it).
+        if (!agent.updateRotation)
+            agent.updateRotation = true;
 
         // Not chasing — reset stuck detection state.
         _stuckTimer = 0f;
@@ -720,17 +739,21 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         // previous path completes (e.g. it was stopped in attack range, the
         // path finished, and then the player moved away). SetDestination
         // alone may silently fail to create a new path in this state.
-        if (agent != null && agent.isOnNavMesh && !agent.hasPath && !agent.isStopped)
+        // Throttle re-path attempts to every 0.5s to avoid spamming
+        // SetDestination every frame (which floods the async pathfinding queue).
+        if (agent != null && agent.isOnNavMesh && !agent.hasPath && !agent.pathPending && !agent.isStopped)
         {
             _noPathRetryCount++;
-            SetDestinationRobust(target.position);
+            if (_noPathRetryCount % 30 == 0) // ~0.5s at 60fps
+            {
+                SetDestinationRobust(target.position);
+            }
 
-            // If SetDestinationRobust keeps failing (agent still has no path
-            // after multiple attempts), the agent is in a broken state. Try
-            // a full agent reset: disable/re-enable/warp to snap it out. This
-            // is NOT a teleport to the player — it warps to the zombie's OWN
-            // position to force the agent to re-initialize.
-            if (_noPathRetryCount >= 10 && !agent.hasPath)
+            // If the agent still has no path after ~5 seconds of retries,
+            // it's in a broken state. Try a full agent reset: disable/re-enable/
+            // warp to snap it out. This is NOT a teleport to the player — it
+            // warps to the zombie's OWN position to force re-initialization.
+            if (_noPathRetryCount >= 300 && !agent.hasPath) // ~5s at 60fps
             {
                 Vector3 currentPos = transform.position;
                 agent.enabled = false;
@@ -832,17 +855,33 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     /// (happens after the agent's previous path completed while isStopped was
     /// true). Falls back to manually calculating the path and assigning it via
     /// SetPath, which reliably creates a new path.
+    ///
+    /// IMPORTANT: The fallback (CalculatePath) is only used when the agent
+    /// has NO path from a PREVIOUS frame — NOT immediately after
+    /// SetDestination. SetDestination is async: it queues a path request but
+    /// doesn't compute it synchronously, so hasPath is false on the same frame.
+    /// Checking hasPath immediately would trigger CalculatePath every call
+    /// (260+ synchronous path calculations per second on a 384k-triangle
+    /// NavMesh = frame stalls = stale paths = sliding).
+    /// Instead, we only use the fallback when the agent had no path BEFORE
+    /// this call (i.e. it was stuck in the post-isStopped no-path state).
     /// </summary>
     private void SetDestinationRobust(Vector3 destination)
     {
         if (agent == null || !agent.isOnNavMesh) return;
 
+        // Remember whether the agent had a path BEFORE this call. If it
+        // didn't, SetDestination alone may silently fail (Unity issue after
+        // isStopped + path completion), so we need the CalculatePath fallback.
+        bool hadNoPath = !agent.hasPath && !agent.pathPending;
+
         agent.isStopped = false;
         agent.SetDestination(destination);
 
-        // If SetDestination didn't create a path (known Unity issue after
-        // isStopped toggle + path completion), calculate one manually.
-        if (!agent.hasPath)
+        // Only use the synchronous CalculatePath fallback when the agent was
+        // in the broken no-path state before this call. This avoids running
+        // expensive synchronous pathfinding on every SetDestination call.
+        if (hadNoPath && !agent.pathPending)
         {
             UnityEngine.AI.NavMeshPath path = new UnityEngine.AI.NavMeshPath();
             if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, destination, UnityEngine.AI.NavMesh.AllAreas, path)

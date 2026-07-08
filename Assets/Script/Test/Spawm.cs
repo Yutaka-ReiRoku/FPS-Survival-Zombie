@@ -295,43 +295,21 @@ public class Spawm : MonoBehaviour
     /// <summary>
     /// Assigns random wander destinations to spawned zombies so they patrol
     /// the area instead of standing still. Called every frame.
-    /// IMPORTANT: Only wanders zombies that are NOT actively chasing the player.
-    /// Once a zombie has detected the player, its ZombieAI.ChasePlayer controls
-    /// the destination — roaming must not override it (otherwise the zombie
-    /// runs to a random wander point instead of chasing, which looks like
-    /// teleporting/erratic movement).
+    /// IMPORTANT: This is now DISABLED — ZombieAI.Wander() already handles
+    /// wandering with NavMesh-validated positions (RandomNavSphere +
+    /// SetDestinationRobust). Having BOTH Spawm.UpdateRoaming and
+    /// ZombieAI.Wander setting destinations for the same agent causes a
+    /// conflict: they alternate overriding each other's destination every
+    /// few seconds, making the zombie zigzag/erratic. Additionally,
+    /// Spawm.UpdateRoaming used raw random positions (not NavMesh-validated),
+    /// so ~31% of destinations were inside walls/colliders, causing
+    /// SetDestination to fail silently and the zombie to stand still.
+    /// The roaming fields (enableRoaming, wanderInterval, wanderRadius) are
+    /// kept for backward compatibility but no longer drive agent destinations.
     /// </summary>
     private void UpdateRoaming()
     {
-        if (!enableRoaming) return;
-
-        foreach (var z in _localActiveZombies)
-        {
-            if (z == null) continue;
-            if (!_wanderTimers.TryGetValue(z, out float nextTime)) continue;
-            if (Time.time < nextTime) continue;
-
-            // Skip zombies that are actively chasing the player — their
-            // ZombieAI.ChasePlayer owns the destination. Roaming is only for
-            // idle/wandering zombies that haven't detected the player yet.
-            if (z.IsDead || z.IsChasing) continue;
-
-            // Pick a random point within wanderRadius of the spawner center.
-            Vector3 wanderPos = transform.position + new Vector3(
-                Random.Range(-wanderRadius, wanderRadius),
-                0f,
-                Random.Range(-wanderRadius, wanderRadius)
-            );
-
-            // Set the zombie's destination via its NavMeshAgent if available.
-            var agent = z.GetComponent<UnityEngine.AI.NavMeshAgent>();
-            if (agent != null && agent.isOnNavMesh)
-            {
-                agent.SetDestination(wanderPos);
-            }
-
-            _wanderTimers[z] = Time.time + wanderInterval + Random.Range(-1f, 2f);
-        }
+        // Disabled — ZombieAI.Wander() owns wandering. See summary above.
     }
 
     private void CheckCamperPunishment()
