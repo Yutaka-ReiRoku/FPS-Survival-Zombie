@@ -4,24 +4,18 @@ using UnityEngine.Audio;
 using UnityEngine.Rendering.PostProcessing;
 
 /// <summary>
-/// Plays a short cinematic when a target story quest completes (e.g. Quest 12 —
-/// escaping the town): cuts to a temporary camera looking at the bomb site,
-/// spawns a mushroom-cloud VFX + explosion SFX, holds the shot, then cuts back
-/// to normal gameplay.
+/// Plays a short cinematic: cuts to a temporary camera looking at the bomb
+/// site, spawns a mushroom-cloud VFX + explosion SFX, holds the shot, then
+/// cuts back to normal gameplay.
 ///
-/// Listens to StoryManager.OnQuestCompleted and fires once when targetQuest
-/// matches the completed quest (leave targetQuest null to fire on ANY quest
-/// completion — not recommended). Does not modify QuestTrigger/StoryManager/
-/// WaveQuestInteractable in any way; it is a pure additive listener, following
-/// the same subscribe pattern used by ChapterBoundary.
+/// This component does not trigger itself — it exposes <see cref="Play"/> so
+/// an orchestrator (e.g. EndingSequenceManager) can run it as one step of a
+/// larger sequence (wait for journal popup to close -> bomb cutscene ->
+/// epilogue -> credits). Does not modify QuestTrigger/StoryManager/
+/// WaveQuestInteractable/JournalUI in any way.
 /// </summary>
 public class BombExplosionCutscene : MonoBehaviour
 {
-    [Header("Trigger")]
-    [Tooltip("Quest that must complete to fire this cutscene (e.g. Quest_12_EscapeTown). " +
-             "Leave null to fire on ANY quest completion (not recommended).")]
-    public QuestData targetQuest;
-
     [Header("Camera")]
     [Tooltip("World position for the temporary cutscene camera.")]
     public Vector3 cameraPoint = new Vector3(-271f, 37.08f, 42.47f);
@@ -55,38 +49,22 @@ public class BombExplosionCutscene : MonoBehaviour
     [Tooltip("How long (real seconds) the VFX instance stays before being destroyed after the cutscene ends.")]
     public float vfxLifetime = 20f;
 
-    private bool _fired;
+    private bool _played;
     private CanvasGroup _fadeGroup;
     private GameObject _fadeCanvasGO;
 
-    private void OnEnable() => Subscribe();
-
-    private void Start() => Subscribe(); // Fallback in case OnEnable ran before StoryManager.Awake.
-
-    private void OnDisable()
+    /// <summary>
+    /// Plays the cutscene once, then invokes <paramref name="onComplete"/>.
+    /// Safe to call only once per instance (subsequent calls are ignored).
+    /// </summary>
+    public void Play(System.Action onComplete = null)
     {
-        if (StoryManager.Instance != null)
-            StoryManager.Instance.OnQuestCompleted -= HandleQuestCompleted;
+        if (_played) { onComplete?.Invoke(); return; }
+        _played = true;
+        StartCoroutine(PlaySequence(onComplete));
     }
 
-    private void Subscribe()
-    {
-        if (StoryManager.Instance == null) return;
-        StoryManager.Instance.OnQuestCompleted -= HandleQuestCompleted;
-        StoryManager.Instance.OnQuestCompleted += HandleQuestCompleted;
-    }
-
-    private void HandleQuestCompleted(QuestData quest)
-    {
-        if (_fired) return;
-        if (targetQuest != null && quest != targetQuest) return;
-
-        _fired = true;
-        Debug.Log($"[BombExplosionCutscene] Firing for quest '{quest?.title}'.");
-        StartCoroutine(PlaySequence());
-    }
-
-    private IEnumerator PlaySequence()
+    private IEnumerator PlaySequence(System.Action onComplete)
     {
         BuildFadeCanvas();
 
@@ -209,6 +187,7 @@ public class BombExplosionCutscene : MonoBehaviour
 
         Destroy(_fadeCanvasGO);
         Debug.Log("[BombExplosionCutscene] Sequence complete.");
+        onComplete?.Invoke();
     }
 
     private IEnumerator WaitRealtime(float seconds)
