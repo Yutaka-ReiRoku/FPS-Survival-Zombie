@@ -15,37 +15,21 @@ namespace cowsins
 
         private IntelligenceSkillSystem intelligenceSystem;
         private AimSkillSystem aimSystem;
-
-        private PlayerMovement movement;
-
-        private float baseWalkSpeed;
-        private float baseRunSpeed;
-        private float baseAirControl;
-        private float baseGrappleForce;
-        private int baseMaxJumps;
+        private MovementSkillSystem movementSystem;
 
         private void Awake()
         {
-            movement = GetComponent<PlayerMovement>();
-            if (movement == null) movement = FindAnyObjectByType<PlayerMovement>();
             intelligenceSystem = GetComponent<IntelligenceSkillSystem>();
             aimSystem = GetComponent<AimSkillSystem>();
+            movementSystem = GetComponent<MovementSkillSystem>();
 
-            if (movement == null)
+            if (movementSystem == null)
             {
-                Debug.LogError("PlayerMovement not found!");
+                Debug.LogError("MovementSkillSystem not found on player!");
                 return;
             }
 
-            baseWalkSpeed = movement.playerSettings.walkSpeed;
-            baseRunSpeed = movement.playerSettings.runSpeed;
-            baseAirControl = movement.playerSettings.controlAirborne;
-            baseGrappleForce = movement.playerSettings.grappleForce;
-            // The skill tree governs double-jump unlock (movement level 5), so
-            // the base jump count is always 1 regardless of the prefab value.
-            baseMaxJumps = 1;
-
-            RefreshMovementStats();
+            movementSystem.RefreshStats(movementLevel);
         }
 
         private float _debugUpdateTimer;
@@ -100,7 +84,7 @@ namespace cowsins
 
             movementLevel++;
 
-            RefreshMovementStats();
+            movementSystem.RefreshStats(movementLevel);
 
             // Survival bonus folded into this branch: +stamina per node.
             if (PlayerUpgradeManager.Instance != null)
@@ -109,65 +93,6 @@ namespace cowsins
             Debug.Log($"Movement upgraded to Node {movementLevel}");
 
             return true;
-        }
-
-        private void RefreshMovementStats()
-        {
-            if (movement == null) return;
-            movement.playerSettings.walkSpeed = baseWalkSpeed;
-            movement.playerSettings.runSpeed = baseRunSpeed;
-            movement.playerSettings.controlAirborne = baseAirControl;
-            movement.playerSettings.grappleForce = baseGrappleForce;
-            movement.playerSettings.maxJumps = baseMaxJumps;
-
-            movement.playerSettings.canWallRun = false;
-            movement.playerSettings.canWallBounce = false;
-            movement.playerSettings.canDash = false;
-
-            if (movementLevel >= 1)
-            {
-                movement.playerSettings.walkSpeed *= 1.05f;
-            }
-
-            if (movementLevel >= 2)
-            {
-                movement.playerSettings.runSpeed *= 1.10f;
-            }
-
-            if (movementLevel >= 3)
-            {
-                movement.playerSettings.controlAirborne =
-                    Mathf.Clamp01(baseAirControl * 1.15f);
-                // Dash unlock (moved from level 5). Only (re)enable and reset
-                // charges when it was previously disabled. Without this,
-                // DashBehaviour.currentDashes stays at 0 (the constructor skips
-                // initialization when canDash is false), so CanExecute() would
-                // always return false even after unlocking.
-                if (!movement.playerSettings.canDash)
-                {
-                    movement.playerSettings.canDash = true;
-                    movement.dashBehaviour?.ResetDashes();
-                }
-            }
-
-            if (movementLevel >= 4)
-            {
-                movement.playerSettings.canWallRun = true;
-                movement.playerSettings.canWallBounce = true;
-            }
-
-            if (movementLevel >= 5)
-            {
-                movement.playerSettings.runSpeed *= 1.25f;
-                movement.playerSettings.grappleForce *= 1.25f;
-                // Double jump unlock: ensure at least 2 jumps. jumpCount is
-                // refreshed automatically by JumpBehaviour.Tick when grounded,
-                // or on the next OnLand event.
-                if (movement.playerSettings.maxJumps < 2)
-                {
-                    movement.playerSettings.maxJumps = 2;
-                }
-            }
         }
 
         #endregion
