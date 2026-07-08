@@ -5205,6 +5205,42 @@ PrefabInstance:
       propertyPath: m_TargetTexture
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 3797153368351518180, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'experienceRequirements.Array.data[1]'
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3797153368351518180, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'experienceRequirements.Array.data[2]'
+      value: 1500
+      objectReference: {fileID: 0}
+    - target: {fileID: 3797153368351518180, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'experienceRequirements.Array.data[3]'
+      value: 2000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3797153368351518180, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'experienceRequirements.Array.data[4]'
+      value: 2500
+      objectReference: {fileID: 0}
+    - target: {fileID: 3797153368351518180, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'experienceRequirements.Array.data[5]'
+      value: 3000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3797153368351518180, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'experienceRequirements.Array.data[6]'
+      value: 3500
+      objectReference: {fileID: 0}
+    - target: {fileID: 3797153368351518180, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'experienceRequirements.Array.data[7]'
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3797153368351518180, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'experienceRequirements.Array.data[8]'
+      value: 4500
+      objectReference: {fileID: 0}
+    - target: {fileID: 3797153368351518180, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: 'experienceRequirements.Array.data[9]'
+      value: 5000
+      objectReference: {fileID: 0}
     - target: {fileID: 3838919507379571057, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
       value: 1801810542
@@ -7519,6 +7555,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       insertIndex: 8
       addedObject: {fileID: 584642609425110740}
+    - targetCorrespondingSourceObject: {fileID: 2998051602686989831, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8321633809937876253}
   m_SourcePrefab: {fileID: 100100000, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
 --- !u!4 &1195374611354653308 stripped
 Transform:
@@ -7691,3 +7730,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CollectibleManager
   resourcesFolder: Journals
   totalOverride: 0
+--- !u!114 &8321633809937876253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8721749980173825586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e8abe9514b3d641aec88e9af9a3830, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::cowsins.MovementSkillSystem
+  walkSpeedMultiplier: 1
+  runSpeedMultiplier: 1
+  airControlMultiplier: 1
+  grappleForceMultiplier: 1
+  dashUnlocked: 0
+  wallRunUnlocked: 0
+  wallBounceUnlocked: 0
+  doubleJumpUnlocked: 0
