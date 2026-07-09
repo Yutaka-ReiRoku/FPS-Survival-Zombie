@@ -58,11 +58,12 @@ namespace cowsins
         {
             if (projectileHasAlreadyHit) return;
 
-            // Pickups (ammo, health, weapons, attachments) and environmental triggers
-            // (acid pools, jump pads, ...) should not block projectiles
+            // Pickups (ammo, health, weapons, attachments), environmental triggers
+            // (acid pools, jump pads, ...), and collectibles should not block projectiles
             if (other.GetComponent<Pickeable>() != null
                 || other.GetComponent<PowerUp>() != null
-                || other.GetComponent<Trigger>() != null)
+                || other.GetComponent<Trigger>() != null
+                || other.GetComponentInParent<Collectible>() != null)
                 return;
 
             IDamageable damageable = other.GetComponent<IDamageable>();

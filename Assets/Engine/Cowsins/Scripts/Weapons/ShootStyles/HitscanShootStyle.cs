@@ -160,7 +160,8 @@ namespace cowsins
             {
                 if (hit.collider.GetComponent<Pickeable>() == null
                     && hit.collider.GetComponent<PowerUp>() == null
-                    && hit.collider.GetComponent<Trigger>() == null)
+                    && hit.collider.GetComponent<Trigger>() == null
+                    && hit.collider.GetComponentInParent<Collectible>() == null)
                     return true;
 
                 // Skip this non-solid hit and continue past it
