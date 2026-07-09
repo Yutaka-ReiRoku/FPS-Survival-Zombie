@@ -79,7 +79,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     public float walkSpeed = 1.5f;
     public float runSpeed = 3.5f;
     public float detectDistance = 20f;
-    public float attackDistance = 2f;
+    public float attackDistance = 1.2f;
 
     [Header("Wander")]
     public float wanderRadius = 15f;
