@@ -848,8 +848,8 @@ MonoBehaviour:
   stuckRepathRadius: 5
   explodeRange: 3
   screamDuration: 1.5
-  playerMovedRepathThreshold: 0.01
-  maxRepathInterval: 0.01
+  playerMovedRepathThreshold: 1.5
+  maxRepathInterval: 0.2
   explosionDamage: 50
   explosionRadius: 5
   explosionPrefab: {fileID: 5018994898019192216, guid: ab977a440365d1c4092c15552e5ff157, type: 3}
@@ -907,12 +907,12 @@ NavMeshAgent:
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 3.5
-  m_Acceleration: 8
+  m_Acceleration: 12
   avoidancePriority: 50
   m_AngularSpeed: 120
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
+  m_AutoBraking: 0
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0

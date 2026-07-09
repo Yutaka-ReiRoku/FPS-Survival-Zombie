@@ -94,7 +94,12 @@ public class CreditsSequence : MonoBehaviour
         Build();
 
         float prevTimeScale = Time.timeScale;
-        Time.timeScale = 1f; // Credits scroll in real gameplay time; no need to freeze.
+        // Freeze gameplay so zombies/bosses stop moving and attacking during
+        // credits. Credits scroll uses Time.unscaledDeltaTime so it is unaffected.
+        Time.timeScale = 0f;
+        // Mute all gameplay audio (zombie growls, footsteps, attacks) so the
+        // credits roll in silence. Credits have no audio of their own.
+        AudioListener.pause = true;
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -121,6 +126,7 @@ public class CreditsSequence : MonoBehaviour
         yield return Fade(1f, 0f, fadeOut);
 
         Time.timeScale = prevTimeScale > 0f ? prevTimeScale : 1f;
+        AudioListener.pause = false;
         Destroy(_canvasGO);
 
         SceneManager.LoadScene(mainMenuSceneName);
