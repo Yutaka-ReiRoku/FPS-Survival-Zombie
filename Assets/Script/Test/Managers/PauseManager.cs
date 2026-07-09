@@ -129,7 +129,7 @@ public class PauseManager : MonoBehaviour
         if (canvasRoot != null)
         {
             // Overlay panels that must stay visible regardless of `visible`.
-            string[] overlayNames = { "PausePanel", "GameOverPanel", "JournalUI", "SkillTreeWidget" };
+            string[] overlayNames = { "PausePanel", "GameOverPanel", "JournalUI", "SkillTreeWidget", "QuestTrackerWidget" };
 
             if (!visible)
             {

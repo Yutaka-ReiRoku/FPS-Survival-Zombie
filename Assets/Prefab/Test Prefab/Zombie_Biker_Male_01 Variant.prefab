@@ -84,11 +84,61 @@ MonoBehaviour:
   target: {fileID: 0}
   walkSpeed: 1.5
   runSpeed: 3.5
-  chaseDistance: 10
-  stopDistance: 1.8
+  detectDistance: 20
+  attackDistance: 2
+  wanderRadius: 15
+  wanderInterval: 5
+  loseSightDistance: 28
+  alertMemoryDuration: 3
+  lungeChancePerSecond: 0.25
+  lungeSpeedMultiplier: 1.8
+  lungeDuration: 0.7
+  feintPauseChancePerSecond: 0.12
+  feintPauseDuration: 0.4
+  chaseJitterRadius: 2.5
+  requireLineOfSight: 1
+  sightObstructionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  sightEyeHeight: 1.5
+  stuckTimeThreshold: 3
+  stuckMoveThreshold: 1
+  stuckRepathRadius: 5
+  playerMovedRepathThreshold: 1
+  maxRepathInterval: 0.1
+  useDirectSteeringWhenLOS: 1
+  directSteeringWallCheckDistance: 1.5
+  directSteeringLOSCacheInterval: 0.15
+  directSteeringWallCooldown: 1.5
+  wallCheckBodyHeight: 0.5
   attackCooldown: 2
-  acceleration: 6
-  rotationSpeed: 7
-  animationDamping: 0.2
-  hitStunDuration: 2
+  attackDamage: 20
   maxHealth: 100
+  growlClip: {fileID: 0}
+  attackClip: {fileID: 0}
+  hitClip: {fileID: 0}
+  deathClip: {fileID: 0}
+  footstepClip: {fileID: 0}
+  lootTable: []
+  dropPrefab: {fileID: 0}
+  dropChance: 50
+  dropHeightOffset: 1.5
+  popLootOnDeath: 1
+  lootPopUpwardSpeed: 4.5
+  lootPopHorizontalSpeed: 2.5
+  lootTrailSettings:
+    trailTime: 0.45
+    startWidth: 0.35
+    endWidth: 0.02
+    enableGlow: 1
+    glowMaxParticles: 60
+    glowEmissionRate: 35
+    glowStartSize: 0.18
+    glowStartLifetime: 0.5
+    coinColor: {r: 1, g: 0.85, b: 0.25, a: 1}
+    xpColor: {r: 0.7, g: 0.25, b: 1, a: 1}
+    defaultColor: {r: 1, g: 0.7, b: 0.4, a: 1}
+  experienceReward: 10
+  headshotBonusExperience: 5
+  coinReward: 5
+  headshotBonusCoins: 5

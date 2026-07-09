@@ -235,6 +235,18 @@ public class ChapterBoundary : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        // The wall collider (non-trigger) blocks the player from re-entering a
+        // locked/completed chapter. When they hit it, show a notification so
+        // they understand why they can't go back.
+        if (!collision.collider.CompareTag("Player")) return;
+        if (!_locked) return;
+
+        SimpleNotification.Show("Khu vực này mình đã khám phá rồi...");
+        Debug.Log($"[ChapterBoundary] Ch{chapter} player hit locked wall — showed 'already explored' notification.");
+    }
+
     /// <summary>
     /// Teleports the player back to the last known position inside the boundary.
     /// Used when the player tries to leave during an external lock (e.g. Q7 waves).

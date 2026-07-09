@@ -1546,7 +1546,7 @@ MonoBehaviour:
   stuckMoveThreshold: 0.5
   stuckRepathRadius: 5
   playerMovedRepathThreshold: 0.5
-  maxRepathInterval: 0.1
+  maxRepathInterval: 0.3
   useDirectSteeringWhenLOS: 1
   directSteeringWallCheckDistance: 1.5
   directSteeringLOSCacheInterval: 0.15
