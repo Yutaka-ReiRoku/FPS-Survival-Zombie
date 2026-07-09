@@ -13,6 +13,10 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
     [Header("Detection")]
     public float detectRange = 20f;
+    [Tooltip("Khoảng cách mất dấu player. Lớn hơn detectRange để chống flip-flop.")]
+    public float loseSightDistance = 25f;
+    [Tooltip("Sau khi mất dấu, Boomer vẫn đuổi theo alertMemoryDuration giây trước khi từ bỏ.")]
+    public float alertMemoryDuration = 3f;
 
     [Header("Line of Sight")]
     [Tooltip("If true, the boomer requires an unobstructed line of sight to the player before detection. Once chasing, it keeps chasing while within detectRange regardless of LOS.")]
@@ -44,6 +48,18 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     public float playerMovedRepathThreshold = 1f;
     [Tooltip("Interval tối đa (giây) giữa các lần re-path khi player đứng yên.")]
     public float maxRepathInterval = 0.1f;
+
+    [Header("Direct Steering (Real-time Tracking)")]
+    [Tooltip("Khi true, Boomer di chuyển thẳng tới vị trí mới nhất của player mỗi frame khi có line-of-sight. Khi mất LOS, quay lại NavMesh pathfinding.")]
+    public bool useDirectSteeringWhenLOS = true;
+    [Tooltip("Khoảng cách raycast check tường phía trước khi direct steering (m).")]
+    public float directSteeringWallCheckDistance = 1.5f;
+    [Tooltip("Interval cache LOS check khi direct steering (giây).")]
+    public float directSteeringLOSCacheInterval = 0.15f;
+    [Tooltip("Sau khi đụng tường khi direct steering, Boomer tạm thời dùng NavMesh trong bao lâu (giây) trước khi thử lại.")]
+    public float directSteeringWallCooldown = 1.5f;
+    [Tooltip("Chiều cao raycast check tường ở mức thân (m). Raycast thêm ở mức thấp để phát hiện chướng ngại vật thấp (xác xe, hàng rào) mà raycast eyeHeight bay qua trên.")]
+    public float wallCheckBodyHeight = 0.5f;
 
     [Header("Explosion Damage")]
     public float explosionDamage = 50f;
@@ -127,6 +143,18 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     // --- Chase re-path throttling ---
     private float _pathTimer;
     private Vector3 _lastSetDestination = Vector3.zero;
+
+    // --- Direct steering runtime state ---
+    private float _losCacheTimer;
+    private bool _cachedLOSResult;
+    private bool _isDirectSteering;
+    private float _directSteeringCooldownTimer;
+
+    // --- Alert memory / last known position ---
+    private float _alertMemoryTimer;
+    private Vector3 _lastKnownPlayerPos;
+    private bool _hasLastKnownPos;
+    private bool _isUsingLastKnownPos;
 
     // --- Cached reusable objects (avoid per-frame allocation) ---
     private UnityEngine.AI.NavMeshPath _reusablePath;
@@ -252,38 +280,120 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         FaceTarget();
 
         //--------------------------------
+        // DETECTION: check if we can see the player
+        //--------------------------------
+
+        bool hasLOSCurrently = !isScreaming &&
+            distance <= detectRange &&
+            (!requireLineOfSight || HasLineOfSight());
+
+        if (hasLOSCurrently)
+        {
+            _lastKnownPlayerPos = target.position;
+            _hasLastKnownPos = true;
+            _alertMemoryTimer = alertMemoryDuration;
+            _isUsingLastKnownPos = false;
+        }
+        else if (distance <= loseSightDistance)
+        {
+            // Hysteresis: within loseSightDistance but no LOS.
+            if (!requireLineOfSight || HasLineOfSight())
+            {
+                _lastKnownPlayerPos = target.position;
+                _hasLastKnownPos = true;
+                _isUsingLastKnownPos = false;
+            }
+            else
+            {
+                _isUsingLastKnownPos = _hasLastKnownPos;
+            }
+        }
+        else if (_alertMemoryTimer > 0f)
+        {
+            _alertMemoryTimer -= Time.deltaTime;
+            _isUsingLastKnownPos = _hasLastKnownPos;
+        }
+        else
+        {
+            _isUsingLastKnownPos = false;
+            _hasLastKnownPos = false;
+        }
+
+        //--------------------------------
         // CHASE
         //--------------------------------
 
-        if (!isScreaming &&
-            distance <= detectRange &&
-            (!requireLineOfSight || HasLineOfSight()))
+        if (hasLOSCurrently || _isUsingLastKnownPos)
         {
-            agent.isStopped = false;
-
-            // Re-path when the throttle interval elapses OR the player has
-            // moved far enough from the last destination that the current
-            // path is stale. Calling SetDestination every frame floods the
-            // async pathfinding queue (each call cancels the previous pending
-            // path), so the boomer ends up with no usable path and slides.
-            _pathTimer += Time.deltaTime;
-            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-            if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+            if (_isUsingLastKnownPos && _hasLastKnownPos)
             {
-                SetDestinationRobust(target.position);
-                _lastSetDestination = target.position;
-                _pathTimer = 0f;
-            }
+                // --- Last known position mode: navigate to where we last saw
+                // the player using NavMesh (not direct steering).
+                float distToLastKnown = Vector3.Distance(transform.position, _lastKnownPlayerPos);
+                if (distToLastKnown <= explodeRange)
+                {
+                    // Reached last known pos but player isn't here. Stop.
+                    agent.isStopped = true;
+                }
+                else
+                {
+                    agent.isStopped = false;
+                    SyncAgentToTransform();
+                    agent.updatePosition = true;
+                    _isDirectSteering = false;
+                    agent.speed = moveSpeed;
 
-            // Stuck detection: if the boomer isn't making progress toward the
-            // player while it should be chasing, try to recover.
-            HandleStuckDetection(distance);
+                    _pathTimer += Time.deltaTime;
+                    float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
+                    if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+                    {
+                        SetDestinationRobust(_lastKnownPlayerPos);
+                        _lastSetDestination = _lastKnownPlayerPos;
+                        _pathTimer = 0f;
+                    }
+
+                    HandleStuckDetection(distance);
+                }
+            }
+            // --- Direct steering: when the Boomer has line-of-sight to the
+            // player, bypass NavMesh pathfinding and move directly toward
+            // the player's CURRENT position every frame.
+            else if (useDirectSteeringWhenLOS && TryDirectSteer(distance))
+            {
+                // Direct steering handled movement this frame. Reset stuck
+                // detection since we're moving under our own control.
+                _stuckTimer = 0f;
+                _lastStuckCheckPos = transform.position;
+            }
+            else
+            {
+                agent.isStopped = false;
+
+                // Re-path when the throttle interval elapses OR the player has
+                // moved far enough from the last destination that the current
+                // path is stale. Calling SetDestination every frame floods the
+                // async pathfinding queue (each call cancels the previous pending
+                // path), so the boomer ends up with no usable path and slides.
+                _pathTimer += Time.deltaTime;
+                float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+                if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+                {
+                    SetDestinationRobust(target.position);
+                    _lastSetDestination = target.position;
+                    _pathTimer = 0f;
+                }
+
+                // Stuck detection: if the boomer isn't making progress toward the
+                // player while it should be chasing, try to recover.
+                HandleStuckDetection(distance);
+            }
         }
         else
         {
             // Not chasing — reset stuck detection state.
             _stuckTimer = 0f;
             _lastStuckCheckPos = transform.position;
+            agent.isStopped = true;
         }
 
         //--------------------------------
@@ -888,5 +998,131 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             transform.position,
             explosionRadius
         );
+    }
+
+    //==================================================
+    // DIRECT STEERING
+    //==================================================
+
+    /// <summary>
+    /// Syncs the NavMeshAgent's internal position to the transform's current
+    /// position. Call this BEFORE setting updatePosition = true when
+    /// transitioning from direct steering back to NavMesh. Without this, the
+    /// agent's position is stale (frozen at the spot where direct steering
+    /// started), causing the Boomer to "snap back" / retreat to that old
+    /// position when the agent resumes position control.
+    /// </summary>
+    private void SyncAgentToTransform()
+    {
+        if (agent == null || !agent.isOnNavMesh)
+            return;
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas))
+            agent.nextPosition = hit.position;
+        else
+            agent.nextPosition = transform.position;
+    }
+
+    /// <summary>
+    /// When the Boomer has line-of-sight to the player, moves directly toward
+    /// the player's current position every frame (bypassing NavMesh
+    /// pathfinding). Returns true if direct steering was used this frame.
+    /// </summary>
+    private bool TryDirectSteer(float distance)
+    {
+        if (target == null || agent == null || !agent.isOnNavMesh)
+            return false;
+
+        // Wall cooldown: after hitting a wall, stay in NavMesh mode for a while.
+        if (_directSteeringCooldownTimer > 0f)
+        {
+            _directSteeringCooldownTimer -= Time.deltaTime;
+            if (_isDirectSteering)
+            {
+                _isDirectSteering = false;
+                agent.isStopped = false;
+                SyncAgentToTransform();
+                agent.updatePosition = true;
+                _pathTimer = maxRepathInterval;
+            }
+            return false;
+        }
+
+        // Cache LOS result to avoid raycasting every frame.
+        _losCacheTimer -= Time.deltaTime;
+        if (_losCacheTimer <= 0f)
+        {
+            _cachedLOSResult = HasLineOfSight();
+            _losCacheTimer = directSteeringLOSCacheInterval;
+        }
+
+        if (!_cachedLOSResult)
+        {
+            // No LOS — let NavMesh pathfinding handle it.
+            if (_isDirectSteering)
+            {
+                _isDirectSteering = false;
+                agent.isStopped = false;
+                SyncAgentToTransform();
+                agent.updatePosition = true; // restore agent position control
+                _pathTimer = maxRepathInterval; // force re-path
+            }
+            return false;
+        }
+
+        // --- Direct steering ---
+        _isDirectSteering = true;
+        agent.isStopped = true;
+        agent.updatePosition = false; // prevent agent from overriding our transform
+
+        Vector3 dir = target.position - transform.position;
+        dir.y = 0f;
+        float distMag = dir.magnitude;
+        if (distMag < 0.01f)
+            return true;
+
+        Vector3 dirNorm = dir / distMag;
+
+        // Wall check: if there's an obstacle directly ahead, fall back to NavMesh.
+        // Check at BOTH eye height (tall walls) and body height (low obstacles).
+        if (Physics.Raycast(
+                transform.position + Vector3.up * sightEyeHeight,
+                dirNorm,
+                out RaycastHit wallHit,
+                directSteeringWallCheckDistance,
+                _cachedLOSMask,
+                QueryTriggerInteraction.Ignore) ||
+            Physics.Raycast(
+                transform.position + Vector3.up * wallCheckBodyHeight,
+                dirNorm,
+                out RaycastHit wallHit2,
+                directSteeringWallCheckDistance,
+                _cachedLOSMask,
+                QueryTriggerInteraction.Ignore))
+        {
+            _isDirectSteering = false;
+            agent.isStopped = false;
+            SyncAgentToTransform();
+            agent.updatePosition = true; // restore agent position control
+            _pathTimer = maxRepathInterval;
+            _directSteeringCooldownTimer = directSteeringWallCooldown;
+            return false;
+        }
+
+        // Move directly toward the player.
+        Vector3 newPos = transform.position + dirNorm * moveSpeed * Time.deltaTime;
+
+        NavMeshHit navHit;
+        if (NavMesh.SamplePosition(newPos, out navHit, 2f, NavMesh.AllAreas))
+        {
+            if (navHit.position.y > -1f)
+                transform.position = navHit.position;
+        }
+
+        if (animator != null)
+            animator.SetFloat(SpeedHash, 1f);
+
+        return true;
     }
 }

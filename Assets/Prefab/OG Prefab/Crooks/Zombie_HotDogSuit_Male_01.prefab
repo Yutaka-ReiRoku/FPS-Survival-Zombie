@@ -1770,7 +1770,7 @@ MonoBehaviour:
   wanderRadius: 15
   wanderInterval: 5
   loseSightDistance: 40
-  alertMemoryDuration: 6
+  alertMemoryDuration: 3
   lungeChancePerSecond: 0.15
   lungeSpeedMultiplier: 1.5
   lungeDuration: 0.5
@@ -1785,8 +1785,13 @@ MonoBehaviour:
   stuckTimeThreshold: 3
   stuckMoveThreshold: 0.5
   stuckRepathRadius: 5
-  playerMovedRepathThreshold: 1.5
-  maxRepathInterval: 0.2
+  playerMovedRepathThreshold: 0.5
+  maxRepathInterval: 0.1
+  useDirectSteeringWhenLOS: 1
+  directSteeringWallCheckDistance: 1.5
+  directSteeringLOSCacheInterval: 0.15
+  directSteeringWallCooldown: 1.5
+  wallCheckBodyHeight: 0.5
   attackCooldown: 1.5
   attackDamage: 20
   maxHealth: 10

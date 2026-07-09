@@ -1285,7 +1285,9 @@ MonoBehaviour:
   target: {fileID: 0}
   maxHealth: 350
   currentHealth: 0
-  detectRange: 20
+  detectRange: 50
+  loseSightDistance: 25
+  alertMemoryDuration: 3
   runSpeed: 8
   rotationSpeed: 10
   meleeRange: 3
@@ -1300,6 +1302,15 @@ MonoBehaviour:
   screamDuration: 2.5
   playerMovedRepathThreshold: 2
   maxRepathInterval: 0.25
+  useDirectSteeringWhenLOS: 1
+  directSteeringWallCheckDistance: 2
+  directSteeringLOSCacheInterval: 0.15
+  sightObstructionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  sightEyeHeight: 2
+  directSteeringWallCooldown: 1.5
+  wallCheckBodyHeight: 1
   screamClip: {fileID: 8300000, guid: decad48e66c9e3a418c89849e2d9dc5d, type: 3}
   meleeAttackClip: {fileID: 8300000, guid: 3aa049bb077689345a82a44125e24046, type: 3}
   jumpLandClip: {fileID: 8300000, guid: 3aa049bb077689345a82a44125e24046, type: 3}

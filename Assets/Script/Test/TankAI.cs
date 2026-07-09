@@ -14,6 +14,10 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
     [Header("Detection")]
     public float detectRange = 20f;
+    [Tooltip("Khoảng cách mất dấu player. Lớn hơn detectRange để chống flip-flop.")]
+    public float loseSightDistance = 25f;
+    [Tooltip("Sau khi mất dấu, Tank vẫn đuổi theo alertMemoryDuration giây trước khi từ bỏ.")]
+    public float alertMemoryDuration = 3f;
 
     [Header("Movement")]
     public float runSpeed = 3.5f;
@@ -41,6 +45,22 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     public float playerMovedRepathThreshold = 1f;
     [Tooltip("Interval tối đa (giây) giữa các lần re-path khi player đứng yên.")]
     public float maxRepathInterval = 0.1f;
+
+    [Header("Direct Steering (Real-time Tracking)")]
+    [Tooltip("Khi true, Tank di chuyển thẳng tới vị trí mới nhất của player mỗi frame khi có line-of-sight. Khi mất LOS, quay lại NavMesh pathfinding.")]
+    public bool useDirectSteeringWhenLOS = true;
+    [Tooltip("Khoảng cách raycast check tường phía trước khi direct steering (m).")]
+    public float directSteeringWallCheckDistance = 2f;
+    [Tooltip("Interval cache LOS check khi direct steering (giây).")]
+    public float directSteeringLOSCacheInterval = 0.15f;
+    [Tooltip("Layer mask cho vật cản tầm nhìn (tường,家具). Mặc định tất cả.")]
+    public LayerMask sightObstructionMask = ~0;
+    [Tooltip("Chiều cao mắt từ pivot cho LOS raycast.")]
+    public float sightEyeHeight = 2f;
+    [Tooltip("Sau khi đụng tường khi direct steering, Tank tạm thời dùng NavMesh trong bao lâu (giây) trước khi thử lại.")]
+    public float directSteeringWallCooldown = 1.5f;
+    [Tooltip("Chiều cao raycast check tường ở mức thân (m). Raycast thêm ở mức thấp để phát hiện chướng ngại vật thấp (xác xe, hàng rào) mà raycast eyeHeight bay qua trên.")]
+    public float wallCheckBodyHeight = 1f;
 
     [Header("Audio")]
     [Tooltip("Sound khi tank phát hiện player và bắt đầu scream.")]
@@ -83,6 +103,20 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     private float _pathTimer;
     private float _cachedDistance;
     private Vector3 _lastSetDestination = Vector3.zero;
+
+    // --- Direct steering runtime state ---
+    private float _losCacheTimer;
+    private bool _cachedLOSResult;
+    private bool _isDirectSteering;
+    private int _cachedLOSMask = -1;
+    private int _cachedLOSCacheKey = -1;
+    private float _directSteeringCooldownTimer;
+
+    // --- Alert memory / last known position ---
+    private float _alertMemoryTimer;
+    private Vector3 _lastKnownPlayerPos;
+    private bool _hasLastKnownPos;
+    private bool _isUsingLastKnownPos;
 
     private bool isDead;
     public bool IsDead { get { return isDead; } }
@@ -208,25 +242,106 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         FaceTarget();
 
         //------------------------------------------------
+        // DETECTION: check if we can see the player
+        //------------------------------------------------
+
+        bool hasLOSCurrently = distance <= detectRange && HasLineOfSight();
+
+        if (hasLOSCurrently)
+        {
+            // Player visible: track last known pos and arm alert memory.
+            _lastKnownPlayerPos = target.position;
+            _hasLastKnownPos = true;
+            _alertMemoryTimer = alertMemoryDuration;
+            _isUsingLastKnownPos = false;
+        }
+        else if (hasScreamed && distance <= loseSightDistance)
+        {
+            // Hysteresis: within loseSightDistance but no LOS.
+            if (HasLineOfSight())
+            {
+                _lastKnownPlayerPos = target.position;
+                _hasLastKnownPos = true;
+                _isUsingLastKnownPos = false;
+            }
+            else
+            {
+                _isUsingLastKnownPos = _hasLastKnownPos;
+            }
+        }
+        else if (_alertMemoryTimer > 0f)
+        {
+            // Lost sight — chase last known position for alertMemoryDuration.
+            _alertMemoryTimer -= Time.deltaTime;
+            _isUsingLastKnownPos = _hasLastKnownPos;
+        }
+        else
+        {
+            // Lost player completely — stop and idle.
+            _isUsingLastKnownPos = false;
+            _hasLastKnownPos = false;
+            agent.isStopped = true;
+            return;
+        }
+
+        //------------------------------------------------
         // CHASE
         //------------------------------------------------
 
         if (!isAttacking &&
             !isJumpAttacking)
         {
-            agent.isStopped = false;
-
-            // Re-path when the throttle interval elapses OR the player has
-            // moved far enough from the last destination that the current
-            // path is stale. This keeps the Tank responsive when the player
-            // changes direction without flooding the async pathfinding queue.
-            _pathTimer += Time.deltaTime;
-            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-            if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+            // --- Last known position mode: navigate to where we last saw
+            // the player using NavMesh (not direct steering).
+            if (_isUsingLastKnownPos && _hasLastKnownPos)
             {
-                agent.SetDestination(target.position);
-                _lastSetDestination = target.position;
-                _pathTimer = 0f;
+                float distToLastKnown = Vector3.Distance(transform.position, _lastKnownPlayerPos);
+                if (distToLastKnown <= meleeRange)
+                {
+                    // Reached last known pos but player isn't here. Stop.
+                    agent.isStopped = true;
+                }
+                else
+                {
+                    agent.isStopped = false;
+                    SyncAgentToTransform();
+                    agent.updatePosition = true;
+                    _isDirectSteering = false;
+                    agent.speed = runSpeed;
+
+                    _pathTimer += Time.deltaTime;
+                    float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
+                    if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+                    {
+                        agent.SetDestination(_lastKnownPlayerPos);
+                        _lastSetDestination = _lastKnownPlayerPos;
+                        _pathTimer = 0f;
+                    }
+                }
+            }
+            // --- Direct steering: when the Tank has line-of-sight to the
+            // player, bypass NavMesh pathfinding and move directly toward
+            // the player's CURRENT position every frame.
+            else if (useDirectSteeringWhenLOS && TryDirectSteer(distance))
+            {
+                // Direct steering handled movement this frame.
+            }
+            else
+            {
+                agent.isStopped = false;
+
+                // Re-path when the throttle interval elapses OR the player has
+                // moved far enough from the last destination that the current
+                // path is stale. This keeps the Tank responsive when the player
+                // changes direction without flooding the async pathfinding queue.
+                _pathTimer += Time.deltaTime;
+                float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+                if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+                {
+                    agent.SetDestination(target.position);
+                    _lastSetDestination = target.position;
+                    _pathTimer = 0f;
+                }
             }
         }
 
@@ -640,5 +755,159 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             transform.position,
             jumpAttackRange
         );
+    }
+
+    //==================================================
+    // DIRECT STEERING
+    //==================================================
+
+    /// <summary>
+    /// Syncs the NavMeshAgent's internal position to the transform's current
+    /// position. Call this BEFORE setting updatePosition = true when
+    /// transitioning from direct steering back to NavMesh. Without this, the
+    /// agent's position is stale (frozen at the spot where direct steering
+    /// started), causing the Tank to "snap back" / retreat to that old
+    /// position when the agent resumes position control.
+    /// </summary>
+    private void SyncAgentToTransform()
+    {
+        if (agent == null || !agent.isOnNavMesh)
+            return;
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas))
+            agent.nextPosition = hit.position;
+        else
+            agent.nextPosition = transform.position;
+    }
+
+    /// <summary>
+    /// Checks whether there is an unobstructed line from the Tank's eyes to
+    /// the player's eyes. Uses a raycast against sightObstructionMask.
+    /// </summary>
+    private bool HasLineOfSight()
+    {
+        if (target == null) return false;
+
+        Vector3 start = transform.position + Vector3.up * sightEyeHeight;
+        Vector3 end = target.position + Vector3.up * sightEyeHeight;
+        Vector3 dir = end - start;
+        float dist = dir.magnitude;
+        if (dist <= 0.1f) return true;
+
+        int myLayer = gameObject.layer;
+        int targetLayer = target.gameObject.layer;
+        int cacheKey = (myLayer << 8) | targetLayer;
+        if (_cachedLOSMask == -1 || _cachedLOSCacheKey != cacheKey)
+        {
+            _cachedLOSMask = sightObstructionMask
+                & ~(1 << targetLayer)
+                & ~(1 << myLayer);
+            _cachedLOSCacheKey = cacheKey;
+        }
+
+        return !Physics.Raycast(start, dir.normalized, dist, _cachedLOSMask, QueryTriggerInteraction.Ignore);
+    }
+
+    /// <summary>
+    /// When the Tank has line-of-sight to the player, moves directly toward
+    /// the player's current position every frame (bypassing NavMesh
+    /// pathfinding). Returns true if direct steering was used this frame.
+    /// </summary>
+    private bool TryDirectSteer(float distance)
+    {
+        if (target == null || agent == null || !agent.isOnNavMesh)
+            return false;
+
+        // Wall cooldown: after hitting a wall, stay in NavMesh mode for a while.
+        if (_directSteeringCooldownTimer > 0f)
+        {
+            _directSteeringCooldownTimer -= Time.deltaTime;
+            if (_isDirectSteering)
+            {
+                _isDirectSteering = false;
+                agent.isStopped = false;
+                SyncAgentToTransform();
+                agent.updatePosition = true;
+                _pathTimer = maxRepathInterval;
+            }
+            return false;
+        }
+
+        // Cache LOS result to avoid raycasting every frame.
+        _losCacheTimer -= Time.deltaTime;
+        if (_losCacheTimer <= 0f)
+        {
+            _cachedLOSResult = HasLineOfSight();
+            _losCacheTimer = directSteeringLOSCacheInterval;
+        }
+
+        if (!_cachedLOSResult)
+        {
+            // No LOS — let NavMesh pathfinding handle it.
+            if (_isDirectSteering)
+            {
+                _isDirectSteering = false;
+                agent.isStopped = false;
+                SyncAgentToTransform();
+                agent.updatePosition = true; // restore agent position control
+                _pathTimer = maxRepathInterval; // force re-path
+            }
+            return false;
+        }
+
+        // --- Direct steering ---
+        _isDirectSteering = true;
+        agent.isStopped = true;
+        agent.updatePosition = false; // prevent agent from overriding our transform
+
+        Vector3 dir = target.position - transform.position;
+        dir.y = 0f;
+        float distMag = dir.magnitude;
+        if (distMag < 0.01f)
+            return true;
+
+        Vector3 dirNorm = dir / distMag;
+
+        // Wall check: if there's an obstacle directly ahead, fall back to NavMesh.
+        // Check at BOTH eye height (tall walls) and body height (low obstacles).
+        if (Physics.Raycast(
+                transform.position + Vector3.up * sightEyeHeight,
+                dirNorm,
+                out RaycastHit wallHit,
+                directSteeringWallCheckDistance,
+                _cachedLOSMask,
+                QueryTriggerInteraction.Ignore) ||
+            Physics.Raycast(
+                transform.position + Vector3.up * wallCheckBodyHeight,
+                dirNorm,
+                out RaycastHit wallHit2,
+                directSteeringWallCheckDistance,
+                _cachedLOSMask,
+                QueryTriggerInteraction.Ignore))
+        {
+            _isDirectSteering = false;
+            agent.isStopped = false;
+            SyncAgentToTransform();
+            agent.updatePosition = true; // restore agent position control
+            _pathTimer = maxRepathInterval;
+            _directSteeringCooldownTimer = directSteeringWallCooldown;
+            return false;
+        }
+
+        // Move directly toward the player.
+        Vector3 newPos = transform.position + dirNorm * runSpeed * Time.deltaTime;
+
+        NavMeshHit navHit;
+        if (NavMesh.SamplePosition(newPos, out navHit, 2f, NavMesh.AllAreas))
+        {
+            if (navHit.position.y > -1f)
+                transform.position = navHit.position;
+        }
+
+        if (animator != null)
+            animator.SetFloat(SpeedHash, runSpeed);
+
+        return true;
     }
 }

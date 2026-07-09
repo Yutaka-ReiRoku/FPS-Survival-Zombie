@@ -89,7 +89,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     [Tooltip("Khoảng cách mất dấu player. Lon hon detectDistance de chong flip-flop (hysteresis).")]
     public float loseSightDistance = 28f;
     [Tooltip("Sau khi mat dau, zombie van duoi theo alertMemoryDuration giay truoc khi quay ve Wander.")]
-    public float alertMemoryDuration = 6f;
+    public float alertMemoryDuration = 3f;
     [Tooltip("Kha nang trigger mot dot lunge (sprint dot ngot) moi giay khi dang duoi o mid-range (0-1).")]
     [Range(0f, 1f)]
     public float lungeChancePerSecond = 0.25f;
@@ -126,6 +126,18 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     public float playerMovedRepathThreshold = 1f;
     [Tooltip("Interval tối đa (giây) giữa các lần re-path khi player đứng yên. Re-path ngay khi player di chuyển quá playerMovedRepathThreshold.")]
     public float maxRepathInterval = 0.1f;
+
+    [Header("Direct Steering (Real-time Tracking)")]
+    [Tooltip("Khi true, zombie di chuyển thẳng tới vị trí mới nhất của player mỗi frame khi có line-of-sight (không cần re-path). Khi mất LOS, quay lại NavMesh pathfinding.")]
+    public bool useDirectSteeringWhenLOS = true;
+    [Tooltip("Khoảng cách raycast check tường phía trước khi direct steering, tránh cắm đầu vào tường (m).")]
+    public float directSteeringWallCheckDistance = 1.5f;
+    [Tooltip("Interval cache LOS check khi direct steering (giây). Nhỏ hơn = responsive hơn nhưng tốn raycast hơn.")]
+    public float directSteeringLOSCacheInterval = 0.15f;
+    [Tooltip("Sau khi đụng tường khi direct steering, zombie tạm thời dùng NavMesh pathfinding trong bao lâu (giây) trước khi thử direct steering lại. Chống flip-flop cắm đầu vào tường.")]
+    public float directSteeringWallCooldown = 1.5f;
+    [Tooltip("Chiều cao raycast check tường phía trước ở mức thân (m). Raycast thêm ở mức thấp này để phát hiện chướng ngại vật thấp (xác xe, hàng rào, thùng) mà raycast ở eyeHeight bay qua trên.")]
+    public float wallCheckBodyHeight = 0.5f;
 
     [Header("Attack")]
     public float attackCooldown = 1.5f;
@@ -204,6 +216,16 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private int _cachedLOSMask = -1;
     private int _cachedLOSCacheKey = -1;
 
+    // --- Direct steering runtime state ---
+    private float _losCacheTimer;
+    private bool _cachedLOSResult;
+    private bool _isDirectSteering;
+    private float _directSteeringCooldownTimer; // >0 = NavMesh only (after wall hit)
+
+    // --- Last known position tracking ---
+    private Vector3 _lastKnownPlayerPos;
+    private bool _hasLastKnownPos;
+
     private static readonly int SpeedHash =
         Animator.StringToHash("Speed");
 
@@ -268,6 +290,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         _noPathRetryCount = 0;
         _lastSetDestination = transform.position;
         pathTimer = maxRepathInterval; // force immediate first re-path
+        _directSteeringCooldownTimer = 0f;
+        _hasLastKnownPos = false;
+        _losCacheTimer = directSteeringLOSCacheInterval; // force LOS recheck
 
         if (target == null)
         {
@@ -375,11 +400,17 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         // NOT require LOS — once the zombie has detected the player, it keeps
         // chasing based on distance/memory even if the player briefly breaks
         // LOS (ducking behind cover, etc.).
-        if (cachedDistance <= detectDistance &&
-            (!requireLineOfSight || HasLineOfSight()))
+        bool hasLOSCurrently = cachedDistance <= detectDistance &&
+            (!requireLineOfSight || HasLineOfSight());
+
+        if (hasLOSCurrently)
         {
-            // Player within detect range: chase and (re)arm alert memory.
+            // Player within detect range AND visible: chase and (re)arm alert memory.
+            // Track last known position for when we lose sight.
+            _lastKnownPlayerPos = target.position;
+            _hasLastKnownPos = true;
             alertMemoryTimer = alertMemoryDuration;
+            _isUsingLastKnownPos = false;
             ChasePlayer(cachedDistance);
         }
         else if (hasDetectedPlayer && cachedDistance <= loseSightDistance)
@@ -387,18 +418,36 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // Hysteresis: once detected, keep chasing while player is still
             // within the larger loseSightDistance (prevents flip-flop at the
             // detectDistance edge).
+            // Still update last known pos if we can see the player (even if
+            // beyond detectDistance, within loseSightDistance).
+            if (!requireLineOfSight || HasLineOfSight())
+            {
+                _lastKnownPlayerPos = target.position;
+                _hasLastKnownPos = true;
+                _isUsingLastKnownPos = false;
+            }
+            else
+            {
+                // Within loseSightDistance but no LOS — use last known pos.
+                _isUsingLastKnownPos = _hasLastKnownPos;
+            }
             ChasePlayer(cachedDistance);
         }
         else if (alertMemoryTimer > 0f)
         {
-            // Lost sight but still in alert memory: keep chasing for a while.
+            // Lost sight but still in alert memory: chase toward last known
+            // position, NOT the player's real position. The zombie doesn't
+            // know where the player is — it goes to where it last saw them.
             alertMemoryTimer -= Time.deltaTime;
+            _isUsingLastKnownPos = _hasLastKnownPos;
             ChasePlayer(cachedDistance);
         }
         else
         {
             Wander();
             hasDetectedPlayer = false;
+            _hasLastKnownPos = false;
+            _isUsingLastKnownPos = false;
         }
 
         animator.SetFloat(
@@ -410,6 +459,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     private float pathTimer = 0f;
     private Vector3 _lastSetDestination = Vector3.zero;
+    private bool _isUsingLastKnownPos; // true when chasing last known pos (no LOS)
 
     void ChasePlayer(float distance)
     {
@@ -417,6 +467,48 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         {
             PlaySound(growlClip);
             hasDetectedPlayer = true;
+        }
+
+        // --- Last known position mode: when we've lost sight of the player,
+        // navigate to where we last saw them using NavMesh pathfinding (not
+        // direct steering, since we can't see the player). This makes the
+        // zombie go around obstacles to check the last known position rather
+        // than walking into walls or cheating with the player's real position.
+        if (_isUsingLastKnownPos && _hasLastKnownPos)
+        {
+            if (agent.updateRotation)
+                agent.updateRotation = false;
+
+            float distToLastKnown = Vector3.Distance(transform.position, _lastKnownPlayerPos);
+
+            if (distToLastKnown <= attackDistance)
+            {
+                // Reached last known position but player isn't here.
+                // Stop and look around — alert memory will expire and
+                // the zombie will return to Wander.
+                agent.isStopped = true;
+                FaceTarget();
+                return;
+            }
+
+            // Navigate to last known position via NavMesh (goes around walls).
+            agent.isStopped = false;
+            SyncAgentToTransform();
+            agent.updatePosition = true;
+            _isDirectSteering = false;
+            agent.speed = runSpeed;
+
+            pathTimer += Time.deltaTime;
+            float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
+            if (pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+            {
+                SetDestinationRobust(_lastKnownPlayerPos);
+                _lastSetDestination = _lastKnownPlayerPos;
+                pathTimer = 0f;
+            }
+
+            FaceTarget();
+            return;
         }
 
         // Take over rotation from the agent so FaceTarget() and the agent
@@ -490,6 +582,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
                 agent.ResetPath();
                 agent.isStopped = false;
                 pathTimer = 0.25f; // force SetDestination this frame
+                _losCacheTimer = directSteeringLOSCacheInterval; // force LOS recheck
             }
             else
             {
@@ -501,6 +594,27 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             if (lungeTimer > 0f)
                 speed = runSpeed * lungeSpeedMultiplier;
             agent.speed = speed;
+
+            // --- Direct steering: when the zombie has line-of-sight to the
+            // player, bypass NavMesh pathfinding and move directly toward the
+            // player's CURRENT position every frame. This eliminates the
+            // "chasing stale positions" problem when the player moves
+            // continuously. When LOS is lost (player behind a wall), fall
+            // back to NavMesh pathfinding to navigate around obstacles.
+            if (useDirectSteeringWhenLOS && TryDirectSteer(distance, speed))
+            {
+                // Direct steering handled movement this frame. Skip NavMesh
+                // re-pathing and stuck detection (not needed when steering
+                // directly). Reset stuck timer since we're moving under our
+                // own control.
+                _stuckTimer = 0f;
+                _lastStuckCheckPos = transform.position;
+                return;
+            }
+
+            // --- NavMesh pathfinding fallback (no LOS or direct steering disabled) ---
+            _isDirectSteering = false;
+            agent.isStopped = false;
 
             // --- Jitter the chase destination so the zombie doesn't run in a straight line ---
             // Only apply jitter when far enough from the player. Near attack range,
@@ -1052,5 +1166,160 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         // Fallback: return origin if no valid ground-level position found.
         return origin;
+    }
+
+    //==================================================
+    // DIRECT STEERING
+    //==================================================
+
+    /// <summary>
+    /// Syncs the NavMeshAgent's internal position to the transform's current
+    /// position. Call this BEFORE setting updatePosition = true when
+    /// transitioning from direct steering back to NavMesh. Without this, the
+    /// agent's position is stale (frozen at the spot where direct steering
+    /// started), causing the zombie to "snap back" / retreat to that old
+    /// position when the agent resumes position control.
+    /// </summary>
+    private void SyncAgentToTransform()
+    {
+        if (agent == null || !agent.isOnNavMesh)
+            return;
+
+        // Sample the NavMesh at the transform's current position to get a
+        // valid NavMesh point (the transform may be slightly off the surface
+        // due to y offset from rigidbody/agent).
+        UnityEngine.AI.NavMeshHit hit;
+        if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out hit, 2f, UnityEngine.AI.NavMesh.AllAreas))
+        {
+            agent.nextPosition = hit.position;
+        }
+        else
+        {
+            // Fallback: set directly even if not perfectly on NavMesh.
+            agent.nextPosition = transform.position;
+        }
+    }
+
+    /// <summary>
+    /// When the zombie has line-of-sight to the player, moves directly toward
+    /// the player's current position every frame (bypassing NavMesh
+    /// pathfinding). Returns true if direct steering was used this frame.
+    /// Falls back to NavMesh pathfinding when LOS is lost.
+    /// </summary>
+    private bool TryDirectSteer(float distance, float speed)
+    {
+        if (target == null || agent == null || !agent.isOnNavMesh)
+            return false;
+
+        // Wall cooldown: after hitting a wall while direct steering, stay in
+        // NavMesh mode for a while to let the zombie navigate around the
+        // obstacle instead of flip-flopping between direct steering and
+        // NavMesh (which causes "te le" / sliding along walls).
+        if (_directSteeringCooldownTimer > 0f)
+        {
+            _directSteeringCooldownTimer -= Time.deltaTime;
+            if (_isDirectSteering)
+            {
+                _isDirectSteering = false;
+                agent.isStopped = false;
+                SyncAgentToTransform();
+                agent.updatePosition = true;
+                pathTimer = maxRepathInterval; // force re-path
+            }
+            return false;
+        }
+
+        // Cache LOS result to avoid raycasting every frame.
+        _losCacheTimer -= Time.deltaTime;
+        if (_losCacheTimer <= 0f)
+        {
+            _cachedLOSResult = HasLineOfSight();
+            _losCacheTimer = directSteeringLOSCacheInterval;
+        }
+
+        if (!_cachedLOSResult)
+        {
+            // No LOS — let NavMesh pathfinding handle it.
+            if (_isDirectSteering)
+            {
+                // Transitioning from direct steering back to NavMesh: force
+                // an immediate re-path so the zombie doesn't stand still.
+                _isDirectSteering = false;
+                agent.isStopped = false;
+                SyncAgentToTransform();
+                agent.updatePosition = true; // restore agent position control
+                pathTimer = maxRepathInterval; // force re-path this frame
+            }
+            return false;
+        }
+
+        // --- Direct steering: move toward player's current position ---
+        _isDirectSteering = true;
+        agent.isStopped = true; // pause NavMeshAgent while we steer manually
+        agent.updatePosition = false; // prevent agent from overriding our transform
+
+        Vector3 dir = target.position - transform.position;
+        dir.y = 0f;
+        float distMag = dir.magnitude;
+        if (distMag < 0.01f)
+            return true;
+
+        Vector3 dirNorm = dir / distMag;
+
+        // Wall check: if there's an obstacle directly ahead within
+        // directSteeringWallCheckDistance, don't steer into it — let
+        // NavMesh pathfinding navigate around it instead.
+        // Check at BOTH eye height (for tall walls) and body height (for
+        // low obstacles like car wrecks, fences, barricades that the eye-
+        // level ray would pass over).
+        if (Physics.Raycast(
+                transform.position + Vector3.up * sightEyeHeight,
+                dirNorm,
+                out RaycastHit wallHit,
+                directSteeringWallCheckDistance,
+                _cachedLOSMask,
+                QueryTriggerInteraction.Ignore) ||
+            Physics.Raycast(
+                transform.position + Vector3.up * wallCheckBodyHeight,
+                dirNorm,
+                out RaycastHit wallHit2,
+                directSteeringWallCheckDistance,
+                _cachedLOSMask,
+                QueryTriggerInteraction.Ignore))
+        {
+            // Wall ahead — fall back to NavMesh pathfinding and enter
+            // cooldown so the zombie navigates around the obstacle instead
+            // of flip-flopping back to direct steering next frame.
+            _isDirectSteering = false;
+            agent.isStopped = false;
+            SyncAgentToTransform();
+            agent.updatePosition = true; // restore agent position control
+            pathTimer = maxRepathInterval; // force re-path
+            _directSteeringCooldownTimer = directSteeringWallCooldown;
+            return false;
+        }
+
+        // Move directly toward the player. Use NavMesh.SamplePosition to
+        // keep the zombie on the NavMesh surface (avoid sliding off edges).
+        // Use a generous sample radius (2m) because the zombie's transform
+        // may be above the NavMesh surface (y offset from agent/rigidbody).
+        Vector3 newPos = transform.position + dirNorm * speed * Time.deltaTime;
+
+        UnityEngine.AI.NavMeshHit navHit;
+        if (UnityEngine.AI.NavMesh.SamplePosition(newPos, out navHit, 2f, UnityEngine.AI.NavMesh.AllAreas))
+        {
+            // Only move if the sampled position is at a reasonable height
+            // (avoid snapping to underground NavMesh islands).
+            if (navHit.position.y > -1f)
+            {
+                transform.position = navHit.position;
+            }
+        }
+
+        // Update animator speed parameter so the run animation plays.
+        if (animator != null)
+            animator.SetFloat(SpeedHash, speed);
+
+        return true;
     }
 }
