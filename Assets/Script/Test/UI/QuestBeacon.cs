@@ -25,6 +25,11 @@ public class QuestBeacon : MonoBehaviour
              "Useful for guiding the player to the save room when they first enter a chapter.")]
     public int showOnChapter = 0;
 
+    [Tooltip("Side quest that activates this beacon. When this side quest is active in " +
+             "SideQuestManager, the beacon shows. Used for side-quest objective markers " +
+             "(typically green to distinguish from main-quest gold beacons).")]
+    public QuestData showOnSideQuest;
+
     [Tooltip("If true, hide the beacon once the player gets within this distance.")]
     public bool hideWhenClose = true;
 
@@ -84,6 +89,11 @@ public class QuestBeacon : MonoBehaviour
             StoryManager.Instance.OnActiveQuestChanged += HandleQuestChanged;
             StoryManager.Instance.OnChapterChanged += HandleChapterChanged;
         }
+        if (SideQuestManager.Instance != null)
+        {
+            SideQuestManager.Instance.OnSideQuestActivated += HandleSideQuestChanged;
+            SideQuestManager.Instance.OnSideQuestCompleted += HandleSideQuestChanged;
+        }
         BuildVisuals();
         EvaluateActivation();
     }
@@ -94,6 +104,11 @@ public class QuestBeacon : MonoBehaviour
         {
             StoryManager.Instance.OnActiveQuestChanged -= HandleQuestChanged;
             StoryManager.Instance.OnChapterChanged -= HandleChapterChanged;
+        }
+        if (SideQuestManager.Instance != null)
+        {
+            SideQuestManager.Instance.OnSideQuestActivated -= HandleSideQuestChanged;
+            SideQuestManager.Instance.OnSideQuestCompleted -= HandleSideQuestChanged;
         }
     }
 
@@ -107,10 +122,24 @@ public class QuestBeacon : MonoBehaviour
         EvaluateActivation();
     }
 
+    private void HandleSideQuestChanged(QuestData quest)
+    {
+        EvaluateActivation();
+    }
+
     private void EvaluateActivation()
     {
         var sm = StoryManager.Instance;
         if (sm == null) { SetActive(false); return; }
+
+        // Priority: side quest > main quest > chapter
+        if (showOnSideQuest != null)
+        {
+            var sqm = SideQuestManager.Instance;
+            bool active = sqm != null && sqm.IsActive(showOnSideQuest) && !sqm.IsCompleted(showOnSideQuest);
+            SetActive(active);
+            return;
+        }
 
         if (showOnQuest != null)
         {

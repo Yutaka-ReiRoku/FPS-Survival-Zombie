@@ -138,6 +138,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     public float directSteeringWallCooldown = 1.5f;
     [Tooltip("Chiều cao raycast check tường phía trước ở mức thân (m). Raycast thêm ở mức thấp này để phát hiện chướng ngại vật thấp (xác xe, hàng rào, thùng) mà raycast ở eyeHeight bay qua trên.")]
     public float wallCheckBodyHeight = 0.5f;
+    [Tooltip("Chênh lệch độ cao tối đa (m) giữa zombie và player để vẫn dùng direct steering. Vượt quá ngưỡng này (zombie trên gò đất, player ở dưới), zombie sẽ fall back to NavMesh pathfinding để navigate slope đúng cách thay vì bị kẹt.")]
+    public float maxDirectSteerHeightDiff = 2f;
 
     [Header("Attack")]
     public float attackCooldown = 1.5f;
@@ -210,6 +212,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private float _stuckTimer;
     private bool _wasInAttackRange;     // tracks isStopped transition (attack→chase)
     private int _noPathRetryCount;      // counts consecutive SetDestinationRobust failures when hasPath=false
+    private Vector3 _prevFramePos;      // position at end of previous Update — for direct steering face direction
 
     // --- Cached reusable objects (avoid per-frame allocation) ---
     private UnityEngine.AI.NavMeshPath _reusablePath;
@@ -371,6 +374,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         if (AIDirector.Instance != null)
             AIDirector.Instance.RegisterZombie(this);
+
+        // Initialize previous-frame position so the first Update doesn't
+        // compute a bogus movement direction (delta from origin).
+        _prevFramePos = transform.position;
     }
 
     void OnDisable()
@@ -455,6 +462,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             agent.velocity.magnitude / runSpeed,
             0.15f,
             Time.deltaTime);
+
+        // Record position at end of frame for direct steering face direction.
+        _prevFramePos = transform.position;
     }
 
     private float pathTimer = 0f;
@@ -556,12 +566,14 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             return;
         }
 
-        FaceTarget();
-
+        // Face movement direction while chasing (not attacking) so the zombie
+        // looks where it's going, not at the player. FaceTarget is only used
+        // when in attack range (needs to face player to hit them).
         if (distance <= attackDistance)
         {
             agent.isStopped = true;
             _wasInAttackRange = true;
+            FaceTarget(); // face player to attack
 
             if (!isAttacking &&
                 attackTimer >= attackCooldown)
@@ -609,6 +621,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
                 // own control.
                 _stuckTimer = 0f;
                 _lastStuckCheckPos = transform.position;
+                // Face the direction we're steering toward (movement direction).
+                FaceMovementDirection();
                 return;
             }
 
@@ -640,12 +654,38 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // path is stale. This keeps zombies responsive when the player
             // changes direction without flooding the async pathfinding queue.
             float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-            if (pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+            // Also force a re-path if the agent's ACTUAL destination has drifted
+            // far from the player (e.g. SetDestination was silently ignored due
+            // to pathPending, or the path broke with remainingDistance=Infinity).
+            float actualDestDrift = agent.hasPath
+                ? Vector3.Distance(agent.destination, target.position)
+                : 0f;
+            bool pathBroken = agent.hasPath && float.IsInfinity(agent.remainingDistance);
+
+            // Don't re-path while a path is already being calculated (pathPending).
+            // ResetPath during pathPending cancels the in-progress path, and the
+            // new SetDestination starts another async path — but if this happens
+            // every frame (because actualDestDrift > 5f keeps triggering), the
+            // path never completes and the destination never updates. This creates
+            // an infinite re-path loop where zombies never reach the player.
+            bool canRepath = !agent.pathPending;
+
+            if (canRepath && (pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold
+                || actualDestDrift > 5f || pathBroken))
             {
                 // Disable jitter when close to attack range to prevent flip-flop.
                 Vector3 dest = target.position;
                 if (distance > attackDistance + chaseJitterRadius + 1f)
                     dest += chaseJitterOffset;
+
+                // If the path is broken (remainingDistance=Infinity) or the
+                // destination has drifted far from the player, the agent may be
+                // stuck on a stale/invalid path. ResetPath first to clear the
+                // old path state, then SetDestination — otherwise SetDestination
+                // can silently fail to update the destination.
+                if (pathBroken || actualDestDrift > 5f)
+                    agent.ResetPath();
+
                 SetDestinationRobust(dest);
                 _lastSetDestination = dest;
                 pathTimer = 0f;
@@ -656,6 +696,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // a nearby valid NavMesh position and re-pathing. Handles cases
             // where the zombie is wedged against a wall, furniture, or door.
             HandleStuckDetection(distance);
+
+            // Face movement direction (NavMesh path velocity) while chasing.
+            FaceMovementDirection();
         }
     }
 
@@ -1118,6 +1161,50 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
                 Time.deltaTime * 8f);
     }
 
+    /// <summary>
+    /// Faces the zombie toward its current movement direction (velocity or
+    /// path direction) instead of toward the player. Used while chasing so
+    /// the zombie looks where it's going, not where the player is — more
+    /// natural visual behavior. Falls back to FaceTarget if not moving.
+    /// </summary>
+    void FaceMovementDirection()
+    {
+        Vector3 moveDir = Vector3.zero;
+
+        // Direct steering: agent is stopped + updatePosition=false, so
+        // agent.velocity is zero and hasPath is false. Use the actual
+        // position delta from the previous frame to determine movement
+        // direction — this is the only reliable source during direct steering.
+        if (_isDirectSteering)
+        {
+            moveDir = transform.position - _prevFramePos;
+        }
+        // NavMesh pathfinding: prefer the agent's velocity (reflects actual
+        // movement along path).
+        else if (agent != null && agent.isOnNavMesh && agent.velocity.sqrMagnitude > 0.5f)
+        {
+            moveDir = agent.velocity;
+        }
+        // Fallback: direction from current position to agent destination
+        // (works when velocity is briefly zero but the agent is still pathing).
+        else if (agent != null && agent.isOnNavMesh && agent.hasPath)
+        {
+            moveDir = agent.destination - transform.position;
+        }
+
+        moveDir.y = 0f;
+
+        if (moveDir.sqrMagnitude < 0.01f)
+        {
+            // Not moving — face the player as a fallback.
+            FaceTarget();
+            return;
+        }
+
+        Quaternion rot = Quaternion.LookRotation(moveDir.normalized);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 8f);
+    }
+
     public void PlayFootstep()
     {
         PlaySound(footstepClip);
@@ -1210,6 +1297,26 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     {
         if (target == null || agent == null || !agent.isOnNavMesh)
             return false;
+
+        // Height difference check: if the zombie and player are on very
+        // different elevations (e.g. zombie on a hill/mound, player below),
+        // direct steering moves horizontally (dir.y=0) and NavMesh.SamplePosition
+        // may snap to the wrong surface or fail — the zombie gets stuck on the
+        // terrain lip. Fall back to NavMesh pathfinding which can navigate
+        // slopes and elevation changes properly.
+        float heightDiff = Mathf.Abs(target.position.y - transform.position.y);
+        if (heightDiff > maxDirectSteerHeightDiff)
+        {
+            if (_isDirectSteering)
+            {
+                _isDirectSteering = false;
+                agent.isStopped = false;
+                SyncAgentToTransform();
+                agent.updatePosition = true;
+                pathTimer = maxRepathInterval; // force re-path
+            }
+            return false;
+        }
 
         // Wall cooldown: after hitting a wall while direct steering, stay in
         // NavMesh mode for a while to let the zombie navigate around the
