@@ -50,6 +50,7 @@ MonoBehaviour:
   penetrationAmount: 5
   penetrationDamageReduction: 0.579
   allowAim: 1
+  ignoreAimPoint: 0
   aimDistance: 0.3
   aimingRotation: {x: 0, y: 0, z: -6}
   aimingSpeed: 14.3

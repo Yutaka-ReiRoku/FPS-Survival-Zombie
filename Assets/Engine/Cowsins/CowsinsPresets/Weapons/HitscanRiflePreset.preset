@@ -181,6 +181,10 @@ Preset:
     value: 1
     objectReference: {fileID: 0}
   - target: {fileID: 0}
+    propertyPath: ignoreAimPoint
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
     propertyPath: aimDistance
     value: 0.25
     objectReference: {fileID: 0}
@@ -717,7 +721,7 @@ Preset:
     value: 1
     objectReference: {fileID: 0}
   - target: {fileID: 0}
-    propertyPath: audioSFX.shooting.Array.data[0]
+    propertyPath: 'audioSFX.shooting.Array.data[0]'
     value: 
     objectReference: {fileID: 8300000, guid: ec5cd49f8987a494d96bf93339c8bfb3, type: 3}
   - target: {fileID: 0}
@@ -809,3 +813,8 @@ Preset:
     value: HitscanRiflePreset
     objectReference: {fileID: 0}
   m_ExcludedProperties: []
+  m_CoupledType:
+    m_NativeTypeID: 0
+    m_ManagedTypePPtr: {fileID: 0}
+    m_ManagedTypeFallback: 
+  m_CoupledProperties: []

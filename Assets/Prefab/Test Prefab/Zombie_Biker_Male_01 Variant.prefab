@@ -111,6 +111,7 @@ MonoBehaviour:
   directSteeringLOSCacheInterval: 0.15
   directSteeringWallCooldown: 1.5
   wallCheckBodyHeight: 0.5
+  maxDirectSteerHeightDiff: 2
   attackCooldown: 2
   attackDamage: 20
   maxHealth: 100

@@ -25,12 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1684736029520712892}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1684736029520712890
 MonoBehaviour:
@@ -44,6 +45,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1bf0f40ed604d04cb5a5063f55c57b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Jumping: 0
+  Sprinting: 0
+  Crouching: 0
+  Dashing: 0
+  Shooting: 0
+  Reloading: 0
+  Aiming: 0
+  Melee: 0
+  Inspecting: 0
+  Interacting: 0
+  StartInteraction: 0
+  Dropping: 0
+  Nextweapon: 0
+  Previousweapon: 0
+  Pausing: 0
+  OpenInventory: 0
+  OpenFavMenu: 0
+  ToggleFlashlight: 0
+  Grappling: 0
+  BackUI: 0
+  SelectUI: 0
+  WestButtonUI: 0
+  NorthButtonUI: 0
+  X: 0
+  Y: 0
+  Scrolling: 0
+  Mousex: 0
+  Mousey: 0
+  Controllerx: 0
+  Controllery: 0
 --- !u!114 &7629461499611396863
 MonoBehaviour:
   m_ObjectHideFlags: 0

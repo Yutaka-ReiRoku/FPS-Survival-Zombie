@@ -181,6 +181,10 @@ Preset:
     value: 1
     objectReference: {fileID: 0}
   - target: {fileID: 0}
+    propertyPath: ignoreAimPoint
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
     propertyPath: aimDistance
     value: 0.2
     objectReference: {fileID: 0}
@@ -557,29 +561,9 @@ Preset:
     value: 
     objectReference: {fileID: 2462405574108921655, guid: e6d36bb0ebdf6cc4dacdeee8b6e8a0ce, type: 3}
   - target: {fileID: 0}
-    propertyPath: bulletHoleImpact.groundImpact
-    value: 
+    propertyPath: bulletHoleImpact.bulletHoleImpact.Array.size
+    value: 0
     objectReference: {fileID: 0}
-  - target: {fileID: 0}
-    propertyPath: bulletHoleImpact.grassImpact
-    value: 
-    objectReference: {fileID: 2462405574108921655, guid: 96098beba501e3247b9452e9455f6189, type: 3}
-  - target: {fileID: 0}
-    propertyPath: bulletHoleImpact.enemyImpact
-    value: 
-    objectReference: {fileID: 2462405574108921655, guid: 8c95f7225cf58144d86befe4ddc08efb, type: 3}
-  - target: {fileID: 0}
-    propertyPath: bulletHoleImpact.metalImpact
-    value: 
-    objectReference: {fileID: 2462405574108921655, guid: e6d36bb0ebdf6cc4dacdeee8b6e8a0ce, type: 3}
-  - target: {fileID: 0}
-    propertyPath: bulletHoleImpact.mudImpact
-    value: 
-    objectReference: {fileID: 2462405574108921655, guid: 4445bafd3b5e24c4eb41ba27f6a44af4, type: 3}
-  - target: {fileID: 0}
-    propertyPath: bulletHoleImpact.woodImpact
-    value: 
-    objectReference: {fileID: 2462405574108921655, guid: 49ec6833820c5774ea4015ac770e6801, type: 3}
   - target: {fileID: 0}
     propertyPath: muzzleVFX
     value: 
@@ -601,7 +585,7 @@ Preset:
     value: 1
     objectReference: {fileID: 0}
   - target: {fileID: 0}
-    propertyPath: audioSFX.shooting.Array.data[0]
+    propertyPath: 'audioSFX.shooting.Array.data[0]'
     value: 
     objectReference: {fileID: 8300000, guid: 31fe3c9004e2e0343a96a4f962909f5e, type: 3}
   - target: {fileID: 0}
@@ -693,3 +677,8 @@ Preset:
     value: ProjectileWeaponPreset
     objectReference: {fileID: 0}
   m_ExcludedProperties: []
+  m_CoupledType:
+    m_NativeTypeID: 0
+    m_ManagedTypePPtr: {fileID: 0}
+    m_ManagedTypeFallback: 
+  m_CoupledProperties: []

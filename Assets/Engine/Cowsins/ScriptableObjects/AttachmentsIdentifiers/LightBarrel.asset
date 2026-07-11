@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: LightBarrel
   m_EditorClassIdentifier: 
   _name: Light Barrel
+  description: 
   icon: {fileID: 21300000, guid: 5467b38deb34ad843b04dfed2f52033a, type: 3}
   pickUpGraphics: {fileID: 4070428369439329199, guid: 424593b91075184478f2ec067bc907e6, type: 3}
   maxStack: 1
@@ -20,3 +21,12 @@ MonoBehaviour:
   irregularItemIcon: {fileID: 0}
   applyWeight: 0
   weightMultiplier: 1
+  attachmentType: 0
+  reloadSpeedIncrease: 0
+  aimSpeedIncrease: 0
+  spreadDecrease: 0
+  fireRateDecrease: 0
+  damageIncrease: 0
+  weightAdded: 0
+  cameraShakeMultiplier: 0
+  penetrationIncrease: 0

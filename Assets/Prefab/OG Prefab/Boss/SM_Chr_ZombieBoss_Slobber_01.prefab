@@ -836,6 +836,8 @@ MonoBehaviour:
   maxHealth: 70
   currentHealth: 0
   detectRange: 25
+  loseSightDistance: 25
+  alertMemoryDuration: 3
   requireLineOfSight: 1
   sightObstructionMask:
     serializedVersion: 2
@@ -850,6 +852,11 @@ MonoBehaviour:
   screamDuration: 1.5
   playerMovedRepathThreshold: 1.5
   maxRepathInterval: 0.2
+  useDirectSteeringWhenLOS: 1
+  directSteeringWallCheckDistance: 1.5
+  directSteeringLOSCacheInterval: 0.15
+  directSteeringWallCooldown: 1.5
+  wallCheckBodyHeight: 0.5
   explosionDamage: 50
   explosionRadius: 5
   explosionPrefab: {fileID: 5018994898019192216, guid: ab977a440365d1c4092c15552e5ff157, type: 3}
