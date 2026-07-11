@@ -224,6 +224,7 @@ namespace cowsins
                 InputManager = inputManager,
                 Settings = playerSettings,
                 Dependencies = playerDependencies,
+                CoyoteJumpTime = playerSettings.coyoteJumpTime,
             };
 
             groundDetectionBehaviour = new GroundDetectionBehaviour(movementContext);

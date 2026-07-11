@@ -316,7 +316,7 @@ MonoBehaviour:
     runSpeed: 10
     walkSpeed: 5
     maxSpeedAllowed: 20
-    controlAirborne: 0.5
+    controlAirborne: 0.3
     whatIsGround:
       serializedVersion: 2
       m_Bits: 16025
@@ -349,7 +349,7 @@ MonoBehaviour:
     doubleJumpResetsFallDamage: 0
     directionalJumpMethod: 0
     directionalJumpForce: 0
-    jumpForce: 20
+    jumpForce: 10.43
     canJumpWhileCrouching: 1
     jumpCooldown: 0.25
     canCoyote: 0
