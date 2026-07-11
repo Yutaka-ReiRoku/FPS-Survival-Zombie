@@ -320,7 +320,7 @@ MonoBehaviour:
     whatIsGround:
       serializedVersion: 2
       m_Bits: 16025
-    groundCheckDistance: 0.4
+    groundCheckDistance: 0.05
     controlsResponsiveness: 0.4
     stepHeight: 0.875
     stepAssistForce: 6

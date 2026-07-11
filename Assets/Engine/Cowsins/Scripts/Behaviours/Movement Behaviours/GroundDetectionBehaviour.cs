@@ -69,6 +69,21 @@ namespace cowsins
 
             // Buffered grounding system
             bool wasGrounded = playerMovement.Grounded;
+
+            // Safe first-frame landing detection to prevent physics bouncing
+            if (foundGroundThisFrame && !wasGrounded && groundedFrameCount == 0)
+            {
+                if (rb.linearVelocity.y < -0.1f)
+                {
+                    if (!playerMovement.IsClimbing && !playerMovement.IsWallRunning && !playerMovement.IsDashing)
+                    {
+                        Vector3 vel = rb.linearVelocity;
+                        vel.y = 0;
+                        rb.linearVelocity = vel;
+                    }
+                }
+            }
+
             bool newGroundedState = UpdateGroundedState(foundGroundThisFrame, wasGrounded);
 
             if (newGroundedState != wasGrounded)
