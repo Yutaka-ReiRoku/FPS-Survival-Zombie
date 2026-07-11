@@ -156,6 +156,7 @@ namespace cowsins
                             EditorGUILayout.PropertyField(playerSettings.FindPropertyRelative("crouchSpeed"));
                             EditorGUILayout.PropertyField(playerSettings.FindPropertyRelative("crouchTransitionSpeed"));
                             EditorGUILayout.PropertyField(playerSettings.FindPropertyRelative("roofCheckDistance"));
+                            EditorGUILayout.PropertyField(playerSettings.FindPropertyRelative("crouchHeight"));
                             EditorGUI.indentLevel--;
                         }
                         SerializedProperty maxSpeedAllowedProp = playerSettings.FindPropertyRelative("maxSpeedAllowed");

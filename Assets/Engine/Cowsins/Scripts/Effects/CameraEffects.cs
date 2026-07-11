@@ -98,25 +98,10 @@ namespace cowsins
             UpdateHeadBob();
             UpdateBreathing();
 
-            // Crouching position offset calculation
-            float targetCrouch = player.IsCrouching ? 1f : 0f;
-            if (playerMovementScript != null)
-            {
-                float transitionSpeed = playerMovementScript.playerSettings.crouchTransitionSpeed;
-                if (player.IsCrouching) transitionSpeed *= 1.5f;
-                currentCrouchTransition = Mathf.MoveTowards(currentCrouchTransition, targetCrouch, Time.deltaTime * transitionSpeed);
-            }
-            else
-            {
-                currentCrouchTransition = player.IsCrouching ? 1f : 0f;
-            }
-
-            Vector3 baseCameraPos = new Vector3(origPos.x, origPos.y * (1f - currentCrouchTransition * 0.5f), origPos.z);
-
             // Apply combined position and rotation as absolute offsets from the original
             // transform values. This prevents frame-over-frame accumulation that caused
             // the camera to drift and then snap back when the player stopped moving.
-            playerCamera.localPosition = baseCameraPos + headBobPosOffset + breathingPosOffset + landingPosOffset;
+            playerCamera.localPosition = origPos + headBobPosOffset + breathingPosOffset + landingPosOffset;
             playerCamera.localRotation = origRot * tiltRot * headBobRotOffset * breathingRotOffset;
 
             HandleCamShake();

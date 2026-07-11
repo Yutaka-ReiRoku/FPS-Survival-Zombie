@@ -1648,7 +1648,7 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 0
   m_AutoRepath: 1
-  m_Height: 2
+  m_Height: 1.63
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 1
@@ -1694,6 +1694,7 @@ MonoBehaviour:
   directSteeringLOSCacheInterval: 0.15
   directSteeringWallCooldown: 1.5
   wallCheckBodyHeight: 0.5
+  maxDirectSteerHeightDiff: 2
   attackCooldown: 1.5
   attackDamage: 20
   maxHealth: 10

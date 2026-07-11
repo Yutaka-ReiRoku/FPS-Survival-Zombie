@@ -132,6 +132,7 @@ namespace cowsins
         [Min(0.01f)] public float crouchTransitionSpeed;
         [Tooltip("Distance to detect a roof. If an obstacle is detected within this distance, the player will not be able to uncrouch")] public float roofCheckDistance = 3.5f;
         [Tooltip("Turn this on to allow the player to crouch while jumping")] public bool allowCrouchWhileJumping;
+        [Tooltip("Target capsule height when crouching. Default is 0.9m.")] public float crouchHeight = 0.9f;
 
 
         // ---------------- SLIDING SETTINGS ---------------- //

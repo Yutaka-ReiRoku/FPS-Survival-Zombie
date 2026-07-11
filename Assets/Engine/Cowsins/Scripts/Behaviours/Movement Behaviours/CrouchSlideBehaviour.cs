@@ -14,6 +14,8 @@ public class CrouchSlideBehaviour
     private PlayerOrientation orientation => playerMovement.Orientation;
     private float initialHeight;
     private Vector3 initialCenter;
+    private Transform cameraHead;
+    private float initialHeadLocalY;
     private bool canUnCrouch = false;
     private float slideTimer = 0f;
     private Vector3 slideDirection = Vector3.zero;
@@ -23,6 +25,8 @@ public class CrouchSlideBehaviour
     public CrouchSlideBehaviour(MovementContext context)
     {
         this.context = context;
+        if (context == null || context.Transform == null) return;
+
         this.rb = context.Rigidbody;
         this.inputManager = context.InputManager;
 
@@ -32,6 +36,30 @@ public class CrouchSlideBehaviour
         this.playerSettings = context.Settings;
         this.initialHeight = context.Capsule.height;
         this.initialCenter = context.Capsule.center;
+
+        // Safe camera head detection
+        cameraHead = context.Transform.Find("Head ( Camera Placement )");
+        if (cameraHead == null)
+        {
+            var allTransforms = context.Transform.GetComponentsInChildren<Transform>(true);
+            foreach (var t in allTransforms)
+            {
+                if (t != context.Transform && t.name.IndexOf("Head", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    cameraHead = t;
+                    break;
+                }
+            }
+        }
+
+        if (cameraHead != null)
+        {
+            initialHeadLocalY = cameraHead.localPosition.y;
+        }
+        else
+        {
+            initialHeadLocalY = 1.60f; // Fallback
+        }
 
         playerEvents.Events.AllowSlide += AllowSliding;
     }
@@ -76,17 +104,21 @@ public class CrouchSlideBehaviour
             
             float bottomOffset = initialCenter.y - initialHeight * 0.5f;
             capsule.center = new Vector3(initialCenter.x, bottomOffset + currentH * 0.5f, initialCenter.z);
+            
+            UpdateHeadPosition(capsule);
             return;
         }
 
         if (playerMovement.IsCrouching || isBoosting)
         {
-            float targetH = initialHeight * 0.5f;
+            float targetH = playerSettings.crouchHeight;
             float currentH = Mathf.MoveTowards(capsule.height, targetH, Time.deltaTime * playerSettings.crouchTransitionSpeed * 1.5f * 2.0f);
             capsule.height = currentH;
             
             float bottomOffset = initialCenter.y - initialHeight * 0.5f;
             capsule.center = new Vector3(initialCenter.x, bottomOffset + currentH * 0.5f, initialCenter.z);
+            
+            UpdateHeadPosition(capsule);
         }
     }
 
@@ -141,12 +173,14 @@ public class CrouchSlideBehaviour
         if (inputManager.Crouching)
         {
             CapsuleCollider capsule = context.Capsule;
-            float targetH = initialHeight * 0.5f;
+            float targetH = playerSettings.crouchHeight;
             float currentH = Mathf.MoveTowards(capsule.height, targetH, Time.deltaTime * playerSettings.crouchTransitionSpeed * 1.5f * 2.0f);
             capsule.height = currentH;
             
             float bottomOffset = initialCenter.y - initialHeight * 0.5f;
             capsule.center = new Vector3(initialCenter.x, bottomOffset + currentH * 0.5f, initialCenter.z);
+            
+            UpdateHeadPosition(capsule);
         }
 
         playerMovement.IsCrouching = true;
@@ -191,5 +225,14 @@ public class CrouchSlideBehaviour
         Vector3 horizontal = new Vector3(vel.x, 0, vel.z);
 
         rb.linearVelocity = new Vector3(horizontal.magnitude > 0 ? horizontal.normalized.x * Mathf.Max(0, horizontal.magnitude * 0.6f) : 0, vel.y, horizontal.magnitude > 0 ? horizontal.normalized.z * Mathf.Max(0, horizontal.magnitude * 0.6f) : 0);
+    }
+
+    private void UpdateHeadPosition(CapsuleCollider capsule)
+    {
+        if (cameraHead != null && initialHeight > 0 && capsule != null)
+        {
+            float targetHeadY = initialHeadLocalY * (capsule.height / initialHeight);
+            cameraHead.localPosition = new Vector3(cameraHead.localPosition.x, targetHeadY, cameraHead.localPosition.z);
+        }
     }
 }
