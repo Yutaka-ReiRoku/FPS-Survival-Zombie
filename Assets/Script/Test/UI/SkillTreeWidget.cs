@@ -220,7 +220,7 @@ public class SkillTreeWidget : MonoBehaviour
     private void OnEnable()
     {
         if (_rootCanvas == null)
-            _rootCanvas = GetComponentInParent<Canvas>();
+            _rootCanvas = transform.parent.GetComponentInParent<Canvas>();
         StartCoroutine(Bind());
     }
 
@@ -269,7 +269,7 @@ public class SkillTreeWidget : MonoBehaviour
         if (_playerControl != null)
             _playerControl.LoseControl();
         // Hide gameplay HUD while the skill tree is open.
-        if (_rootCanvas == null) _rootCanvas = GetComponentInParent<Canvas>();
+        if (_rootCanvas == null) _rootCanvas = transform.parent.GetComponentInParent<Canvas>();
         PauseManager.SetHUDVisible(_rootCanvas != null ? _rootCanvas.transform : transform.parent, false);
         if (_transition != null) _transition.Play();
         Refresh();
@@ -290,7 +290,7 @@ public class SkillTreeWidget : MonoBehaviour
             if (_playerControl != null)
                 _playerControl.GrantControl();
             // Restore gameplay HUD when no other overlay is holding it.
-            if (_rootCanvas == null) _rootCanvas = GetComponentInParent<Canvas>();
+            if (_rootCanvas == null) _rootCanvas = transform.parent.GetComponentInParent<Canvas>();
             PauseManager.SetHUDVisible(_rootCanvas != null ? _rootCanvas.transform : transform.parent, true);
         }
     }

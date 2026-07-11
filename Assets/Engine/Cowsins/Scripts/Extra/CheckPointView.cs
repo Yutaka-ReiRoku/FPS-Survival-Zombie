@@ -63,6 +63,9 @@ namespace cowsins
             StartCoroutine(UpdateValue());
         }
 
+        private Material _clonedFontMat;
+        private System.Collections.Generic.List<Material> _clonedImageMats = new System.Collections.Generic.List<Material>();
+
         /// <summary>
         /// Overrides the ZTest on the checkpoint's UI materials so the icon and
         /// distance text are visible through walls/geometry. Both the TMP SDF
@@ -76,8 +79,9 @@ namespace cowsins
 
             if (text != null)
             {
-                text.fontMaterial = new Material(text.fontSharedMaterial);
-                text.fontMaterial.SetFloat("unity_GUIZTestMode", zTestAlways);
+                _clonedFontMat = new Material(text.fontSharedMaterial);
+                _clonedFontMat.SetFloat("unity_GUIZTestMode", zTestAlways);
+                text.fontMaterial = _clonedFontMat;
             }
 
             foreach (var img in GetComponentsInChildren<Image>(true))
@@ -86,7 +90,18 @@ namespace cowsins
                 var mat = new Material(img.material);
                 mat.SetFloat("unity_GUIZTestMode", zTestAlways);
                 img.material = mat;
+                _clonedImageMats.Add(mat);
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (_clonedFontMat != null) Destroy(_clonedFontMat);
+            foreach (var mat in _clonedImageMats)
+            {
+                if (mat != null) Destroy(mat);
+            }
+            _clonedImageMats.Clear();
         }
 
         /// <summary>

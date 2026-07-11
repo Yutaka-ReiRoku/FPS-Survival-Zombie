@@ -4,6 +4,18 @@ namespace cowsins
 {
     public class AimSkillSystem : MonoBehaviour
     {
+        public static AimSkillSystem Instance { get; private set; }
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
         [Header("Runtime Stats")]
 
         [SerializeField] private float critChance;

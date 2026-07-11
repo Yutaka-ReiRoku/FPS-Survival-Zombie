@@ -17,7 +17,7 @@ namespace cowsins
 
         private WeaponControllerSettings settings;
 
-        private AimSkillSystem aimSystem;
+        private AimSkillSystem aimSystem => AimSkillSystem.Instance;
 
         public HitDetectionSystem(WeaponContext context, WeaponControllerSettings settings)
         {
@@ -37,11 +37,6 @@ namespace cowsins
             this.weaponReference = context.Dependencies.WeaponReference;
             this.weaponEvents = context.Dependencies.WeaponEvents;
             this.playerMovement = context.Dependencies.PlayerMovementState;
-
-            // AimSkillSystem lives on the GeneralManagers GameObject, not on
-            // the player, so GetComponent on the player transform returns null.
-            // Find it globally instead (there is only one instance).
-            aimSystem = UnityEngine.Object.FindAnyObjectByType<AimSkillSystem>();
 
             context.Dependencies.WeaponEvents.Events.OnHit.AddListener(Hit);
         }

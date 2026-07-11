@@ -112,6 +112,13 @@ public class QuestBeacon : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (_beamMat != null) Destroy(_beamMat);
+        if (_iconMat != null) Destroy(_iconMat);
+        if (_ringMat != null) Destroy(_ringMat);
+    }
+
     private void HandleQuestChanged(QuestData oldQuest, QuestData newQuest)
     {
         EvaluateActivation();

@@ -62,6 +62,8 @@ public class Spawm : MonoBehaviour
     private readonly System.Collections.Generic.Dictionary<ZombieAI, float> _wanderTimers =
         new System.Collections.Generic.Dictionary<ZombieAI, float>();
 
+    private NavMeshPath _cachedPath;
+
     private void Start()
     {
         if (player == null)
@@ -72,6 +74,8 @@ public class Spawm : MonoBehaviour
 
         if (zombiePrefabs == null || zombiePrefabs.Length == 0)
             return;
+
+        _cachedPath = new NavMeshPath();
 
         if (zombieContainer == null)
             zombieContainer = new GameObject("Zombies").transform;
@@ -376,6 +380,11 @@ public class Spawm : MonoBehaviour
                     _wanderTimers[ai] = Time.time + Random.Range(0f, wanderInterval);
             }
 
+            if (AIDirector.Instance != null)
+            {
+                AIDirector.Instance.camperTime = 0f;
+            }
+
             Debug.Log(
                 "[DIRECTOR] Camper Punishment Spawn!"
             );
@@ -458,9 +467,9 @@ public class Spawm : MonoBehaviour
     /// </summary>
     private bool HasPathToPlayer(Vector3 fromPos, Vector3 playerNavMeshPos)
     {
-        NavMeshPath path = new NavMeshPath();
-        NavMesh.CalculatePath(fromPos, playerNavMeshPos, NavMesh.AllAreas, path);
-        return path.status == NavMeshPathStatus.PathComplete;
+        if (_cachedPath == null) _cachedPath = new NavMeshPath();
+        NavMesh.CalculatePath(fromPos, playerNavMeshPos, NavMesh.AllAreas, _cachedPath);
+        return _cachedPath.status == NavMeshPathStatus.PathComplete;
     }
 
     private void OnDrawGizmosSelected()

@@ -25,7 +25,7 @@ namespace cowsins
         private static Collider[] overlapColliders = new Collider[500];
         private bool projectileHasAlreadyHit = false; // Prevent from double hitting issues
 
-        private AimSkillSystem aimSystem;
+        private AimSkillSystem aimSystem => AimSkillSystem.Instance;
 
         private void OnEnable()
         {
@@ -40,11 +40,6 @@ namespace cowsins
         public void Initialize()
         {
             transform.LookAt(destination);
-
-            // AimSkillSystem lives on the GeneralManagers GameObject, not on
-            // the player, so GetComponent on the player transform returns null.
-            // Find it globally instead (there is only one instance).
-            aimSystem = UnityEngine.Object.FindAnyObjectByType<AimSkillSystem>();
 
             Invoke(nameof(DestroyProjectile), duration);
         }

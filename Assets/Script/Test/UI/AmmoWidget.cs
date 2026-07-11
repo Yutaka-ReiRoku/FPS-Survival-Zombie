@@ -67,21 +67,6 @@ public class AmmoWidget : MonoBehaviour
 
     private void OnFired()
     {
-        if (punchRoot == null) return;
-        if (_punch != null) StopCoroutine(_punch);
-        _punch = StartCoroutine(Punch());
-    }
-
-    private IEnumerator Punch()
-    {
-        float t = 0f, dur = 0.12f;
-        while (t < dur)
-        {
-            t += Time.unscaledDeltaTime;
-            float k = 1f - (t / dur);
-            punchRoot.localScale = _home * (1f + (punchScale - 1f) * k);
-            yield return null;
-        }
-        punchRoot.localScale = _home;
+        // Trống để loại bỏ Coroutine rác trên mỗi phát bắn
     }
 }

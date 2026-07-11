@@ -388,6 +388,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
 
     private float cachedDistance = 100f;
+    private bool _cachedLOSResult;
+    private float _nextLOSCheckTime;
 
     void Update()
     {
@@ -407,8 +409,23 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         // NOT require LOS — once the zombie has detected the player, it keeps
         // chasing based on distance/memory even if the player briefly breaks
         // LOS (ducking behind cover, etc.).
-        bool hasLOSCurrently = cachedDistance <= detectDistance &&
-            (!requireLineOfSight || HasLineOfSight());
+        bool hasLOSCurrently = false;
+        if (cachedDistance <= detectDistance)
+        {
+            if (!requireLineOfSight)
+            {
+                hasLOSCurrently = true;
+            }
+            else
+            {
+                if (Time.time >= _nextLOSCheckTime)
+                {
+                    _cachedLOSResult = HasLineOfSight();
+                    _nextLOSCheckTime = Time.time + Random.Range(0.12f, 0.18f);
+                }
+                hasLOSCurrently = _cachedLOSResult;
+            }
+        }
 
         if (hasLOSCurrently)
         {
@@ -427,7 +444,22 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // detectDistance edge).
             // Still update last known pos if we can see the player (even if
             // beyond detectDistance, within loseSightDistance).
-            if (!requireLineOfSight || HasLineOfSight())
+            bool hasLOSForHysteresis = false;
+            if (!requireLineOfSight)
+            {
+                hasLOSForHysteresis = true;
+            }
+            else
+            {
+                if (Time.time >= _nextLOSCheckTime)
+                {
+                    _cachedLOSResult = HasLineOfSight();
+                    _nextLOSCheckTime = Time.time + Random.Range(0.12f, 0.18f);
+                }
+                hasLOSForHysteresis = _cachedLOSResult;
+            }
+
+            if (hasLOSForHysteresis)
             {
                 _lastKnownPlayerPos = target.position;
                 _hasLastKnownPos = true;

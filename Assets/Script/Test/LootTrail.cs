@@ -101,7 +101,22 @@ public class LootTrail : MonoBehaviour
     {
         // Particle child sẽ tự destroy theo parent, nhưng clear trail để
         // tránh vệt linger trên pool.
-        if (trail != null) trail.Clear();
+        if (trail != null)
+        {
+            trail.Clear();
+            if (trail.material != null && trail.material.name == "LootTrail_Runtime")
+            {
+                Destroy(trail.material);
+            }
+        }
+        if (glow != null)
+        {
+            var renderer = glow.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null && renderer.material != null && renderer.material.name == "LootGlow_Runtime")
+            {
+                Destroy(renderer.material);
+            }
+        }
     }
 
     void Update()
@@ -139,6 +154,11 @@ public class LootTrail : MonoBehaviour
     {
         trail = gameObject.GetComponent<TrailRenderer>();
         if (trail == null) trail = gameObject.AddComponent<TrailRenderer>();
+
+        if (trail.material != null && trail.material.name == "LootTrail_Runtime")
+        {
+            Destroy(trail.material);
+        }
 
         // Material runtime: Sprites/Default với blend additive cho vệt sáng.
         Shader shader = Shader.Find("Sprites/Default");
@@ -209,6 +229,10 @@ public class LootTrail : MonoBehaviour
         var renderer = glow.GetComponent<ParticleSystemRenderer>();
         if (renderer != null)
         {
+            if (renderer.material != null && renderer.material.name == "LootGlow_Runtime")
+            {
+                Destroy(renderer.material);
+            }
             Shader pshader = Shader.Find("Sprites/Default");
             Material pmat = new Material(pshader);
             pmat.name = "LootGlow_Runtime";

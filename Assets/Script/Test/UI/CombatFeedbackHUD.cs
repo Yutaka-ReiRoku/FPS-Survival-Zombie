@@ -19,6 +19,20 @@ public class CombatFeedbackHUD : MonoBehaviour
     [Tooltip("Camera used to project world hit positions. Defaults to Camera.main.")]
     public Camera worldCamera;
 
+    private static readonly string[] _numberStrings = new string[1000];
+    private static string GetDamageString(int dmg, bool crit)
+    {
+        if (dmg >= 0 && dmg < 1000)
+        {
+            if (_numberStrings[dmg] == null)
+            {
+                _numberStrings[dmg] = dmg.ToString();
+            }
+            return crit ? (_numberStrings[dmg] + "!") : _numberStrings[dmg];
+        }
+        return crit ? (dmg + "!") : dmg.ToString();
+    }
+
     private RectTransform _root;
 
     // ---- Hitmarker ----
@@ -45,8 +59,9 @@ public class CombatFeedbackHUD : MonoBehaviour
 
     // ---- Killfeed ----
     private RectTransform _killContainer;
-    private class Kill { public GameObject go; public CanvasGroup cg; public float life; }
+    private class Kill { public GameObject go; public CanvasGroup cg; public TextMeshProUGUI tmp; public float life; public bool active; }
     private readonly List<Kill> _kills = new List<Kill>();
+    private readonly List<Kill> _killPool = new List<Kill>();
     private float _killLife = 4f;
 
     private UITheme _theme;
@@ -161,7 +176,7 @@ public class CombatFeedbackHUD : MonoBehaviour
         }
         d.rt.anchoredPosition = local + new Vector2(Random.Range(-18f, 18f), 0f);
         int dmgInt = Mathf.Max(1, Mathf.RoundToInt(damage));
-        d.tmp.text = crit ? (dmgInt + "!") : dmgInt.ToString();
+        d.tmp.text = GetDamageString(dmgInt, crit);
         d.tmp.color = crit ? _critColor : headshot ? _hitKill : (_theme != null ? _theme.textPrimary : Color.white);
         d.tmp.fontSize = crit ? 42 : headshot ? 36 : 28;
         d.cg.alpha = 1f;
@@ -173,25 +188,59 @@ public class CombatFeedbackHUD : MonoBehaviour
 
     public void ShowKill(string name)
     {
-        var rt = NewChild("KillEntry", _killContainer);
-        rt.sizeDelta = new Vector2(360, 40);
-        var le = rt.gameObject.AddComponent<LayoutElement>();
-        le.preferredHeight = 40; le.preferredWidth = 360;
-        var bg = rt.gameObject.AddComponent<Image>();
-        bg.color = _theme != null ? _theme.surfaceTop : new Color(0.137f, 0.165f, 0.2f, 0.9f);
-        bg.raycastTarget = false;
-        var txtRT = NewChild("Text", rt);
-        txtRT.anchorMin = Vector2.zero; txtRT.anchorMax = Vector2.one;
-        txtRT.offsetMin = new Vector2(12, 0); txtRT.offsetMax = new Vector2(-12, 0);
-        var tmp = txtRT.gameObject.AddComponent<TextMeshProUGUI>();
-        tmp.alignment = TextAlignmentOptions.MidlineRight; tmp.fontSize = 22; tmp.raycastTarget = false;
-        tmp.text = "Killed  " + (string.IsNullOrEmpty(name) ? "Zombie" : name);
-        PremiumUITheme.StyleLabel(tmp);
-        tmp.color = _theme != null ? _theme.textPrimary : Color.white;
-        var cg = rt.gameObject.AddComponent<CanvasGroup>();
-        cg.blocksRaycasts = false; cg.alpha = 1f;
-        _kills.Add(new Kill { go = rt.gameObject, cg = cg, life = _killLife });
-        while (_kills.Count > 6) { var k = _kills[0]; _kills.RemoveAt(0); if (k.go) Destroy(k.go); }
+        Kill k = null;
+        for (int i = 0; i < _killPool.Count; i++)
+        {
+            if (!_killPool[i].active)
+            {
+                k = _killPool[i];
+                break;
+            }
+        }
+
+        if (k == null)
+        {
+            var rt = NewChild("KillEntry", _killContainer);
+            rt.sizeDelta = new Vector2(360, 40);
+            var le = rt.gameObject.AddComponent<LayoutElement>();
+            le.preferredHeight = 40; le.preferredWidth = 360;
+            var bg = rt.gameObject.AddComponent<Image>();
+            bg.color = _theme != null ? _theme.surfaceTop : new Color(0.137f, 0.165f, 0.2f, 0.9f);
+            bg.raycastTarget = false;
+            
+            var txtRT = NewChild("Text", rt);
+            txtRT.anchorMin = Vector2.zero; txtRT.anchorMax = Vector2.one;
+            txtRT.offsetMin = new Vector2(12, 0); txtRT.offsetMax = new Vector2(-12, 0);
+            var tmp = txtRT.gameObject.AddComponent<TextMeshProUGUI>();
+            tmp.alignment = TextAlignmentOptions.MidlineRight; tmp.fontSize = 22; tmp.raycastTarget = false;
+            PremiumUITheme.StyleLabel(tmp);
+            tmp.color = _theme != null ? _theme.textPrimary : Color.white;
+            
+            var cg = rt.gameObject.AddComponent<CanvasGroup>();
+            cg.blocksRaycasts = false;
+            
+            k = new Kill { go = rt.gameObject, cg = cg, tmp = tmp, active = true };
+            _killPool.Add(k);
+        }
+        else
+        {
+            k.go.transform.SetAsLastSibling();
+            k.go.SetActive(true);
+            k.active = true;
+        }
+
+        k.tmp.text = "Killed  " + (string.IsNullOrEmpty(name) ? "Zombie" : name);
+        k.cg.alpha = 1f;
+        k.life = _killLife;
+        _kills.Add(k);
+
+        while (_kills.Count > 6)
+        {
+            var oldest = _kills[0];
+            _kills.RemoveAt(0);
+            oldest.active = false;
+            if (oldest.go != null) oldest.go.SetActive(false);
+        }
     }
 
     private Dmg GetDmg()
@@ -234,7 +283,13 @@ public class CombatFeedbackHUD : MonoBehaviour
         {
             var k = _kills[i];
             k.life -= dt;
-            if (k.life <= 0f) { _kills.RemoveAt(i); if (k.go) Destroy(k.go); continue; }
+            if (k.life <= 0f)
+            {
+                _kills.RemoveAt(i);
+                k.active = false;
+                if (k.go) k.go.SetActive(false);
+                continue;
+            }
             if (k.cg != null && k.life < 0.6f) k.cg.alpha = Mathf.Clamp01(k.life / 0.6f);
         }
     }
