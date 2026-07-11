@@ -66,7 +66,7 @@ public static class StoryChapter1Builder
         var playerGO = GameObject.Find("Player");
         if (playerGO != null)
         {
-            playerGO.transform.position = new Vector3(0f, 2.5f, 12f);
+            playerGO.transform.localPosition = new Vector3(0f, 2.5f, 12f);
             Debug.Log("[StoryChapter1Builder] Player moved to Ch1 start (0, 2.5, 12).");
         }
 

@@ -1,12 +1,10 @@
 namespace cowsins
 {
-    /// <summary>
-    /// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved.
-    /// </summary>
     using UnityEngine;
 
     /// <summary>
-    /// Keep camera in place
+    /// Keep camera in place with premium AAA-grade step-climbing Y-offset compensation.
+    /// Decouples visual camera transitions from sudden vertical physics teleports.
     /// </summary>
     public class MoveCamera : MonoBehaviour
     {
@@ -15,22 +13,48 @@ namespace cowsins
         [Tooltip("Smoothing speed for vertical camera movement on stairs/rough terrain. Higher = more responsive, lower = smoother."), SerializeField, Min(0.1f)]
         private float verticalSmoothSpeed = 15f;
 
-        [Tooltip("Vertical velocity threshold above which smoothing is disabled (jumping/falling). Below this, the camera smooths Y for stairs."), SerializeField, Min(0.1f)]
-        private float snapVelocityThreshold = 2f;
+        [Tooltip("Maximum Y-offset compensation value to prevent camera from clipping into player meshes or stairs."), SerializeField, Min(0.1f)]
+        private float maxOffset = 0.4f;
 
-        private float smoothedY;
-        private bool initialized;
+        private float cameraYOffset = 0f;
         private PlayerMovement playerMovement;
-        private Rigidbody playerRb;
 
         private void Awake()
         {
             if (cameraHead != null)
             {
                 playerMovement = cameraHead.GetComponentInParent<PlayerMovement>();
-                if (playerMovement != null)
-                    playerRb = playerMovement.GetComponent<Rigidbody>();
             }
+        }
+
+        private void Start()
+        {
+            if (playerMovement == null && cameraHead != null)
+            {
+                playerMovement = cameraHead.GetComponentInParent<PlayerMovement>();
+            }
+            if (playerMovement != null)
+            {
+                // Subscribe to the step-climb event
+                playerMovement.OnStepClimb.AddListener(OnStepClimb);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (playerMovement != null)
+            {
+                playerMovement.OnStepClimb.RemoveListener(OnStepClimb);
+            }
+        }
+
+        private void OnStepClimb(float heightDelta)
+        {
+            // Subtract heightDelta to cancel out the physical step-up pop
+            cameraYOffset -= heightDelta;
+            
+            // Clamp offset to prevent clipping into player body or step geometry
+            cameraYOffset = Mathf.Clamp(cameraYOffset, -maxOffset, maxOffset);
         }
 
         private void Update()
@@ -41,36 +65,26 @@ namespace cowsins
             {
                 playerMovement = cameraHead.GetComponentInParent<PlayerMovement>();
                 if (playerMovement != null)
-                    playerRb = playerMovement.GetComponent<Rigidbody>();
+                {
+                    playerMovement.OnStepClimb.AddListener(OnStepClimb);
+                }
             }
 
             Vector3 targetPos = cameraHead.position;
 
-            // Smooth Y only when the player is on the ground AND moving slowly vertically.
-            // This covers walking up stairs/rough terrain (small Y changes per frame).
-            // When jumping/falling (high vertical velocity), snap instantly for responsiveness.
-            // Using velocity instead of Grounded avoids the 1-2 frame delay where Grounded
-            // is still true but the player is already launching upward.
-            bool shouldSmooth = playerMovement != null && playerMovement.Grounded
-                && !playerMovement.IsClimbing && !playerMovement.IsWallRunning
-                && playerRb != null && Mathf.Abs(playerRb.linearVelocity.y) < snapVelocityThreshold;
-
-            if (!initialized)
+            // Instantly clear/snap the offset if the player is not grounded, climbing a ladder, or sliding
+            if (playerMovement == null || !playerMovement.Grounded || playerMovement.IsClimbing || playerMovement.IsSliding)
             {
-                smoothedY = targetPos.y;
-                initialized = true;
-            }
-            else if (shouldSmooth)
-            {
-                smoothedY = Mathf.Lerp(smoothedY, targetPos.y, verticalSmoothSpeed * Time.deltaTime);
+                cameraYOffset = 0f;
             }
             else
             {
-                // Snap instantly — no smoothing when airborne or moving fast vertically
-                smoothedY = targetPos.y;
+                // Frame-rate independent exponential decay towards 0
+                cameraYOffset = cameraYOffset * Mathf.Exp(-verticalSmoothSpeed * Time.deltaTime);
             }
 
-            transform.position = new Vector3(targetPos.x, smoothedY, targetPos.z);
+            // Render camera at the target position + the smoothed offset
+            transform.position = new Vector3(targetPos.x, targetPos.y + cameraYOffset, targetPos.z);
         }
     }
 }

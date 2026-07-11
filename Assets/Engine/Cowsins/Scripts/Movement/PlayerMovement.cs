@@ -70,6 +70,7 @@ namespace cowsins
         #endregion
 
         #region Behaviours
+        public UnityEngine.Events.UnityEvent<float> OnStepClimb = new UnityEngine.Events.UnityEvent<float>();
         public MovementContext movementContext { get; private set; }
         public StaminaBehaviour staminaBehaviour { get; private set; }
         public GroundDetectionBehaviour groundDetectionBehaviour { get; private set; }
@@ -120,7 +121,37 @@ namespace cowsins
             if (!IsClimbing)
             {
                 float gravityForce = extraGravityForce;
-                if (IsWallRunning)
+
+                // Check if standing still on a stable slope using vertical raycast
+                bool standingStillOnSlope = false;
+                Vector3 slopeNormal = Vector3.up;
+                if (Grounded && movementContext != null && movementContext.IsPlayerOnSlope)
+                {
+                    bool noInput = inputManager.X == 0f && inputManager.Y == 0f;
+                    if (noInput)
+                    {
+                        // Cast a vertical ray down from center to get true slope normal (prevents edge repulsion bugs)
+                        if (Physics.Raycast(rb.position + Vector3.up * 0.1f, Vector3.down, out RaycastHit trueSlopeHit, 0.4f, playerSettings.whatIsGround, QueryTriggerInteraction.Ignore))
+                        {
+                            slopeNormal = trueSlopeHit.normal;
+                            float slopeAngle = Vector3.Angle(Vector3.up, slopeNormal);
+                            if (slopeAngle > 0.01f && slopeAngle <= 45f)
+                            {
+                                standingStillOnSlope = true;
+                            }
+                        }
+                    }
+                }
+
+                if (standingStillOnSlope)
+                {
+                    // Cancel the parallel component of gravity along the slope,
+                    // keeping only the perpendicular component to keep the player grounded.
+                    Vector3 gravityVec = Vector3.down * gravityForce;
+                    Vector3 gravityParallel = gravityVec - Vector3.Dot(gravityVec, slopeNormal) * slopeNormal;
+                    rb.AddForce(-gravityParallel, ForceMode.Acceleration);
+                }
+                else if (IsWallRunning)
                 {
                     if (playerSettings.useGravity)
                     {

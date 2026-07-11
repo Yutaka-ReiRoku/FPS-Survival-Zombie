@@ -105,11 +105,17 @@ public class BasicMovementBehaviour
 
             if (moveDirection.magnitude == 0 && !context.HasJumped)
             {
-                // Only zero horizontal velocity to prevent sliding down slopes,
-                // but preserve downward Y velocity so gravity can pull the player
-                // onto the ground. Zeroing Y velocity caused the player to float
-                // and lose the ability to jump when standing still on slopes.
-                rb.linearVelocity = new Vector3(0f, Mathf.Min(rb.linearVelocity.y, 0f), 0f);
+                float slopeAngle = context.IsPlayerOnSlope ? Vector3.Angle(Vector3.up, context.SlopeHit.normal) : 0f;
+                if (context.IsPlayerOnSlope && slopeAngle <= 45f)
+                {
+                    // Zero out all velocity to stop sliding completely when standing still on stable slopes
+                    rb.linearVelocity = Vector3.zero;
+                }
+                else
+                {
+                    // Fallback for steep slopes or non-slope surfaces
+                    rb.linearVelocity = new Vector3(0f, Mathf.Min(rb.linearVelocity.y, 0f), 0f);
+                }
             }
         }
         else
@@ -255,33 +261,43 @@ public class BasicMovementBehaviour
             float obstacleAngle = Vector3.Angle(Vector3.up, hit.normal);
             if (obstacleAngle > 45f) // A steep vertical obstacle
             {
-                // 1. Ceiling Clearance Sweep Check
-                float radius = playerCapsuleCollider.radius;
-                Vector3 center = rb.position + playerCapsuleCollider.center;
-                float halfHeight = Mathf.Max(0, (playerCapsuleCollider.height * 0.5f) - radius);
-                Vector3 point0 = center + Vector3.up * halfHeight;
-                Vector3 point1 = center - Vector3.up * halfHeight;
-                
-                bool ceilingBlocked = Physics.CapsuleCast(
-                    point1, point0, radius, Vector3.up, out RaycastHit ceilingHit,
-                    stepH, context.WhatIsGround, QueryTriggerInteraction.Ignore
-                );
-                
-                if (ceilingBlocked) return; // Headroom blocked, abort step-up
-
-                // 2. Clear landing surface verification
-                Vector3 highRayOrigin = rb.position + Vector3.up * (stepH + 0.05f);
-                if (!Physics.Raycast(highRayOrigin, inputDir, checkDistance, context.WhatIsGround, QueryTriggerInteraction.Ignore))
+                // 1. Calculate actual step height landing point first
+                Vector3 downRayOrigin = rb.position + inputDir * checkDistance + Vector3.up * (stepH + 0.05f);
+                if (Physics.Raycast(downRayOrigin, Vector3.down, out RaycastHit downHit, stepH + 0.1f, context.WhatIsGround, QueryTriggerInteraction.Ignore))
                 {
-                    Vector3 downRayOrigin = rb.position + inputDir * checkDistance + Vector3.up * (stepH + 0.05f);
-                    if (Physics.Raycast(downRayOrigin, Vector3.down, out RaycastHit downHit, stepH + 0.1f, context.WhatIsGround, QueryTriggerInteraction.Ignore))
+                    float stepHeightActual = downHit.point.y - rb.position.y;
+                    if (stepHeightActual > 0.01f && stepHeightActual <= stepH)
                     {
-                        float stepHeightActual = downHit.point.y - rb.position.y;
-                        if (stepHeightActual > 0.01f && stepHeightActual <= stepH)
+                        // 2. Ceiling Clearance Sweep Check based on actual step height rather than max height
+                        float radius = playerCapsuleCollider.radius;
+                        Vector3 center = rb.position + playerCapsuleCollider.center;
+                        float halfHeight = Mathf.Max(0, (playerCapsuleCollider.height * 0.5f) - radius);
+                        Vector3 point0 = center + Vector3.up * halfHeight;
+                        Vector3 point1 = center - Vector3.up * halfHeight;
+                        
+                        bool ceilingBlocked = Physics.CapsuleCast(
+                            point1, point0, radius, Vector3.up, out RaycastHit ceilingHit,
+                            stepHeightActual, context.WhatIsGround, QueryTriggerInteraction.Ignore
+                        );
+                        
+                        if (ceilingBlocked) return; // Headroom blocked, abort step-up
+
+                        // 3. Capsule overlap check at final destination to verify the player fits
+                        Vector3 targetCenter = center + inputDir * checkDistance + Vector3.up * stepHeightActual;
+                        bool targetBlocked = Physics.CheckCapsule(
+                            targetCenter + Vector3.up * halfHeight,
+                            targetCenter - Vector3.up * halfHeight,
+                            radius * 0.95f,
+                            context.WhatIsGround,
+                            QueryTriggerInteraction.Ignore
+                        );
+
+                        if (!targetBlocked)
                         {
                             // Instantly step up to preserve Rigidbody velocity
                             rb.MovePosition(new Vector3(rb.position.x, downHit.point.y + 0.01f, rb.position.z));
                             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+                            (playerMovement as PlayerMovement)?.OnStepClimb.Invoke(stepHeightActual);
                         }
                     }
                 }
@@ -296,12 +312,13 @@ public class BasicMovementBehaviour
         if (!playerMovement.Grounded) return;
         if (rb.linearVelocity.y > 0.1f) return;
 
-        float checkDist = playerSettings.stepHeight + 0.1f;
+        float maxStepSnap = Mathf.Min(playerSettings.stepHeight, 0.4f);
+        float checkDist = maxStepSnap + 0.1f;
         Vector3 castOrigin = rb.position + Vector3.up * 0.1f;
         if (Physics.Raycast(castOrigin, Vector3.down, out RaycastHit hit, checkDist + 0.1f, context.WhatIsGround, QueryTriggerInteraction.Ignore))
         {
             float distance = castOrigin.y - hit.point.y;
-            if (distance > 0.1f && distance <= (playerSettings.stepHeight + 0.1f))
+            if (distance > 0.1f && distance <= (maxStepSnap + 0.1f))
             {
                 float angle = Vector3.Angle(Vector3.up, hit.normal);
                 if (angle < 60f) // Matches max slope angle
