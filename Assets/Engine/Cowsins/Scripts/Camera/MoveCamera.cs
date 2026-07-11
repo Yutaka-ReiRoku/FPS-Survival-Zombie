@@ -10,14 +10,11 @@ namespace cowsins
     {
         [Tooltip("Reference to our Camera Head Transform, that defines the placement of our Camera"), SerializeField] private Transform cameraHead;
 
-        [Tooltip("Smoothing speed for vertical camera movement on stairs/rough terrain. Higher = more responsive, lower = smoother."), SerializeField, Min(0.1f)]
-        private float verticalSmoothSpeed = 15f;
+        [Tooltip("Smoothing time for vertical camera movement on stairs/rough terrain. Lower = faster, higher = smoother."), SerializeField, Min(0.01f)]
+        private float verticalSmoothTime = 0.05f;
 
-        [Tooltip("Maximum Y-offset compensation value to prevent camera from clipping into player meshes or stairs."), SerializeField, Min(0.1f)]
-        private float maxOffset = 0.4f;
-
-        private float cameraYOffset = 0f;
         private PlayerMovement playerMovement;
+        private float verticalVelocity = 0f;
 
         private void Awake()
         {
@@ -33,28 +30,6 @@ namespace cowsins
             {
                 playerMovement = cameraHead.GetComponentInParent<PlayerMovement>();
             }
-            if (playerMovement != null)
-            {
-                // Subscribe to the step-climb event
-                playerMovement.OnStepClimb.AddListener(OnStepClimb);
-            }
-        }
-
-        private void OnDestroy()
-        {
-            if (playerMovement != null)
-            {
-                playerMovement.OnStepClimb.RemoveListener(OnStepClimb);
-            }
-        }
-
-        private void OnStepClimb(float heightDelta)
-        {
-            // Subtract heightDelta to cancel out the physical step-up pop
-            cameraYOffset -= heightDelta;
-            
-            // Clamp offset to prevent clipping into player body or step geometry
-            cameraYOffset = Mathf.Clamp(cameraYOffset, -maxOffset, maxOffset);
         }
 
         private void LateUpdate()
@@ -64,27 +39,31 @@ namespace cowsins
             if (playerMovement == null)
             {
                 playerMovement = cameraHead.GetComponentInParent<PlayerMovement>();
-                if (playerMovement != null)
-                {
-                    playerMovement.OnStepClimb.AddListener(OnStepClimb);
-                }
             }
 
             Vector3 targetPos = cameraHead.position;
+            float newY;
 
-            // Instantly clear/snap the offset if the player is not grounded, climbing a ladder, or sliding
-            if (playerMovement == null || !playerMovement.Grounded || playerMovement.IsClimbing || playerMovement.IsSliding)
+            // Instantly snap the camera Y if the player is airborne, climbing, sliding, crouching, dashing, or wallrunning
+            if (playerMovement == null || 
+                !playerMovement.Grounded || 
+                playerMovement.IsClimbing || 
+                playerMovement.IsSliding || 
+                playerMovement.IsCrouching || 
+                playerMovement.IsDashing || 
+                playerMovement.IsWallRunning)
             {
-                cameraYOffset = 0f;
+                newY = targetPos.y;
+                verticalVelocity = 0f;
             }
             else
             {
-                // Frame-rate independent exponential decay towards 0
-                cameraYOffset = cameraYOffset * Mathf.Exp(-verticalSmoothSpeed * Time.deltaTime);
+                // Smoothly damp the vertical position towards the player's head height
+                newY = Mathf.SmoothDamp(transform.position.y, targetPos.y, ref verticalVelocity, verticalSmoothTime);
             }
 
-            // Render camera at the target position + the smoothed offset
-            transform.position = new Vector3(targetPos.x, targetPos.y + cameraYOffset, targetPos.z);
+            // Keep horizontal tracking instant to maintain mouse-look responsiveness
+            transform.position = new Vector3(targetPos.x, newY, targetPos.z);
         }
     }
 }

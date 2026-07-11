@@ -61,7 +61,7 @@ public class DashBehaviour
 
         // Remove not wanted Y velocity after slope
         Vector3 vel = rb.linearVelocity;
-        vel.y = 0;
+        if (!playerMovement.Grounded || vel.y < 0) vel.y = 0;
         rb.linearVelocity = vel;
 
         playerEvents.Events.OnDashing?.Invoke(); 

@@ -145,11 +145,10 @@ namespace cowsins
 
                 if (standingStillOnSlope)
                 {
-                    // Cancel the parallel component of gravity along the slope,
-                    // keeping only the perpendicular component to keep the player grounded.
+                    // Apply only the perpendicular component of gravity to press the player into the slope
                     Vector3 gravityVec = Vector3.down * gravityForce;
-                    Vector3 gravityParallel = gravityVec - Vector3.Dot(gravityVec, slopeNormal) * slopeNormal;
-                    rb.AddForce(-gravityParallel, ForceMode.Acceleration);
+                    Vector3 gravityPerpendicular = Vector3.Dot(gravityVec, slopeNormal) * slopeNormal;
+                    rb.AddForce(gravityPerpendicular, ForceMode.Acceleration);
                 }
                 else if (IsWallRunning)
                 {

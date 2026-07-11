@@ -106,7 +106,7 @@ public class BasicMovementBehaviour
             if (moveDirection.magnitude == 0 && !context.HasJumped)
             {
                 float slopeAngle = context.IsPlayerOnSlope ? Vector3.Angle(Vector3.up, context.SlopeHit.normal) : 0f;
-                if (context.IsPlayerOnSlope && slopeAngle <= 45f)
+                if (context.IsPlayerOnSlope && slopeAngle <= 45f && rb.linearVelocity.magnitude < 0.1f)
                 {
                     // Zero out all velocity to stop sliding completely when standing still on stable slopes
                     rb.linearVelocity = Vector3.zero;
@@ -160,6 +160,9 @@ public class BasicMovementBehaviour
     {
         float currentWeightedSpeed = playerMovement.CurrentSpeed * playerMultipliers.WeightMultiplier;
         
+        // If the player is sliding, allow velocity to exceed currentWeightedSpeed (or handle slide speed separately)
+        if (playerMovement.IsSliding) return;
+
         if (context.IsPlayerOnSlope)
         {
             if (rb.linearVelocity.magnitude > currentWeightedSpeed)
@@ -252,38 +255,51 @@ public class BasicMovementBehaviour
         if (stepH <= 0) return;
         if (rb.linearVelocity.y > 0.5f) return;
 
-        // Proactive Raycast checking
-        Vector3 rayOrigin = rb.position + Vector3.up * 0.05f;
         float checkDistance = playerCapsuleCollider.radius + 0.15f;
         
-        if (Physics.Raycast(rayOrigin, inputDir, out RaycastHit hit, checkDistance, context.WhatIsGround, QueryTriggerInteraction.Ignore))
+        // Robust Capsule Sweep Check covering vertically [0.02f, stepH]
+        float bottomOffset = 0.02f;
+        float topOffset = stepH;
+        float totalHeight = topOffset - bottomOffset;
+        float sweepRadius = Mathf.Min(0.05f, totalHeight * 0.4f);
+        
+        Vector3 pointBottom = rb.position + Vector3.up * (bottomOffset + sweepRadius);
+        Vector3 pointTop = rb.position + Vector3.up * (topOffset - sweepRadius);
+        
+        if (Physics.CapsuleCast(pointBottom, pointTop, sweepRadius, inputDir, out RaycastHit hit, checkDistance, context.WhatIsGround, QueryTriggerInteraction.Ignore))
         {
             float obstacleAngle = Vector3.Angle(Vector3.up, hit.normal);
             if (obstacleAngle > 45f) // A steep vertical obstacle
             {
                 // 1. Calculate actual step height landing point first
-                Vector3 downRayOrigin = rb.position + inputDir * checkDistance + Vector3.up * (stepH + 0.05f);
+                // Use precise hit.distance to avoid overshoot regardless of tread depth
+                float horizontalProbeDist = hit.distance + sweepRadius + 0.05f;
+                Vector3 downRayOrigin = rb.position + inputDir * horizontalProbeDist + Vector3.up * (stepH + 0.05f);
                 if (Physics.Raycast(downRayOrigin, Vector3.down, out RaycastHit downHit, stepH + 0.1f, context.WhatIsGround, QueryTriggerInteraction.Ignore))
                 {
                     float stepHeightActual = downHit.point.y - rb.position.y;
                     if (stepHeightActual > 0.01f && stepHeightActual <= stepH)
                     {
-                        // 2. Ceiling Clearance Sweep Check based on actual step height rather than max height
+                        // 2. Ceiling and Path Clearance Check at the step height to prevent thin ceiling/platform clipping
                         float radius = playerCapsuleCollider.radius;
                         Vector3 center = rb.position + playerCapsuleCollider.center;
                         float halfHeight = Mathf.Max(0, (playerCapsuleCollider.height * 0.5f) - radius);
-                        Vector3 point0 = center + Vector3.up * halfHeight;
-                        Vector3 point1 = center - Vector3.up * halfHeight;
                         
-                        bool ceilingBlocked = Physics.CapsuleCast(
-                            point1, point0, radius, Vector3.up, out RaycastHit ceilingHit,
-                            stepHeightActual, context.WhatIsGround, QueryTriggerInteraction.Ignore
+                        // Raise the capsule by stepHeightActual + 0.02f to avoid scraping the ground/step
+                        Vector3 sweepStartOffset = Vector3.up * (stepHeightActual + 0.02f);
+                        Vector3 point0 = center + Vector3.up * halfHeight + sweepStartOffset;
+                        Vector3 point1 = center - Vector3.up * halfHeight + sweepStartOffset;
+                        
+                        // Sweep horizontally along inputDir
+                        bool pathBlocked = Physics.CapsuleCast(
+                            point1, point0, radius * 0.95f, inputDir, out RaycastHit pathHit,
+                            horizontalProbeDist, context.WhatIsGround, QueryTriggerInteraction.Ignore
                         );
                         
-                        if (ceilingBlocked) return; // Headroom blocked, abort step-up
+                        if (pathBlocked) return; // Path at step height is blocked, abort step-up
 
                         // 3. Capsule overlap check at final destination to verify the player fits
-                        Vector3 targetCenter = center + inputDir * checkDistance + Vector3.up * stepHeightActual;
+                        Vector3 targetCenter = center + inputDir * horizontalProbeDist + Vector3.up * stepHeightActual;
                         bool targetBlocked = Physics.CheckCapsule(
                             targetCenter + Vector3.up * halfHeight,
                             targetCenter - Vector3.up * halfHeight,
