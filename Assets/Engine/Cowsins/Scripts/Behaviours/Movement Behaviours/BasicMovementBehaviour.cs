@@ -323,6 +323,7 @@ public class BasicMovementBehaviour
                 float angle = Vector3.Angle(Vector3.up, hit.normal);
                 if (angle < 60f) // Matches max slope angle
                 {
+                    float stepHeightDelta = hit.point.y - rb.position.y;
                     rb.MovePosition(new Vector3(rb.position.x, hit.point.y, rb.position.z));
                     Vector3 vel = rb.linearVelocity;
                     if (vel.y < 0)
@@ -330,6 +331,7 @@ public class BasicMovementBehaviour
                         vel.y = 0;
                         rb.linearVelocity = vel;
                     }
+                    (playerMovement as PlayerMovement)?.OnStepClimb.Invoke(stepHeightDelta);
                 }
             }
         }

@@ -57,7 +57,7 @@ namespace cowsins
             cameraYOffset = Mathf.Clamp(cameraYOffset, -maxOffset, maxOffset);
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             if (cameraHead == null) return;
 
