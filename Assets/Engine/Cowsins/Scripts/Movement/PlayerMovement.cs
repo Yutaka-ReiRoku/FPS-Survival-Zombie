@@ -45,7 +45,7 @@ namespace cowsins
         public bool AlternateSprint => playerSettings.alternateSprint;
         public bool AlternateCrouch => playerSettings.alternateCrouch;
         public float OriginalCapsuleHeight { get; private set; }
-        public float CurrentCapsuleHeight => playerCapsuleCollider != null ? playerCapsuleCollider.height : 2.0f;
+        public float CurrentCapsuleHeight => playerCapsuleCollider != null ? playerCapsuleCollider.height : 1.75f;
 
         private PlayerOrientation orientation = new PlayerOrientation(Vector3.zero, Quaternion.identity);
 
@@ -101,7 +101,7 @@ namespace cowsins
 
             inputManager.SetPlayerInputModes(playerSettings);
 
-            OriginalCapsuleHeight = playerCapsuleCollider != null ? playerCapsuleCollider.height : 2.0f;
+            OriginalCapsuleHeight = playerCapsuleCollider != null ? playerCapsuleCollider.height : 1.75f;
 
             InitializeBehaviours();
         }

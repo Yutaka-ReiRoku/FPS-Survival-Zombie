@@ -136,6 +136,15 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
     private EnemyLocomotion locomotion;
 
+    // Caching original values for scaling
+    private Vector3 _originalScale;
+    private float _originalAgentHeight;
+    private float _originalAgentRadius;
+    private float _originalSightEyeHeight;
+    private float _originalWallCheckBodyHeight;
+    private float _originalDropHeightOffset;
+    private float _originalMoveSpeed;
+
     // --- Chase re-path throttling ---
     private float _pathTimer;
     private Vector3 _lastSetDestination = Vector3.zero;
@@ -173,6 +182,45 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         locomotion = GetComponent<EnemyLocomotion>();
         if (locomotion == null)
             locomotion = gameObject.AddComponent<EnemyLocomotion>();
+
+        // Cache original values before scaling
+        _originalScale = transform.localScale;
+        if (agent != null)
+        {
+            _originalAgentHeight = agent.height;
+            _originalAgentRadius = agent.radius;
+        }
+        _originalSightEyeHeight = sightEyeHeight;
+        _originalWallCheckBodyHeight = wallCheckBodyHeight;
+        _originalDropHeightOffset = dropHeightOffset;
+        _originalMoveSpeed = moveSpeed;
+
+        // Dynamically randomize height between 1.6m and 1.9m
+        float defaultHeight = 1.8f;
+        if (col is CapsuleCollider capCol)
+        {
+            defaultHeight = capCol.height;
+        }
+        float targetHeight = Random.Range(1.6f, 1.9f);
+        float scaleFactor = targetHeight / defaultHeight;
+
+        // Apply uniform scale to visual mesh and collider
+        transform.localScale = _originalScale * scaleFactor;
+
+        // Scale NavMeshAgent bounds
+        if (agent != null)
+        {
+            agent.height = _originalAgentHeight * scaleFactor;
+            agent.radius = _originalAgentRadius * scaleFactor;
+        }
+
+        // Scale height-based locomotion variables
+        sightEyeHeight = _originalSightEyeHeight * scaleFactor;
+        wallCheckBodyHeight = _originalWallCheckBodyHeight * scaleFactor;
+        dropHeightOffset = _originalDropHeightOffset * scaleFactor;
+
+        // Scale movement speed to match stride length
+        moveSpeed = _originalMoveSpeed * scaleFactor;
 
         FindPlayer();
 

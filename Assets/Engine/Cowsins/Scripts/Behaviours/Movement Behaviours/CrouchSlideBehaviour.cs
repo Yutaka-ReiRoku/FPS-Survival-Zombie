@@ -62,7 +62,7 @@ namespace cowsins
             }
             else
             {
-                initialHeadLocalY = 1.60f; // Fallback
+                initialHeadLocalY = 1.55f; // Fallback for 1.75m height
             }
 
             playerEvents.Events.AllowSlide += AllowSliding;
@@ -171,40 +171,51 @@ namespace cowsins
 
         public bool CheckUnCrouch()
         {
-            if (!inputManager.Crouching) // Prevent from uncrouching when there's a roof and we can get hit with it
+            // Performance optimization: skip physical capsule sweep if already fully stood up
+            if (Mathf.Approximately(context.Capsule.height, initialHeight))
             {
-                float currentHeight = context.Capsule.height;
-                float standingHeight = initialHeight;
-                float checkRadius = context.Capsule.radius * 0.95f;
-                float bottomOffset = initialCenter.y - initialHeight * 0.5f;
+                playerMovement.IsCrouching = false;
+                return true;
+            }
 
-                Vector3 point0 = context.Transform.position + context.Transform.up * (bottomOffset + currentHeight + checkRadius);
-                Vector3 point1 = context.Transform.position + context.Transform.up * Mathf.Max(bottomOffset + currentHeight + checkRadius, bottomOffset + standingHeight - checkRadius);
+            if (inputManager.Crouching) return false;
 
-                int count = Physics.OverlapCapsuleNonAlloc(point0, point1, checkRadius, uncrouchOverlaps, context.WhatIsGround, QueryTriggerInteraction.Ignore);
-                
-                bool isObstacleAbove = false;
-                for (int i = 0; i < count; i++)
+            float checkRadius = context.Capsule.radius * 0.95f;
+            float standingHeight = initialHeight;
+            float bottomOffset = initialCenter.y - initialHeight * 0.5f;
+
+            // Calculate the capsule centers at the player's current feet position for a standing capsule.
+            Vector3 bottomSphereCenter = context.Transform.position + context.Transform.up * (bottomOffset + checkRadius);
+            Vector3 topSphereCenter = context.Transform.position + context.Transform.up * (bottomOffset + standingHeight - checkRadius);
+
+            int count = Physics.OverlapCapsuleNonAlloc(bottomSphereCenter, topSphereCenter, checkRadius, uncrouchOverlaps, context.WhatIsGround, QueryTriggerInteraction.Ignore);
+            
+            bool isObstacleAbove = false;
+            for (int i = 0; i < count; i++)
+            {
+                if (uncrouchOverlaps[i].transform.IsChildOf(context.Transform))
                 {
-                    if (uncrouchOverlaps[i].transform.IsChildOf(context.Transform))
-                    {
-                        continue;
-                    }
-                    isObstacleAbove = true;
-                    break;
+                    continue;
                 }
+                isObstacleAbove = true;
+                break;
+            }
+            canUnCrouch = !isObstacleAbove;
 
-                canUnCrouch = !isObstacleAbove;
+            if (isObstacleAbove)
+            {
+                // Force the player to shrink back to crouch height rather than remaining at a broken intermediate height
+                ResizeCapsule(playerSettings.crouchHeight, playerSettings.crouchDownMultiplier);
+                return false;
+            }
 
-                if (canUnCrouch)
-                {
-                    Tick();
-                    if (Mathf.Approximately(context.Capsule.height, initialHeight))
-                    {
-                        playerMovement.IsCrouching = false;
-                        return true;
-                    }
-                }
+            // Resume standing up
+            ResizeCapsule(standingHeight, playerSettings.crouchUpMultiplier);
+
+            if (Mathf.Approximately(context.Capsule.height, standingHeight))
+            {
+                playerMovement.IsCrouching = false;
+                return true;
             }
 
             return false;
