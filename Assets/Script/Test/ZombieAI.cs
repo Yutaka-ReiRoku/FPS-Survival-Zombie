@@ -388,7 +388,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
 
     private float cachedDistance = 100f;
-    private bool _cachedLOSResult;
     private float _nextLOSCheckTime;
 
     void Update()
