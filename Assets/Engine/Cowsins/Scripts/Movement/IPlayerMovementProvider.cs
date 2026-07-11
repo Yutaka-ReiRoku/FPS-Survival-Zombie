@@ -25,6 +25,8 @@ namespace cowsins
         float WallRunningFOV { get; }
         float RunningFOV { get; }
         float FadeFOVAmount { get; }
+        float OriginalCapsuleHeight { get; }
+        float CurrentCapsuleHeight { get; }
     }
 
     public interface IPlayerMovementEventsProvider

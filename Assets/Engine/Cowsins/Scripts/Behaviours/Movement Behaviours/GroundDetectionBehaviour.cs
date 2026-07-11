@@ -223,9 +223,8 @@ namespace cowsins
             // Get capsule center
             Vector3 center = playerCapsuleCollider.transform.TransformPoint(playerCapsuleCollider.center);
 
-            float height = playerMovement.IsCrouching
-                ? playerCapsuleCollider.height * 0.5f
-                : playerCapsuleCollider.height;
+            // Use actual physical height since crouching now directly resizes the collider
+            float height = playerCapsuleCollider.height;
 
             float radius = playerCapsuleCollider.radius * 0.95f;
             float halfHeight = Mathf.Max(0, (height * 0.5f) - radius);
@@ -248,7 +247,8 @@ namespace cowsins
                 Vector3.down,
                 out hit,
                 castDistance,
-                context.WhatIsGround
+                context.WhatIsGround,
+                QueryTriggerInteraction.Ignore
             );
 
             if (foundGround && CowsinsUtilities.IsFloor(hit.normal, maxSlopeAngle))
@@ -259,7 +259,7 @@ namespace cowsins
             // Fallbacks to Raycast
             Vector3 rayOrigin = center + Vector3.up * startOffset;
             if (Physics.Raycast(rayOrigin, Vector3.down, out hit,
-                castDistance, context.WhatIsGround))
+                castDistance, context.WhatIsGround, QueryTriggerInteraction.Ignore))
             {
                 return CowsinsUtilities.IsFloor(hit.normal, maxSlopeAngle);
             }

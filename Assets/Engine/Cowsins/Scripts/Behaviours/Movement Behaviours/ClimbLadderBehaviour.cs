@@ -1,4 +1,4 @@
-﻿using cowsins;
+using cowsins;
 using UnityEngine;
 using static cowsins.PlayerMovementSettings;
 
@@ -38,7 +38,6 @@ public class ClimbLadderBehaviour
     public void Exit()
     {
         playerMovement.IsClimbing = false;
-        rb.useGravity = true;
         playerEvents.Events.OnClimbStop?.Invoke(playerSettings.hideWeaponWhileClimbing);
     }
 

@@ -12,8 +12,8 @@ public class CrouchSlideBehaviour
     private PlayerMovementSettings playerSettings;
 
     private PlayerOrientation orientation => playerMovement.Orientation;
-    private Vector3 playerScale;
-    public Vector3 crouchScale { get; private set; } = new Vector3(1, 0.5f, 1);
+    private float initialHeight;
+    private Vector3 initialCenter;
     private bool canUnCrouch = false;
     private float slideTimer = 0f;
     private Vector3 slideDirection = Vector3.zero;
@@ -30,7 +30,8 @@ public class CrouchSlideBehaviour
         this.playerEvents = context.Dependencies.PlayerMovementEvents;
 
         this.playerSettings = context.Settings;
-        this.playerScale = context.Transform.localScale;
+        this.initialHeight = context.Capsule.height;
+        this.initialCenter = context.Capsule.center;
 
         playerEvents.Events.AllowSlide += AllowSliding;
     }
@@ -65,19 +66,27 @@ public class CrouchSlideBehaviour
 
     public void Tick() 
     {
-        Transform transform = context.Transform;
-        // When not crouching, smoothly stand up
+        CapsuleCollider capsule = context.Capsule;
         if (!inputManager.Crouching)
         {
             playerMovement.IsCrouching = false;
-            transform.localScale = Vector3.MoveTowards(transform.localScale, playerScale, Time.deltaTime * playerSettings.crouchTransitionSpeed);
+            float targetH = initialHeight;
+            float currentH = Mathf.MoveTowards(capsule.height, targetH, Time.deltaTime * playerSettings.crouchTransitionSpeed * 2.0f);
+            capsule.height = currentH;
+            
+            float bottomOffset = initialCenter.y - initialHeight * 0.5f;
+            capsule.center = new Vector3(initialCenter.x, bottomOffset + currentH * 0.5f, initialCenter.z);
             return;
         }
 
-        // Maintain crouch scale while crouching or during the short boost window for the slide
         if (playerMovement.IsCrouching || isBoosting)
         {
-            transform.localScale = Vector3.MoveTowards(transform.localScale, crouchScale, Time.deltaTime * playerSettings.crouchTransitionSpeed * 1.5f);
+            float targetH = initialHeight * 0.5f;
+            float currentH = Mathf.MoveTowards(capsule.height, targetH, Time.deltaTime * playerSettings.crouchTransitionSpeed * 1.5f * 2.0f);
+            capsule.height = currentH;
+            
+            float bottomOffset = initialCenter.y - initialHeight * 0.5f;
+            capsule.center = new Vector3(initialCenter.x, bottomOffset + currentH * 0.5f, initialCenter.z);
         }
     }
 
@@ -131,7 +140,13 @@ public class CrouchSlideBehaviour
     {
         if (inputManager.Crouching)
         {
-            context.Transform.localScale = Vector3.MoveTowards(context.Transform.localScale, crouchScale, Time.deltaTime * playerSettings.crouchTransitionSpeed * 1.5f);
+            CapsuleCollider capsule = context.Capsule;
+            float targetH = initialHeight * 0.5f;
+            float currentH = Mathf.MoveTowards(capsule.height, targetH, Time.deltaTime * playerSettings.crouchTransitionSpeed * 1.5f * 2.0f);
+            capsule.height = currentH;
+            
+            float bottomOffset = initialCenter.y - initialHeight * 0.5f;
+            capsule.center = new Vector3(initialCenter.x, bottomOffset + currentH * 0.5f, initialCenter.z);
         }
 
         playerMovement.IsCrouching = true;
@@ -141,7 +156,7 @@ public class CrouchSlideBehaviour
 
     public bool CheckUnCrouch()
     {
-        if (!inputManager.Crouching) // Prevent from uncrouching when there�s a roof and we can get hit with it
+        if (!inputManager.Crouching) // Prevent from uncrouching when there’s a roof and we can get hit with it
         {
             RaycastHit hit;
             bool isObstacleAbove = Physics.Raycast(context.Transform.position, context.Transform.up, out hit, playerSettings.roofCheckDistance, context.WhatIsGround);
@@ -151,8 +166,11 @@ public class CrouchSlideBehaviour
             if (canUnCrouch)
             {
                 Tick();
-                if (context.Transform.localScale == playerScale)
+                if (Mathf.Approximately(context.Capsule.height, initialHeight))
+                {
+                    playerMovement.IsCrouching = false;
                     return true;
+                }
             }
         }
 

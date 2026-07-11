@@ -44,6 +44,8 @@ namespace cowsins
         public float RunningFOV => playerSettings.runningFOV;
         public bool AlternateSprint => playerSettings.alternateSprint;
         public bool AlternateCrouch => playerSettings.alternateCrouch;
+        public float OriginalCapsuleHeight { get; private set; }
+        public float CurrentCapsuleHeight => playerCapsuleCollider != null ? playerCapsuleCollider.height : 2.0f;
 
         private PlayerOrientation orientation = new PlayerOrientation(Vector3.zero, Quaternion.identity);
 
@@ -99,6 +101,8 @@ namespace cowsins
 
             inputManager.SetPlayerInputModes(playerSettings);
 
+            OriginalCapsuleHeight = playerCapsuleCollider != null ? playerCapsuleCollider.height : 2.0f;
+
             InitializeBehaviours();
         }
 
@@ -111,8 +115,23 @@ namespace cowsins
         private void FixedUpdate()
         {
             groundDetectionBehaviour?.FixedTick();
-            // Added Gravity, only if we are not climbing to prevent unvoluntary sliding
-            if (!IsClimbing) rb.AddForce(Vector3.down * extraGravityForce, ForceMode.Acceleration);
+            
+            // Centralized Custom Gravity
+            if (!IsClimbing)
+            {
+                float gravityForce = extraGravityForce;
+                if (IsWallRunning)
+                {
+                    if (playerSettings.useGravity)
+                    {
+                        rb.AddForce(Vector3.down * gravityForce, ForceMode.Acceleration);
+                    }
+                }
+                else
+                {
+                    rb.AddForce(Vector3.down * gravityForce, ForceMode.Acceleration);
+                }
+            }
 
             rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, playerSettings.maxSpeedAllowed);
 
@@ -144,6 +163,7 @@ namespace cowsins
             if (rb == null) return;
 
             rb.freezeRotation = true;
+            rb.useGravity = false; // Disable default Unity gravity globally
 
             // Use ContinuousDynamic to prevent physics tunneling
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;

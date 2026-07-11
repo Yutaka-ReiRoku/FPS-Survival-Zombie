@@ -44,6 +44,8 @@ namespace cowsins
 
         private Vector3 origPos;
         private Quaternion origRot;
+        private PlayerMovement playerMovementScript;
+        private float currentCrouchTransition = 0f;
 
         // Effect offsets — applied as absolute offsets from origPos/origRot each frame.
         // This prevents the accumulation bug where world position/rotation was incremented
@@ -62,6 +64,7 @@ namespace cowsins
             weaponEvents = playerDependencies.WeaponEvents;
             rb = GetComponent<Rigidbody>();
             this.inputManager = playerDependencies.InputManager;
+            playerMovementScript = playerDependencies.GetComponent<PlayerMovement>();
 
             playerDependencies.PlayerMovementEvents.Events.OnLand.AddListener(LandingShake);
             weaponEvents.Events.OnShootShake.AddListener(ShootShake);
@@ -95,10 +98,25 @@ namespace cowsins
             UpdateHeadBob();
             UpdateBreathing();
 
+            // Crouching position offset calculation
+            float targetCrouch = player.IsCrouching ? 1f : 0f;
+            if (playerMovementScript != null)
+            {
+                float transitionSpeed = playerMovementScript.playerSettings.crouchTransitionSpeed;
+                if (player.IsCrouching) transitionSpeed *= 1.5f;
+                currentCrouchTransition = Mathf.MoveTowards(currentCrouchTransition, targetCrouch, Time.deltaTime * transitionSpeed);
+            }
+            else
+            {
+                currentCrouchTransition = player.IsCrouching ? 1f : 0f;
+            }
+
+            Vector3 baseCameraPos = new Vector3(origPos.x, origPos.y * (1f - currentCrouchTransition * 0.5f), origPos.z);
+
             // Apply combined position and rotation as absolute offsets from the original
             // transform values. This prevents frame-over-frame accumulation that caused
-            // the camera to drift and then jerk back when the player stopped moving.
-            playerCamera.localPosition = origPos + headBobPosOffset + breathingPosOffset + landingPosOffset;
+            // the camera to drift and then snap back when the player stopped moving.
+            playerCamera.localPosition = baseCameraPos + headBobPosOffset + breathingPosOffset + landingPosOffset;
             playerCamera.localRotation = origRot * tiltRot * headBobRotOffset * breathingRotOffset;
 
             HandleCamShake();

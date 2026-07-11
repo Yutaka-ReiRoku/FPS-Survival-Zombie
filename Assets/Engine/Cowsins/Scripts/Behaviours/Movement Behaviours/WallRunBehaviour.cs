@@ -72,8 +72,6 @@ public class WallRunBehaviour
             rb.AddForce(wallNormal * playerSettings.stopWallRunningImpulse, ForceMode.Impulse);
         }
         playerMovement.IsWallRunning = false;
-        if (!playerMovement.IsClimbing && !context.IsPlayerOnSlope)
-            rb.useGravity = true;
     }
 
     public bool CanExecute()
@@ -102,8 +100,6 @@ public class WallRunBehaviour
 
         // Start Wallrunning
         if (!playerMovement.IsWallRunning) Enter();
-
-        rb.useGravity = playerSettings.useGravity;
 
         if (rb.linearVelocity.y < 0)
         {

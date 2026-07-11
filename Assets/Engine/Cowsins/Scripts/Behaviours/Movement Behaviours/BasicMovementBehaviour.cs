@@ -51,9 +51,6 @@ public class BasicMovementBehaviour
     {
         if(!playerControl.IsMovementControllable) return;
 
-        //Extra gravity
-        rb.AddForce(Vector3.down * Time.fixedDeltaTime * extraGravityMultiplier);
-
         //Find actual velocity relative to where player is looking
         Vector2 relativeVelocity = FindVelRelativeToLook();
 
@@ -90,7 +87,6 @@ public class BasicMovementBehaviour
         CalculateMoveDirection();
         CallEvents();
 
-        movementMultipliers *= context.IsPlayerOnSlope ? 2f : 1;
         // If crouch-sliding, respect steering multiplier and don't add full movement force
         movementMultipliers *= isCrouchSliding ? playerSettings.slideSteerMultiplier : 1; 
 
@@ -98,6 +94,7 @@ public class BasicMovementBehaviour
 
         // Proactively follow ground height ahead for smooth stair/terrain climbing
         StepAssist();
+        SnapToGround();
     }
 
     private void CalculateMoveDirection()
@@ -114,7 +111,6 @@ public class BasicMovementBehaviour
                 // and lose the ability to jump when standing still on slopes.
                 rb.linearVelocity = new Vector3(0f, Mathf.Min(rb.linearVelocity.y, 0f), 0f);
             }
-            if (rb.linearVelocity.y != 0 && moveDirection.magnitude != 0) rb.AddForce(Vector3.down * slopeGravityMultiplier);
         }
         else
         {
@@ -156,12 +152,23 @@ public class BasicMovementBehaviour
     /// </summary>
     private void LimitDiagonalVelocity()
     {
-        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         float currentWeightedSpeed = playerMovement.CurrentSpeed * playerMultipliers.WeightMultiplier;
-        if (horizontalVelocity.magnitude > currentWeightedSpeed)
+        
+        if (context.IsPlayerOnSlope)
         {
-            horizontalVelocity = horizontalVelocity.normalized * currentWeightedSpeed;
-            rb.linearVelocity = new Vector3(horizontalVelocity.x, rb.linearVelocity.y, horizontalVelocity.z);
+            if (rb.linearVelocity.magnitude > currentWeightedSpeed)
+            {
+                rb.linearVelocity = rb.linearVelocity.normalized * currentWeightedSpeed;
+            }
+        }
+        else
+        {
+            Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+            if (horizontalVelocity.magnitude > currentWeightedSpeed)
+            {
+                horizontalVelocity = horizontalVelocity.normalized * currentWeightedSpeed;
+                rb.linearVelocity = new Vector3(horizontalVelocity.x, rb.linearVelocity.y, horizontalVelocity.z);
+            }
         }
     }
 
@@ -237,40 +244,76 @@ public class BasicMovementBehaviour
 
         float stepH = playerSettings.stepHeight;
         if (stepH <= 0) return;
-
-        // Only assist when the player is actually blocked (velocity significantly below target speed)
-        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        float currentTargetSpeed = playerMovement.CurrentSpeed;
-        if (currentTargetSpeed > 0 && horizontalVel.magnitude > currentTargetSpeed * 0.7f) return;
-
-        // Don't assist if already moving upward (e.g. mid-jump)
         if (rb.linearVelocity.y > 0.5f) return;
 
-        // Capsule dimensions for CheckCapsule
-        float radius = playerCapsuleCollider.radius;
-        Vector3 center = rb.position + playerCapsuleCollider.center;
-        float halfHeight = Mathf.Max(0, (playerCapsuleCollider.height * 0.5f) - radius);
-        Vector3 point0 = center + Vector3.up * halfHeight;
-        Vector3 point1 = center - Vector3.up * halfHeight;
-
-        // Test at increasing heights to find the minimum lift needed to clear the obstacle.
-        // At each height, check if the capsule can fit AND move forward (no collision ahead).
-        float testIncrement = 0.1f;
-        float forwardCheck = 0.1f;
-
-        for (float testLift = testIncrement; testLift <= stepH; testLift += testIncrement)
+        // Proactive Raycast checking
+        Vector3 rayOrigin = rb.position + Vector3.up * 0.05f;
+        float checkDistance = playerCapsuleCollider.radius + 0.15f;
+        
+        if (Physics.Raycast(rayOrigin, inputDir, out RaycastHit hit, checkDistance, context.WhatIsGround, QueryTriggerInteraction.Ignore))
         {
-            // Check if the capsule can fit at this raised position + slightly forward
-            Vector3 testCenter = center + Vector3.up * testLift + inputDir * forwardCheck;
-            Vector3 testP0 = testCenter + Vector3.up * halfHeight;
-            Vector3 testP1 = testCenter - Vector3.up * halfHeight;
-
-            if (!Physics.CheckCapsule(testP0, testP1, radius, context.WhatIsGround, QueryTriggerInteraction.Ignore))
+            float obstacleAngle = Vector3.Angle(Vector3.up, hit.normal);
+            if (obstacleAngle > 45f) // A steep vertical obstacle
             {
-                // The capsule fits at this height! Lift the player up gradually.
-                float liftThisFrame = Mathf.Min(playerSettings.stepAssistForce * Time.fixedDeltaTime, testLift);
-                rb.MovePosition(rb.position + Vector3.up * liftThisFrame);
-                return;
+                // 1. Ceiling Clearance Sweep Check
+                float radius = playerCapsuleCollider.radius;
+                Vector3 center = rb.position + playerCapsuleCollider.center;
+                float halfHeight = Mathf.Max(0, (playerCapsuleCollider.height * 0.5f) - radius);
+                Vector3 point0 = center + Vector3.up * halfHeight;
+                Vector3 point1 = center - Vector3.up * halfHeight;
+                
+                bool ceilingBlocked = Physics.CapsuleCast(
+                    point1, point0, radius, Vector3.up, out RaycastHit ceilingHit,
+                    stepH, context.WhatIsGround, QueryTriggerInteraction.Ignore
+                );
+                
+                if (ceilingBlocked) return; // Headroom blocked, abort step-up
+
+                // 2. Clear landing surface verification
+                Vector3 highRayOrigin = rb.position + Vector3.up * (stepH + 0.05f);
+                if (!Physics.Raycast(highRayOrigin, inputDir, checkDistance, context.WhatIsGround, QueryTriggerInteraction.Ignore))
+                {
+                    Vector3 downRayOrigin = rb.position + inputDir * checkDistance + Vector3.up * (stepH + 0.05f);
+                    if (Physics.Raycast(downRayOrigin, Vector3.down, out RaycastHit downHit, stepH + 0.1f, context.WhatIsGround, QueryTriggerInteraction.Ignore))
+                    {
+                        float stepHeightActual = downHit.point.y - rb.position.y;
+                        if (stepHeightActual > 0.01f && stepHeightActual <= stepH)
+                        {
+                            // Instantly step up to preserve Rigidbody velocity
+                            rb.MovePosition(new Vector3(rb.position.x, downHit.point.y + 0.01f, rb.position.z));
+                            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void SnapToGround()
+    {
+        if (context.HasJumped || inputManager.Jumping) return;
+        if (playerMovement.IsClimbing || playerMovement.IsWallRunning || playerMovement.IsDashing) return;
+        if (!playerMovement.Grounded) return;
+        if (rb.linearVelocity.y > 0.1f) return;
+
+        float checkDist = playerSettings.stepHeight + 0.1f;
+        Vector3 castOrigin = rb.position + Vector3.up * 0.1f;
+        if (Physics.Raycast(castOrigin, Vector3.down, out RaycastHit hit, checkDist + 0.1f, context.WhatIsGround, QueryTriggerInteraction.Ignore))
+        {
+            float distance = castOrigin.y - hit.point.y;
+            if (distance > 0.1f && distance <= (playerSettings.stepHeight + 0.1f))
+            {
+                float angle = Vector3.Angle(Vector3.up, hit.normal);
+                if (angle < 60f) // Matches max slope angle
+                {
+                    rb.MovePosition(new Vector3(rb.position.x, hit.point.y, rb.position.z));
+                    Vector3 vel = rb.linearVelocity;
+                    if (vel.y < 0)
+                    {
+                        vel.y = 0;
+                        rb.linearVelocity = vel;
+                    }
+                }
             }
         }
     }

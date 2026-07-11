@@ -43,7 +43,6 @@ public class DashBehaviour
         this.input = input;
 
         playerMovement.IsDashing = true;
-        rb.useGravity = true;
 
         if (!playerSettings.infiniteDashes)
         {
@@ -71,7 +70,6 @@ public class DashBehaviour
     public void Exit()
     {
         playerMovement.IsDashing = false;
-        rb.useGravity = true;
         playerSettings.events.OnEndDash?.Invoke();
     }
 
