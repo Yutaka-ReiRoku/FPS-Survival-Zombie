@@ -19,9 +19,6 @@ namespace cowsins
 
         private Vector3 playerScale;
 
-        private Coroutine ungroundCoroutine;
-        private MonoBehaviour coroutineRunner;
-
         // Slopes
         private float maxSlopeAngle = 60f;
 
@@ -34,8 +31,6 @@ namespace cowsins
         private int notGroundedFrameCount = 0;
         private const int requiredFrames = 2;
 
-        private bool cancellingGrounded;
-
         public GroundDetectionBehaviour(MovementContext context)
         {
             this.context = context;
@@ -47,11 +42,7 @@ namespace cowsins
             this.playerSettings = context.Settings;
             this.playerCapsuleCollider = context.Capsule;
 
-            this.coroutineRunner = context.Transform.GetComponent<MonoBehaviour>();
-
             this.playerScale = context.Transform.localScale;
-
-            playerEvents.Events.OnJump.AddListener(NegateCancellingGrounded);
         }
 
         private bool _foundGroundThisFixedUpdate;
@@ -103,14 +94,6 @@ namespace cowsins
                 groundedFrameCount++;
                 notGroundedFrameCount = 0;
 
-                // Cancel any pending unground coroutine
-                if (ungroundCoroutine != null)
-                {
-                    coroutineRunner.StopCoroutine(ungroundCoroutine);
-                    ungroundCoroutine = null;
-                    cancellingGrounded = false;
-                }
-
                 // Become grounded after consistent detection
                 if (!wasGrounded && groundedFrameCount >= requiredFrames)
                 {
@@ -125,19 +108,9 @@ namespace cowsins
             {
                 notGroundedFrameCount++;
                 groundedFrameCount = 0;
-
-                // Only start leaving ground process if we were previously grounded
-                if (wasGrounded && !cancellingGrounded)
-                {
-                    cancellingGrounded = true;
-                    if (ungroundCoroutine == null)
-                    {
-                        ungroundCoroutine = coroutineRunner.StartCoroutine(StopGroundedCoroutine());
-                    }
-                }
+                return false; // Leave ground immediately
             }
 
-            // No state change
             return wasGrounded;
         }
 
@@ -150,8 +123,6 @@ namespace cowsins
 
             lastLandingTime = Time.time;
 
-            cancellingGrounded = false;
-
             playerEvents.Events.OnLand?.Invoke();
             playerSettings.events.OnLand.Invoke();
             SoundManager.Instance.PlaySound(playerSettings.sounds.landSFX, 0, 0, false);
@@ -160,38 +131,13 @@ namespace cowsins
         private void HandleLeavingGround()
         {
             context.CoyoteTimer = context.CoyoteJumpTime;
-            cancellingGrounded = false;
         }
 
         private void ResetGroundingState()
         {
             playerMovement.Grounded = true;
-            cancellingGrounded = false;
             groundedFrameCount = requiredFrames;
             notGroundedFrameCount = 0;
-
-            if (ungroundCoroutine != null)
-            {
-                coroutineRunner.StopCoroutine(ungroundCoroutine);
-                ungroundCoroutine = null;
-            }
-        }
-
-        private IEnumerator StopGroundedCoroutine()
-        {
-            yield return new WaitForSeconds(0.1f);
-
-            // Check if we are grounded using the cached result from FixedUpdate
-            bool stillHasGround = _foundGroundThisFixedUpdate;
-
-            if (!stillHasGround)
-            {
-                playerMovement.Grounded = false;
-                context.CoyoteTimer = context.CoyoteJumpTime;
-            }
-
-            cancellingGrounded = false;
-            ungroundCoroutine = null;
         }
 
         /// <summary>
@@ -207,13 +153,10 @@ namespace cowsins
             return false;
         }
 
-
         private bool IsSliding()
         {
             return playerMovement.IsCrouching && rb.linearVelocity.magnitude > playerMovement.WalkSpeed;
         }
-
-        private void NegateCancellingGrounded() => cancellingGrounded = false;
 
         /// <summary>
         /// Checks if the player is grounded through physics raycast.

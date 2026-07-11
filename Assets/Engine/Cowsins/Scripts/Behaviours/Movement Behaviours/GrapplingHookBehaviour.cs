@@ -32,6 +32,7 @@ public class GrapplingHookBehaviour
     private MonoBehaviour CoroutineRunner;
 
     private bool isGrappling;
+    public bool IsGrappling => isGrappling;
 
     public GrapplingHookBehaviour(MovementContext context)
     {

@@ -163,7 +163,7 @@ public class BasicMovementBehaviour
         // If the player is sliding, allow velocity to exceed currentWeightedSpeed (or handle slide speed separately)
         if (playerMovement.IsSliding) return;
 
-        if (context.IsPlayerOnSlope)
+        if (context.IsPlayerOnSlope && rb.linearVelocity.y <= 0.1f)
         {
             if (rb.linearVelocity.magnitude > currentWeightedSpeed)
             {
@@ -242,6 +242,11 @@ public class BasicMovementBehaviour
     private void StepAssist()
     {
         if (playerMovement.IsCrouching || playerMovement.IsSliding) return;
+        if (playerMovement.IsClimbing || playerMovement.IsWallRunning || playerMovement.IsDashing) return;
+
+        bool isGrappling = (playerMovement as PlayerMovement)?.grapplingHookBehaviour?.IsGrappling ?? false;
+        if (isGrappling) return;
+
         if (context.HasJumped || inputManager.Jumping) return;
         if (!playerMovement.Grounded) return;
 
@@ -253,7 +258,6 @@ public class BasicMovementBehaviour
 
         float stepH = playerSettings.stepHeight;
         if (stepH <= 0) return;
-        if (rb.linearVelocity.y > 0.5f) return;
 
         float checkDistance = playerCapsuleCollider.radius + 0.15f;
         
