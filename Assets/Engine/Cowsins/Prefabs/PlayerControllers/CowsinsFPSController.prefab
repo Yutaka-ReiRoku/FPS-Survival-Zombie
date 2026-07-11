@@ -322,7 +322,7 @@ MonoBehaviour:
       m_Bits: 16025
     groundCheckDistance: 0.4
     controlsResponsiveness: 0.4
-    stepHeight: 1.5
+    stepHeight: 0.875
     stepAssistForce: 6
     allowCrouch: 1
     crouchSpeed: 3
@@ -566,6 +566,9 @@ MonoBehaviour:
         m_PersistentCalls:
           m_Calls: []
   showCapsuleGroundCheckDebugInfo: 0
+  OnStepClimb:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &4612824603642630899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1296,8 +1299,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraHead: {fileID: 23676707013476890}
-  verticalSmoothSpeed: 15
-  snapVelocityThreshold: 2
+  verticalSmoothTime: 0.05
 --- !u!1 &4612824603769077301
 GameObject:
   m_ObjectHideFlags: 0

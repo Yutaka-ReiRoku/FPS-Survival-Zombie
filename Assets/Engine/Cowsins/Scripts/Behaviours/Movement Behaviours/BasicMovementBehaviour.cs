@@ -51,6 +51,16 @@ public class BasicMovementBehaviour
     {
         if(!playerControl.IsMovementControllable) return;
 
+        if (playerMovement.Grounded && context.IsPlayerOnSlope && inputManager.X == 0 && inputManager.Y == 0 && !context.HasJumped)
+        {
+            rb.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
+            rb.linearVelocity = Vector3.zero;
+        }
+        else
+        {
+            rb.constraints = RigidbodyConstraints.FreezeRotation;
+        }
+
         //Find actual velocity relative to where player is looking
         Vector2 relativeVelocity = FindVelRelativeToLook();
 
@@ -259,16 +269,20 @@ public class BasicMovementBehaviour
         float stepH = playerSettings.stepHeight;
         if (stepH <= 0) return;
 
-        float checkDistance = playerCapsuleCollider.radius + 0.15f;
+        float checkDistance = playerCapsuleCollider.radius + 0.3f;
         
         // Robust Capsule Sweep Check covering vertically [0.02f, stepH]
         float bottomOffset = 0.02f;
         float topOffset = stepH;
         float totalHeight = topOffset - bottomOffset;
-        float sweepRadius = Mathf.Min(0.05f, totalHeight * 0.4f);
+        float sweepRadius = playerCapsuleCollider.radius * 0.95f;
         
-        Vector3 pointBottom = rb.position + Vector3.up * (bottomOffset + sweepRadius);
-        Vector3 pointTop = rb.position + Vector3.up * (topOffset - sweepRadius);
+        // Calculate half-height of the cylinder part safely, ensuring it never goes negative
+        float halfHeight = Mathf.Max(0f, (totalHeight * 0.5f) - sweepRadius);
+        float centerOffset = bottomOffset + totalHeight * 0.5f;
+        
+        Vector3 pointBottom = rb.position + Vector3.up * (centerOffset - halfHeight);
+        Vector3 pointTop = rb.position + Vector3.up * (centerOffset + halfHeight);
         
         if (Physics.CapsuleCast(pointBottom, pointTop, sweepRadius, inputDir, out RaycastHit hit, checkDistance, context.WhatIsGround, QueryTriggerInteraction.Ignore))
         {
@@ -277,48 +291,45 @@ public class BasicMovementBehaviour
             {
                 // 1. Calculate actual step height landing point first
                 // Use precise hit.distance to avoid overshoot regardless of tread depth
-                float horizontalProbeDist = hit.distance + sweepRadius + 0.05f;
-                Vector3 downRayOrigin = rb.position + inputDir * horizontalProbeDist + Vector3.up * (stepH + 0.05f);
+                Vector3 downRayOrigin = rb.position - hit.normal * (playerCapsuleCollider.radius + 0.05f) + Vector3.up * (stepH + 0.05f);
                 if (Physics.Raycast(downRayOrigin, Vector3.down, out RaycastHit downHit, stepH + 0.1f, context.WhatIsGround, QueryTriggerInteraction.Ignore))
                 {
                     float stepHeightActual = downHit.point.y - rb.position.y;
                     if (stepHeightActual > 0.01f && stepHeightActual <= stepH)
                     {
-                        // 2. Ceiling and Path Clearance Check at the step height to prevent thin ceiling/platform clipping
-                        float radius = playerCapsuleCollider.radius;
-                        Vector3 center = rb.position + playerCapsuleCollider.center;
-                        float halfHeight = Mathf.Max(0, (playerCapsuleCollider.height * 0.5f) - radius);
+                        // Calculate required upward velocity against total gravity (Cowsins + Unity)
+                        float gravity = 30.19f + 9.81f; 
+                        float requiredUpwardVelocity = Mathf.Sqrt(2f * gravity * stepHeightActual) * 1.25f;
                         
-                        // Raise the capsule by stepHeightActual + 0.02f to avoid scraping the ground/step
-                        Vector3 sweepStartOffset = Vector3.up * (stepHeightActual + 0.02f);
-                        Vector3 point0 = center + Vector3.up * halfHeight + sweepStartOffset;
-                        Vector3 point1 = center - Vector3.up * halfHeight + sweepStartOffset;
+                        // Extract current horizontal velocity
+                        Vector3 currentHorizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
                         
-                        // Sweep horizontally along inputDir
-                        bool pathBlocked = Physics.CapsuleCast(
-                            point1, point0, radius * 0.95f, inputDir, out RaycastHit pathHit,
-                            horizontalProbeDist, context.WhatIsGround, QueryTriggerInteraction.Ignore
-                        );
-                        
-                        if (pathBlocked) return; // Path at step height is blocked, abort step-up
+                        // Project current horizontal velocity parallel to the wall normal (hit.normal)
+                        Vector3 wallNormalH = new Vector3(hit.normal.x, 0f, hit.normal.z).normalized;
+                        Vector3 parallelVel = currentHorizontalVel - Vector3.Dot(currentHorizontalVel, wallNormalH) * wallNormalH;
+                        float parallelSpeed = parallelVel.magnitude;
 
-                        // 3. Capsule overlap check at final destination to verify the player fits
-                        Vector3 targetCenter = center + inputDir * horizontalProbeDist + Vector3.up * stepHeightActual;
-                        bool targetBlocked = Physics.CheckCapsule(
-                            targetCenter + Vector3.up * halfHeight,
-                            targetCenter - Vector3.up * halfHeight,
-                            radius * 0.95f,
-                            context.WhatIsGround,
-                            QueryTriggerInteraction.Ignore
-                        );
+                        // Calculate redirected normal velocity component (40% of parallel speed, minimum 2.0m/s)
+                        float redirectionFactor = 0.4f;
+                        float minPushSpeed = 2.0f;
+                        float targetPushSpeed = Mathf.Max(parallelSpeed * redirectionFactor, minPushSpeed);
+                        Vector3 normalPushVel = -wallNormalH * targetPushSpeed;
 
-                        if (!targetBlocked)
+                        // Attenuate parallel velocity to conserve kinetic energy
+                        float conservationFactor = Mathf.Sqrt(1f - redirectionFactor * redirectionFactor);
+                        Vector3 adjustedParallelVel = parallelVel * conservationFactor;
+
+                        // Combine and clamp to prevent speed exploits
+                        Vector3 newHorizontalVel = adjustedParallelVel + normalPushVel;
+                        float speedLimit = Mathf.Max(currentHorizontalVel.magnitude, playerSettings.runSpeed);
+                        newHorizontalVel = Vector3.ClampMagnitude(newHorizontalVel, speedLimit);
+
+                        // Apply to Rigidbody Y-velocity and redirected horizontal velocity
+                        if (rb.linearVelocity.y < requiredUpwardVelocity)
                         {
-                            // Instantly step up to preserve Rigidbody velocity
-                            rb.MovePosition(new Vector3(rb.position.x, downHit.point.y + 0.01f, rb.position.z));
-                            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-                            (playerMovement as PlayerMovement)?.OnStepClimb.Invoke(stepHeightActual);
+                            rb.linearVelocity = new Vector3(newHorizontalVel.x, requiredUpwardVelocity, newHorizontalVel.z);
                         }
+                        (playerMovement as PlayerMovement)?.OnStepClimb.Invoke(stepHeightActual);
                     }
                 }
             }
@@ -332,7 +343,7 @@ public class BasicMovementBehaviour
         if (!playerMovement.Grounded) return;
         if (rb.linearVelocity.y > 0.1f) return;
 
-        float maxStepSnap = Mathf.Min(playerSettings.stepHeight, 0.4f);
+        float maxStepSnap = playerSettings.stepHeight;
         float checkDist = maxStepSnap + 0.1f;
         Vector3 castOrigin = rb.position + Vector3.up * 0.1f;
         if (Physics.Raycast(castOrigin, Vector3.down, out RaycastHit hit, checkDist + 0.1f, context.WhatIsGround, QueryTriggerInteraction.Ignore))
