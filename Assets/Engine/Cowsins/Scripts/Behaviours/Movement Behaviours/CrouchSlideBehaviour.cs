@@ -19,6 +19,8 @@ namespace cowsins
         private Transform cameraHead;
         private float initialHeadLocalY;
         private bool canUnCrouch = false;
+        private readonly Collider[] uncrouchOverlaps = new Collider[8];
+
         private float slideTimer = 0f;
         private Vector3 slideDirection = Vector3.zero;
         private float slideBoostRemaining = 0f;
@@ -174,11 +176,23 @@ namespace cowsins
                 float currentHeight = context.Capsule.height;
                 float standingHeight = initialHeight;
                 float checkRadius = context.Capsule.radius * 0.95f;
+                float bottomOffset = initialCenter.y - initialHeight * 0.5f;
 
-                Vector3 point0 = context.Transform.position + context.Transform.up * (currentHeight + checkRadius);
-                Vector3 point1 = context.Transform.position + context.Transform.up * Mathf.Max(currentHeight + checkRadius, standingHeight - checkRadius);
+                Vector3 point0 = context.Transform.position + context.Transform.up * (bottomOffset + currentHeight + checkRadius);
+                Vector3 point1 = context.Transform.position + context.Transform.up * Mathf.Max(bottomOffset + currentHeight + checkRadius, bottomOffset + standingHeight - checkRadius);
 
-                bool isObstacleAbove = Physics.CheckCapsule(point0, point1, checkRadius, context.WhatIsGround, QueryTriggerInteraction.Ignore);
+                int count = Physics.OverlapCapsuleNonAlloc(point0, point1, checkRadius, uncrouchOverlaps, context.WhatIsGround, QueryTriggerInteraction.Ignore);
+                
+                bool isObstacleAbove = false;
+                for (int i = 0; i < count; i++)
+                {
+                    if (uncrouchOverlaps[i].transform.IsChildOf(context.Transform))
+                    {
+                        continue;
+                    }
+                    isObstacleAbove = true;
+                    break;
+                }
 
                 canUnCrouch = !isObstacleAbove;
 
@@ -230,7 +244,8 @@ namespace cowsins
         {
             if (cameraHead != null && initialHeight > 0 && capsule != null)
             {
-                float targetHeadY = initialHeadLocalY * (capsule.height / initialHeight);
+                float bottomOffset = initialCenter.y - initialHeight * 0.5f;
+                float targetHeadY = bottomOffset + (initialHeadLocalY - bottomOffset) * (capsule.height / initialHeight);
                 cameraHead.localPosition = new Vector3(cameraHead.localPosition.x, targetHeadY, cameraHead.localPosition.z);
             }
         }

@@ -104,13 +104,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     private float _cachedDistance;
     private Vector3 _lastSetDestination = Vector3.zero;
 
-    // --- Direct steering runtime state ---
-    private float _losCacheTimer;
-    private bool _cachedLOSResult;
-    private bool _isDirectSteering;
-    private int _cachedLOSMask = -1;
-    private int _cachedLOSCacheKey = -1;
-    private float _directSteeringCooldownTimer;
+    private EnemyLocomotion locomotion;
 
     // --- Alert memory / last known position ---
     private float _alertMemoryTimer;
@@ -129,7 +123,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
     private int attackIndex;
 
-    // --- Reusable buffer for OverlapSphere (avoid per-explosion allocation) ---
+    // --- Reusable buffer for OverlapSphere (avoid per-call allocation) ---
     private static readonly Collider[] _overlapBuffer = new Collider[64];
 
     // --- Cached animator parameter hashes (avoid per-call string hashing) ---
@@ -152,6 +146,9 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
         audioSource = GetComponent<AudioSource>();
+        locomotion = GetComponent<EnemyLocomotion>();
+        if (locomotion == null)
+            locomotion = gameObject.AddComponent<EnemyLocomotion>();
 
         FindPlayer();
 
@@ -190,6 +187,27 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         animator.speed =
             Random.Range(0.95f, 1.05f);
 
+        if (locomotion != null)
+        {
+            locomotion.target = target;
+            locomotion.requireLineOfSight = true; // Tank always requires LOS initially
+            locomotion.sightObstructionMask = sightObstructionMask;
+            locomotion.sightEyeHeight = sightEyeHeight;
+            locomotion.stuckTimeThreshold = 3f; // default stuck threshold
+            locomotion.stuckMoveThreshold = 1f;
+            locomotion.stuckRepathRadius = 5f;
+            locomotion.playerMovedRepathThreshold = playerMovedRepathThreshold;
+            locomotion.maxRepathInterval = maxRepathInterval;
+            locomotion.useDirectSteeringWhenLOS = useDirectSteeringWhenLOS;
+            locomotion.directSteeringWallCheckDistance = directSteeringWallCheckDistance;
+            locomotion.directSteeringLOSCacheInterval = directSteeringLOSCacheInterval;
+            locomotion.directSteeringWallCooldown = directSteeringWallCooldown;
+            locomotion.wallCheckBodyHeight = wallCheckBodyHeight;
+            locomotion.maxDirectSteerHeightDiff = 2f; // Default height diff limit for special enemies
+
+            locomotion.Initialize();
+        }
+
         _lastSetDestination = transform.position;
         _pathTimer = maxRepathInterval; // force immediate first re-path
     }
@@ -208,6 +226,11 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
                 findPlayerTimer = 0f;
             }
             return;
+        }
+
+        if (locomotion != null)
+        {
+            locomotion.target = target;
         }
 
         attackTimer += Time.deltaTime;
@@ -306,14 +329,13 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
                     agent.isStopped = false;
                     SyncAgentToTransform();
                     agent.updatePosition = true;
-                    _isDirectSteering = false;
                     agent.speed = runSpeed;
 
                     _pathTimer += Time.deltaTime;
                     float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
                     if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
                     {
-                        agent.SetDestination(_lastKnownPlayerPos);
+                        SetDestinationRobust(_lastKnownPlayerPos);
                         _lastSetDestination = _lastKnownPlayerPos;
                         _pathTimer = 0f;
                     }
@@ -338,7 +360,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
                 float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
                 if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
                 {
-                    agent.SetDestination(target.position);
+                    SetDestinationRobust(target.position);
                     _lastSetDestination = target.position;
                     _pathTimer = 0f;
                 }
@@ -402,28 +424,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
     private void FaceTarget()
     {
-        if (target == null)
-            return;
-
-        Vector3 dir =
-            target.position -
-            transform.position;
-
-        dir.y = 0;
-
-        if (dir.sqrMagnitude < 0.01f)
-            return;
-
-        Quaternion rot =
-            Quaternion.LookRotation(dir);
-
-        transform.rotation =
-            Quaternion.Slerp(
-                transform.rotation,
-                rot,
-                rotationSpeed *
-                Time.deltaTime
-            );
+        if (locomotion != null)
+            locomotion.FaceTarget(rotationSpeed);
     }
 
     //==================================================
@@ -769,145 +771,36 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     /// started), causing the Tank to "snap back" / retreat to that old
     /// position when the agent resumes position control.
     /// </summary>
+    private void SetDestinationRobust(Vector3 destination)
+    {
+        if (locomotion != null)
+            locomotion.SetDestinationRobust(destination);
+    }
+
     private void SyncAgentToTransform()
     {
-        if (agent == null || !agent.isOnNavMesh)
-            return;
-
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas))
-            agent.nextPosition = hit.position;
-        else
-            agent.nextPosition = transform.position;
+        if (locomotion != null)
+            locomotion.SyncAgentToTransform();
     }
 
-    /// <summary>
-    /// Checks whether there is an unobstructed line from the Tank's eyes to
-    /// the player's eyes. Uses a raycast against sightObstructionMask.
-    /// </summary>
     private bool HasLineOfSight()
     {
-        if (target == null) return false;
-
-        Vector3 start = transform.position + Vector3.up * sightEyeHeight;
-        Vector3 end = target.position + Vector3.up * sightEyeHeight;
-        Vector3 dir = end - start;
-        float dist = dir.magnitude;
-        if (dist <= 0.1f) return true;
-
-        int myLayer = gameObject.layer;
-        int targetLayer = target.gameObject.layer;
-        int cacheKey = (myLayer << 8) | targetLayer;
-        if (_cachedLOSMask == -1 || _cachedLOSCacheKey != cacheKey)
-        {
-            _cachedLOSMask = sightObstructionMask
-                & ~(1 << targetLayer)
-                & ~(1 << myLayer);
-            _cachedLOSCacheKey = cacheKey;
-        }
-
-        return !Physics.Raycast(start, dir.normalized, dist, _cachedLOSMask, QueryTriggerInteraction.Ignore);
+        if (locomotion != null)
+            return locomotion.HasLineOfSight();
+        return false;
     }
 
-    /// <summary>
-    /// When the Tank has line-of-sight to the player, moves directly toward
-    /// the player's current position every frame (bypassing NavMesh
-    /// pathfinding). Returns true if direct steering was used this frame.
-    /// </summary>
     private bool TryDirectSteer(float distance)
     {
-        if (target == null || agent == null || !agent.isOnNavMesh)
-            return false;
-
-        // Wall cooldown: after hitting a wall, stay in NavMesh mode for a while.
-        if (_directSteeringCooldownTimer > 0f)
+        if (locomotion != null)
         {
-            _directSteeringCooldownTimer -= Time.deltaTime;
-            if (_isDirectSteering)
+            bool result = locomotion.TryDirectSteer(runSpeed);
+            if (animator != null && result)
             {
-                _isDirectSteering = false;
-                agent.isStopped = false;
-                SyncAgentToTransform();
-                agent.updatePosition = true;
-                _pathTimer = maxRepathInterval;
+                animator.SetFloat(SpeedHash, runSpeed);
             }
-            return false;
+            return result;
         }
-
-        // Cache LOS result to avoid raycasting every frame.
-        _losCacheTimer -= Time.deltaTime;
-        if (_losCacheTimer <= 0f)
-        {
-            _cachedLOSResult = HasLineOfSight();
-            _losCacheTimer = directSteeringLOSCacheInterval;
-        }
-
-        if (!_cachedLOSResult)
-        {
-            // No LOS — let NavMesh pathfinding handle it.
-            if (_isDirectSteering)
-            {
-                _isDirectSteering = false;
-                agent.isStopped = false;
-                SyncAgentToTransform();
-                agent.updatePosition = true; // restore agent position control
-                _pathTimer = maxRepathInterval; // force re-path
-            }
-            return false;
-        }
-
-        // --- Direct steering ---
-        _isDirectSteering = true;
-        agent.isStopped = true;
-        agent.updatePosition = false; // prevent agent from overriding our transform
-
-        Vector3 dir = target.position - transform.position;
-        dir.y = 0f;
-        float distMag = dir.magnitude;
-        if (distMag < 0.01f)
-            return true;
-
-        Vector3 dirNorm = dir / distMag;
-
-        // Wall check: if there's an obstacle directly ahead, fall back to NavMesh.
-        // Check at BOTH eye height (tall walls) and body height (low obstacles).
-        if (Physics.Raycast(
-                transform.position + Vector3.up * sightEyeHeight,
-                dirNorm,
-                out RaycastHit wallHit,
-                directSteeringWallCheckDistance,
-                _cachedLOSMask,
-                QueryTriggerInteraction.Ignore) ||
-            Physics.Raycast(
-                transform.position + Vector3.up * wallCheckBodyHeight,
-                dirNorm,
-                out RaycastHit wallHit2,
-                directSteeringWallCheckDistance,
-                _cachedLOSMask,
-                QueryTriggerInteraction.Ignore))
-        {
-            _isDirectSteering = false;
-            agent.isStopped = false;
-            SyncAgentToTransform();
-            agent.updatePosition = true; // restore agent position control
-            _pathTimer = maxRepathInterval;
-            _directSteeringCooldownTimer = directSteeringWallCooldown;
-            return false;
-        }
-
-        // Move directly toward the player.
-        Vector3 newPos = transform.position + dirNorm * runSpeed * Time.deltaTime;
-
-        NavMeshHit navHit;
-        if (NavMesh.SamplePosition(newPos, out navHit, 2f, NavMesh.AllAreas))
-        {
-            if (navHit.position.y > -1f)
-                transform.position = navHit.position;
-        }
-
-        if (animator != null)
-            animator.SetFloat(SpeedHash, runSpeed);
-
-        return true;
+        return false;
     }
 }

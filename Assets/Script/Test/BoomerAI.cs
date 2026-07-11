@@ -134,32 +134,19 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private bool isScreaming;
     private bool hasStartedExplosion;
 
-    // --- Stuck recovery runtime state ---
-    private Vector3 _lastStuckCheckPos;
-    private float _stuckTimer;
-    private int _noPathRetryCount;
-    private float _noPathRetryTimer;
+    private EnemyLocomotion locomotion;
 
     // --- Chase re-path throttling ---
     private float _pathTimer;
     private Vector3 _lastSetDestination = Vector3.zero;
 
-    // --- Direct steering runtime state ---
-    private float _losCacheTimer;
-    private bool _cachedLOSResult;
-    private bool _isDirectSteering;
-    private float _directSteeringCooldownTimer;
+    private bool _isDirectSteering => locomotion != null && locomotion.IsDirectSteering;
 
     // --- Alert memory / last known position ---
     private float _alertMemoryTimer;
     private Vector3 _lastKnownPlayerPos;
     private bool _hasLastKnownPos;
     private bool _isUsingLastKnownPos;
-
-    // --- Cached reusable objects (avoid per-frame allocation) ---
-    private UnityEngine.AI.NavMeshPath _reusablePath;
-    private int _cachedLOSMask = -1;
-    private int _cachedLOSCacheKey = -1;
 
     // --- Cached animator parameter hashes (avoid per-call string hashing) ---
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
@@ -183,7 +170,9 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
-        _reusablePath = new UnityEngine.AI.NavMeshPath();
+        locomotion = GetComponent<EnemyLocomotion>();
+        if (locomotion == null)
+            locomotion = gameObject.AddComponent<EnemyLocomotion>();
 
         FindPlayer();
 
@@ -198,24 +187,6 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             // avoidance system when many regular zombies are also active.
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
             agent.avoidancePriority = 15; // Special enemy — slightly higher priority than regular zombies.
-
-            // UNDERGROUND NAVMESH FIX: 31% of the NavMesh triangles are
-            // underground (y=-2 to -1385) and disconnected from the main
-            // surface. If the boomer spawns on an underground NavMesh island,
-            // it can never reach the player. Sample a ground-level NavMesh
-            // position above the boomer and warp there if the current
-            // position is too far below y=0.
-            if (transform.position.y < -1f)
-            {
-                UnityEngine.AI.NavMeshHit groundHit;
-                Vector3 searchFrom = new Vector3(transform.position.x, 0f, transform.position.z);
-                if (UnityEngine.AI.NavMesh.SamplePosition(searchFrom, out groundHit, 10f, UnityEngine.AI.NavMesh.AllAreas)
-                    && groundHit.position.y >= -1f)
-                {
-                    agent.Warp(groundHit.position);
-                    transform.position = groundHit.position;
-                }
-            }
         }
 
         // Keep the Rigidbody KINEMATIC while alive so the NavMeshAgent fully
@@ -237,9 +208,27 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                 Random.Range(0.95f, 1.05f);
         }
 
-        _stuckTimer = 0f;
-        _lastStuckCheckPos = transform.position;
-        _noPathRetryCount = 0;
+        if (locomotion != null)
+        {
+            locomotion.target = target;
+            locomotion.requireLineOfSight = requireLineOfSight;
+            locomotion.sightObstructionMask = sightObstructionMask;
+            locomotion.sightEyeHeight = sightEyeHeight;
+            locomotion.stuckTimeThreshold = stuckTimeThreshold;
+            locomotion.stuckMoveThreshold = stuckMoveThreshold;
+            locomotion.stuckRepathRadius = stuckRepathRadius;
+            locomotion.playerMovedRepathThreshold = playerMovedRepathThreshold;
+            locomotion.maxRepathInterval = maxRepathInterval;
+            locomotion.useDirectSteeringWhenLOS = useDirectSteeringWhenLOS;
+            locomotion.directSteeringWallCheckDistance = directSteeringWallCheckDistance;
+            locomotion.directSteeringLOSCacheInterval = directSteeringLOSCacheInterval;
+            locomotion.directSteeringWallCooldown = directSteeringWallCooldown;
+            locomotion.wallCheckBodyHeight = wallCheckBodyHeight;
+            locomotion.maxDirectSteerHeightDiff = 2f; // Default height diff limit for special enemies
+
+            locomotion.Initialize();
+        }
+
         _lastSetDestination = transform.position;
         _pathTimer = maxRepathInterval; // force immediate first re-path
     }
@@ -266,6 +255,11 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                 findPlayerTimer = 0f;
             }
             return;
+        }
+
+        if (locomotion != null)
+        {
+            locomotion.target = target;
         }
 
         if (isHit)
@@ -340,7 +334,6 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                     agent.isStopped = false;
                     SyncAgentToTransform();
                     agent.updatePosition = true;
-                    _isDirectSteering = false;
                     agent.speed = moveSpeed;
 
                     _pathTimer += Time.deltaTime;
@@ -360,10 +353,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             // the player's CURRENT position every frame.
             else if (useDirectSteeringWhenLOS && TryDirectSteer(distance))
             {
-                // Direct steering handled movement this frame. Reset stuck
-                // detection since we're moving under our own control.
-                _stuckTimer = 0f;
-                _lastStuckCheckPos = transform.position;
+                // Direct steering handled movement this frame.
             }
             else
             {
@@ -390,9 +380,6 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         }
         else
         {
-            // Not chasing — reset stuck detection state.
-            _stuckTimer = 0f;
-            _lastStuckCheckPos = transform.position;
             agent.isStopped = true;
         }
 
@@ -452,238 +439,33 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     // STUCK DETECTION & RECOVERY
     //==================================================
 
-    /// <summary>
-    /// Tracks whether the boomer is actually making progress toward the player.
-    /// If it stays nearly stationary for too long while chasing, it tries to
-    /// recover by snapping to a nearby valid NavMesh position and re-pathing.
-    /// </summary>
     private void HandleStuckDetection(float distanceToPlayer)
     {
-        // Only check for stuck while actively chasing (far enough to need
-        // movement). If we're in explode range, being stationary is expected.
-        if (distanceToPlayer <= explodeRange + 0.5f)
-        {
-            _stuckTimer = 0f;
-            _lastStuckCheckPos = transform.position;
-            _noPathRetryCount = 0;
-            return;
-        }
-
-        // CRITICAL: If the agent has no path while it should be chasing, it
-        // will stand forever without moving. Force a robust re-path, but
-        // throttle to every 0.5s to avoid spamming SetDestination every frame
-        // (which floods the async pathfinding queue and can cause frame stalls
-        // on a large NavMesh).
-        if (agent != null && agent.isOnNavMesh && !agent.hasPath && !agent.pathPending && !agent.isStopped)
-        {
-            _noPathRetryCount++;
-            _noPathRetryTimer += Time.deltaTime;
-            if (_noPathRetryTimer >= 0.5f)
-            {
-                SetDestinationRobust(target.position);
-                _noPathRetryTimer = 0f;
-            }
-
-            // If the agent still has no path after ~5 seconds of retries,
-            // it's in a broken state. Try a full agent reset: disable/re-enable/
-            // warp to snap it out. This is NOT a teleport to the player — it
-            // warps to the boomer's OWN position to force re-initialization.
-            if (_noPathRetryCount >= 10 && !agent.hasPath)
-            {
-                Vector3 currentPos = transform.position;
-                agent.enabled = false;
-                agent.enabled = true;
-                if (agent.isOnNavMesh)
-                {
-                    agent.Warp(currentPos);
-                    agent.isStopped = false;
-                    SetDestinationRobust(target.position);
-                }
-                _noPathRetryCount = 0;
-                _noPathRetryTimer = 0f;
-            }
-
-            _stuckTimer = 0f;
-            _lastStuckCheckPos = transform.position;
-            return;
-        }
-
-        // Agent has a path but isn't moving — could be avoidance deadlock.
-        _noPathRetryCount = 0;
-
-        float moved = Vector3.Distance(transform.position, _lastStuckCheckPos);
-
-        if (moved < stuckMoveThreshold * 0.33f)
-        {
-            _stuckTimer += Time.deltaTime;
-        }
-        else
-        {
-            _stuckTimer = 0f;
-            _lastStuckCheckPos = transform.position;
-        }
-
-        if (_stuckTimer >= stuckTimeThreshold)
-        {
-            TryRecoverFromStuck();
-            _stuckTimer = 0f;
-            _lastStuckCheckPos = transform.position;
-        }
+        if (locomotion != null)
+            locomotion.HandleStuckDetection(distanceToPlayer, explodeRange);
     }
 
-    /// <summary>
-    /// Attempts to unstick the boomer by finding a valid NavMesh position nearby
-    /// (with a complete path to the player) and warping there. If no valid
-    /// position is found, the agent is simply re-pathed as a fallback.
-    /// </summary>
-    /// <summary>
-    /// Attempts to unstick the boomer by re-pathing toward the player. Does NOT
-    /// warp/teleport — only re-paths from the current position.
-    /// </summary>
-    private void TryRecoverFromStuck()
-    {
-        if (agent == null || target == null) return;
-
-        // Strategy 1: robust re-path directly to the player.
-        SetDestinationRobust(target.position);
-        if (agent.hasPath) return;
-
-        // Strategy 2: path to an intermediate point halfway to the player.
-        Vector3 toPlayer = target.position - transform.position;
-        Vector3 midPoint = transform.position + toPlayer * 0.5f;
-
-        UnityEngine.AI.NavMeshHit midHit;
-        if (UnityEngine.AI.NavMesh.SamplePosition(midPoint, out midHit, 3f, UnityEngine.AI.NavMesh.AllAreas))
-        {
-            _reusablePath.ClearCorners();
-            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, midHit.position, UnityEngine.AI.NavMesh.AllAreas, _reusablePath)
-                && _reusablePath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
-            {
-                agent.SetPath(_reusablePath);
-                return;
-            }
-        }
-
-        // Strategy 3: path to a random nearby NavMesh position (small nudge,
-        // NOT a teleport).
-        for (int attempt = 0; attempt < 3; attempt++)
-        {
-            Vector2 rand = Random.insideUnitCircle * 2f;
-            Vector3 candidate = transform.position + new Vector3(rand.x, 0f, rand.y);
-
-            UnityEngine.AI.NavMeshHit hit;
-            if (!UnityEngine.AI.NavMesh.SamplePosition(candidate, out hit, 1.5f, UnityEngine.AI.NavMesh.AllAreas))
-                continue;
-
-            _reusablePath.ClearCorners();
-            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, _reusablePath)
-                && _reusablePath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
-            {
-                agent.SetPath(_reusablePath);
-                return;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Robust destination setter that works around a Unity NavMeshAgent issue
-    /// where SetDestination returns true but doesn't actually create a path
-    /// (happens after the agent's previous path completed while isStopped was
-    /// true). Falls back to manually calculating the path and assigning it via
-    /// SetPath, which reliably creates a new path.
-    ///
-    /// IMPORTANT: The fallback (CalculatePath) is only used when the agent
-    /// has NO path from a PREVIOUS frame — NOT immediately after
-    /// SetDestination. SetDestination is async: it queues a path request but
-    /// doesn't compute it synchronously, so hasPath is false on the same frame.
-    /// Checking hasPath immediately would trigger CalculatePath every call
-    /// (synchronous pathfinding on every frame = frame stalls = sliding).
-    /// </summary>
     private void SetDestinationRobust(Vector3 destination)
     {
-        if (agent == null || !agent.isOnNavMesh) return;
-
-        // Remember whether the agent had a path BEFORE this call. If it
-        // didn't, SetDestination alone may silently fail (Unity issue after
-        // isStopped + path completion), so we need the CalculatePath fallback.
-        bool hadNoPath = !agent.hasPath && !agent.pathPending;
-
-        agent.isStopped = false;
-        agent.SetDestination(destination);
-
-        // Only use the synchronous CalculatePath fallback when the agent was
-        // in the broken no-path state before this call. This avoids running
-        // expensive synchronous pathfinding on every SetDestination call.
-        if (hadNoPath && !agent.pathPending)
-        {
-            _reusablePath.ClearCorners();
-            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, destination, UnityEngine.AI.NavMesh.AllAreas, _reusablePath)
-                && _reusablePath.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
-            {
-                agent.SetPath(_reusablePath);
-            }
-        }
+        if (locomotion != null)
+            locomotion.SetDestinationRobust(destination);
     }
 
     //==================================================
     // LINE OF SIGHT
     //==================================================
 
-    /// <summary>
-    /// Checks whether there is an unobstructed line from the boomer's eyes to
-    /// the player's eyes. The player and the boomer's own layer are
-    /// automatically excluded from the obstruction mask.
-    /// </summary>
     private bool HasLineOfSight()
     {
-        if (target == null) return false;
-
-        Vector3 start = transform.position + Vector3.up * sightEyeHeight;
-        Vector3 end = target.position + Vector3.up * sightEyeHeight;
-        Vector3 dir = end - start;
-        float dist = dir.magnitude;
-        if (dist <= 0.1f) return true;
-
-        // Cache the LOS mask — it only changes when the target or this boomer's
-        // layer changes (rare). Recompute only if the cached value is stale.
-        int myLayer = gameObject.layer;
-        int targetLayer = target.gameObject.layer;
-        int cacheKey = (myLayer << 8) | targetLayer;
-        if (_cachedLOSMask == -1 || _cachedLOSCacheKey != cacheKey)
-        {
-            _cachedLOSMask = sightObstructionMask
-                & ~(1 << targetLayer)
-                & ~(1 << myLayer);
-            _cachedLOSCacheKey = cacheKey;
-        }
-
-        return !Physics.Raycast(start, dir.normalized, dist, _cachedLOSMask, QueryTriggerInteraction.Ignore);
+        if (locomotion != null)
+            return locomotion.HasLineOfSight();
+        return false;
     }
 
     private void FaceTarget()
     {
-        if (target == null)
-            return;
-
-        Vector3 dir =
-            target.position -
-            transform.position;
-
-        dir.y = 0f;
-
-        if (dir.sqrMagnitude < 0.01f)
-            return;
-
-        Quaternion rot =
-            Quaternion.LookRotation(dir);
-
-        transform.rotation =
-            Quaternion.Slerp(
-                transform.rotation,
-                rot,
-                rotationSpeed *
-                Time.deltaTime
-            );
+        if (locomotion != null)
+            locomotion.FaceTarget(rotationSpeed);
     }
 
     //==================================
@@ -1004,125 +786,23 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     // DIRECT STEERING
     //==================================================
 
-    /// <summary>
-    /// Syncs the NavMeshAgent's internal position to the transform's current
-    /// position. Call this BEFORE setting updatePosition = true when
-    /// transitioning from direct steering back to NavMesh. Without this, the
-    /// agent's position is stale (frozen at the spot where direct steering
-    /// started), causing the Boomer to "snap back" / retreat to that old
-    /// position when the agent resumes position control.
-    /// </summary>
     private void SyncAgentToTransform()
     {
-        if (agent == null || !agent.isOnNavMesh)
-            return;
-
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas))
-            agent.nextPosition = hit.position;
-        else
-            agent.nextPosition = transform.position;
+        if (locomotion != null)
+            locomotion.SyncAgentToTransform();
     }
 
-    /// <summary>
-    /// When the Boomer has line-of-sight to the player, moves directly toward
-    /// the player's current position every frame (bypassing NavMesh
-    /// pathfinding). Returns true if direct steering was used this frame.
-    /// </summary>
     private bool TryDirectSteer(float distance)
     {
-        if (target == null || agent == null || !agent.isOnNavMesh)
-            return false;
-
-        // Wall cooldown: after hitting a wall, stay in NavMesh mode for a while.
-        if (_directSteeringCooldownTimer > 0f)
+        if (locomotion != null)
         {
-            _directSteeringCooldownTimer -= Time.deltaTime;
-            if (_isDirectSteering)
+            bool result = locomotion.TryDirectSteer(moveSpeed);
+            if (animator != null && result)
             {
-                _isDirectSteering = false;
-                agent.isStopped = false;
-                SyncAgentToTransform();
-                agent.updatePosition = true;
-                _pathTimer = maxRepathInterval;
+                animator.SetFloat(SpeedHash, 1f);
             }
-            return false;
+            return result;
         }
-
-        // Cache LOS result to avoid raycasting every frame.
-        _losCacheTimer -= Time.deltaTime;
-        if (_losCacheTimer <= 0f)
-        {
-            _cachedLOSResult = HasLineOfSight();
-            _losCacheTimer = directSteeringLOSCacheInterval;
-        }
-
-        if (!_cachedLOSResult)
-        {
-            // No LOS — let NavMesh pathfinding handle it.
-            if (_isDirectSteering)
-            {
-                _isDirectSteering = false;
-                agent.isStopped = false;
-                SyncAgentToTransform();
-                agent.updatePosition = true; // restore agent position control
-                _pathTimer = maxRepathInterval; // force re-path
-            }
-            return false;
-        }
-
-        // --- Direct steering ---
-        _isDirectSteering = true;
-        agent.isStopped = true;
-        agent.updatePosition = false; // prevent agent from overriding our transform
-
-        Vector3 dir = target.position - transform.position;
-        dir.y = 0f;
-        float distMag = dir.magnitude;
-        if (distMag < 0.01f)
-            return true;
-
-        Vector3 dirNorm = dir / distMag;
-
-        // Wall check: if there's an obstacle directly ahead, fall back to NavMesh.
-        // Check at BOTH eye height (tall walls) and body height (low obstacles).
-        if (Physics.Raycast(
-                transform.position + Vector3.up * sightEyeHeight,
-                dirNorm,
-                out RaycastHit wallHit,
-                directSteeringWallCheckDistance,
-                _cachedLOSMask,
-                QueryTriggerInteraction.Ignore) ||
-            Physics.Raycast(
-                transform.position + Vector3.up * wallCheckBodyHeight,
-                dirNorm,
-                out RaycastHit wallHit2,
-                directSteeringWallCheckDistance,
-                _cachedLOSMask,
-                QueryTriggerInteraction.Ignore))
-        {
-            _isDirectSteering = false;
-            agent.isStopped = false;
-            SyncAgentToTransform();
-            agent.updatePosition = true; // restore agent position control
-            _pathTimer = maxRepathInterval;
-            _directSteeringCooldownTimer = directSteeringWallCooldown;
-            return false;
-        }
-
-        // Move directly toward the player.
-        Vector3 newPos = transform.position + dirNorm * moveSpeed * Time.deltaTime;
-
-        NavMeshHit navHit;
-        if (NavMesh.SamplePosition(newPos, out navHit, 2f, NavMesh.AllAreas))
-        {
-            if (navHit.position.y > -1f)
-                transform.position = navHit.position;
-        }
-
-        if (animator != null)
-            animator.SetFloat(SpeedHash, 1f);
-
-        return true;
+        return false;
     }
 }

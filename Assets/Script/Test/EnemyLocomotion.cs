@@ -1,0 +1,387 @@
+using UnityEngine;
+using UnityEngine.AI;
+
+[RequireComponent(typeof(NavMeshAgent))]
+public class EnemyLocomotion : MonoBehaviour
+{
+    [Header("Target")]
+    public Transform target;
+
+    [Header("Line of Sight & Detection")]
+    public bool requireLineOfSight = true;
+    public LayerMask sightObstructionMask = ~0;
+    public float sightEyeHeight = 1.5f;
+
+    [Header("Stuck Recovery")]
+    public float stuckTimeThreshold = 3f;
+    public float stuckMoveThreshold = 1f;
+    public float stuckRepathRadius = 5f;
+
+    [Header("Chase Re-path (Responsiveness)")]
+    public float playerMovedRepathThreshold = 1f;
+    public float maxRepathInterval = 0.1f;
+
+    [Header("Direct Steering")]
+    public bool useDirectSteeringWhenLOS = true;
+    public float directSteeringWallCheckDistance = 1.5f;
+    public float directSteeringLOSCacheInterval = 0.15f;
+    public float directSteeringWallCooldown = 1.5f;
+    public float wallCheckBodyHeight = 0.5f;
+    public float maxDirectSteerHeightDiff = 2f;
+
+    public NavMeshAgent Agent { get; private set; }
+
+    // Runtime state variables for pathfinding, stuck checks, and direct steering
+    private NavMeshPath _reusablePath;
+    private int _cachedLOSMask = -1;
+    private int _cachedLOSCacheKey = -1;
+    private bool _cachedLOSResult;
+    private float _nextLOSCheckTime;
+
+    private float _stuckTimer;
+    private Vector3 _lastStuckCheckPos;
+    private int _noPathRetryCount;
+    private float _noPathRetryTimer;
+
+    private bool _isDirectSteering;
+    private float _directSteeringCooldownTimer;
+    private float _losCacheTimer;
+    private Vector3 _prevFramePos;
+
+    public bool IsDirectSteering => _isDirectSteering;
+
+    private void Awake()
+    {
+        Agent = GetComponent<NavMeshAgent>();
+        _reusablePath = new NavMeshPath();
+    }
+
+    public void Initialize()
+    {
+        _stuckTimer = 0f;
+        _lastStuckCheckPos = transform.position;
+        _noPathRetryCount = 0;
+        _noPathRetryTimer = 0f;
+        _directSteeringCooldownTimer = 0f;
+        _losCacheTimer = directSteeringLOSCacheInterval;
+        _prevFramePos = transform.position;
+
+        WarpIfUnderground();
+    }
+
+    public void WarpIfUnderground()
+    {
+        if (Agent != null && transform.position.y < -1f)
+        {
+            NavMeshHit groundHit;
+            Vector3 searchFrom = new Vector3(transform.position.x, 0f, transform.position.z);
+            if (NavMesh.SamplePosition(searchFrom, out groundHit, 10f, NavMesh.AllAreas) && groundHit.position.y >= -1f)
+            {
+                Agent.Warp(groundHit.position);
+                transform.position = groundHit.position;
+            }
+        }
+    }
+
+    public bool HasLineOfSight()
+    {
+        if (target == null) return false;
+
+        if (Time.time < _nextLOSCheckTime)
+        {
+            return _cachedLOSResult;
+        }
+
+        Vector3 start = transform.position + Vector3.up * sightEyeHeight;
+        Vector3 end = target.position + Vector3.up * sightEyeHeight;
+        Vector3 dir = end - start;
+        float dist = dir.magnitude;
+        if (dist <= 0.1f)
+        {
+            _cachedLOSResult = true;
+            _nextLOSCheckTime = Time.time + Random.Range(0.12f, 0.18f);
+            return true;
+        }
+
+        int myLayer = gameObject.layer;
+        int targetLayer = target.gameObject.layer;
+        int cacheKey = (myLayer << 8) | targetLayer;
+        if (_cachedLOSMask == -1 || _cachedLOSCacheKey != cacheKey)
+        {
+            _cachedLOSMask = sightObstructionMask & ~(1 << targetLayer) & ~(1 << myLayer);
+            _cachedLOSCacheKey = cacheKey;
+        }
+
+        _cachedLOSResult = !Physics.Raycast(start, dir.normalized, dist, _cachedLOSMask, QueryTriggerInteraction.Ignore);
+        _nextLOSCheckTime = Time.time + Random.Range(0.12f, 0.18f);
+
+        return _cachedLOSResult;
+    }
+
+    public void ForceRecalculateLOS()
+    {
+        _nextLOSCheckTime = 0f;
+    }
+
+    public void SetDestinationRobust(Vector3 destination)
+    {
+        if (Agent == null || !Agent.isOnNavMesh) return;
+        bool hadNoPath = !Agent.hasPath && !Agent.pathPending;
+        Agent.isStopped = false;
+        Agent.SetDestination(destination);
+
+        if (hadNoPath && !Agent.pathPending)
+        {
+            _reusablePath.ClearCorners();
+            if (NavMesh.CalculatePath(transform.position, destination, NavMesh.AllAreas, _reusablePath)
+                && _reusablePath.status == NavMeshPathStatus.PathComplete)
+            {
+                Agent.SetPath(_reusablePath);
+            }
+        }
+    }
+
+    public bool TryDirectSteer(float speed)
+    {
+        if (target == null || Agent == null || !Agent.isOnNavMesh) return false;
+
+        float heightDiff = Mathf.Abs(target.position.y - transform.position.y);
+        if (heightDiff > maxDirectSteerHeightDiff)
+        {
+            ExitDirectSteering();
+            return false;
+        }
+
+        if (_directSteeringCooldownTimer > 0f)
+        {
+            _directSteeringCooldownTimer -= Time.deltaTime;
+            ExitDirectSteering();
+            return false;
+        }
+
+        _losCacheTimer -= Time.deltaTime;
+        if (_losCacheTimer <= 0f)
+        {
+            _cachedLOSResult = HasLineOfSight();
+            _losCacheTimer = directSteeringLOSCacheInterval;
+        }
+
+        if (!_cachedLOSResult)
+        {
+            ExitDirectSteering();
+            return false;
+        }
+
+        _isDirectSteering = true;
+        Agent.isStopped = true;
+        Agent.updatePosition = false;
+
+        Vector3 dir = target.position - transform.position;
+        dir.y = 0f;
+        float distMag = dir.magnitude;
+        if (distMag < 0.01f) return true;
+
+        Vector3 dirNorm = dir / distMag;
+
+        if (Physics.Raycast(transform.position + Vector3.up * sightEyeHeight, dirNorm, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore) ||
+            Physics.Raycast(transform.position + Vector3.up * wallCheckBodyHeight, dirNorm, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore))
+        {
+            ExitDirectSteering();
+            _directSteeringCooldownTimer = directSteeringWallCooldown;
+            return false;
+        }
+
+        Vector3 newPos = transform.position + dirNorm * speed * Time.deltaTime;
+        NavMeshHit navHit;
+        if (NavMesh.SamplePosition(newPos, out navHit, 2f, NavMesh.AllAreas))
+        {
+            if (navHit.position.y > -1f)
+            {
+                transform.position = navHit.position;
+            }
+        }
+
+        return true;
+    }
+
+    public void ExitDirectSteering()
+    {
+        if (_isDirectSteering)
+        {
+            _isDirectSteering = false;
+            Agent.isStopped = false;
+            SyncAgentToTransform();
+            Agent.updatePosition = true;
+        }
+    }
+
+    public void SyncAgentToTransform()
+    {
+        if (Agent == null || !Agent.isOnNavMesh) return;
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(transform.position, out hit, 2f, NavMesh.AllAreas))
+            Agent.nextPosition = hit.position;
+        else
+            Agent.nextPosition = transform.position;
+    }
+
+    public void FaceTarget(float rotSpeed)
+    {
+        if (target == null) return;
+        Vector3 dir = target.position - transform.position;
+        dir.y = 0;
+        if (dir.sqrMagnitude < 0.01f) return;
+
+        Quaternion rot = Quaternion.LookRotation(dir);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * rotSpeed);
+    }
+
+    public void FaceMovementDirection(float rotSpeed)
+    {
+        Vector3 moveDir = Vector3.zero;
+        if (_isDirectSteering)
+            moveDir = transform.position - _prevFramePos;
+        else if (Agent.velocity.sqrMagnitude > 0.5f)
+            moveDir = Agent.velocity;
+        else if (Agent.hasPath)
+            moveDir = Agent.destination - transform.position;
+
+        moveDir.y = 0f;
+        if (moveDir.sqrMagnitude < 0.01f)
+        {
+            FaceTarget(rotSpeed);
+            return;
+        }
+
+        Quaternion rot = Quaternion.LookRotation(moveDir.normalized);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * rotSpeed);
+    }
+
+    public void HandleStuckDetection(float distanceToPlayer, float stoppingDistance)
+    {
+        if (distanceToPlayer <= stoppingDistance + 0.5f)
+        {
+            _stuckTimer = 0f;
+            _lastStuckCheckPos = transform.position;
+            _noPathRetryCount = 0;
+            _noPathRetryTimer = 0f;
+            return;
+        }
+
+        if (Agent != null && Agent.isOnNavMesh && !Agent.hasPath && !Agent.pathPending && !Agent.isStopped)
+        {
+            _noPathRetryCount++;
+            _noPathRetryTimer += Time.deltaTime;
+            if (_noPathRetryTimer >= 0.5f)
+            {
+                SetDestinationRobust(target.position);
+                _noPathRetryTimer = 0f;
+            }
+
+            if (_noPathRetryCount >= 300 && !Agent.hasPath)
+            {
+                Vector3 currentPos = transform.position;
+                Agent.enabled = false;
+                Agent.enabled = true;
+                if (Agent.isOnNavMesh)
+                {
+                    Agent.Warp(currentPos);
+                    Agent.isStopped = false;
+                    SetDestinationRobust(target.position);
+                }
+                _noPathRetryCount = 0;
+                _noPathRetryTimer = 0f;
+            }
+
+            _stuckTimer = 0f;
+            _lastStuckCheckPos = transform.position;
+            return;
+        }
+
+        _noPathRetryCount = 0;
+        _noPathRetryTimer = 0f;
+        float moved = Vector3.Distance(transform.position, _lastStuckCheckPos);
+
+        if (moved < stuckMoveThreshold * 0.33f)
+        {
+            _stuckTimer += Time.deltaTime;
+        }
+        else
+        {
+            _stuckTimer = 0f;
+            _lastStuckCheckPos = transform.position;
+        }
+
+        if (_stuckTimer >= stuckTimeThreshold)
+        {
+            TryRecoverFromStuck();
+            _stuckTimer = 0f;
+            _lastStuckCheckPos = transform.position;
+        }
+    }
+
+    private void TryRecoverFromStuck()
+    {
+        if (Agent == null || target == null) return;
+        SetDestinationRobust(target.position);
+        if (Agent.hasPath) return;
+
+        Vector3 toPlayer = target.position - transform.position;
+        Vector3 midPoint = transform.position + toPlayer * 0.5f;
+
+        NavMeshHit midHit;
+        if (NavMesh.SamplePosition(midPoint, out midHit, 3f, NavMesh.AllAreas))
+        {
+            _reusablePath.ClearCorners();
+            if (NavMesh.CalculatePath(transform.position, midHit.position, NavMesh.AllAreas, _reusablePath)
+                && _reusablePath.status == NavMeshPathStatus.PathComplete)
+            {
+                Agent.SetPath(_reusablePath);
+                return;
+            }
+        }
+
+        for (int attempt = 0; attempt < 3; attempt++)
+        {
+            Vector2 rand = Random.insideUnitCircle * 2f;
+            Vector3 candidate = transform.position + new Vector3(rand.x, 0f, rand.y);
+            NavMeshHit hit;
+            if (!NavMesh.SamplePosition(candidate, out hit, 1.5f, NavMesh.AllAreas)) continue;
+
+            _reusablePath.ClearCorners();
+            if (NavMesh.CalculatePath(transform.position, hit.position, NavMesh.AllAreas, _reusablePath)
+                && _reusablePath.status == NavMeshPathStatus.PathComplete)
+            {
+                Agent.SetPath(_reusablePath);
+                return;
+            }
+        }
+    }
+
+    public static Vector3 RandomNavSphere(Vector3 origin, float distance)
+    {
+        Vector3 randomDirection = Random.insideUnitSphere * distance;
+        randomDirection += origin;
+        NavMeshHit hit;
+
+        if (NavMesh.SamplePosition(randomDirection, out hit, distance, NavMesh.AllAreas))
+        {
+            if (hit.position.y < -1f)
+            {
+                Vector3 groundLevel = new Vector3(randomDirection.x, 0f, randomDirection.z);
+                if (NavMesh.SamplePosition(groundLevel, out hit, distance, NavMesh.AllAreas) && hit.position.y >= -1f)
+                    return hit.position;
+            }
+            else
+            {
+                return hit.position;
+            }
+        }
+        return origin;
+    }
+
+    private void LateUpdate()
+    {
+        _prevFramePos = transform.position;
+    }
+}
