@@ -1,5 +1,5 @@
 /// <summary>
-/// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved. 
+/// This script belongs to cowsinsT as a part of the cowsins' FPS Engine. All rights reserved. 
 /// </summary>
 using UnityEngine;
 using System.Collections;
@@ -28,6 +28,26 @@ namespace cowsins
 
             playerDependencies.PlayerMovementEvents.Events.OnCrouchStart.AddListener(StartCrouch);
             playerDependencies.PlayerMovementEvents.Events.OnCrouchStop.AddListener(StopCrouch);
+
+            playerDependencies.WeaponEvents.Events.OnAimStart.AddListener(HandleAimStart);
+            playerDependencies.WeaponEvents.Events.OnAimStop.AddListener(HandleAimStop);
+        }
+
+        private void OnDestroy()
+        {
+            if (playerDependencies != null)
+            {
+                if (playerDependencies.PlayerMovementEvents != null && playerDependencies.PlayerMovementEvents.Events != null)
+                {
+                    playerDependencies.PlayerMovementEvents.Events.OnCrouchStart.RemoveListener(StartCrouch);
+                    playerDependencies.PlayerMovementEvents.Events.OnCrouchStop.RemoveListener(StopCrouch);
+                }
+                if (playerDependencies.WeaponEvents != null && playerDependencies.WeaponEvents.Events != null)
+                {
+                    playerDependencies.WeaponEvents.Events.OnAimStart.RemoveListener(HandleAimStart);
+                    playerDependencies.WeaponEvents.Events.OnAimStop.RemoveListener(HandleAimStop);
+                }
+            }
         }
 
         private void StartCrouch()
@@ -40,6 +60,22 @@ namespace cowsins
             StartTilting(origRot.eulerAngles, origPos);
         }
 
+        private void HandleAimStart(float aimDuration)
+        {
+            if (playerDependencies.PlayerMovementState.IsCrouching)
+            {
+                StartTilting(origRot.eulerAngles, origPos);
+            }
+        }
+
+        private void HandleAimStop()
+        {
+            if (playerDependencies.PlayerMovementState.IsCrouching)
+            {
+                StartTilting(tiltRot, origPos + tiltPosOffset);
+            }
+        }
+
         private void StartTilting(Vector3 targetRotation, Vector3 targetPosition)
         {
             if (tiltCoroutine != null) StopCoroutine(tiltCoroutine);
@@ -48,13 +84,17 @@ namespace cowsins
 
         private IEnumerator TiltRoutine(Vector3 targetRotation, Vector3 targetPosition)
         {
-            while (Quaternion.Angle(transform.localRotation, Quaternion.Euler(targetRotation)) > 0.1f ||
+            Quaternion targetRotQuat = Quaternion.Euler(targetRotation);
+            while (Quaternion.Angle(transform.localRotation, targetRotQuat) > 0.1f ||
                    Vector3.Distance(transform.localPosition, targetPosition) > 0.01f)
             {
-                transform.localRotation = Quaternion.Lerp(transform.localRotation, Quaternion.Euler(targetRotation), Time.deltaTime * tiltSpeed);
-                transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * tiltSpeed);
+                float lerpFactor = 1f - Mathf.Exp(-tiltSpeed * Time.deltaTime);
+                transform.localRotation = Quaternion.Slerp(transform.localRotation, targetRotQuat, lerpFactor);
+                transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, lerpFactor);
                 yield return null;  // Wait for the next frame before continuing
             }
+            transform.localRotation = targetRotQuat;
+            transform.localPosition = targetPosition;
         }
     }
 }

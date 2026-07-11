@@ -1,5 +1,5 @@
 /// <summary>
-/// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved. 
+/// This script belongs to cowsinsT as a part of the cowsins' FPS Engine. All rights reserved. 
 /// </summary>
 using cowsins;
 using UnityEngine;
@@ -71,6 +71,11 @@ namespace cowsins
         private Quaternion originalLocalRot;
         private Coroutine tiltCoroutine;
 
+        // Cooperative sway and crouch tilt positions/rotations
+        private Vector3 currentCrouchTiltPos;
+        private Quaternion currentCrouchTiltRot;
+        private bool initializedOriginals = false;
+
         #endregion
 
         private PlayerDependencies playerDependencies;
@@ -78,35 +83,70 @@ namespace cowsins
         private IWeaponBehaviourProvider weaponController; // IWeaponBehaviourProvider is implemented in WeaponController.cs
         private IPlayerControlProvider playerControl; // IPlayerControlProvider is implemented in PlayerControl.cs
         private InputManager inputManager;
+
         private void Start()
         {
+            InitializeOriginalsIfNeeded();
+
             // Sway Set-up
             if (swayMethod == SwayMethod.Simple)
             {
-                initialPosition = transform.localPosition;
-                initialRotation = transform.localRotation;
                 sway = SimpleSway;
             }
             else
             {
                 sway = PivotSway;
             }
+        }
 
-            // Crouch Tilt Set-up
-            originalLocalRot  = transform.localRotation;
+        private void InitializeOriginalsIfNeeded()
+        {
+            if (initializedOriginals) return;
+            originalLocalRot = transform.localRotation;
             originalLocalPos = transform.localPosition;
+            currentCrouchTiltRot = originalLocalRot;
+            currentCrouchTiltPos = originalLocalPos;
+
+            initialPosition = transform.localPosition;
+            initialRotation = transform.localRotation;
+
+            initializedOriginals = true;
         }
 
         public void Initialize(PlayerDependencies playerDependencies)
         {
+            this.playerDependencies = playerDependencies;
             playerMovement = playerDependencies.PlayerMovementState;
             weaponController = playerDependencies.WeaponBehaviour;
             playerControl = playerDependencies.PlayerControl;
             inputManager = playerDependencies.InputManager;
 
+            InitializeOriginalsIfNeeded();
+
             playerDependencies.PlayerMovementEvents.Events.OnCrouchStart.AddListener(HandleCrouch);
             playerDependencies.PlayerMovementEvents.Events.OnCrouchStop.AddListener(HandleUnCrouch);
             playerDependencies.WeaponEvents.Events.OnUnholster.AddListener(HandleCrouchOnUnholster);
+
+            playerDependencies.WeaponEvents.Events.OnAimStart.AddListener(HandleAimStart);
+            playerDependencies.WeaponEvents.Events.OnAimStop.AddListener(HandleAimStop);
+        }
+
+        private void OnDestroy()
+        {
+            if (playerDependencies != null)
+            {
+                if (playerDependencies.PlayerMovementEvents != null && playerDependencies.PlayerMovementEvents.Events != null)
+                {
+                    playerDependencies.PlayerMovementEvents.Events.OnCrouchStart.RemoveListener(HandleCrouch);
+                    playerDependencies.PlayerMovementEvents.Events.OnCrouchStop.RemoveListener(HandleUnCrouch);
+                }
+                if (playerDependencies.WeaponEvents != null && playerDependencies.WeaponEvents.Events != null)
+                {
+                    playerDependencies.WeaponEvents.Events.OnUnholster.RemoveListener(HandleCrouchOnUnholster);
+                    playerDependencies.WeaponEvents.Events.OnAimStart.RemoveListener(HandleAimStart);
+                    playerDependencies.WeaponEvents.Events.OnAimStop.RemoveListener(HandleAimStop);
+                }
+            }
         }
 
         private void Update()
@@ -114,6 +154,7 @@ namespace cowsins
             if (!playerControl.IsControllable) return;
             sway?.Invoke();
         }
+
         #region Weapon Sway Methods
 
         private void SimpleSway()
@@ -138,7 +179,8 @@ namespace cowsins
 
             Vector3 finalPosition = new Vector3(moveX, moveY, 0);
 
-            transform.localPosition = Vector3.Lerp(transform.localPosition, finalPosition + initialPosition, Time.fixedDeltaTime * smoothAmount * playerMultiplier);
+            // Lerp relative to the current crouch tilt position
+            transform.localPosition = Vector3.Lerp(transform.localPosition, finalPosition + currentCrouchTiltPos, Time.fixedDeltaTime * smoothAmount * playerMultiplier);
         }
 
         private void TiltSway()
@@ -147,7 +189,8 @@ namespace cowsins
 
             Quaternion finalRotation = Quaternion.Euler(0, 0, moveX);
 
-            transform.localRotation = Quaternion.Lerp(transform.localRotation, finalRotation * initialRotation, Time.fixedDeltaTime * smoothTiltAmount * playerMultiplier);
+            // Lerp relative to the current crouch tilt rotation
+            transform.localRotation = Quaternion.Lerp(transform.localRotation, finalRotation * currentCrouchTiltRot, Time.fixedDeltaTime * smoothTiltAmount * playerMultiplier);
         }
 
         private void PivotSway()
@@ -170,7 +213,8 @@ namespace cowsins
                 Quaternion.Euler(new Vector3(transform.localRotation.eulerAngles.x, transform.localRotation.eulerAngles.y, inputManager.Mousex * swayTiltAmount)),
                 Time.deltaTime * swaySpeed);
 
-            swayRot = Quaternion.Lerp(transform.localRotation, Quaternion.Euler(Vector3.zero), Time.deltaTime * swaySpeed);
+            // Lerp relative to the current crouch tilt rotation
+            swayRot = Quaternion.Lerp(transform.localRotation, currentCrouchTiltRot, Time.deltaTime * swaySpeed);
 
             transform.localRotation = swayRot;
         }
@@ -181,7 +225,8 @@ namespace cowsins
             finalPosition.x = Mathf.Clamp(finalPosition.x, -1, 1) * swayMovementAmount.x;
             finalPosition.y = Mathf.Clamp(finalPosition.y, -1, 1) * swayMovementAmount.y;
 
-            transform.localPosition = Vector3.Lerp(transform.localPosition, finalPosition, swaySpeed * Time.deltaTime);
+            // Lerp relative to the current crouch tilt position
+            transform.localPosition = Vector3.Lerp(transform.localPosition, finalPosition + currentCrouchTiltPos, swaySpeed * Time.deltaTime);
         }
 
         #endregion
@@ -192,6 +237,7 @@ namespace cowsins
         {
             if (playerMovement.IsCrouching) HandleCrouch();
         }
+
         private void HandleCrouch()
         {
             if (!weaponController.IsAiming)
@@ -203,9 +249,27 @@ namespace cowsins
             StartCrouchTilt(originalLocalRot.eulerAngles, originalLocalPos);
         }
 
+        private void HandleAimStart(float aimDuration)
+        {
+            if (playerMovement.IsCrouching)
+            {
+                StartCrouchTilt(originalLocalRot.eulerAngles, originalLocalPos);
+            }
+        }
+
+        private void HandleAimStop()
+        {
+            if (playerMovement.IsCrouching)
+            {
+                StartCrouchTilt(tiltRot, originalLocalPos + tiltPosOffset);
+            }
+        }
+
         private void StartCrouchTilt(Vector3 targetRot, Vector3 targetPos)
         {
             if (!gameObject.activeInHierarchy) return;
+
+            InitializeOriginalsIfNeeded();
 
             if (tiltCoroutine != null) StopCoroutine(tiltCoroutine);
             tiltCoroutine = StartCoroutine(TiltRoutine(targetRot, targetPos));
@@ -215,15 +279,18 @@ namespace cowsins
         {
             Quaternion targetQuat = Quaternion.Euler(targetRotation);
 
-            while (Quaternion.Angle(transform.localRotation, targetQuat) > 0.1f ||
-                   Vector3.Distance(transform.localPosition, targetPosition) > 0.01f)
+            while (Quaternion.Angle(currentCrouchTiltRot, targetQuat) > 0.1f ||
+                   Vector3.Distance(currentCrouchTiltPos, targetPosition) > 0.01f)
             {
-                transform.localRotation = Quaternion.Lerp(transform.localRotation, targetQuat, Time.deltaTime * tiltSpeed);
-                transform.localPosition = Vector3.Lerp(transform.localPosition, targetPosition, Time.deltaTime * tiltSpeed);
+                // Mathematically correct decay factor for framerate independence
+                float lerpFactor = 1.0f - Mathf.Exp(-tiltSpeed * Time.deltaTime);
+                currentCrouchTiltRot = Quaternion.Slerp(currentCrouchTiltRot, targetQuat, lerpFactor);
+                currentCrouchTiltPos = Vector3.Lerp(currentCrouchTiltPos, targetPosition, lerpFactor);
                 yield return null;
             }
+            currentCrouchTiltRot = targetQuat;
+            currentCrouchTiltPos = targetPosition;
         }
-
 
         #endregion
 
