@@ -134,7 +134,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private float _originalAgentHeight;
     private float _originalAgentRadius;
     private float _originalSightEyeHeight;
-    private float _originalWallCheckBodyHeight;
+
     private float _originalDropHeightOffset;
     private float _originalMoveSpeed;
 
@@ -142,7 +142,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private float _pathTimer;
     private Vector3 _lastSetDestination = Vector3.zero;
 
-    private bool _isDirectSteering => locomotion != null && locomotion.IsDirectSteering;
+
 
     // --- Cached animator parameter hashes (avoid per-call string hashing) ---
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
@@ -176,7 +176,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             _originalAgentRadius = agent.radius;
         }
         _originalSightEyeHeight = sightEyeHeight;
-        _originalWallCheckBodyHeight = wallCheckBodyHeight;
+
         _originalDropHeightOffset = dropHeightOffset;
         _originalMoveSpeed = moveSpeed;
     }
@@ -219,7 +219,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
         // Scale height-based locomotion variables
         sightEyeHeight = _originalSightEyeHeight * scaleFactor;
-        wallCheckBodyHeight = _originalWallCheckBodyHeight * scaleFactor;
+
         dropHeightOffset = _originalDropHeightOffset * scaleFactor;
 
         // Scale movement speed to match stride length

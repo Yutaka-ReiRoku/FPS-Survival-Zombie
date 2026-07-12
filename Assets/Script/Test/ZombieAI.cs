@@ -183,7 +183,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private float _originalAgentHeight;
     private float _originalAgentRadius;
     private float _originalSightEyeHeight;
-    private float _originalWallCheckBodyHeight;
+
     private float _originalDropHeightOffset;
     private float _originalWalkSpeed;
     private float _originalRunSpeed;
@@ -208,8 +208,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     // --- Stuck recovery runtime state ---
     private bool _wasInAttackRange;     // tracks isStopped transition (attack→chase)
 
-    // --- Direct steering runtime state ---
-    private bool _isDirectSteering => locomotion != null && locomotion.IsDirectSteering;
+
 
     private static readonly int SpeedHash =
         Animator.StringToHash("Speed");
@@ -245,7 +244,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             _originalAgentRadius = agent.radius;
         }
         _originalSightEyeHeight = sightEyeHeight;
-        _originalWallCheckBodyHeight = wallCheckBodyHeight;
+
         _originalDropHeightOffset = dropHeightOffset;
         _originalWalkSpeed = walkSpeed;
         _originalRunSpeed = runSpeed;
@@ -288,7 +287,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         // Scale height-based locomotion variables
         sightEyeHeight = _originalSightEyeHeight * scaleFactor;
-        wallCheckBodyHeight = _originalWallCheckBodyHeight * scaleFactor;
+
         dropHeightOffset = _originalDropHeightOffset * scaleFactor;
 
         // Scale movement speeds to match stride length

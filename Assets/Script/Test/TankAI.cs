@@ -246,7 +246,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         if (isScreaming)
             return;
 
-        if (locomotion != null && locomotion.IsDirectSteering || distance <= meleeRange)
+        if (distance <= meleeRange)
         {
             FaceTarget();
         }
@@ -306,7 +306,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         if (isScreaming)
             return;
 
-        if (locomotion != null && locomotion.IsDirectSteering || distance <= meleeRange)
+        if (distance <= meleeRange)
         {
             FaceTarget();
         }
@@ -383,15 +383,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         }
 
         // Set animator speed using normalized values and handle direct steering case
-        float targetAnimSpeed = 0f;
-        if (locomotion != null && locomotion.IsDirectSteering)
-        {
-            targetAnimSpeed = 1f; // Normalized run speed
-        }
-        else
-        {
-            targetAnimSpeed = agent != null && agent.isOnNavMesh ? agent.velocity.magnitude / runSpeed : 0f;
-        }
+        float targetAnimSpeed = agent != null && agent.isOnNavMesh ? agent.velocity.magnitude / runSpeed : 0f;
 
         if (animator != null)
         {
