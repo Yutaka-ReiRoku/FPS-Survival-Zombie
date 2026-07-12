@@ -618,6 +618,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
                 pathTimer = 0f;
             }
 
+            HandleStuckDetection(distToLastKnown);
             FaceTarget();
             return;
         }
