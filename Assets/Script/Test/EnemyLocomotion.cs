@@ -30,6 +30,8 @@ public class EnemyLocomotion : MonoBehaviour
     public float maxDirectSteerHeightDiff = 2f;
 
     public NavMeshAgent Agent { get; private set; }
+    
+    public bool IsRecoveringFromStuck => _stuckRecoveryCooldownTimer > 0f;
 
     // Runtime state variables for pathfinding, stuck checks, and direct steering
     private NavMeshPath _reusablePath;
@@ -47,6 +49,7 @@ public class EnemyLocomotion : MonoBehaviour
     private float _directSteeringCooldownTimer;
     private float _losCacheTimer;
     private Vector3 _prevFramePos;
+    private float _stuckRecoveryCooldownTimer;
 
     public bool IsDirectSteering => _isDirectSteering;
 
@@ -65,6 +68,7 @@ public class EnemyLocomotion : MonoBehaviour
         _directSteeringCooldownTimer = 0f;
         _losCacheTimer = directSteeringLOSCacheInterval;
         _prevFramePos = transform.position;
+        _stuckRecoveryCooldownTimer = 0f;
 
         WarpIfUnderground();
     }
@@ -335,6 +339,7 @@ public class EnemyLocomotion : MonoBehaviour
     private void TryRecoverFromStuck()
     {
         if (Agent == null || target == null) return;
+        _stuckRecoveryCooldownTimer = 1.5f; // Lock normal chasing re-pathing for 1.5s
         SetDestinationRobust(target.position);
         if (Agent.hasPath) return;
 
@@ -394,6 +399,10 @@ public class EnemyLocomotion : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (_stuckRecoveryCooldownTimer > 0f)
+        {
+            _stuckRecoveryCooldownTimer -= Time.deltaTime;
+        }
         _prevFramePos = transform.position;
     }
 }
