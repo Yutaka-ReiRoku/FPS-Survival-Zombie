@@ -380,6 +380,7 @@ public class EnemyLocomotion : MonoBehaviour
     private void TryRecoverFromStuck()
     {
         if (Agent == null || target == null) return;
+        Debug.Log($"[EnemyLocomotion] {name} is stuck! Running stuck recovery.");
         _stuckRecoveryCooldownTimer = 1.5f; // Lock normal chasing re-pathing for 1.5s
 
         Vector3 toPlayer = target.position - transform.position;

@@ -576,6 +576,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         // --- Feint pause: stop abruptly, face the player, then resume ---
         if (feintPauseTimer > 0f)
         {
+            if (!agent.isStopped)
+                Debug.Log($"[ZombieAI] {name} entered feint pause. Stopping agent.");
             agent.isStopped = true;
             FaceTarget();
             return;
@@ -586,6 +588,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         // when in attack range (needs to face player to hit them).
         if (distance <= attackDistance)
         {
+            if (!agent.isStopped)
+                Debug.Log($"[ZombieAI] {name} entered attack range (distance={distance:F2}). Stopping agent.");
             agent.isStopped = true;
             _wasInAttackRange = true;
             FaceTarget(); // face player to attack
@@ -593,6 +597,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             if (!isAttacking &&
                 attackTimer >= attackCooldown)
             {
+                Debug.Log($"[ZombieAI] {name} triggers Attack.");
                 Attack();
             }
         }
@@ -605,6 +610,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // force an immediate re-path on this frame.
             if (_wasInAttackRange)
             {
+                Debug.Log($"[ZombieAI] {name} exited attack range (distance={distance:F2}). Resetting path.");
                 _wasInAttackRange = false;
                 agent.ResetPath();
                 agent.isStopped = false;
@@ -614,6 +620,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             }
             else
             {
+                if (agent.isStopped)
+                    Debug.Log($"[ZombieAI] {name} resuming chase movement. Setting isStopped=false.");
                 agent.isStopped = false;
             }
 
@@ -696,6 +704,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             if (canRepath && (pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold
                 || pathBroken))
             {
+                Debug.Log($"[ZombieAI] {name} re-path triggered. timer={pathTimer >= dynamicInterval} ({pathTimer:F2}/{dynamicInterval:F2}), dist={distToLastDest > dynamicThreshold} ({distToLastDest:F2}/{dynamicThreshold:F2}), broken={pathBroken}");
                 // Disable jitter when close to attack range to prevent flip-flop.
                 Vector3 dest = target.position;
                 if (distance > attackDistance + chaseJitterRadius + 1f)
@@ -705,7 +714,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
                 // stuck on a stale/invalid path. ResetPath first to clear the
                 // old path state, then SetDestination.
                 if (pathBroken)
+                {
+                    Debug.Log($"[ZombieAI] {name} path is broken! Resetting path.");
                     agent.ResetPath();
+                }
 
                 SetDestinationRobust(dest);
                 _lastSetDestination = dest;
