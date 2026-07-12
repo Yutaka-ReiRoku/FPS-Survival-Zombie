@@ -87,6 +87,7 @@ public class SpecialEnemyDirector : MonoBehaviour
     private readonly List<GameObject> _aliveTanks = new List<GameObject>();
     private float _tankTimer;
     private AudioSource _audioSource;
+    private NavMeshPath _pathValidation;
 
     private void Awake()
     {
@@ -114,6 +115,11 @@ public class SpecialEnemyDirector : MonoBehaviour
     private void Update()
     {
         if (player == null)
+            return;
+
+        // Skip spawning ticks if player is dead
+        var stats = player.GetComponent<PlayerStats>();
+        if (stats != null && stats.IsDead)
             return;
 
         int wave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 1;
@@ -257,6 +263,14 @@ public class SpecialEnemyDirector : MonoBehaviour
     {
         result = player.position;
 
+        // Find player NavMesh position first
+        NavMeshHit playerHit;
+        if (!NavMesh.SamplePosition(player.position, out playerHit, 10f, NavMesh.AllAreas))
+        {
+            return false;
+        }
+        Vector3 playerNavPos = playerHit.position;
+
         for (int attempt = 0; attempt < 8; attempt++)
         {
             float angle = Random.Range(0f, Mathf.PI * 2f);
@@ -274,6 +288,12 @@ public class SpecialEnemyDirector : MonoBehaviour
                 // at y<-1 that cover 31% of the NavMesh). Special enemies
                 // spawning there can never reach the player.
                 if (hit.position.y < -1f)
+                    continue;
+
+                // Validate path connectivity (Main Thread, Cached Path)
+                if (_pathValidation == null) _pathValidation = new NavMeshPath();
+                NavMesh.CalculatePath(hit.position, playerNavPos, NavMesh.AllAreas, _pathValidation);
+                if (_pathValidation.status != NavMeshPathStatus.PathComplete)
                     continue;
 
                 result = hit.position;
