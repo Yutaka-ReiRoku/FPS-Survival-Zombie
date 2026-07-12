@@ -147,7 +147,7 @@ public class EnemyLocomotion : MonoBehaviour
         {
             _reusablePath.ClearCorners();
             if (NavMesh.CalculatePath(transform.position, destination, NavMesh.AllAreas, _reusablePath)
-                && _reusablePath.status == NavMeshPathStatus.PathComplete)
+                && (_reusablePath.status == NavMeshPathStatus.PathComplete || _reusablePath.status == NavMeshPathStatus.PathPartial))
             {
                 Agent.SetPath(_reusablePath);
             }
@@ -157,6 +157,13 @@ public class EnemyLocomotion : MonoBehaviour
     public bool TryDirectSteer(float speed)
     {
         if (target == null || Agent == null || !Agent.isOnNavMesh) return false;
+
+        // If recovering from being stuck, bypass direct steering so agent can pathfind out
+        if (IsRecoveringFromStuck)
+        {
+            ExitDirectSteering();
+            return false;
+        }
 
         float heightDiff = Mathf.Abs(target.position.y - transform.position.y);
         if (heightDiff > maxDirectSteerHeightDiff)
@@ -230,6 +237,16 @@ public class EnemyLocomotion : MonoBehaviour
         {
             if (Mathf.Abs(navHit.position.y - transform.position.y) <= 1.5f)
             {
+                // Progress check to detect if we are blocked by a NavMesh boundary (e.g. gap/wall)
+                float expectedDistance = speed * Time.deltaTime;
+                float actualDistance = Vector3.Distance(transform.position, navHit.position);
+                if (actualDistance < expectedDistance * 0.3f)
+                {
+                    ExitDirectSteering();
+                    _directSteeringCooldownTimer = directSteeringWallCooldown;
+                    return false;
+                }
+
                 transform.position = navHit.position;
                 Agent.nextPosition = navHit.position;
                 return true;
