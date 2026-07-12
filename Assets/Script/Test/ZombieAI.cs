@@ -266,13 +266,13 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     void OnEnable()
     {
-        // Dynamically randomize height between 1.6m and 1.9m
+        // Dynamically randomize height between 1.6m and 2.0m
         float defaultHeight = 1.8f;
         if (_collider is CapsuleCollider capCol)
         {
             defaultHeight = capCol.height;
         }
-        float targetHeight = Random.Range(1.6f, 1.9f);
+        float targetHeight = Random.Range(1.6f, 2.0f);
         float scaleFactor = targetHeight / defaultHeight;
 
         // Apply uniform scale to visual mesh and collider
@@ -290,9 +290,29 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         dropHeightOffset = _originalDropHeightOffset * scaleFactor;
 
-        // Scale movement speeds to match stride length
-        walkSpeed = _originalWalkSpeed * scaleFactor;
-        runSpeed = _originalRunSpeed * scaleFactor;
+        // Dynamic speed based on Player's actual speeds
+        float playerWalkSpeed = 3f;
+        float playerRunSpeed = 6f;
+
+        if (target == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+                target = playerObj.transform;
+        }
+
+        if (target != null)
+        {
+            var pm = target.GetComponent<cowsins.PlayerMovement>();
+            if (pm != null)
+            {
+                playerWalkSpeed = pm.WalkSpeed;
+                playerRunSpeed = pm.RunSpeed;
+            }
+        }
+
+        walkSpeed = Random.Range(0.75f * playerWalkSpeed, 1.0f * playerWalkSpeed);
+        runSpeed = Random.Range(1.0f * playerWalkSpeed, 1.5f * playerWalkSpeed);
 
         isDead = false;
         isAttacking = false;
