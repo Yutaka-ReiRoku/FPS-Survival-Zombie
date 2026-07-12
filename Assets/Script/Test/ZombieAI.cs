@@ -187,6 +187,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private float _originalDropHeightOffset;
     private float _originalWalkSpeed;
     private float _originalRunSpeed;
+    private int _originalMaxHealth;
 
     private int currentHealth;
 
@@ -248,6 +249,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         _originalDropHeightOffset = dropHeightOffset;
         _originalWalkSpeed = walkSpeed;
         _originalRunSpeed = runSpeed;
+        _originalMaxHealth = maxHealth;
 
         // Zombies cast shadows (so they are visible on the ground during daytime)
         // but do not receive shadows (GPU saving at high counts).
@@ -266,13 +268,13 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     void OnEnable()
     {
-        // Dynamically randomize height between 1.6m and 2.0m
+        // Dynamically randomize height between 1.5m and 2.0m
         float defaultHeight = 1.8f;
         if (_collider is CapsuleCollider capCol)
         {
             defaultHeight = capCol.height;
         }
-        float targetHeight = Random.Range(1.6f, 2.0f);
+        float targetHeight = Random.Range(1.5f, 2.0f);
         float scaleFactor = targetHeight / defaultHeight;
 
         // Apply uniform scale to visual mesh and collider
@@ -289,6 +291,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         sightEyeHeight = _originalSightEyeHeight * scaleFactor;
 
         dropHeightOffset = _originalDropHeightOffset * scaleFactor;
+
+        // Calculate health multiplier based on height
+        // 1.5m -> 100% (1.0x), 2.0m -> 200% (2.0x)
+        float healthMultiplier = 1.0f + (targetHeight - 1.5f) * 2.0f;
+        maxHealth = Mathf.RoundToInt(_originalMaxHealth * healthMultiplier);
 
         // Dynamic speed based on Player's actual speeds
         float playerWalkSpeed = 3f;
