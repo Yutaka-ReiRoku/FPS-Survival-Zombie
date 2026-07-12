@@ -382,23 +382,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
             agent.avoidancePriority = Random.Range(30, 70);
 
-            // UNDERGROUND NAVMESH FIX: 31% of the NavMesh triangles are
-            // underground (y=-2 to -1385, from beach/rocks/sewers) and
-            // disconnected from the main surface. If the zombie spawns on
-            // an underground NavMesh island, it can never reach the player
-            // and will slide around forever. Sample a ground-level NavMesh
-            // position above the zombie and warp there if the current
-            // position is too far below y=0.
-            if (transform.position.y < -1f)
+            if (locomotion != null)
             {
-                UnityEngine.AI.NavMeshHit groundHit;
-                Vector3 searchFrom = new Vector3(transform.position.x, 0f, transform.position.z);
-                if (UnityEngine.AI.NavMesh.SamplePosition(searchFrom, out groundHit, 10f, UnityEngine.AI.NavMesh.AllAreas)
-                    && groundHit.position.y >= -1f)
-                {
-                    agent.Warp(groundHit.position);
-                    transform.position = groundHit.position;
-                }
+                locomotion.WarpIfUnderground();
             }
         }
 
@@ -477,24 +463,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             }
         }
 
-        if (hasLOSCurrently)
+        // Determine if player is currently visible for hysteresis
+        bool hasLOSForHysteresis = false;
+        if (hasDetectedPlayer && cachedDistance <= loseSightDistance)
         {
-            // Player within detect range AND visible: chase and (re)arm alert memory.
-            // Track last known position for when we lose sight.
-            _lastKnownPlayerPos = target.position;
-            _hasLastKnownPos = true;
-            alertMemoryTimer = alertMemoryDuration;
-            _isUsingLastKnownPos = false;
-            ChasePlayer(cachedDistance);
-        }
-        else if (hasDetectedPlayer && cachedDistance <= loseSightDistance)
-        {
-            // Hysteresis: once detected, keep chasing while player is still
-            // within the larger loseSightDistance (prevents flip-flop at the
-            // detectDistance edge).
-            // Still update last known pos if we can see the player (even if
-            // beyond detectDistance, within loseSightDistance).
-            bool hasLOSForHysteresis = false;
             if (!requireLineOfSight)
             {
                 hasLOSForHysteresis = true;
@@ -503,40 +475,81 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             {
                 hasLOSForHysteresis = locomotion != null && locomotion.HasLineOfSight();
             }
+        }
 
-            if (hasLOSForHysteresis)
+        // Target (Player) Dead Check
+        bool isTargetDead = false;
+        if (target != null)
+        {
+            var targetStats = target.GetComponent<PlayerStats>();
+            if (targetStats != null && targetStats.IsDead)
             {
-                _lastKnownPlayerPos = target.position;
-                _hasLastKnownPos = true;
-                _isUsingLastKnownPos = false;
+                isTargetDead = true;
             }
-            else
+        }
+
+        if (isTargetDead)
+        {
+            if (hasDetectedPlayer)
             {
-                // Within loseSightDistance but no LOS — use last known pos.
-                _isUsingLastKnownPos = _hasLastKnownPos;
+                wanderTimer = wanderInterval; // Force immediate destination selection to clear isStopped
             }
+            Wander();
+            hasDetectedPlayer = false;
+            _hasLastKnownPos = false;
+            _isUsingLastKnownPos = false;
+            alertMemoryTimer = 0f;
+        }
+        else if (hasLOSCurrently)
+        {
+            _lastKnownPlayerPos = target.position;
+            _hasLastKnownPos = true;
+            alertMemoryTimer = alertMemoryDuration;
+            _isUsingLastKnownPos = false;
+            ChasePlayer(cachedDistance);
+        }
+        else if (hasDetectedPlayer && cachedDistance <= loseSightDistance && hasLOSForHysteresis)
+        {
+            // Hysteresis: only maintain chase if we actually have LOS
+            _lastKnownPlayerPos = target.position;
+            _hasLastKnownPos = true;
+            _isUsingLastKnownPos = false;
             ChasePlayer(cachedDistance);
         }
         else if (alertMemoryTimer > 0f)
         {
-            // Lost sight but still in alert memory: chase toward last known
-            // position, NOT the player's real position. The zombie doesn't
-            // know where the player is — it goes to where it last saw them.
+            // Lost sight: chase last known position while timer counts down
             alertMemoryTimer -= Time.deltaTime;
             _isUsingLastKnownPos = _hasLastKnownPos;
             ChasePlayer(cachedDistance);
         }
         else
         {
+            if (hasDetectedPlayer)
+            {
+                wanderTimer = wanderInterval; // Force immediate destination selection
+            }
             Wander();
             hasDetectedPlayer = false;
             _hasLastKnownPos = false;
             _isUsingLastKnownPos = false;
         }
 
+        // Set animator speed using normalized values and handle direct steering case
+        float targetAnimSpeed = 0f;
+        if (locomotion != null && locomotion.IsDirectSteering)
+        {
+            float curSpeed = lungeTimer > 0f ? (runSpeed * 1.8f) : runSpeed;
+            targetAnimSpeed = curSpeed / runSpeed;
+        }
+        else
+        {
+            targetAnimSpeed = agent.velocity.magnitude / runSpeed;
+        }
+
         animator.SetFloat(
             SpeedHash,
-            agent.velocity.magnitude / runSpeed,
+            targetAnimSpeed,
             0.15f,
             Time.deltaTime);
     }
@@ -1061,12 +1074,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     {
         if (locomotion != null)
         {
-            bool result = locomotion.TryDirectSteer(speed);
-            if (animator != null && result)
-            {
-                animator.SetFloat(SpeedHash, speed);
-            }
-            return result;
+            return locomotion.TryDirectSteer(speed);
         }
         return false;
     }

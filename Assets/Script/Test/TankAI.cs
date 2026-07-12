@@ -262,7 +262,14 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         if (isScreaming)
             return;
 
-        FaceTarget();
+        if (locomotion != null && locomotion.IsDirectSteering || distance <= meleeRange)
+        {
+            FaceTarget();
+        }
+        else
+        {
+            FaceMovementDirection();
+        }
 
         //------------------------------------------------
         // DETECTION: check if we can see the player
@@ -270,31 +277,41 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
         bool hasLOSCurrently = distance <= detectRange && HasLineOfSight();
 
-        if (hasLOSCurrently)
+        // Target (Player) Dead Check
+        bool isTargetDead = false;
+        if (target != null)
         {
-            // Player visible: track last known pos and arm alert memory.
+            var targetStats = target.GetComponent<PlayerStats>();
+            if (targetStats != null && targetStats.IsDead)
+            {
+                isTargetDead = true;
+            }
+        }
+
+        if (isTargetDead)
+        {
+            _isUsingLastKnownPos = false;
+            _hasLastKnownPos = false;
+            _alertMemoryTimer = 0f;
+            agent.isStopped = true;
+            return;
+        }
+        else if (hasLOSCurrently)
+        {
             _lastKnownPlayerPos = target.position;
             _hasLastKnownPos = true;
             _alertMemoryTimer = alertMemoryDuration;
             _isUsingLastKnownPos = false;
         }
-        else if (hasScreamed && distance <= loseSightDistance)
+        else if (hasScreamed && distance <= loseSightDistance && HasLineOfSight())
         {
-            // Hysteresis: within loseSightDistance but no LOS.
-            if (HasLineOfSight())
-            {
-                _lastKnownPlayerPos = target.position;
-                _hasLastKnownPos = true;
-                _isUsingLastKnownPos = false;
-            }
-            else
-            {
-                _isUsingLastKnownPos = _hasLastKnownPos;
-            }
+            // Hysteresis: only maintain chase if we have LOS
+            _lastKnownPlayerPos = target.position;
+            _hasLastKnownPos = true;
+            _isUsingLastKnownPos = false;
         }
         else if (_alertMemoryTimer > 0f)
         {
-            // Lost sight — chase last known position for alertMemoryDuration.
             _alertMemoryTimer -= Time.deltaTime;
             _isUsingLastKnownPos = _hasLastKnownPos;
         }
@@ -393,6 +410,22 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         {
             StartMeleeAttack();
         }
+
+        // Set animator speed using normalized values and handle direct steering case
+        float targetAnimSpeed = 0f;
+        if (locomotion != null && locomotion.IsDirectSteering)
+        {
+            targetAnimSpeed = 1f; // Normalized run speed
+        }
+        else
+        {
+            targetAnimSpeed = agent != null && agent.isOnNavMesh ? agent.velocity.magnitude / runSpeed : 0f;
+        }
+
+        if (animator != null)
+        {
+            animator.SetFloat(SpeedHash, targetAnimSpeed, 0.15f, Time.deltaTime);
+        }
     }
 
     private float findPlayerTimer;
@@ -428,6 +461,12 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     {
         if (locomotion != null)
             locomotion.FaceTarget(rotationSpeed);
+    }
+
+    private void FaceMovementDirection()
+    {
+        if (locomotion != null)
+            locomotion.FaceMovementDirection(rotationSpeed);
     }
 
     //==================================================
@@ -796,12 +835,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     {
         if (locomotion != null)
         {
-            bool result = locomotion.TryDirectSteer(runSpeed);
-            if (animator != null && result)
-            {
-                animator.SetFloat(SpeedHash, runSpeed);
-            }
-            return result;
+            return locomotion.TryDirectSteer(runSpeed);
         }
         return false;
     }

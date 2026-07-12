@@ -71,14 +71,23 @@ public class EnemyLocomotion : MonoBehaviour
 
     public void WarpIfUnderground()
     {
-        if (Agent != null && transform.position.y < -1f)
+        if (Agent != null && target != null)
         {
-            NavMeshHit groundHit;
-            Vector3 searchFrom = new Vector3(transform.position.x, 0f, transform.position.z);
-            if (NavMesh.SamplePosition(searchFrom, out groundHit, 10f, NavMesh.AllAreas) && groundHit.position.y >= -1f)
+            float targetY = target.position.y;
+            if (transform.position.y < targetY - 4f)
             {
-                Agent.Warp(groundHit.position);
-                transform.position = groundHit.position;
+                _reusablePath.ClearCorners();
+                if (NavMesh.CalculatePath(transform.position, target.position, NavMesh.AllAreas, _reusablePath) 
+                    && _reusablePath.status != NavMeshPathStatus.PathComplete)
+                {
+                    NavMeshHit groundHit;
+                    Vector3 searchFrom = new Vector3(transform.position.x, targetY, transform.position.z);
+                    if (NavMesh.SamplePosition(searchFrom, out groundHit, 15f, NavMesh.AllAreas))
+                    {
+                        Agent.Warp(groundHit.position);
+                        transform.position = groundHit.position;
+                    }
+                }
             }
         }
     }
@@ -177,11 +186,10 @@ public class EnemyLocomotion : MonoBehaviour
         Agent.updatePosition = false;
 
         Vector3 dir = target.position - transform.position;
-        dir.y = 0f;
         float distMag = dir.magnitude;
         if (distMag < 0.01f) return true;
 
-        Vector3 dirNorm = dir / distMag;
+        Vector3 dirNorm = dir / distMag; // 3D direction parallel to ground slope
 
         if (Physics.Raycast(transform.position + Vector3.up * sightEyeHeight, dirNorm, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore) ||
             Physics.Raycast(transform.position + Vector3.up * wallCheckBodyHeight, dirNorm, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore))
@@ -191,11 +199,15 @@ public class EnemyLocomotion : MonoBehaviour
             return false;
         }
 
-        Vector3 newPos = transform.position + dirNorm * speed * Time.deltaTime;
+        Vector3 moveDir = dirNorm;
+        moveDir.y = 0f;
+        moveDir.Normalize();
+
+        Vector3 newPos = transform.position + moveDir * speed * Time.deltaTime;
         NavMeshHit navHit;
         if (NavMesh.SamplePosition(newPos, out navHit, 2f, NavMesh.AllAreas))
         {
-            if (navHit.position.y > -1f)
+            if (Mathf.Abs(navHit.position.y - transform.position.y) <= Agent.stepHeight + 0.5f)
             {
                 transform.position = navHit.position;
             }
@@ -366,10 +378,10 @@ public class EnemyLocomotion : MonoBehaviour
 
         if (NavMesh.SamplePosition(randomDirection, out hit, distance, NavMesh.AllAreas))
         {
-            if (hit.position.y < -1f)
+            if (hit.position.y < origin.y - 3f)
             {
-                Vector3 groundLevel = new Vector3(randomDirection.x, 0f, randomDirection.z);
-                if (NavMesh.SamplePosition(groundLevel, out hit, distance, NavMesh.AllAreas) && hit.position.y >= -1f)
+                Vector3 groundLevel = new Vector3(randomDirection.x, origin.y, randomDirection.z);
+                if (NavMesh.SamplePosition(groundLevel, out hit, distance, NavMesh.AllAreas) && hit.position.y >= origin.y - 3f)
                     return hit.position;
             }
             else
