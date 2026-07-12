@@ -56,13 +56,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     }
 
     /// <summary>
-    /// True while the zombie is actively chasing the player (detected + within
-    /// hysteresis/alert memory). External systems (e.g. Spawm roaming) should
-    /// check this before overriding the NavMeshAgent destination.
+    /// True while the zombie is actively chasing the player (detected).
     /// </summary>
     public bool IsChasing
     {
-        get { return !isDead && (hasDetectedPlayer || alertMemoryTimer > 0f); }
+        get { return !isDead && hasDetectedPlayer; }
     }
 
     /// <summary>
@@ -88,6 +86,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     [Header("Erratic / Unpredictable Behavior")]
     [Tooltip("Khoảng cách mất dấu player. Lon hon detectDistance de chong flip-flop (hysteresis).")]
     public float loseSightDistance = 28f;
+    [System.Obsolete("No longer used in simplified chase logic.")]
     [Tooltip("Sau khi mat dau, zombie van duoi theo alertMemoryDuration giay truoc khi quay ve Wander.")]
     public float alertMemoryDuration = 3f;
     [Tooltip("Kha nang trigger mot dot lunge (sprint dot ngot) moi giay khi dang duoi o mid-range (0-1).")]
@@ -212,7 +211,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private bool lastHitWasHeadshot;
 
     // --- Erratic behavior runtime state ---
-    private float alertMemoryTimer;     // counts down after losing sight; >0 means keep chasing
     private float lungeTimer;           // >0 while a lunge burst is active
     private float feintPauseTimer;      // >0 while a feint pause is active
     private float erraticRollTimer;     // accumulates dt to roll lunge/feint once per second
@@ -224,10 +222,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     // --- Direct steering runtime state ---
     private bool _isDirectSteering => locomotion != null && locomotion.IsDirectSteering;
-
-    // --- Last known position tracking ---
-    private Vector3 _lastKnownPlayerPos;
-    private bool _hasLastKnownPos;
 
     private static readonly int SpeedHash =
         Animator.StringToHash("Speed");
@@ -322,7 +316,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         wanderTimer = wanderInterval;
 
         // Reset erratic behavior state on (re)spawn.
-        alertMemoryTimer = 0f;
         lungeTimer = 0f;
         feintPauseTimer = 0f;
         erraticRollTimer = 0f;
@@ -331,7 +324,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
         // Reset stuck recovery state on (re)spawn.
         _wasInAttackRange = false;
-        _hasLastKnownPos = false;
 
         if (locomotion != null)
         {
@@ -453,12 +445,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         cachedDistance = Vector3.Distance(transform.position, target.position);
 
         // First-time detection requires both distance AND line of sight (if
-        // requireLineOfSight is enabled). Hysteresis and alert memory below do
-        // NOT require LOS — once the zombie has detected the player, it keeps
-        // chasing based on distance/memory even if the player briefly breaks
-        // LOS (ducking behind cover, etc.).
+        // requireLineOfSight is enabled).
         bool hasLOSCurrently = false;
-        if (cachedDistance <= detectDistance)
+        if (!hasDetectedPlayer && cachedDistance <= detectDistance)
         {
             if (!requireLineOfSight)
             {
@@ -467,20 +456,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             else
             {
                 hasLOSCurrently = locomotion != null && locomotion.HasLineOfSight();
-            }
-        }
-
-        // Determine if player is currently visible for hysteresis
-        bool hasLOSForHysteresis = false;
-        if (hasDetectedPlayer && cachedDistance <= loseSightDistance)
-        {
-            if (!requireLineOfSight)
-            {
-                hasLOSForHysteresis = true;
-            }
-            else
-            {
-                hasLOSForHysteresis = locomotion != null && locomotion.HasLineOfSight();
             }
         }
 
@@ -508,31 +483,15 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             }
             Wander();
             hasDetectedPlayer = false;
-            _hasLastKnownPos = false;
-            _isUsingLastKnownPos = false;
-            alertMemoryTimer = 0f;
         }
-        else if (hasLOSCurrently)
+        else if (hasDetectedPlayer && cachedDistance <= loseSightDistance)
         {
-            _lastKnownPlayerPos = target.position;
-            _hasLastKnownPos = true;
-            alertMemoryTimer = alertMemoryDuration;
-            _isUsingLastKnownPos = false;
+            // Keep chasing Player's real position as long as detected and in range
             ChasePlayer(cachedDistance);
         }
-        else if (hasDetectedPlayer && cachedDistance <= loseSightDistance && hasLOSForHysteresis)
+        else if (!hasDetectedPlayer && hasLOSCurrently)
         {
-            // Hysteresis: only maintain chase if we actually have LOS
-            _lastKnownPlayerPos = target.position;
-            _hasLastKnownPos = true;
-            _isUsingLastKnownPos = false;
-            ChasePlayer(cachedDistance);
-        }
-        else if (alertMemoryTimer > 0f)
-        {
-            // Lost sight: chase last known position while timer counts down
-            alertMemoryTimer -= Time.deltaTime;
-            _isUsingLastKnownPos = _hasLastKnownPos;
+            // Initial detection: player enters detection range and is visible
             ChasePlayer(cachedDistance);
         }
         else
@@ -543,8 +502,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             }
             Wander();
             hasDetectedPlayer = false;
-            _hasLastKnownPos = false;
-            _isUsingLastKnownPos = false;
         }
 
         // Set animator speed using normalized values and handle direct steering case
@@ -568,7 +525,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     private float pathTimer = 0f;
     private Vector3 _lastSetDestination = Vector3.zero;
-    private bool _isUsingLastKnownPos; // true when chasing last known pos (no LOS)
 
     void ChasePlayer(float distance)
     {
@@ -578,50 +534,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             hasDetectedPlayer = true;
         }
 
-        // --- Last known position mode: when we've lost sight of the player,
-        // navigate to where we last saw them using NavMesh pathfinding (not
-        // direct steering, since we can't see the player). This makes the
-        // zombie go around obstacles to check the last known position rather
-        // than walking into walls or cheating with the player's real position.
-        if (_isUsingLastKnownPos && _hasLastKnownPos)
-        {
-            if (agent.updateRotation)
-                agent.updateRotation = false;
 
-            float distToLastKnown = Vector3.Distance(transform.position, _lastKnownPlayerPos);
-
-            if (distToLastKnown <= attackDistance)
-            {
-                // Reached last known position but player isn't here.
-                // Stop and look around — alert memory will expire and
-                // the zombie will return to Wander.
-                agent.isStopped = true;
-                FaceTarget();
-                return;
-            }
-
-            // Navigate to last known position via NavMesh (goes around walls).
-            agent.isStopped = false;
-            SyncAgentToTransform();
-            agent.updatePosition = true;
-            agent.speed = runSpeed;
-
-            pathTimer += Time.deltaTime;
-            float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
-            bool canRepath = !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
-            float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
-            float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
-            if (canRepath && (pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
-            {
-                SetDestinationRobust(_lastKnownPlayerPos);
-                _lastSetDestination = _lastKnownPlayerPos;
-                pathTimer = 0f;
-            }
-
-            HandleStuckDetection(distToLastKnown);
-            FaceTarget();
-            return;
-        }
 
         // Take over rotation from the agent so FaceTarget() and the agent
         // don't fight over transform.rotation (causes visual sliding when
@@ -770,8 +683,15 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // an infinite re-path loop where zombies never reach the player.
             bool canRepath = !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
 
+            // Slower repathing when player is out of sight (no LOS) to save CPU
+            bool hasLOS = locomotion != null && locomotion.HasLineOfSight();
             float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
             float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+            if (!hasLOS)
+            {
+                dynamicInterval *= 2.0f;
+                dynamicThreshold *= 1.5f;
+            }
 
             if (canRepath && (pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold
                 || actualDestDrift > 5f || pathBroken))

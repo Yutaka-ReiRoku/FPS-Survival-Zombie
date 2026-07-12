@@ -15,7 +15,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     [Header("Detection")]
     public float detectRange = 20f;
     [Tooltip("Khoảng cách mất dấu player. Lớn hơn detectRange để chống flip-flop.")]
-    public float loseSightDistance = 25f;
+    public float loseSightDistance = 60f;
+    [System.Obsolete("No longer used in simplified chase logic.")]
     [Tooltip("Sau khi mất dấu, Tank vẫn đuổi theo alertMemoryDuration giây trước khi từ bỏ.")]
     public float alertMemoryDuration = 3f;
 
@@ -107,12 +108,6 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     private EnemyLocomotion locomotion;
     private PlayerStats _targetStats;
 
-    // --- Alert memory / last known position ---
-    private float _alertMemoryTimer;
-    private Vector3 _lastKnownPlayerPos;
-    private bool _hasLastKnownPos;
-    private bool _isUsingLastKnownPos;
-
     private bool isDead;
     public bool IsDead { get { return isDead; } }
     private bool isHit;
@@ -121,6 +116,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
     private bool hasScreamed;
     private bool isScreaming;
+    private bool hasDetectedPlayer;
 
     private int attackIndex;
 
@@ -209,6 +205,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             locomotion.Initialize();
         }
 
+        hasDetectedPlayer = false;
         _lastSetDestination = transform.position;
         _pathTimer = maxRepathInterval; // force immediate first re-path
     }
@@ -275,8 +272,11 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         //------------------------------------------------
         // DETECTION: check if we can see the player
         //------------------------------------------------
-
-        bool hasLOSCurrently = distance <= detectRange && HasLineOfSight();
+        bool hasLOSCurrently = false;
+        if (!hasDetectedPlayer && !isScreaming && distance <= detectRange)
+        {
+            hasLOSCurrently = HasLineOfSight();
+        }
 
         // Target (Player) Dead Check
         bool isTargetDead = false;
@@ -296,109 +296,86 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
         if (isTargetDead)
         {
-            _isUsingLastKnownPos = false;
-            _hasLastKnownPos = false;
-            _alertMemoryTimer = 0f;
+            hasDetectedPlayer = false;
             agent.isStopped = true;
             return;
         }
-        else if (hasLOSCurrently)
+
+        bool shouldChase = false;
+        if (hasDetectedPlayer && distance <= loseSightDistance)
         {
-            _lastKnownPlayerPos = target.position;
-            _hasLastKnownPos = true;
-            _alertMemoryTimer = alertMemoryDuration;
-            _isUsingLastKnownPos = false;
+            shouldChase = true;
         }
-        else if (hasScreamed && distance <= loseSightDistance && HasLineOfSight())
+        else if (!hasDetectedPlayer && hasLOSCurrently)
         {
-            // Hysteresis: only maintain chase if we have LOS
-            _lastKnownPlayerPos = target.position;
-            _hasLastKnownPos = true;
-            _isUsingLastKnownPos = false;
+            hasDetectedPlayer = true;
+            shouldChase = true;
+            if (!hasScreamed)
+            {
+                StartScream();
+                return;
+            }
         }
-        else if (_alertMemoryTimer > 0f)
+
+        if (isScreaming)
+            return;
+
+        if (locomotion != null && locomotion.IsDirectSteering || distance <= meleeRange)
         {
-            _alertMemoryTimer -= Time.deltaTime;
-            _isUsingLastKnownPos = _hasLastKnownPos;
+            FaceTarget();
         }
         else
         {
-            // Lost player completely — stop and idle.
-            _isUsingLastKnownPos = false;
-            _hasLastKnownPos = false;
-            agent.isStopped = true;
-            return;
+            FaceMovementDirection();
         }
 
         //------------------------------------------------
         // CHASE
         //------------------------------------------------
-
-        if (!isAttacking &&
-            !isJumpAttacking)
+        if (shouldChase)
         {
-            // --- Last known position mode: navigate to where we last saw
-            // the player using NavMesh (not direct steering).
-            if (_isUsingLastKnownPos && _hasLastKnownPos)
+            if (!isAttacking && !isJumpAttacking)
             {
-                float distToLastKnown = Vector3.Distance(transform.position, _lastKnownPlayerPos);
-                if (distToLastKnown <= meleeRange)
+                if (useDirectSteeringWhenLOS && TryDirectSteer(distance))
                 {
-                    // Reached last known pos but player isn't here. Stop.
-                    agent.isStopped = true;
+                    // Direct steering handled movement this frame.
                 }
                 else
                 {
                     agent.isStopped = false;
-                    SyncAgentToTransform();
-                    agent.updatePosition = true;
-                    agent.speed = runSpeed;
 
                     _pathTimer += Time.deltaTime;
-                    float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
+                    float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
                     bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
-                    float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
-                    float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
+                    
+                    // Slower repathing when player is out of sight (no LOS) to save CPU
+                    bool hasLOS = HasLineOfSight();
+                    float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
+                    float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                    if (!hasLOS)
+                    {
+                        dynamicInterval *= 2.0f;
+                        dynamicThreshold *= 1.5f;
+                    }
+
                     if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
                     {
-                        SetDestinationRobust(_lastKnownPlayerPos);
-                        _lastSetDestination = _lastKnownPlayerPos;
+                        SetDestinationRobust(target.position);
+                        _lastSetDestination = target.position;
                         _pathTimer = 0f;
+                    }
+
+                    if (locomotion != null)
+                    {
+                        locomotion.HandleStuckDetection(distance, meleeRange * 0.5f);
                     }
                 }
             }
-            // --- Direct steering: when the Tank has line-of-sight to the
-            // player, bypass NavMesh pathfinding and move directly toward
-            // the player's CURRENT position every frame.
-            else if (useDirectSteeringWhenLOS && TryDirectSteer(distance))
-            {
-                // Direct steering handled movement this frame.
-            }
-            else
-            {
-                agent.isStopped = false;
-
-                // Re-path when the throttle interval elapses OR the player has
-                // moved far enough from the last destination that the current
-                // path is stale. This keeps the Tank responsive when the player
-                // changes direction without flooding the async pathfinding queue.
-                _pathTimer += Time.deltaTime;
-                float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-                bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
-                float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
-                float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
-                if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
-                {
-                    SetDestinationRobust(target.position);
-                    _lastSetDestination = target.position;
-                    _pathTimer = 0f;
-                }
-
-                if (locomotion != null)
-                {
-                    locomotion.HandleStuckDetection(distance, meleeRange * 0.5f);
-                }
-            }
+        }
+        else
+        {
+            hasDetectedPlayer = false;
+            agent.isStopped = true;
         }
 
         //------------------------------------------------

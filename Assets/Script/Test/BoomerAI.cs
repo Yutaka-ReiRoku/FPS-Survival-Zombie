@@ -15,6 +15,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     public float detectRange = 20f;
     [Tooltip("Khoảng cách mất dấu player. Lớn hơn detectRange để chống flip-flop.")]
     public float loseSightDistance = 25f;
+    [System.Obsolete("No longer used in simplified chase logic.")]
     [Tooltip("Sau khi mất dấu, Boomer vẫn đuổi theo alertMemoryDuration giây trước khi từ bỏ.")]
     public float alertMemoryDuration = 3f;
 
@@ -133,6 +134,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private bool isHit;
     private bool isScreaming;
     private bool hasStartedExplosion;
+    private bool hasDetectedPlayer;
 
     private EnemyLocomotion locomotion;
     private PlayerStats _targetStats;
@@ -151,12 +153,6 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private Vector3 _lastSetDestination = Vector3.zero;
 
     private bool _isDirectSteering => locomotion != null && locomotion.IsDirectSteering;
-
-    // --- Alert memory / last known position ---
-    private float _alertMemoryTimer;
-    private Vector3 _lastKnownPlayerPos;
-    private bool _hasLastKnownPos;
-    private bool _isUsingLastKnownPos;
 
     // --- Cached animator parameter hashes (avoid per-call string hashing) ---
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
@@ -208,9 +204,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         isWaitingForExplosion = false;
         explosionWaitTimer = 0f;
 
-        _alertMemoryTimer = 0f;
-        _hasLastKnownPos = false;
-        _isUsingLastKnownPos = false;
+        hasDetectedPlayer = false;
 
         // Dynamically randomize height between 1.6m and 1.9m
         float defaultHeight = 1.8f;
@@ -342,9 +336,6 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
         if (isTargetDead)
         {
-            _isUsingLastKnownPos = false;
-            _hasLastKnownPos = false;
-            _alertMemoryTimer = 0f;
             agent.isStopped = true;
             animator.SetFloat(SpeedHash, 0f, 0.2f, Time.deltaTime);
             return;
@@ -369,95 +360,32 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         //--------------------------------
         // DETECTION: check if we can see the player
         //--------------------------------
-
-        bool hasLOSCurrently = !isScreaming &&
-            distance <= detectRange &&
-            (!requireLineOfSight || HasLineOfSight());
-
-        if (hasLOSCurrently)
+        bool hasLOSCurrently = false;
+        if (!hasDetectedPlayer && !isScreaming && distance <= detectRange)
         {
-            _lastKnownPlayerPos = target.position;
-            _hasLastKnownPos = true;
-            _alertMemoryTimer = alertMemoryDuration;
-            _isUsingLastKnownPos = false;
-        }
-        else if (distance <= loseSightDistance)
-        {
-            // Hysteresis: within loseSightDistance but no LOS.
-            if (!requireLineOfSight || HasLineOfSight())
-            {
-                _lastKnownPlayerPos = target.position;
-                _hasLastKnownPos = true;
-                _isUsingLastKnownPos = false;
-                _alertMemoryTimer = alertMemoryDuration;
-            }
+            if (!requireLineOfSight)
+                hasLOSCurrently = true;
             else
-            {
-                _isUsingLastKnownPos = _hasLastKnownPos;
-                if (_alertMemoryTimer > 0f)
-                {
-                    _alertMemoryTimer -= Time.deltaTime;
-                }
-                else
-                {
-                    _isUsingLastKnownPos = false;
-                    _hasLastKnownPos = false;
-                }
-            }
+                hasLOSCurrently = HasLineOfSight();
         }
-        else if (_alertMemoryTimer > 0f)
+
+        bool shouldChase = false;
+        if (hasDetectedPlayer && distance <= loseSightDistance)
         {
-            _alertMemoryTimer -= Time.deltaTime;
-            _isUsingLastKnownPos = _hasLastKnownPos;
+            shouldChase = true;
         }
-        else
+        else if (!hasDetectedPlayer && hasLOSCurrently)
         {
-            _isUsingLastKnownPos = false;
-            _hasLastKnownPos = false;
+            hasDetectedPlayer = true;
+            shouldChase = true;
         }
 
         //--------------------------------
         // CHASE
         //--------------------------------
-
-        if (hasLOSCurrently || _isUsingLastKnownPos)
+        if (shouldChase)
         {
-            if (_isUsingLastKnownPos && _hasLastKnownPos)
-            {
-                // --- Last known position mode: navigate to where we last saw
-                // the player using NavMesh (not direct steering).
-                float distToLastKnown = Vector3.Distance(transform.position, _lastKnownPlayerPos);
-                if (distToLastKnown <= explodeRange)
-                {
-                    // Reached last known pos but player isn't here. Stop.
-                    agent.isStopped = true;
-                }
-                else
-                {
-                    agent.isStopped = false;
-                    SyncAgentToTransform();
-                    agent.updatePosition = true;
-                    agent.speed = moveSpeed;
-
-                    _pathTimer += Time.deltaTime;
-                    float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
-                    bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
-                    float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
-                    float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
-                    if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
-                    {
-                        SetDestinationRobust(_lastKnownPlayerPos);
-                        _lastSetDestination = _lastKnownPlayerPos;
-                        _pathTimer = 0f;
-                    }
-
-                    HandleStuckDetection(distance);
-                }
-            }
-            // --- Direct steering: when the Boomer has line-of-sight to the
-            // player, bypass NavMesh pathfinding and move directly toward
-            // the player's CURRENT position every frame.
-            else if (useDirectSteeringWhenLOS && TryDirectSteer(distance))
+            if (useDirectSteeringWhenLOS && TryDirectSteer(distance))
             {
                 // Direct steering handled movement this frame.
             }
@@ -465,16 +393,20 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             {
                 agent.isStopped = false;
 
-                // Re-path when the throttle interval elapses OR the player has
-                // moved far enough from the last destination that the current
-                // path is stale. Calling SetDestination every frame floods the
-                // async pathfinding queue (each call cancels the previous pending
-                // path), so the boomer ends up with no usable path and slides.
                 _pathTimer += Time.deltaTime;
                 float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
                 bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+                
+                // Slower repathing when player is out of sight (no LOS) to save CPU
+                bool hasLOS = HasLineOfSight();
                 float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
                 float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                if (!hasLOS)
+                {
+                    dynamicInterval *= 2.0f;
+                    dynamicThreshold *= 1.5f;
+                }
+
                 if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
                 {
                     SetDestinationRobust(target.position);
@@ -482,13 +414,12 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                     _pathTimer = 0f;
                 }
 
-                // Stuck detection: if the boomer isn't making progress toward the
-                // player while it should be chasing, try to recover.
                 HandleStuckDetection(distance);
             }
         }
         else
         {
+            hasDetectedPlayer = false;
             agent.isStopped = true;
         }
 
