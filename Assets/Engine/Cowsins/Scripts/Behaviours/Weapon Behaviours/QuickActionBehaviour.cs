@@ -24,6 +24,8 @@ namespace cowsins
         private Coroutine meleeCoroutine;
         private Coroutine reEnableMeleeCoroutine;
 
+        private static readonly Collider[] _meleeHitBuffer = new Collider[16];
+
         private MonoBehaviour CoroutineRunner => context.CoroutineRunner;
 
         public QuickActionBehaviour(WeaponContext context)
@@ -92,12 +94,15 @@ namespace cowsins
         {
             RaycastHit hit;
             Vector3 basePosition = id != null ? id.transform.position : context.Transform.position;
-            Collider[] col = Physics.OverlapSphere(basePosition + mainCamera.transform.parent.forward * attackRange / 2, attackRange, settings.hitLayer);
-
+            
+            int hitCount = Physics.OverlapSphereNonAlloc(basePosition + mainCamera.transform.parent.forward * attackRange / 2, attackRange, _meleeHitBuffer, settings.hitLayer);
             float dmg = damage * playerMultipliers.DamageMultiplier;
 
-            foreach (var c in col)
+            for (int i = 0; i < hitCount; i++)
             {
+                Collider c = _meleeHitBuffer[i];
+                if (c == null) continue;
+
                 if (c.CompareTag("Critical") || c.CompareTag("BodyShot"))
                 {
                     CowsinsUtilities.GatherDamageableParent(c.transform).Damage(dmg, false);
@@ -110,6 +115,12 @@ namespace cowsins
                     damageable.Damage(dmg, false);
                     break;
                 }
+            }
+
+            // Clean up static references to allow garbage collection of hit colliders
+            for (int i = 0; i < hitCount; i++)
+            {
+                _meleeHitBuffer[i] = null;
             }
 
             //VISUALS

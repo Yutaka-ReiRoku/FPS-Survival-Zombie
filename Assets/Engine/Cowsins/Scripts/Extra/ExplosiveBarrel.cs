@@ -1,5 +1,5 @@
 /// <summary>
-/// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved. 
+/// This script belongs to cowsins as a part of the cowsins FPS Engine. All rights reserved. 
 /// </summary>
 using UnityEngine;
 
@@ -10,6 +10,8 @@ namespace cowsins
     /// </summary>
     public class ExplosiveBarrel : Destructible
     {
+        private static readonly Collider[] _explosionHitBuffer = new Collider[64];
+
         [SerializeField] private float explosionRadius;
 
         [SerializeField] private float explosionForce;
@@ -31,16 +33,18 @@ namespace cowsins
         public override void Die()
         {
             SoundManager.Instance.PlaySoundAtPosition(destroyedSFX,transform.position, 0, .1f, true);
-            Collider[] cols = Physics.OverlapSphere(transform.position, explosionRadius);
+            int hitCount = Physics.OverlapSphereNonAlloc(transform.position, explosionRadius, _explosionHitBuffer);
 
             Instantiate(destroyedObject, transform.position, Quaternion.identity);
             Instantiate(explosionVFX, transform.position, Quaternion.identity);
 
-            foreach (Collider c in cols)
+            for (int i = 0; i < hitCount; i++)
             {
-                if (c.CompareTag("Player") && !hurtPlayer) return;
-                if (c.GetComponent<Rigidbody>() != null)
-                    c.GetComponent<Rigidbody>().AddExplosionForce(explosionForce / (Vector3.Distance(c.transform.position, transform.position) + .1f), transform.position, explosionRadius, 5, ForceMode.Impulse);
+                Collider c = _explosionHitBuffer[i];
+                if (c == null) continue;
+                if (c.CompareTag("Player") && !hurtPlayer) continue;
+                if (c.TryGetComponent<Rigidbody>(out var rb))
+                    rb.AddExplosionForce(explosionForce / (Vector3.Distance(c.transform.position, transform.position) + .1f), transform.position, explosionRadius, 5, ForceMode.Impulse);
 
                 float dmg = damage / Vector3.Distance(c.transform.position, transform.position);
                 if (c.CompareTag("BodyShot"))
@@ -48,16 +52,24 @@ namespace cowsins
                     CowsinsUtilities.GatherDamageableParent(c.transform).Damage(dmg, false);
                     continue;
                 }
-                else if (c.GetComponent<IDamageable>() != null)
+                else if (c.TryGetComponent<IDamageable>(out var damageable))
                 {
-                    c.GetComponent<IDamageable>().Damage(dmg, false);
-                    if (c.GetComponent<IPlayerMovementStateProvider>() != null)
+                    damageable.Damage(dmg, false);
+                    if (c.TryGetComponent<IPlayerMovementStateProvider>(out var playerMovement))
                     {
-                        CameraEffects cameraEffects = c.GetComponent<CameraEffects>();
-                        cameraEffects.ExplosionShake(Vector3.Distance(cameraEffects.transform.position, transform.position));
+                        if (c.TryGetComponent<CameraEffects>(out var cameraEffects))
+                        {
+                            cameraEffects.ExplosionShake(Vector3.Distance(cameraEffects.transform.position, transform.position));
+                        }
                     }
                     continue;
                 }
+            }
+
+            // Clean up static references to allow garbage collection of hit colliders
+            for (int i = 0; i < hitCount; i++)
+            {
+                _explosionHitBuffer[i] = null;
             }
             base.Die();
         }

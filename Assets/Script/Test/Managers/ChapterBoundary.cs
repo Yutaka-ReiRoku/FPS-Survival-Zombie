@@ -46,6 +46,22 @@ public class ChapterBoundary : MonoBehaviour
     /// <summary>Last known forward direction of the player while inside (for teleport-back orientation).</summary>
     private Quaternion _lastInsideRot;
 
+    private GameObject _cachedPlayer;
+    private Rigidbody _cachedPlayerRb;
+
+    private GameObject GetPlayer()
+    {
+        if (_cachedPlayer == null)
+        {
+            _cachedPlayer = GameObject.FindGameObjectWithTag("Player");
+            if (_cachedPlayer != null)
+            {
+                _cachedPlayerRb = _cachedPlayer.GetComponent<Rigidbody>();
+            }
+        }
+        return _cachedPlayer;
+    }
+
     private void Reset()
     {
         var c = GetComponent<Collider>();
@@ -89,7 +105,7 @@ public class ChapterBoundary : MonoBehaviour
         SetSpawnersActive(false);
 
         var sm = StoryManager.Instance;
-        var player = GameObject.FindGameObjectWithTag("Player");
+        var player = GetPlayer();
 
         // If this is a future chapter, enable the wall from the start — but
         // only if the player is NOT inside (safety: don't trap the player).
@@ -149,16 +165,15 @@ public class ChapterBoundary : MonoBehaviour
         // boundary (e.g. respawned outside after dying during waves), teleport
         // them back inside. This catches edge cases that OnTriggerExit might miss.
         if (!_externallyLocked || _triggerCol == null) return;
-        var player = GameObject.FindGameObjectWithTag("Player");
+        var player = GetPlayer();
         if (player == null) return;
         if (!_triggerCol.bounds.Contains(player.transform.position))
         {
             Debug.Log($"[ChapterBoundary] Ch{chapter} player outside during external lock — teleporting back.");
-            var rb = player.GetComponent<Rigidbody>();
-            if (rb != null)
+            if (_cachedPlayerRb != null)
             {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
+                _cachedPlayerRb.linearVelocity = Vector3.zero;
+                _cachedPlayerRb.angularVelocity = Vector3.zero;
             }
             player.transform.position = _lastInsidePos != Vector3.zero ? _lastInsidePos : transform.position;
         }
@@ -279,7 +294,7 @@ public class ChapterBoundary : MonoBehaviour
     {
         _externallyLocked = true;
         // Record the player's current position as the teleport-back point.
-        var player = GameObject.FindGameObjectWithTag("Player");
+        var player = GetPlayer();
         if (player != null)
         {
             _lastInsidePos = player.transform.position;
