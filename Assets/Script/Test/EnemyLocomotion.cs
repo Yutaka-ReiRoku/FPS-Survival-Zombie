@@ -156,6 +156,10 @@ public class EnemyLocomotion : MonoBehaviour
 
     public bool TryDirectSteer(float speed)
     {
+        // Completely disable Direct Steering to rely 100% on NavMesh pathfinding.
+        // This prevents railing stuck/staring loops and ensures robust collision physics.
+        return false;
+
         if (target == null || Agent == null || !Agent.isOnNavMesh) return false;
 
         // If recovering from being stuck, bypass direct steering so agent can pathfind out
