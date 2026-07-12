@@ -33,7 +33,7 @@ TextureImporter:
     wrapMode: -1
   nPOTScale: 1
   lightmap: 0
-  compressionQuality: 50
+  compressionQuality: 80
   spriteMode: 0
   spriteExtrude: 1
   spriteMeshType: 1
@@ -54,8 +54,8 @@ TextureImporter:
     maxTextureSize: 2048
     textureFormat: -1
     textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
+    compressionQuality: 80
+    crunchedCompression: 1
     allowsAlphaSplitting: 0
     overridden: 0
   spriteSheet:
