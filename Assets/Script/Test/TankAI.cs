@@ -105,6 +105,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     private Vector3 _lastSetDestination = Vector3.zero;
 
     private EnemyLocomotion locomotion;
+    private PlayerStats _targetStats;
 
     // --- Alert memory / last known position ---
     private float _alertMemoryTimer;
@@ -281,7 +282,12 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         bool isTargetDead = false;
         if (target != null)
         {
-            var targetStats = target.GetComponent<PlayerStats>();
+            var targetStats = _targetStats;
+            if (targetStats == null)
+            {
+                targetStats = target.GetComponent<PlayerStats>();
+                _targetStats = targetStats;
+            }
             if (targetStats != null && targetStats.IsDead)
             {
                 isTargetDead = true;
@@ -350,7 +356,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
                     _pathTimer += Time.deltaTime;
                     float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
-                    bool canRepath = agent != null && !agent.pathPending;
+                    bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
                     if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
                     {
                         SetDestinationRobust(_lastKnownPlayerPos);
@@ -376,12 +382,17 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
                 // changes direction without flooding the async pathfinding queue.
                 _pathTimer += Time.deltaTime;
                 float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-                bool canRepath = agent != null && !agent.pathPending;
+                bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
                 if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
                 {
                     SetDestinationRobust(target.position);
                     _lastSetDestination = target.position;
                     _pathTimer = 0f;
+                }
+
+                if (locomotion != null)
+                {
+                    locomotion.HandleStuckDetection(distance, meleeRange * 0.5f);
                 }
             }
         }
@@ -440,6 +451,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             target = cachedPlayerTransform;
             cachedPlayerDamageable = target.GetComponent<IDamageable>();
             cachedCameraEffects = target.GetComponent<CameraEffects>();
+            _targetStats = target.GetComponent<PlayerStats>();
             return;
         }
 
@@ -454,6 +466,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             target = player.transform;
             cachedPlayerDamageable = target.GetComponent<IDamageable>();
             cachedCameraEffects = target.GetComponent<CameraEffects>();
+            _targetStats = target.GetComponent<PlayerStats>();
         }
     }
 
