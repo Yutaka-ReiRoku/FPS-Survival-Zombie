@@ -301,7 +301,7 @@ public class EnemyLocomotion : MonoBehaviour
         else if (Agent.velocity.sqrMagnitude > 0.5f)
             moveDir = Agent.velocity;
         else if (Agent.hasPath)
-            moveDir = Agent.destination - transform.position;
+            moveDir = Agent.steeringTarget - transform.position;
 
         moveDir.y = 0f;
         if (moveDir.sqrMagnitude < 0.01f)
