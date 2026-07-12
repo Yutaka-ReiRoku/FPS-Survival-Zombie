@@ -231,10 +231,13 @@ public class EnemyLocomotion : MonoBehaviour
             if (Mathf.Abs(navHit.position.y - transform.position.y) <= 1.5f)
             {
                 transform.position = navHit.position;
+                Agent.nextPosition = navHit.position;
+                return true;
             }
         }
 
-        return true;
+        ExitDirectSteering();
+        return false;
     }
 
     public void ExitDirectSteering()
@@ -357,8 +360,6 @@ public class EnemyLocomotion : MonoBehaviour
     {
         if (Agent == null || target == null) return;
         _stuckRecoveryCooldownTimer = 1.5f; // Lock normal chasing re-pathing for 1.5s
-        SetDestinationRobust(target.position);
-        if (Agent.hasPath) return;
 
         Vector3 toPlayer = target.position - transform.position;
         Vector3 midPoint = transform.position + toPlayer * 0.5f;

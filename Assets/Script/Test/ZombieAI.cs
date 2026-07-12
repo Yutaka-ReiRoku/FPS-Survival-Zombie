@@ -280,7 +280,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         // Performance: don't evaluate the animator for zombies no camera renders.
         // NOTE: off-screen zombies won't play attack animations until visible (acceptable for a horde shooter; revert to CullUpdateTransforms if undesired).
         if (animator != null)
-            animator.cullingMode = AnimatorCullingMode.CullCompletely;
+            animator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
     }
 
     void OnEnable()
