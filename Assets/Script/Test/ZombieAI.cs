@@ -673,7 +673,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             float actualDestDrift = agent.hasPath
                 ? Vector3.Distance(agent.destination, target.position)
                 : 0f;
-            bool pathBroken = agent.hasPath && float.IsInfinity(agent.remainingDistance);
+            bool pathBroken = agent.hasPath && !agent.pathPending && float.IsInfinity(agent.remainingDistance);
 
             // Don't re-path while a path is already being calculated (pathPending).
             // ResetPath during pathPending cancels the in-progress path, and the
@@ -694,19 +694,17 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             }
 
             if (canRepath && (pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold
-                || actualDestDrift > 5f || pathBroken))
+                || pathBroken))
             {
                 // Disable jitter when close to attack range to prevent flip-flop.
                 Vector3 dest = target.position;
                 if (distance > attackDistance + chaseJitterRadius + 1f)
                     dest += chaseJitterOffset;
 
-                // If the path is broken (remainingDistance=Infinity) or the
-                // destination has drifted far from the player, the agent may be
+                // If the path is broken (remainingDistance=Infinity), the agent may be
                 // stuck on a stale/invalid path. ResetPath first to clear the
-                // old path state, then SetDestination — otherwise SetDestination
-                // can silently fail to update the destination.
-                if (pathBroken || actualDestDrift > 5f)
+                // old path state, then SetDestination.
+                if (pathBroken)
                     agent.ResetPath();
 
                 SetDestinationRobust(dest);
