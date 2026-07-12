@@ -135,6 +135,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private bool hasStartedExplosion;
 
     private EnemyLocomotion locomotion;
+    private PlayerStats _targetStats;
 
     // Caching original values for scaling
     private Vector3 _originalScale;
@@ -305,6 +306,32 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             return;
         }
 
+        // Target (Player) Dead Check
+        bool isTargetDead = false;
+        if (target != null)
+        {
+            var targetStats = _targetStats;
+            if (targetStats == null)
+            {
+                targetStats = target.GetComponent<PlayerStats>();
+                _targetStats = targetStats;
+            }
+            if (targetStats != null && targetStats.IsDead)
+            {
+                isTargetDead = true;
+            }
+        }
+
+        if (isTargetDead)
+        {
+            _isUsingLastKnownPos = false;
+            _hasLastKnownPos = false;
+            _alertMemoryTimer = 0f;
+            agent.isStopped = true;
+            animator.SetFloat(SpeedHash, 0f, 0.2f, Time.deltaTime);
+            return;
+        }
+
         if (locomotion != null)
         {
             locomotion.target = target;
@@ -344,10 +371,20 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                 _lastKnownPlayerPos = target.position;
                 _hasLastKnownPos = true;
                 _isUsingLastKnownPos = false;
+                _alertMemoryTimer = alertMemoryDuration;
             }
             else
             {
                 _isUsingLastKnownPos = _hasLastKnownPos;
+                if (_alertMemoryTimer > 0f)
+                {
+                    _alertMemoryTimer -= Time.deltaTime;
+                }
+                else
+                {
+                    _isUsingLastKnownPos = false;
+                    _hasLastKnownPos = false;
+                }
             }
         }
         else if (_alertMemoryTimer > 0f)
@@ -386,7 +423,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
                     _pathTimer += Time.deltaTime;
                     float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
-                    bool canRepath = agent != null && !agent.pathPending;
+                    bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
                     if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
                     {
                         SetDestinationRobust(_lastKnownPlayerPos);
@@ -415,7 +452,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                 // path), so the boomer ends up with no usable path and slides.
                 _pathTimer += Time.deltaTime;
                 float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-                bool canRepath = agent != null && !agent.pathPending;
+                bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
                 if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
                 {
                     SetDestinationRobust(target.position);
@@ -470,6 +507,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         if (cachedPlayerTransform != null)
         {
             target = cachedPlayerTransform;
+            _targetStats = target.GetComponent<PlayerStats>();
             return;
         }
 
@@ -482,6 +520,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         {
             cachedPlayerTransform = player.transform;
             target = player.transform;
+            _targetStats = target.GetComponent<PlayerStats>();
         }
     }
 
