@@ -185,6 +185,13 @@ public class EnemyLocomotion : MonoBehaviour
             return false;
         }
 
+        // 1. Check NavMesh connectivity (Fix A)
+        if (Agent.Raycast(target.position, out _))
+        {
+            ExitDirectSteering();
+            return false;
+        }
+
         _isDirectSteering = true;
         Agent.isStopped = true;
         Agent.updatePosition = false;
@@ -193,23 +200,33 @@ public class EnemyLocomotion : MonoBehaviour
         float distMag = dir.magnitude;
         if (distMag < 0.01f) return true;
 
-        Vector3 dirNorm = dir / distMag; // 3D direction parallel to ground slope
+        Vector3 dirNorm = dir / distMag;
 
-        if (Physics.Raycast(transform.position + Vector3.up * sightEyeHeight, dirNorm, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore) ||
-            Physics.Raycast(transform.position + Vector3.up * wallCheckBodyHeight, dirNorm, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore))
+        // 2. Compute slope-aligned direction vector to prevent terrain collisions (Fix C)
+        Vector3 groundNormal = Vector3.up;
+        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit groundHit, 1.0f, _cachedLOSMask))
+        {
+            groundNormal = groundHit.normal;
+        }
+        Vector3 moveDir = Vector3.ProjectOnPlane(dirNorm, groundNormal).normalized;
+
+        // 3. Slope-aligned physics raycasts
+        if (Physics.Raycast(transform.position + Vector3.up * sightEyeHeight, moveDir, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore) ||
+            Physics.Raycast(transform.position + Vector3.up * wallCheckBodyHeight, moveDir, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore))
         {
             ExitDirectSteering();
             _directSteeringCooldownTimer = directSteeringWallCooldown;
             return false;
         }
 
-        Vector3 moveDir = dirNorm;
-        moveDir.y = 0f;
-        moveDir.Normalize();
-
+        // 4. Calculate movement step
         Vector3 newPos = transform.position + moveDir * speed * Time.deltaTime;
+        
+        // 5. Use frame-rate-independent search radius to prevent stutter (Fix C)
+        float sampleRadius = Mathf.Max(0.5f, speed * Time.deltaTime * 1.5f);
+        
         NavMeshHit navHit;
-        if (NavMesh.SamplePosition(newPos, out navHit, 2f, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(newPos, out navHit, sampleRadius, NavMesh.AllAreas))
         {
             if (Mathf.Abs(navHit.position.y - transform.position.y) <= 1.5f)
             {
