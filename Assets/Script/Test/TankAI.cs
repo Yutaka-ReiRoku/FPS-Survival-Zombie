@@ -108,6 +108,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     private bool hasScreamed;
     private bool isScreaming;
     private bool hasDetectedPlayer;
+    [Header("Debug/Testing")]
+    [SerializeField] private bool forceDetectPlayer = true;
 
     private int attackIndex;
 
@@ -288,7 +290,17 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         }
 
         bool shouldChase = false;
-        if (hasDetectedPlayer && distance <= loseSightDistance)
+        if (forceDetectPlayer)
+        {
+            hasDetectedPlayer = true;
+            shouldChase = true;
+            if (!hasScreamed)
+            {
+                StartScream();
+                return;
+            }
+        }
+        else if (hasDetectedPlayer && distance <= loseSightDistance)
         {
             shouldChase = true;
         }

@@ -197,6 +197,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private bool isDead;
     private bool isAttacking;
     private bool hasDetectedPlayer;
+    [Header("Debug/Testing")]
+    [SerializeField] private bool forceDetectPlayer = true;
     private bool lastHitWasHeadshot;
 
     // --- Erratic behavior runtime state ---
@@ -492,6 +494,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             }
             Wander();
             hasDetectedPlayer = false;
+        }
+        else if (forceDetectPlayer)
+        {
+            // Test Mode: Always chase and detect player
+            ChasePlayer(cachedDistance);
+            hasDetectedPlayer = true;
         }
         else if (hasDetectedPlayer && cachedDistance <= loseSightDistance)
         {

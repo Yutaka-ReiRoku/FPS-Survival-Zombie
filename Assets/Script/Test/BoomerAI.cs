@@ -125,6 +125,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     private bool isScreaming;
     private bool hasStartedExplosion;
     private bool hasDetectedPlayer;
+    [Header("Debug/Testing")]
+    [SerializeField] private bool forceDetectPlayer = true;
 
     private EnemyLocomotion locomotion;
     private PlayerStats _targetStats;
@@ -355,7 +357,12 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         }
 
         bool shouldChase = false;
-        if (hasDetectedPlayer && distance <= loseSightDistance)
+        if (forceDetectPlayer)
+        {
+            hasDetectedPlayer = true;
+            shouldChase = true;
+        }
+        else if (hasDetectedPlayer && distance <= loseSightDistance)
         {
             shouldChase = true;
         }
