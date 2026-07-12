@@ -126,19 +126,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     [Tooltip("Interval tối đa (giây) giữa các lần re-path khi player đứng yên. Re-path ngay khi player di chuyển quá playerMovedRepathThreshold.")]
     public float maxRepathInterval = 0.1f;
 
-    [Header("Direct Steering (Real-time Tracking)")]
-    [Tooltip("Khi true, zombie di chuyển thẳng tới vị trí mới nhất của player mỗi frame khi có line-of-sight (không cần re-path). Khi mất LOS, quay lại NavMesh pathfinding.")]
-    public bool useDirectSteeringWhenLOS = false;
-    [Tooltip("Khoảng cách raycast check tường phía trước khi direct steering, tránh cắm đầu vào tường (m).")]
-    public float directSteeringWallCheckDistance = 1.5f;
-    [Tooltip("Interval cache LOS check khi direct steering (giây). Nhỏ hơn = responsive hơn nhưng tốn raycast hơn.")]
-    public float directSteeringLOSCacheInterval = 0.15f;
-    [Tooltip("Sau khi đụng tường khi direct steering, zombie tạm thời dùng NavMesh pathfinding trong bao lâu (giây) trước khi thử direct steering lại. Chống flip-flop cắm đầu vào tường.")]
-    public float directSteeringWallCooldown = 1.5f;
-    [Tooltip("Chiều cao raycast check tường phía trước ở mức thân (m). Raycast thêm ở mức thấp này để phát hiện chướng ngại vật thấp (xác xe, hàng rào, thùng) mà raycast ở eyeHeight bay qua trên.")]
-    public float wallCheckBodyHeight = 0.5f;
-    [Tooltip("Chênh lệch độ cao tối đa (m) giữa zombie và player để vẫn dùng direct steering. Vượt quá ngưỡng này (zombie trên gò đất, player ở dưới), zombie sẽ fall back to NavMesh pathfinding để navigate slope đúng cách thay vì bị kẹt.")]
-    public float maxDirectSteerHeightDiff = 2f;
+
 
     [Header("Attack")]
     public float attackCooldown = 1.5f;
@@ -336,12 +324,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             locomotion.stuckRepathRadius = stuckRepathRadius;
             locomotion.playerMovedRepathThreshold = playerMovedRepathThreshold;
             locomotion.maxRepathInterval = maxRepathInterval;
-            locomotion.useDirectSteeringWhenLOS = useDirectSteeringWhenLOS;
-            locomotion.directSteeringWallCheckDistance = directSteeringWallCheckDistance;
-            locomotion.directSteeringLOSCacheInterval = directSteeringLOSCacheInterval;
-            locomotion.directSteeringWallCooldown = directSteeringWallCooldown;
-            locomotion.wallCheckBodyHeight = wallCheckBodyHeight;
-            locomotion.maxDirectSteerHeightDiff = maxDirectSteerHeightDiff;
+
 
             locomotion.Initialize();
         }
@@ -505,16 +488,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         }
 
         // Set animator speed using normalized values and handle direct steering case
-        float targetAnimSpeed = 0f;
-        if (locomotion != null && locomotion.IsDirectSteering)
-        {
-            float curSpeed = lungeTimer > 0f ? (runSpeed * 1.8f) : runSpeed;
-            targetAnimSpeed = curSpeed / runSpeed;
-        }
-        else
-        {
-            targetAnimSpeed = agent.velocity.magnitude / runSpeed;
-        }
+        float targetAnimSpeed = agent.velocity.magnitude / runSpeed;
 
         animator.SetFloat(
             SpeedHash,
@@ -630,26 +604,6 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             if (lungeTimer > 0f)
                 speed = runSpeed * lungeSpeedMultiplier;
             agent.speed = speed;
-
-            // --- Direct steering: when the zombie has line-of-sight to the
-            // player, bypass NavMesh pathfinding and move directly toward the
-            // player's CURRENT position every frame. This eliminates the
-            // "chasing stale positions" problem when the player moves
-            // continuously. When LOS is lost (player behind a wall), fall
-            // back to NavMesh pathfinding to navigate around obstacles.
-            if (useDirectSteeringWhenLOS && TryDirectSteer(distance, speed))
-            {
-                // Direct steering handled movement this frame. Skip NavMesh
-                // re-pathing and stuck detection (not needed when steering
-                // directly). Reset stuck timer since we're moving under our
-                // own control.
-                // Face the direction we're steering toward (movement direction).
-                FaceMovementDirection();
-                return;
-            }
-
-            // --- NavMesh pathfinding fallback (no LOS or direct steering disabled) ---
-            agent.isStopped = false;
 
             // --- Jitter the chase destination so the zombie doesn't run in a straight line ---
             // Only apply jitter when far enough from the player. Near attack range,
@@ -987,22 +941,5 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         return EnemyLocomotion.RandomNavSphere(origin, distance);
     }
 
-    //==================================================
-    // DIRECT STEERING & HELPERS
-    //==================================================
 
-    private void SyncAgentToTransform()
-    {
-        if (locomotion != null)
-            locomotion.SyncAgentToTransform();
-    }
-
-    private bool TryDirectSteer(float distance, float speed)
-    {
-        if (locomotion != null)
-        {
-            return locomotion.TryDirectSteer(speed);
-        }
-        return false;
-    }
 }

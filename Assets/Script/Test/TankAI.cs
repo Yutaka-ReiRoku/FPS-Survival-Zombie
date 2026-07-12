@@ -47,21 +47,12 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
     [Tooltip("Interval tối đa (giây) giữa các lần re-path khi player đứng yên.")]
     public float maxRepathInterval = 0.1f;
 
-    [Header("Direct Steering (Real-time Tracking)")]
-    [Tooltip("Khi true, Tank di chuyển thẳng tới vị trí mới nhất của player mỗi frame khi có line-of-sight. Khi mất LOS, quay lại NavMesh pathfinding.")]
-    public bool useDirectSteeringWhenLOS = false;
-    [Tooltip("Khoảng cách raycast check tường phía trước khi direct steering (m).")]
-    public float directSteeringWallCheckDistance = 2f;
-    [Tooltip("Interval cache LOS check khi direct steering (giây).")]
-    public float directSteeringLOSCacheInterval = 0.15f;
+
     [Tooltip("Layer mask cho vật cản tầm nhìn (tường,家具). Mặc định tất cả.")]
     public LayerMask sightObstructionMask = ~0;
     [Tooltip("Chiều cao mắt từ pivot cho LOS raycast.")]
     public float sightEyeHeight = 2f;
-    [Tooltip("Sau khi đụng tường khi direct steering, Tank tạm thời dùng NavMesh trong bao lâu (giây) trước khi thử lại.")]
-    public float directSteeringWallCooldown = 1.5f;
-    [Tooltip("Chiều cao raycast check tường ở mức thân (m). Raycast thêm ở mức thấp để phát hiện chướng ngại vật thấp (xác xe, hàng rào) mà raycast eyeHeight bay qua trên.")]
-    public float wallCheckBodyHeight = 1f;
+
 
     [Header("Audio")]
     [Tooltip("Sound khi tank phát hiện player và bắt đầu scream.")]
@@ -195,12 +186,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             locomotion.stuckRepathRadius = 5f;
             locomotion.playerMovedRepathThreshold = playerMovedRepathThreshold;
             locomotion.maxRepathInterval = maxRepathInterval;
-            locomotion.useDirectSteeringWhenLOS = useDirectSteeringWhenLOS;
-            locomotion.directSteeringWallCheckDistance = directSteeringWallCheckDistance;
-            locomotion.directSteeringLOSCacheInterval = directSteeringLOSCacheInterval;
-            locomotion.directSteeringWallCooldown = directSteeringWallCooldown;
-            locomotion.wallCheckBodyHeight = wallCheckBodyHeight;
-            locomotion.maxDirectSteerHeightDiff = 2f; // Default height diff limit for special enemies
+
 
             locomotion.Initialize();
         }
@@ -336,39 +322,32 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         {
             if (!isAttacking && !isJumpAttacking)
             {
-                if (useDirectSteeringWhenLOS && TryDirectSteer(distance))
+                agent.isStopped = false;
+
+                _pathTimer += Time.deltaTime;
+                float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+                bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+                
+                // Slower repathing when player is out of sight (no LOS) to save CPU
+                bool hasLOS = HasLineOfSight();
+                float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
+                float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                if (!hasLOS)
                 {
-                    // Direct steering handled movement this frame.
+                    dynamicInterval *= 2.0f;
+                    dynamicThreshold *= 1.5f;
                 }
-                else
+
+                if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
                 {
-                    agent.isStopped = false;
+                    SetDestinationRobust(target.position);
+                    _lastSetDestination = target.position;
+                    _pathTimer = 0f;
+                }
 
-                    _pathTimer += Time.deltaTime;
-                    float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-                    bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
-                    
-                    // Slower repathing when player is out of sight (no LOS) to save CPU
-                    bool hasLOS = HasLineOfSight();
-                    float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
-                    float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
-                    if (!hasLOS)
-                    {
-                        dynamicInterval *= 2.0f;
-                        dynamicThreshold *= 1.5f;
-                    }
-
-                    if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
-                    {
-                        SetDestinationRobust(target.position);
-                        _lastSetDestination = target.position;
-                        _pathTimer = 0f;
-                    }
-
-                    if (locomotion != null)
-                    {
-                        locomotion.HandleStuckDetection(distance, meleeRange * 0.5f);
-                    }
+                if (locomotion != null)
+                {
+                    locomotion.HandleStuckDetection(distance, meleeRange * 0.5f);
                 }
             }
         }
@@ -812,11 +791,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             locomotion.SetDestinationRobust(destination);
     }
 
-    private void SyncAgentToTransform()
-    {
-        if (locomotion != null)
-            locomotion.SyncAgentToTransform();
-    }
+
 
     private bool HasLineOfSight()
     {
@@ -825,12 +800,5 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
         return false;
     }
 
-    private bool TryDirectSteer(float distance)
-    {
-        if (locomotion != null)
-        {
-            return locomotion.TryDirectSteer(runSpeed);
-        }
-        return false;
-    }
+
 }

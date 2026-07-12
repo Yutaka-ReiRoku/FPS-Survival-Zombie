@@ -21,14 +21,6 @@ public class EnemyLocomotion : MonoBehaviour
     public float playerMovedRepathThreshold = 1f;
     public float maxRepathInterval = 0.1f;
 
-    [Header("Direct Steering")]
-    public bool useDirectSteeringWhenLOS = false;
-    public float directSteeringWallCheckDistance = 1.5f;
-    public float directSteeringLOSCacheInterval = 0.15f;
-    public float directSteeringWallCooldown = 1.5f;
-    public float wallCheckBodyHeight = 0.5f;
-    public float maxDirectSteerHeightDiff = 2f;
-
     public NavMeshAgent Agent { get; private set; }
     
     public bool IsRecoveringFromStuck => _stuckRecoveryCooldownTimer > 0f;
@@ -45,15 +37,7 @@ public class EnemyLocomotion : MonoBehaviour
     private int _noPathRetryCount;
     private float _noPathRetryTimer;
 
-    private bool _isDirectSteering;
-#pragma warning disable 0414
-    private float _directSteeringCooldownTimer;
-#pragma warning restore 0414
-    private float _losCacheTimer;
-    private Vector3 _prevFramePos;
     private float _stuckRecoveryCooldownTimer;
-
-    public bool IsDirectSteering => _isDirectSteering;
 
     private void Awake()
     {
@@ -67,9 +51,6 @@ public class EnemyLocomotion : MonoBehaviour
         _lastStuckCheckPos = transform.position;
         _noPathRetryCount = 0;
         _noPathRetryTimer = 0f;
-        _directSteeringCooldownTimer = 0f;
-        _losCacheTimer = directSteeringLOSCacheInterval;
-        _prevFramePos = transform.position;
         _stuckRecoveryCooldownTimer = 0f;
 
         WarpIfUnderground();
@@ -158,122 +139,12 @@ public class EnemyLocomotion : MonoBehaviour
 
     public bool TryDirectSteer(float speed)
     {
-        // Completely disable Direct Steering to rely 100% on NavMesh pathfinding.
-        // This prevents railing stuck/staring loops and ensures robust collision physics.
         return false;
-
-        /*
-        if (target == null || Agent == null || !Agent.isOnNavMesh) return false;
-
-        // If recovering from being stuck, bypass direct steering so agent can pathfind out
-        if (IsRecoveringFromStuck)
-        {
-            ExitDirectSteering();
-            return false;
-        }
-
-        float heightDiff = Mathf.Abs(target.position.y - transform.position.y);
-        if (heightDiff > maxDirectSteerHeightDiff)
-        {
-            ExitDirectSteering();
-            return false;
-        }
-
-        if (_directSteeringCooldownTimer > 0f)
-        {
-            _directSteeringCooldownTimer -= Time.deltaTime;
-            ExitDirectSteering();
-            return false;
-        }
-
-        _losCacheTimer -= Time.deltaTime;
-        if (_losCacheTimer <= 0f)
-        {
-            _cachedLOSResult = HasLineOfSight();
-            _losCacheTimer = directSteeringLOSCacheInterval;
-        }
-
-        if (!_cachedLOSResult)
-        {
-            ExitDirectSteering();
-            return false;
-        }
-
-        // 1. Check NavMesh connectivity (Fix A)
-        if (Agent.Raycast(target.position, out _))
-        {
-            ExitDirectSteering();
-            return false;
-        }
-
-        _isDirectSteering = true;
-        Agent.isStopped = true;
-        Agent.updatePosition = false;
-
-        Vector3 dir = target.position - transform.position;
-        float distMag = dir.magnitude;
-        if (distMag < 0.01f) return true;
-
-        Vector3 dirNorm = dir / distMag;
-
-        // 2. Compute slope-aligned direction vector to prevent terrain collisions (Fix C)
-        Vector3 groundNormal = Vector3.up;
-        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit groundHit, 1.0f, _cachedLOSMask))
-        {
-            groundNormal = groundHit.normal;
-        }
-        Vector3 moveDir = Vector3.ProjectOnPlane(dirNorm, groundNormal).normalized;
-
-        // 3. Slope-aligned physics raycasts
-        if (Physics.Raycast(transform.position + Vector3.up * sightEyeHeight, moveDir, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore) ||
-            Physics.Raycast(transform.position + Vector3.up * wallCheckBodyHeight, moveDir, out _, directSteeringWallCheckDistance, _cachedLOSMask, QueryTriggerInteraction.Ignore))
-        {
-            ExitDirectSteering();
-            _directSteeringCooldownTimer = directSteeringWallCooldown;
-            return false;
-        }
-
-        // 4. Calculate movement step
-        Vector3 newPos = transform.position + moveDir * speed * Time.deltaTime;
-        
-        // 5. Use frame-rate-independent search radius to prevent stutter (Fix C)
-        float sampleRadius = Mathf.Max(0.5f, speed * Time.deltaTime * 1.5f);
-        
-        NavMeshHit navHit;
-        if (NavMesh.SamplePosition(newPos, out navHit, sampleRadius, NavMesh.AllAreas))
-        {
-            if (Mathf.Abs(navHit.position.y - transform.position.y) <= 1.5f)
-            {
-                // Progress check to detect if we are blocked by a NavMesh boundary (e.g. gap/wall)
-                float expectedDistance = speed * Time.deltaTime;
-                float actualDistance = Vector3.Distance(transform.position, navHit.position);
-                if (actualDistance < expectedDistance * 0.3f)
-                {
-                    ExitDirectSteering();
-                    _directSteeringCooldownTimer = directSteeringWallCooldown;
-                    return false;
-                }
-
-                transform.position = navHit.position;
-                Agent.nextPosition = navHit.position;
-                return true;
-            }
-        }
-
-        ExitDirectSteering();
-        return false;
-        */
     }
 
     public void ExitDirectSteering()
     {
-        if (_isDirectSteering)
-        {
-            _isDirectSteering = false;
-            Agent.isStopped = false;
-            SyncAgentToTransform();
-            Agent.updatePosition = true;
-        }
+        // No-op as direct steering is disabled
     }
 
     public void SyncAgentToTransform()
@@ -300,9 +171,7 @@ public class EnemyLocomotion : MonoBehaviour
     public void FaceMovementDirection(float rotSpeed)
     {
         Vector3 moveDir = Vector3.zero;
-        if (_isDirectSteering)
-            moveDir = transform.position - _prevFramePos;
-        else if (Agent.velocity.sqrMagnitude > 0.5f)
+        if (Agent.velocity.sqrMagnitude > 0.5f)
             moveDir = Agent.velocity;
         else if (Agent.hasPath)
             moveDir = Agent.steeringTarget - transform.position;
@@ -447,6 +316,5 @@ public class EnemyLocomotion : MonoBehaviour
         {
             _stuckRecoveryCooldownTimer -= Time.deltaTime;
         }
-        _prevFramePos = transform.position;
     }
 }

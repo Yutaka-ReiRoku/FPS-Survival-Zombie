@@ -50,17 +50,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     [Tooltip("Interval tối đa (giây) giữa các lần re-path khi player đứng yên.")]
     public float maxRepathInterval = 0.1f;
 
-    [Header("Direct Steering (Real-time Tracking)")]
-    [Tooltip("Khi true, Boomer di chuyển thẳng tới vị trí mới nhất của player mỗi frame khi có line-of-sight. Khi mất LOS, quay lại NavMesh pathfinding.")]
-    public bool useDirectSteeringWhenLOS = false;
-    [Tooltip("Khoảng cách raycast check tường phía trước khi direct steering (m).")]
-    public float directSteeringWallCheckDistance = 1.5f;
-    [Tooltip("Interval cache LOS check khi direct steering (giây).")]
-    public float directSteeringLOSCacheInterval = 0.15f;
-    [Tooltip("Sau khi đụng tường khi direct steering, Boomer tạm thời dùng NavMesh trong bao lâu (giây) trước khi thử lại.")]
-    public float directSteeringWallCooldown = 1.5f;
-    [Tooltip("Chiều cao raycast check tường ở mức thân (m). Raycast thêm ở mức thấp để phát hiện chướng ngại vật thấp (xác xe, hàng rào) mà raycast eyeHeight bay qua trên.")]
-    public float wallCheckBodyHeight = 0.5f;
+
 
     [Header("Explosion Damage")]
     public float explosionDamage = 50f;
@@ -280,12 +270,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             locomotion.stuckRepathRadius = stuckRepathRadius;
             locomotion.playerMovedRepathThreshold = playerMovedRepathThreshold;
             locomotion.maxRepathInterval = maxRepathInterval;
-            locomotion.useDirectSteeringWhenLOS = useDirectSteeringWhenLOS;
-            locomotion.directSteeringWallCheckDistance = directSteeringWallCheckDistance;
-            locomotion.directSteeringLOSCacheInterval = directSteeringLOSCacheInterval;
-            locomotion.directSteeringWallCooldown = directSteeringWallCooldown;
-            locomotion.wallCheckBodyHeight = wallCheckBodyHeight;
-            locomotion.maxDirectSteerHeightDiff = 2f; // Default height diff limit for special enemies
+
 
             locomotion.Initialize();
         }
@@ -385,37 +370,30 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         //--------------------------------
         if (shouldChase)
         {
-            if (useDirectSteeringWhenLOS && TryDirectSteer(distance))
+            agent.isStopped = false;
+
+            _pathTimer += Time.deltaTime;
+            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+            bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+            
+            // Slower repathing when player is out of sight (no LOS) to save CPU
+            bool hasLOS = HasLineOfSight();
+            float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
+            float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+            if (!hasLOS)
             {
-                // Direct steering handled movement this frame.
+                dynamicInterval *= 2.0f;
+                dynamicThreshold *= 1.5f;
             }
-            else
+
+            if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
             {
-                agent.isStopped = false;
-
-                _pathTimer += Time.deltaTime;
-                float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-                bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
-                
-                // Slower repathing when player is out of sight (no LOS) to save CPU
-                bool hasLOS = HasLineOfSight();
-                float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
-                float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
-                if (!hasLOS)
-                {
-                    dynamicInterval *= 2.0f;
-                    dynamicThreshold *= 1.5f;
-                }
-
-                if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
-                {
-                    SetDestinationRobust(target.position);
-                    _lastSetDestination = target.position;
-                    _pathTimer = 0f;
-                }
-
-                HandleStuckDetection(distance);
+                SetDestinationRobust(target.position);
+                _lastSetDestination = target.position;
+                _pathTimer = 0f;
             }
+
+            HandleStuckDetection(distance);
         }
         else
         {
@@ -822,29 +800,5 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             transform.position,
             explosionRadius
         );
-    }
-
-    //==================================================
-    // DIRECT STEERING
-    //==================================================
-
-    private void SyncAgentToTransform()
-    {
-        if (locomotion != null)
-            locomotion.SyncAgentToTransform();
-    }
-
-    private bool TryDirectSteer(float distance)
-    {
-        if (locomotion != null)
-        {
-            bool result = locomotion.TryDirectSteer(moveSpeed);
-            if (animator != null && result)
-            {
-                animator.SetFloat(SpeedHash, 1f);
-            }
-            return result;
-        }
-        return false;
     }
 }
