@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using cowsins;
 
 /// <summary>
 /// Spawns "special" enemies (Boomer and Tank boss) as a bonus threat layered on

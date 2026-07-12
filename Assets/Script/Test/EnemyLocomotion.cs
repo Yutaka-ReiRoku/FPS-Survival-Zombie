@@ -207,7 +207,7 @@ public class EnemyLocomotion : MonoBehaviour
         NavMeshHit navHit;
         if (NavMesh.SamplePosition(newPos, out navHit, 2f, NavMesh.AllAreas))
         {
-            if (Mathf.Abs(navHit.position.y - transform.position.y) <= Agent.stepHeight + 0.5f)
+            if (Mathf.Abs(navHit.position.y - transform.position.y) <= 1.5f)
             {
                 transform.position = navHit.position;
             }
