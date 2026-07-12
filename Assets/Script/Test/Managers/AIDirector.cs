@@ -37,8 +37,8 @@ public class AIDirector : MonoBehaviour
 
     private Vector3 lastPlayerPosition;
 
-    private readonly List<ZombieAI> activeZombies =
-        new List<ZombieAI>();
+    private readonly HashSet<ZombieAI> activeZombies =
+        new HashSet<ZombieAI>();
 
     public enum DirectorState
     {
@@ -197,16 +197,26 @@ public class AIDirector : MonoBehaviour
     public void RegisterZombie(
         ZombieAI zombie)
     {
-        if (!activeZombies.Contains(zombie))
-        {
-            activeZombies.Add(zombie);
-        }
+        activeZombies.Add(zombie);
     }
 
     public void UnregisterZombie(
         ZombieAI zombie)
     {
         activeZombies.Remove(zombie);
+    }
+
+    public void FlushActiveZombies()
+    {
+        var tempActive = new List<ZombieAI>(activeZombies);
+        foreach (var zombie in tempActive)
+        {
+            if (zombie != null && zombie.gameObject != null)
+            {
+                zombie.gameObject.SetActive(false);
+            }
+        }
+        activeZombies.Clear();
     }
 
     public void RegisterKill()

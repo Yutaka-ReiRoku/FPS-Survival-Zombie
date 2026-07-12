@@ -221,6 +221,27 @@ public class GameOverManager : MonoBehaviour
         if (sm != null && SaveRoom.LastCheckpoint.HasValue)
         {
             isGameOver = false;
+
+            // Flush all active zombies and special enemies
+            if (AIDirector.Instance != null)
+            {
+                AIDirector.Instance.FlushActiveZombies();
+            }
+
+            var spawners = FindObjectsByType<Spawm>(FindObjectsSortMode.None);
+            foreach (var spawner in spawners)
+            {
+                if (spawner != null)
+                {
+                    spawner.FlushSpawner();
+                }
+            }
+
+            if (SpecialEnemyDirector.Instance != null)
+            {
+                SpecialEnemyDirector.Instance.FlushSpecialEnemies();
+            }
+
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;

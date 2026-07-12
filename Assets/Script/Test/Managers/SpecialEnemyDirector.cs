@@ -303,4 +303,21 @@ public class SpecialEnemyDirector : MonoBehaviour
 
         return false;
     }
+
+    public void FlushSpecialEnemies()
+    {
+        var tempBoomers = new List<GameObject>(_alive);
+        foreach (var boomer in tempBoomers)
+        {
+            if (boomer != null) Destroy(boomer);
+        }
+        _alive.Clear();
+
+        var tempTanks = new List<GameObject>(_aliveTanks);
+        foreach (var tank in tempTanks)
+        {
+            if (tank != null) Destroy(tank);
+        }
+        _aliveTanks.Clear();
+    }
 }

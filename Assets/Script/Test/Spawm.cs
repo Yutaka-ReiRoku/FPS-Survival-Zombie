@@ -472,6 +472,19 @@ public class Spawm : MonoBehaviour
         return _cachedPath.status == NavMeshPathStatus.PathComplete;
     }
 
+    public void FlushSpawner()
+    {
+        foreach (var z in _localActiveZombies)
+        {
+            if (z != null && z.gameObject != null)
+            {
+                z.gameObject.SetActive(false);
+            }
+        }
+        _localActiveZombies.Clear();
+        _wanderTimers.Clear();
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
