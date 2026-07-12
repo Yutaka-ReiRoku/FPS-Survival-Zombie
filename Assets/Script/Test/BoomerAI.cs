@@ -386,7 +386,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
                     _pathTimer += Time.deltaTime;
                     float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
-                    if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+                    bool canRepath = agent != null && !agent.pathPending;
+                    if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
                     {
                         SetDestinationRobust(_lastKnownPlayerPos);
                         _lastSetDestination = _lastKnownPlayerPos;
@@ -414,7 +415,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                 // path), so the boomer ends up with no usable path and slides.
                 _pathTimer += Time.deltaTime;
                 float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-                if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+                bool canRepath = agent != null && !agent.pathPending;
+                if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
                 {
                     SetDestinationRobust(target.position);
                     _lastSetDestination = target.position;

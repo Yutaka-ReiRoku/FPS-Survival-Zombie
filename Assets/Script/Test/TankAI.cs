@@ -333,7 +333,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
                     _pathTimer += Time.deltaTime;
                     float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
-                    if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+                    bool canRepath = agent != null && !agent.pathPending;
+                    if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
                     {
                         SetDestinationRobust(_lastKnownPlayerPos);
                         _lastSetDestination = _lastKnownPlayerPos;
@@ -358,7 +359,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
                 // changes direction without flooding the async pathfinding queue.
                 _pathTimer += Time.deltaTime;
                 float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-                if (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+                bool canRepath = agent != null && !agent.pathPending;
+                if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
                 {
                     SetDestinationRobust(target.position);
                     _lastSetDestination = target.position;
