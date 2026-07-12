@@ -22,7 +22,7 @@ public class EnemyLocomotion : MonoBehaviour
     public float maxRepathInterval = 0.1f;
 
     [Header("Direct Steering")]
-    public bool useDirectSteeringWhenLOS = true;
+    public bool useDirectSteeringWhenLOS = false;
     public float directSteeringWallCheckDistance = 1.5f;
     public float directSteeringLOSCacheInterval = 0.15f;
     public float directSteeringWallCooldown = 1.5f;

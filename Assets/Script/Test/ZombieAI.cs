@@ -129,7 +129,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     [Header("Direct Steering (Real-time Tracking)")]
     [Tooltip("Khi true, zombie di chuyển thẳng tới vị trí mới nhất của player mỗi frame khi có line-of-sight (không cần re-path). Khi mất LOS, quay lại NavMesh pathfinding.")]
-    public bool useDirectSteeringWhenLOS = true;
+    public bool useDirectSteeringWhenLOS = false;
     [Tooltip("Khoảng cách raycast check tường phía trước khi direct steering, tránh cắm đầu vào tường (m).")]
     public float directSteeringWallCheckDistance = 1.5f;
     [Tooltip("Interval cache LOS check khi direct steering (giây). Nhỏ hơn = responsive hơn nhưng tốn raycast hơn.")]
@@ -608,7 +608,10 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
             pathTimer += Time.deltaTime;
             float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
-            if (pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold)
+            bool canRepath = !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+            float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
+            float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
+            if (canRepath && (pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
             {
                 SetDestinationRobust(_lastKnownPlayerPos);
                 _lastSetDestination = _lastKnownPlayerPos;
@@ -764,9 +767,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // every frame (because actualDestDrift > 5f keeps triggering), the
             // path never completes and the destination never updates. This creates
             // an infinite re-path loop where zombies never reach the player.
-            bool canRepath = !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
+            bool canRepath = !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
 
-            if (canRepath && (pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold
+            float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
+            float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+
+            if (canRepath && (pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold
                 || actualDestDrift > 5f || pathBroken))
             {
                 // Disable jitter when close to attack range to prevent flip-flop.

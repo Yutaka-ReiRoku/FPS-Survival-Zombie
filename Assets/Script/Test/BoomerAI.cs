@@ -51,7 +51,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
     [Header("Direct Steering (Real-time Tracking)")]
     [Tooltip("Khi true, Boomer di chuyển thẳng tới vị trí mới nhất của player mỗi frame khi có line-of-sight. Khi mất LOS, quay lại NavMesh pathfinding.")]
-    public bool useDirectSteeringWhenLOS = true;
+    public bool useDirectSteeringWhenLOS = false;
     [Tooltip("Khoảng cách raycast check tường phía trước khi direct steering (m).")]
     public float directSteeringWallCheckDistance = 1.5f;
     [Tooltip("Interval cache LOS check khi direct steering (giây).")]
@@ -172,10 +172,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
     private ExplosionType explosionType;
 
-    private void Start()
+    private void Awake()
     {
-        currentHealth = maxHealth;
-
         animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
@@ -195,6 +193,24 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         _originalWallCheckBodyHeight = wallCheckBodyHeight;
         _originalDropHeightOffset = dropHeightOffset;
         _originalMoveSpeed = moveSpeed;
+    }
+
+    private void OnEnable()
+    {
+        currentHealth = maxHealth;
+        isDead = false;
+        isHit = false;
+        isScreaming = false;
+        hasStartedExplosion = false;
+        hasExploded = false;
+        hasDestroyed = false;
+        rewardsGranted = false;
+        isWaitingForExplosion = false;
+        explosionWaitTimer = 0f;
+
+        _alertMemoryTimer = 0f;
+        _hasLastKnownPos = false;
+        _isUsingLastKnownPos = false;
 
         // Dynamically randomize height between 1.6m and 1.9m
         float defaultHeight = 1.8f;
@@ -211,6 +227,8 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         // Scale NavMeshAgent bounds
         if (agent != null)
         {
+            agent.enabled = true;
+            agent.isStopped = false;
             agent.height = _originalAgentHeight * scaleFactor;
             agent.radius = _originalAgentRadius * scaleFactor;
         }
@@ -423,8 +441,10 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
                     _pathTimer += Time.deltaTime;
                     float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
-                    bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
-                    if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
+                    bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+                    float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
+                    float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
+                    if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
                     {
                         SetDestinationRobust(_lastKnownPlayerPos);
                         _lastSetDestination = _lastKnownPlayerPos;
@@ -452,8 +472,10 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                 // path), so the boomer ends up with no usable path and slides.
                 _pathTimer += Time.deltaTime;
                 float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-                bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
-                if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
+                bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+                float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
+                float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
                 {
                     SetDestinationRobust(target.position);
                     _lastSetDestination = target.position;

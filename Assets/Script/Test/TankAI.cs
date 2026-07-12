@@ -48,7 +48,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
     [Header("Direct Steering (Real-time Tracking)")]
     [Tooltip("Khi true, Tank di chuyển thẳng tới vị trí mới nhất của player mỗi frame khi có line-of-sight. Khi mất LOS, quay lại NavMesh pathfinding.")]
-    public bool useDirectSteeringWhenLOS = true;
+    public bool useDirectSteeringWhenLOS = false;
     [Tooltip("Khoảng cách raycast check tường phía trước khi direct steering (m).")]
     public float directSteeringWallCheckDistance = 2f;
     [Tooltip("Interval cache LOS check khi direct steering (giây).")]
@@ -356,8 +356,10 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
                     _pathTimer += Time.deltaTime;
                     float distToLastDest = Vector3.Distance(_lastKnownPlayerPos, _lastSetDestination);
-                    bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
-                    if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
+                    bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+                    float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
+                    float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distToLastKnown - 5f) / 15f));
+                    if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
                     {
                         SetDestinationRobust(_lastKnownPlayerPos);
                         _lastSetDestination = _lastKnownPlayerPos;
@@ -382,8 +384,10 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
                 // changes direction without flooding the async pathfinding queue.
                 _pathTimer += Time.deltaTime;
                 float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-                bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
-                if (canRepath && (_pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold))
+                bool canRepath = agent != null && !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+                float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
+                float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
                 {
                     SetDestinationRobust(target.position);
                     _lastSetDestination = target.position;
