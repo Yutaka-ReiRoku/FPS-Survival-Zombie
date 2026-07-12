@@ -670,25 +670,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
             pathTimer += Time.deltaTime;
 
-            // Re-path when the throttle interval elapses OR the player has
-            // moved far enough from the last destination that the current
-            // path is stale. This keeps zombies responsive when the player
-            // changes direction without flooding the async pathfinding queue.
-            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-            // Also force a re-path if the agent's ACTUAL destination has drifted
-            // far from the player (e.g. SetDestination was silently ignored due
-            // to pathPending, or the path broke with remainingDistance=Infinity).
-            float actualDestDrift = agent.hasPath
-                ? Vector3.Distance(agent.destination, target.position)
-                : 0f;
-            bool pathBroken = agent.hasPath && !agent.pathPending && float.IsInfinity(agent.remainingDistance);
-
             // Don't re-path while a path is already being calculated (pathPending).
-            // ResetPath during pathPending cancels the in-progress path, and the
-            // new SetDestination starts another async path — but if this happens
-            // every frame (because actualDestDrift > 5f keeps triggering), the
-            // path never completes and the destination never updates. This creates
-            // an infinite re-path loop where zombies never reach the player.
             bool canRepath = !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
 
             // Slower repathing when player is out of sight (no LOS) to save CPU
@@ -701,23 +683,14 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
                 dynamicThreshold *= 1.5f;
             }
 
-            if (canRepath && (pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold
-                || pathBroken))
+            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+
+            if (canRepath && (pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
             {
-                Debug.Log($"[ZombieAI] {name} re-path triggered. timer={pathTimer >= dynamicInterval} ({pathTimer:F2}/{dynamicInterval:F2}), dist={distToLastDest > dynamicThreshold} ({distToLastDest:F2}/{dynamicThreshold:F2}), broken={pathBroken}");
                 // Disable jitter when close to attack range to prevent flip-flop.
                 Vector3 dest = target.position;
                 if (distance > attackDistance + chaseJitterRadius + 1f)
                     dest += chaseJitterOffset;
-
-                // If the path is broken (remainingDistance=Infinity), the agent may be
-                // stuck on a stale/invalid path. ResetPath first to clear the
-                // old path state, then SetDestination.
-                if (pathBroken)
-                {
-                    Debug.Log($"[ZombieAI] {name} path is broken! Resetting path.");
-                    agent.ResetPath();
-                }
 
                 SetDestinationRobust(dest);
                 _lastSetDestination = dest;

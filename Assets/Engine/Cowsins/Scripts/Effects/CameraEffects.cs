@@ -45,7 +45,7 @@ namespace cowsins
         private Vector3 origPos;
         private Quaternion origRot;
         private PlayerMovement playerMovementScript;
-        private float currentCrouchTransition = 0f;
+        // private float currentCrouchTransition = 0f;
 
         // Effect offsets — applied as absolute offsets from origPos/origRot each frame.
         // This prevents the accumulation bug where world position/rotation was incremented

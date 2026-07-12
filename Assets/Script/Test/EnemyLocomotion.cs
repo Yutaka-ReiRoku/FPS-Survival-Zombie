@@ -46,7 +46,9 @@ public class EnemyLocomotion : MonoBehaviour
     private float _noPathRetryTimer;
 
     private bool _isDirectSteering;
+#pragma warning disable 0414
     private float _directSteeringCooldownTimer;
+#pragma warning restore 0414
     private float _losCacheTimer;
     private Vector3 _prevFramePos;
     private float _stuckRecoveryCooldownTimer;
@@ -160,6 +162,7 @@ public class EnemyLocomotion : MonoBehaviour
         // This prevents railing stuck/staring loops and ensures robust collision physics.
         return false;
 
+        /*
         if (target == null || Agent == null || !Agent.isOnNavMesh) return false;
 
         // If recovering from being stuck, bypass direct steering so agent can pathfind out
@@ -259,6 +262,7 @@ public class EnemyLocomotion : MonoBehaviour
 
         ExitDirectSteering();
         return false;
+        */
     }
 
     public void ExitDirectSteering()
