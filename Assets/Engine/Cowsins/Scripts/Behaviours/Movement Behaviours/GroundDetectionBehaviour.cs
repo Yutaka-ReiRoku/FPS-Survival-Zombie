@@ -55,9 +55,6 @@ namespace cowsins
 
         public void Tick()
         {
-            if (IsSliding())
-                playerMovement.IsSliding = true;
-
             // Use ground check performed in FixedUpdate
             bool foundGroundThisFrame = _foundGroundThisFixedUpdate;
             RaycastHit hit = _groundHitThisFixedUpdate;

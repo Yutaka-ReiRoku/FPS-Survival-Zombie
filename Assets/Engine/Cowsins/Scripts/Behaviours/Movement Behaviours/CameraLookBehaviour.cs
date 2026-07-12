@@ -104,7 +104,7 @@ public class CameraLookBehaviour
     private void CalculateCameraRoll()
     {
         if (playerMovement.IsWallRunning) cameraRoll = context.WallLeft ? Mathf.Lerp(cameraRoll, -playerSettings.wallrunCameraTiltAmount, Time.deltaTime * playerSettings.cameraTiltTransitionSpeed) : Mathf.Lerp(cameraRoll, playerSettings.wallrunCameraTiltAmount, Time.deltaTime * playerSettings.cameraTiltTransitionSpeed);
-        else if (playerMovement.IsCrouching && playerMovement.CurrentSpeed >= playerMovement.WalkSpeed && playerEvents.Events.InvokeAllowSlide() && !context.HasJumped) cameraRoll = Mathf.Lerp(cameraRoll, playerSettings.slidingCameraTiltAmount, Time.deltaTime * playerSettings.cameraTiltTransitionSpeed);
+        else if (playerMovement.IsSliding) cameraRoll = Mathf.Lerp(cameraRoll, playerSettings.slidingCameraTiltAmount, Time.deltaTime * playerSettings.cameraTiltTransitionSpeed);
         else cameraRoll = Mathf.Lerp(cameraRoll, 0, Time.deltaTime * playerSettings.cameraTiltTransitionSpeed);
     }
 

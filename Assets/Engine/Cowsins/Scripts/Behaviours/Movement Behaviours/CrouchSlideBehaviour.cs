@@ -77,8 +77,11 @@ namespace cowsins
             playerSettings.events.OnCrouch.Invoke();
             playerEvents.Events.OnCrouchStart?.Invoke(); // Internal Event
 
-            // Start sliding when conditions match.
-            if (rb.linearVelocity.magnitude >= playerMovement.WalkSpeed && playerMovement.Grounded && playerSettings.allowSliding && !context.HasJumped)
+            // Start sliding when conditions match, checking sprint/run speed scaled by player weight.
+            float weightMult = context.Dependencies.PlayerMultipliers != null ? context.Dependencies.PlayerMultipliers.WeightMultiplier : 1f;
+            float slideThreshold = (playerMovement.RunSpeed * weightMult) - 0.5f;
+
+            if (rb.linearVelocity.magnitude >= slideThreshold && playerMovement.Grounded && playerSettings.allowSliding && !context.HasJumped)
             {
                 Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
                 if (horizontalVel.magnitude > 0.1f)
@@ -88,6 +91,7 @@ namespace cowsins
 
                 slideBoostRemaining = Mathf.Max(0.0001f, playerSettings.slideBoostDuration);
                 isBoosting = true;
+                playerMovement.IsSliding = true;
 
                 // Begin local boost and timer.
                 slideTimer = playerSettings.slideDuration;
