@@ -188,6 +188,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     private Rigidbody rb;
     private Collider _collider;
     private IDamageable _targetDamageable;
+    private PlayerStats _targetStats;
     private EnemyLocomotion locomotion;
 
     // Caching original values for scaling
@@ -365,9 +366,15 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         // Cache the player's IDamageable once per spawn so AttackHit doesn't
         // call GetComponent every hit (50+ zombies * 1.5s cooldown = ~33 hits/s).
         if (target != null)
+        {
             _targetDamageable = target.GetComponent<IDamageable>();
+            _targetStats = target.GetComponent<PlayerStats>();
+        }
         else
+        {
             _targetDamageable = null;
+            _targetStats = null;
+        }
 
         if (agent != null)
         {
@@ -481,7 +488,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         bool isTargetDead = false;
         if (target != null)
         {
-            var targetStats = target.GetComponent<PlayerStats>();
+            var targetStats = _targetStats;
+            if (targetStats == null)
+            {
+                targetStats = target.GetComponent<PlayerStats>();
+                _targetStats = targetStats;
+            }
             if (targetStats != null && targetStats.IsDead)
             {
                 isTargetDead = true;
@@ -752,7 +764,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             // every frame (because actualDestDrift > 5f keeps triggering), the
             // path never completes and the destination never updates. This creates
             // an infinite re-path loop where zombies never reach the player.
-            bool canRepath = !agent.pathPending;
+            bool canRepath = !agent.pathPending && (locomotion == null || !locomotion.IsRecoveringFromStuck);
 
             if (canRepath && (pathTimer >= maxRepathInterval || distToLastDest > playerMovedRepathThreshold
                 || actualDestDrift > 5f || pathBroken))
@@ -788,6 +800,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     void Wander()
     {
+        if (locomotion != null)
+        {
+            locomotion.ExitDirectSteering();
+        }
+
         agent.speed = walkSpeed;
 
         // Let the agent handle rotation during wander (ChasePlayer disabled it).
