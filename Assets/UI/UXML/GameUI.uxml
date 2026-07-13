@@ -16,6 +16,7 @@
     <ui:Style src="project://database/Assets/UI/USS/WaveAnnouncer.uss" />
     <ui:Style src="project://database/Assets/UI/USS/CombatFeedback.uss" />
     <ui:Style src="project://database/Assets/UI/USS/DamageDirection.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/BossHealthBar.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -151,4 +152,13 @@
 
     <!-- Damage Direction HUD (Phase 17) -->
     <ui:VisualElement name="DamageDirection" />
+
+    <!-- Boss Health Bar (Phase 18) -->
+    <ui:VisualElement name="BossHealthBar" class="boss-root">
+        <ui:VisualElement name="BossBg" class="boss-bg" />
+        <ui:VisualElement name="BossFillArea" class="boss-fill-area">
+            <ui:VisualElement name="BossFill" class="boss-fill" />
+        </ui:VisualElement>
+        <ui:Label name="BossLabel" class="boss-label" text="BOSS" />
+    </ui:VisualElement>
 </ui:UXML>
