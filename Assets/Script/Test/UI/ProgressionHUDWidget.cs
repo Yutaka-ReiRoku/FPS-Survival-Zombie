@@ -1,53 +1,48 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
-/// <summary>
-/// Custom HUD widget for coins + XP/level, fed by CowsinsHUDAdapter (engine-free).
-/// Mirrors the bind/unbind pattern of the other widgets.
-/// </summary>
 public class ProgressionHUDWidget : MonoBehaviour
 {
     [Header("Coins")]
-    public TMP_Text coinsText;
-    public string coinsPrefix = "";
+    [SerializeField] private string _coinsPrefix = "";
 
     [Header("XP / Level")]
-    public TMP_Text levelText;
-    public Slider xpSlider;       // non-interactable; value driven by adapter
-    public Image xpGhost;         // optional delayed trail (Filled Image)
-    public string levelPrefix = "LV ";
+    [SerializeField] private string _levelPrefix = "LV ";
 
     [Header("Tuning")]
-    [Tooltip("Damped lerp rate for XP fill (higher = snappier).")]
-    public float xpDamping = 6f;
-    [Tooltip("Damped lerp rate for XP ghost trail.")]
-    public float xpGhostDamping = 2.5f;
+    [SerializeField] private float _xpDamping = 6f;
+    [SerializeField] private float _xpGhostDamping = 2.5f;
 
+    private VisualElement _root;
+    private Label _coinsLabel;
+    private Label _levelValue;
+    private VisualElement _xpFill;
+    private VisualElement _xpGhost;
     private CowsinsHUDAdapter _adapter;
     private float _xpTarget;
+    private float _currentFillPct;
+    private float _currentGhostPct;
+
+    private void Awake()
+    {
+        var doc = GetComponent<UIDocument>();
+        if (doc == null) { enabled = false; return; }
+        var root = doc.rootVisualElement;
+        _root = root.Q<VisualElement>("ProgressionCluster");
+        _coinsLabel = _root?.Q<Label>("CoinsValue");
+        _levelValue = _root?.Q<Label>("LevelValue");
+        _xpFill = _root?.Q<VisualElement>("XpFill");
+        _xpGhost = _root?.Q<VisualElement>("XpGhost");
+        if (_root == null) { enabled = false; }
+    }
 
     private void OnEnable() { StartCoroutine(Bind()); }
 
     private IEnumerator Bind()
     {
-        float timeout = 12f;
-        while (CowsinsHUDAdapter.Instance == null && timeout > 0f)
-        {
-            timeout -= Time.unscaledDeltaTime;
-            yield return null;
-        }
+        while (CowsinsHUDAdapter.Instance == null) yield return null;
         _adapter = CowsinsHUDAdapter.Instance;
-        if (_adapter == null) yield break;
-        // Configure slider as read-only HUD bar
-        if (xpSlider != null)
-        {
-            xpSlider.interactable = false;
-            xpSlider.minValue = 0f;
-            xpSlider.maxValue = 1f;
-            xpSlider.wholeNumbers = false;
-        }
         _adapter.OnCoinsChanged += HandleCoins;
         _adapter.OnXpChanged += HandleXp;
         HandleCoins(_adapter.Coins);
@@ -61,31 +56,34 @@ public class ProgressionHUDWidget : MonoBehaviour
             _adapter.OnCoinsChanged -= HandleCoins;
             _adapter.OnXpChanged -= HandleXp;
         }
+        StopAllCoroutines();
     }
 
     private void HandleCoins(int coins)
     {
-        if (coinsText != null) coinsText.text = coinsPrefix + coins.ToString();
+        if (_coinsLabel != null) _coinsLabel.text = _coinsPrefix + coins.ToString();
     }
 
     private void HandleXp(int level, float fill)
     {
-        if (levelText != null) levelText.text = levelPrefix + level.ToString();
+        if (_levelValue != null) _levelValue.text = _levelPrefix + level.ToString();
         _xpTarget = Mathf.Clamp01(fill);
     }
 
     private void Update()
     {
         float dt = Time.unscaledDeltaTime;
-        if (xpSlider != null)
+        if (_xpFill != null)
         {
-            float k = 1f - Mathf.Exp(-xpDamping * dt);
-            xpSlider.value = Mathf.Lerp(xpSlider.value, _xpTarget, k);
+            float k = 1f - Mathf.Exp(-_xpDamping * dt);
+            _currentFillPct = Mathf.Lerp(_currentFillPct, _xpTarget, k);
+            _xpFill.style.width = Length.Percent(_currentFillPct * 100f);
         }
-        if (xpGhost != null)
+        if (_xpGhost != null)
         {
-            if (xpGhost.fillAmount < _xpTarget) xpGhost.fillAmount = _xpTarget;
-            else xpGhost.fillAmount = Mathf.Lerp(xpGhost.fillAmount, _xpTarget, 1f - Mathf.Exp(-xpGhostDamping * dt));
+            if (_currentGhostPct < _xpTarget) _currentGhostPct = _xpTarget;
+            else _currentGhostPct = Mathf.Lerp(_currentGhostPct, _xpTarget, 1f - Mathf.Exp(-_xpGhostDamping * dt));
+            _xpGhost.style.width = Length.Percent(_currentGhostPct * 100f);
         }
     }
 }

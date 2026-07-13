@@ -1,8 +1,9 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <ui:Style src="project://database/Assets/UI/USS/GameOverPanel.uss" />
     <ui:Style src="project://database/Assets/UI/USS/PausePanel.uss" />
     <ui:Style src="project://database/Assets/UI/USS/HealthCluster.uss" />
     <ui:Style src="project://database/Assets/UI/USS/AmmoCluster.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/ProgressionCluster.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -69,6 +70,18 @@
         <ui:Label name="AmmoReserve" text="&#x221E;" />
         <ui:VisualElement name="HeatBarTrack">
             <ui:VisualElement name="HeatBarFill" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Progression Cluster (Phase 5) -->
+    <ui:VisualElement name="ProgressionCluster">
+        <ui:Label name="ProgressionLabel" text="LEVEL" />
+        <ui:VisualElement name="XpBarRow">
+            <ui:VisualElement name="XpTrack">
+                <ui:VisualElement name="XpGhost" />
+                <ui:VisualElement name="XpFill" />
+            </ui:VisualElement>
+            <ui:Label name="LevelValue" text="LV 1" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
