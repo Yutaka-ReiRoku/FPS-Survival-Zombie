@@ -1,58 +1,56 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
-/// <summary>Current weapon name + icon, with a quick fade-in on swap. Reads CowsinsHUDAdapter only.</summary>
 public class WeaponIndicatorWidget : MonoBehaviour
 {
-    public TMP_Text nameText;
-    public Image iconImage;
-    public CanvasGroup group;     // optional, for crossfade on swap
     public float fadeSpeed = 6f;
 
-    private Coroutine _fade;
+    private Label _weaponName;
+    private VisualElement _weaponIcon;
+    private VisualElement _root;
+    private float _currentOpacity = 1f;
+    private float _targetOpacity = 1f;
 
-    private void OnEnable() { StartCoroutine(Bind()); }
+    private void Awake()
+    {
+        var doc = GetComponent<UIDocument>();
+        var root = doc.rootVisualElement;
+        _root = root.Q("WeaponIndicator");
+        _weaponName = _root.Q<Label>("WeaponName");
+        _weaponIcon = _root.Q("WeaponIcon");
+    }
+
+    private void OnEnable()
+    {
+        var a = CowsinsHUDAdapter.Instance;
+        if (a == null) return;
+        a.OnWeaponChanged += OnWeapon;
+        OnWeapon(a.WeaponName, a.WeaponIcon);
+    }
 
     private void OnDisable()
     {
         var a = CowsinsHUDAdapter.Instance;
         if (a != null) a.OnWeaponChanged -= OnWeapon;
-        StopAllCoroutines();
-    }
-
-    private IEnumerator Bind()
-    {
-        while (CowsinsHUDAdapter.Instance == null) yield return null;
-        var a = CowsinsHUDAdapter.Instance;
-        a.OnWeaponChanged += OnWeapon;
-        OnWeapon(a.WeaponName, a.WeaponIcon);
     }
 
     private void OnWeapon(string n, Sprite icon)
     {
-        if (nameText != null) nameText.text = string.IsNullOrEmpty(n) ? string.Empty : n.ToUpperInvariant();
-        if (iconImage != null)
-        {
-            iconImage.sprite = icon;
-            iconImage.enabled = icon != null;
-        }
-        if (group != null)
-        {
-            if (_fade != null) StopCoroutine(_fade);
-            _fade = StartCoroutine(FadeIn());
-        }
+        _weaponName.text = string.IsNullOrEmpty(n) ? string.Empty : n.ToUpperInvariant();
+        if (icon != null)
+            _weaponIcon.style.backgroundImage = new StyleBackground(icon);
+        else
+            _weaponIcon.style.backgroundImage = null;
+
+        _currentOpacity = 0.25f;
+        _targetOpacity = 1f;
+        _root.style.opacity = _currentOpacity;
     }
 
-    private IEnumerator FadeIn()
+    private void Update()
     {
-        group.alpha = 0.25f;
-        while (group.alpha < 0.999f)
-        {
-            group.alpha = Mathf.MoveTowards(group.alpha, 1f, fadeSpeed * Time.unscaledDeltaTime);
-            yield return null;
-        }
-        group.alpha = 1f;
+        if (_currentOpacity >= _targetOpacity) return;
+        _currentOpacity = Mathf.MoveTowards(_currentOpacity, _targetOpacity, fadeSpeed * Time.unscaledDeltaTime);
+        _root.style.opacity = _currentOpacity;
     }
 }

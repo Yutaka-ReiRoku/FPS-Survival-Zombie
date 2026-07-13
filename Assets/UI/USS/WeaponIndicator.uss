@@ -1,0 +1,38 @@
+/* ===== WeaponIndicator.uss ===== */
+@import url("Shared.uss");
+
+#WeaponIndicator {
+    position: absolute;
+    right: 48px;
+    bottom: 210px;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    height: 64px;
+    padding: 0 12px;
+    background-image: resource("Images/ui_panel");
+    -unity-slice-top: 16;
+    -unity-slice-bottom: 16;
+    -unity-slice-left: 16;
+    -unity-slice-right: 16;
+}
+
+#WeaponName {
+    -unity-font: resource("Fonts/Outfit-SemiBold");
+    font-size: 28px;
+    color: rgb(235, 224, 199);
+    -unity-text-align: middle-right;
+    width: 244px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+#WeaponIcon {
+    width: 74px;
+    height: 46px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    flex-shrink: 0;
+    margin-left: 10px;
+}

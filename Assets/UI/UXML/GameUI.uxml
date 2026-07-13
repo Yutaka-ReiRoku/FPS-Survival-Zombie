@@ -4,6 +4,7 @@
     <ui:Style src="project://database/Assets/UI/USS/HealthCluster.uss" />
     <ui:Style src="project://database/Assets/UI/USS/AmmoCluster.uss" />
     <ui:Style src="project://database/Assets/UI/USS/ProgressionCluster.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/WeaponIndicator.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -83,5 +84,11 @@
             </ui:VisualElement>
             <ui:Label name="LevelValue" text="LV 1" />
         </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Weapon Indicator (Phase 6) -->
+    <ui:VisualElement name="WeaponIndicator">
+        <ui:Label name="WeaponName" text="" />
+        <ui:VisualElement name="WeaponIcon" />
     </ui:VisualElement>
 </ui:UXML>
