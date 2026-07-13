@@ -14,6 +14,7 @@
     <ui:Style src="project://database/Assets/UI/USS/Dash.uss" />
     <ui:Style src="project://database/Assets/UI/USS/InteractPrompt.uss" />
     <ui:Style src="project://database/Assets/UI/USS/WaveAnnouncer.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/CombatFeedback.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -138,5 +139,12 @@
     <ui:VisualElement name="WaveAnnouncer">
         <ui:Label name="WaveTitle" class="wave-title" text="WAVE 1" />
         <ui:Label name="WaveSub" class="wave-sub" text="SURVIVE" />
+    </ui:VisualElement>
+
+    <!-- Combat Feedback HUD (Phase 16) -->
+    <ui:VisualElement name="CombatFeedbackHUD">
+        <ui:VisualElement name="Hitmarker" />
+        <ui:VisualElement name="DamageNumbers" />
+        <ui:VisualElement name="Killfeed" />
     </ui:VisualElement>
 </ui:UXML>
