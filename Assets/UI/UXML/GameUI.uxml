@@ -17,6 +17,7 @@
     <ui:Style src="project://database/Assets/UI/USS/CombatFeedback.uss" />
     <ui:Style src="project://database/Assets/UI/USS/DamageDirection.uss" />
     <ui:Style src="project://database/Assets/UI/USS/BossHealthBar.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/ThreatWidget.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -160,5 +161,14 @@
             <ui:VisualElement name="BossFill" class="boss-fill" />
         </ui:VisualElement>
         <ui:Label name="BossLabel" class="boss-label" text="BOSS" />
+    </ui:VisualElement>
+
+    <!-- Threat Widget (Phase 19) -->
+    <ui:VisualElement name="ThreatWidget" class="threat-root">
+        <ui:Label name="ThreatState" class="threat-state" text="CALM" />
+        <ui:VisualElement name="ThreatBarBg" class="threat-bar-bg">
+            <ui:VisualElement name="ThreatFill" class="threat-fill" />
+        </ui:VisualElement>
+        <ui:Label name="ThreatWarn" class="threat-warn" text="FLANKED \u2014 MOVE!" />
     </ui:VisualElement>
 </ui:UXML>

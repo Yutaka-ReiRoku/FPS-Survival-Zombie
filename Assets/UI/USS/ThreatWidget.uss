@@ -1,0 +1,64 @@
+/* ===== ThreatWidget.uss ===== */
+
+#ThreatWidget {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.threat-root {
+    position: absolute;
+    width: 320px;
+    height: 80px;
+    left: 50%;
+    top: 58px;
+    translate: -50% 0;
+}
+
+.threat-state {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 2px;
+    font-size: 18px;
+    -unity-text-align: middle-center;
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: var(--color-text-primary, rgba(245, 245, 245, 1));
+    white-space: nowrap;
+    overflow: visible;
+}
+
+.threat-bar-bg {
+    position: absolute;
+    width: 240px;
+    height: 6px;
+    left: 50%;
+    top: 24px;
+    translate: -50% 0;
+    background-color: rgba(20, 24, 29, 0.85);
+    border-radius: var(--radius-s, 8px);
+    overflow: hidden;
+}
+
+.threat-fill {
+    height: 100%;
+    background-color: rgb(79, 224, 138);
+    transition: width 0.15s ease-out;
+}
+
+.threat-warn {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 36px;
+    font-size: 24px;
+    -unity-text-align: middle-center;
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: rgb(242, 82, 69);
+    opacity: 0;
+    white-space: nowrap;
+    overflow: visible;
+}
