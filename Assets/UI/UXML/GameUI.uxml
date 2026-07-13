@@ -11,6 +11,7 @@
     <ui:Style src="project://database/Assets/UI/USS/Stamina.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Crosshair.uss" />
     <ui:Style src="project://database/Assets/UI/USS/FPS.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Dash.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -124,4 +125,7 @@
 
     <!-- FPS Counter (Phase 12) -->
     <ui:Label name="FPSLabel" text="-- FPS" class="fps-counter" />
+
+    <!-- Dash Widget (Phase 13) -->
+    <ui:VisualElement name="DashWidget" class="dash-widget" />
 </ui:UXML>
