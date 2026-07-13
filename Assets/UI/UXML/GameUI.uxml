@@ -9,6 +9,7 @@
     <ui:Style src="project://database/Assets/UI/USS/WeaponInventory.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Compass.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Stamina.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Crosshair.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -116,4 +117,7 @@
         <ui:VisualElement name="StaminaBg" />
         <ui:VisualElement name="StaminaFill" />
     </ui:VisualElement>
+
+    <!-- Crosshair (Phase 11) -->
+    <ui:VisualElement name="Crosshair" class="crosshair-container" />
 </ui:UXML>
