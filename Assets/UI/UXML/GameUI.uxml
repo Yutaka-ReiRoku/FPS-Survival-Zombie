@@ -18,6 +18,7 @@
     <ui:Style src="project://database/Assets/UI/USS/DamageDirection.uss" />
     <ui:Style src="project://database/Assets/UI/USS/BossHealthBar.uss" />
     <ui:Style src="project://database/Assets/UI/USS/ThreatWidget.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/UpgradesWidget.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -171,4 +172,7 @@
         </ui:VisualElement>
         <ui:Label name="ThreatWarn" class="threat-warn" text="FLANKED \u2014 MOVE!" />
     </ui:VisualElement>
+
+    <!-- Upgrades Widget (Phase 20) -->
+    <ui:Label name="UpgradesWidget" text="" />
 </ui:UXML>

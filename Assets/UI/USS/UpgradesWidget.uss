@@ -1,0 +1,14 @@
+#UpgradesWidget {
+    position: absolute;
+    right: 24px;
+    top: 170px;
+    width: 320px;
+    height: 28px;
+    color: rgb(217, 199, 115);
+    font-size: 20px;
+    -unity-font: var(--font-body);
+    -unity-text-align: middle-right;
+    white-space: nowrap;
+    opacity: 0;
+    display: flex;
+}
