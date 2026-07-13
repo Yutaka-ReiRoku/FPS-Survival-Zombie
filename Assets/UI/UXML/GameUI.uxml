@@ -2,6 +2,7 @@
     <ui:Style src="project://database/Assets/UI/USS/GameOverPanel.uss" />
     <ui:Style src="project://database/Assets/UI/USS/PausePanel.uss" />
     <ui:Style src="project://database/Assets/UI/USS/HealthCluster.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/AmmoCluster.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -53,6 +54,21 @@
             <ui:VisualElement name="ShieldTrack">
                 <ui:VisualElement name="ShieldFill" />
             </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Ammo Cluster (Phase 4) -->
+    <ui:VisualElement name="AmmoCluster">
+        <ui:Label name="AmmoLabel" text="AMMO" />
+        <ui:VisualElement name="AmmoValueRow">
+            <ui:VisualElement name="AmmoValueGradient" />
+            <ui:VisualElement name="AmmoPunchRoot">
+                <ui:Label name="AmmoValue" text="30" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label name="AmmoReserve" text="&#x221E;" />
+        <ui:VisualElement name="HeatBarTrack">
+            <ui:VisualElement name="HeatBarFill" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
