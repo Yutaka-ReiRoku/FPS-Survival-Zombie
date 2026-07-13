@@ -12,6 +12,7 @@
     <ui:Style src="project://database/Assets/UI/USS/Crosshair.uss" />
     <ui:Style src="project://database/Assets/UI/USS/FPS.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Dash.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/InteractPrompt.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -128,4 +129,7 @@
 
     <!-- Dash Widget (Phase 13) -->
     <ui:VisualElement name="DashWidget" class="dash-widget" />
+
+    <!-- Interact Prompt (Phase 14) -->
+    <ui:VisualElement name="InteractPrompt" class="interact-prompt" />
 </ui:UXML>
