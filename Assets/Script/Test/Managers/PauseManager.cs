@@ -1,18 +1,15 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 using cowsins;
 
 public class PauseManager : MonoBehaviour
 {
     public static PauseManager Instance;
 
-    [Header("UI")]
-    public GameObject pausePanel;
-    public Button resumeButton;
-    public Button mainMenuButton;
-    public Button quitButton;
+    [Header("UIDocument")]
+    public UIDocument uiDocument;
 
     [Header("Main Menu")]
     public string mainMenuSceneName = "MainMenu";
@@ -20,56 +17,99 @@ public class PauseManager : MonoBehaviour
     public bool IsPaused { get; private set; }
 
     private PlayerControl playerControl;
+    private Transform _canvasRoot;
+
+    private VisualElement _pausePanel;
+    private VisualElement _pauseCard;
+    private Button _resumeButton;
+    private Button _mainMenuButton;
+    private Button _quitButton;
+
+    private bool _uiReady;
 
     private void Awake()
     {
         Instance = this;
-        // Clear any stale HUD-hide state from a previous scene/session.
-        // _hudActiveState is static and survives scene reloads (and play-mode
-        // restarts when "Reload Domain" is off), so leftover entries would make
-        // SetHUDVisible(false) skip hiding the HUD on newly-loaded scenes.
         _hudActiveState.Clear();
-        if (pausePanel != null)
-            pausePanel.SetActive(false);
-        if (resumeButton != null)
-            resumeButton.onClick.AddListener(Resume);
-        if (mainMenuButton != null)
-            mainMenuButton.onClick.AddListener(GoToMainMenu);
-        if (quitButton != null)
-            quitButton.onClick.AddListener(QuitGame);
+    }
+
+    private void OnEnable()
+    {
+        SetupUI();
     }
 
     private void Start()
     {
+        _canvasRoot = GameObject.Find("GameUICanvas")?.transform;
+
         var p = GameObject.FindGameObjectWithTag("Player");
         if (p != null)
             playerControl = p.GetComponentInChildren<PlayerControl>();
 
-        // Lock cursor khi vào gameplay (scene này không có Cowsins UIController
-        // để gọi LockMouse() trong Start, nên PauseManager phải đảm nhiệm việc đó).
         if (!IsPaused && (GameOverManager.Instance == null || !GameOverManager.Instance.IsGameOver))
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+            UnityEngine.Cursor.visible = false;
         }
+    }
+
+    private void OnDisable()
+    {
+        if (_resumeButton != null) _resumeButton.clicked -= Resume;
+        if (_mainMenuButton != null) _mainMenuButton.clicked -= GoToMainMenu;
+        if (_quitButton != null) _quitButton.clicked -= QuitGame;
+    }
+
+    private void SetupUI()
+    {
+        if (uiDocument == null)
+            uiDocument = GetComponent<UIDocument>();
+        if (uiDocument == null)
+            uiDocument = FindAnyObjectByType<UIDocument>();
+        if (uiDocument == null || uiDocument.rootVisualElement == null)
+        {
+            Debug.LogError("[PauseManager] No UIDocument found! PausePanel will not function.");
+            return;
+        }
+
+        var root = uiDocument.rootVisualElement;
+        _pausePanel = root.Q("PausePanel");
+        if (_pausePanel == null)
+        {
+            Debug.LogError("[PauseManager] PausePanel not found in UXML!");
+            return;
+        }
+
+        _pauseCard = _pausePanel.Q("PauseCard");
+        _resumeButton = _pausePanel.Q<Button>("ResumeButton");
+        _mainMenuButton = _pausePanel.Q<Button>("PauseMainMenuButton");
+        _quitButton = _pausePanel.Q<Button>("PauseQuitButton");
+
+        _pausePanel.style.display = DisplayStyle.None;
+
+        if (_resumeButton != null)
+            _resumeButton.clicked += Resume;
+        if (_mainMenuButton != null)
+            _mainMenuButton.clicked += GoToMainMenu;
+        if (_quitButton != null)
+            _quitButton.clicked += QuitGame;
+
+        _uiReady = true;
     }
 
     private void Update()
     {
-        // Never pause during Game Over.
         if (GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver)
             return;
         var kb = Keyboard.current;
         if (kb != null && kb.escapeKey.wasPressedThisFrame)
         {
-            // If the skill-tree panel is open, Esc closes it instead of pausing.
             var skillTree = FindAnyObjectByType<SkillTreeWidget>();
             if (skillTree != null && skillTree.IsOpen)
             {
                 skillTree.Close();
                 return;
             }
-            // If the journal panel is open, Esc closes it instead of pausing.
             if (JournalUI.Instance != null && JournalUI.Instance.IsOpen)
             {
                 JournalUI.Instance.Close();
@@ -87,57 +127,45 @@ public class PauseManager : MonoBehaviour
 
     public void Pause()
     {
+        if (!_uiReady) return;
         IsPaused = true;
-        if (pausePanel != null)
-            pausePanel.SetActive(true);
-        SetHUDVisible(pausePanel != null ? pausePanel.transform.parent : null, false);
+        if (_pausePanel != null)
+        {
+            _pausePanel.style.display = DisplayStyle.Flex;
+            if (_pauseCard != null)
+                _pauseCard.AddToClassList("visible");
+        }
+        SetHUDVisible(_canvasRoot, false);
         if (playerControl != null)
             playerControl.LoseControl();
         Time.timeScale = 0f;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        UnityEngine.Cursor.lockState = CursorLockMode.None;
+        UnityEngine.Cursor.visible = true;
     }
 
     public void Resume()
     {
+        if (!_uiReady) return;
         IsPaused = false;
-        if (pausePanel != null)
-            pausePanel.SetActive(false);
-        SetHUDVisible(pausePanel != null ? pausePanel.transform.parent : null, true);
+        if (_pausePanel != null)
+            _pausePanel.style.display = DisplayStyle.None;
+        SetHUDVisible(_canvasRoot, true);
         Time.timeScale = 1f;
         if (playerControl != null)
             playerControl.GrantControl();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+        UnityEngine.Cursor.visible = false;
     }
 
-    /// <summary>
-    /// Toggles visibility of gameplay HUD elements and the Cowsins crosshair.
-    /// Shared by PauseManager, SkillTreeWidget and JournalUI so any overlay menu
-    /// can hide the gameplay HUD while it's open. Hides every direct child of
-    /// <paramref name="canvasRoot"/> except the overlay panels themselves
-    /// (PausePanel, GameOverPanel, JournalUI, SkillTreeWidget), so newly added
-    /// gameplay widgets are hidden automatically without updating a name list.
-    /// When restoring (visible=true), only children that were active right before
-    /// the HUD was hidden are re-activated — elements that are intentionally
-    /// inactive (legacy HUD, GameOverPanel, LowHealthVignette, ...) stay off.
-    /// </summary>
-    /// <param name="canvasRoot">Transform whose direct children include the HUD
-    /// elements (typically the UICanvas). Pass null to skip the canvas search.</param>
     public static void SetHUDVisible(Transform canvasRoot, bool visible)
     {
         if (canvasRoot != null)
         {
-            // Overlay panels that must stay visible regardless of `visible`.
             string[] overlayNames = { "PausePanel", "GameOverPanel", "JournalUI", "SkillTreeWidget", "QuestTrackerWidget" };
 
             if (!visible)
             {
-                // If HUD is already hidden by another overlay, don't overwrite
-                // the recorded state — just let the caller keep the existing hide.
                 if (_hudActiveState.Count > 0) return;
-                // Remember which non-overlay children were active so we can
-                // restore exactly those (and only those) later.
                 for (int i = 0; i < canvasRoot.childCount; i++)
                 {
                     var child = canvasRoot.GetChild(i);
@@ -155,8 +183,6 @@ public class PauseManager : MonoBehaviour
             }
             else
             {
-                // Re-activate only the children that were active before hiding.
-                // If we never hid (no recorded state), do nothing.
                 if (_hudActiveState.Count == 0) return;
                 for (int i = 0; i < canvasRoot.childCount; i++)
                 {
@@ -168,7 +194,7 @@ public class PauseManager : MonoBehaviour
                 _hudActiveState.Clear();
             }
         }
-        // Ẩn crosshair Cowsins (nằm trong PlayerUI)
+
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
@@ -177,9 +203,6 @@ public class PauseManager : MonoBehaviour
         }
     }
 
-    // Remembers which gameplay-HUD children of the canvas were active before
-    // SetHUDVisible(false) was called, so the matching restore only turns back
-    // on the ones that were on — not legacy/conditional elements.
     private static readonly System.Collections.Generic.Dictionary<string, bool> _hudActiveState = new System.Collections.Generic.Dictionary<string, bool>();
 
     public void GoToMainMenu()

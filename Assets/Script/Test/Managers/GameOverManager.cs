@@ -72,14 +72,19 @@ public class GameOverManager : MonoBehaviour
 
         var root = uiDocument.rootVisualElement;
         _gameOverPanel = root.Q("GameOverPanel");
-        _card = root.Q("Card");
-        _finalScoreText = root.Q<Label>("FinalScoreText");
-        _waveReachedText = root.Q<Label>("WaveReachedText");
-        _killsText = root.Q<Label>("KillsText");
-        _bestScoreText = root.Q<Label>("BestScoreText");
-        _restartButton = root.Q<Button>("RestartButton");
-        _mainMenuButton = root.Q<Button>("MainMenuButton");
-        _quitButton = root.Q<Button>("QuitButton");
+        if (_gameOverPanel == null)
+        {
+            Debug.LogError("[GameOverManager] GameOverPanel not found in UXML!");
+            return;
+        }
+        _card = _gameOverPanel.Q("Card");
+        _finalScoreText = _gameOverPanel.Q<Label>("FinalScoreText");
+        _waveReachedText = _gameOverPanel.Q<Label>("WaveReachedText");
+        _killsText = _gameOverPanel.Q<Label>("KillsText");
+        _bestScoreText = _gameOverPanel.Q<Label>("BestScoreText");
+        _restartButton = _gameOverPanel.Q<Button>("RestartButton");
+        _mainMenuButton = _gameOverPanel.Q<Button>("MainMenuButton");
+        _quitButton = _gameOverPanel.Q<Button>("QuitButton");
 
         if (_gameOverPanel != null)
             _gameOverPanel.style.display = DisplayStyle.None;

@@ -1,5 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:Style src="project://database/Assets/UI/USS/GameOverPanel.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/PausePanel.uss" />
+
+    <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
         <ui:VisualElement name="Vignette" />
         <ui:VisualElement name="CardShadow" />
@@ -17,6 +20,21 @@
             <ui:Button name="RestartButton" text="RESTART" class="gameover-button" />
             <ui:Button name="MainMenuButton" text="MAIN MENU" class="gameover-button" />
             <ui:Button name="QuitButton" text="QUIT" class="gameover-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Pause Panel (Phase 2) -->
+    <ui:VisualElement name="PausePanel" style="display: none;">
+        <ui:VisualElement name="PauseVignette" />
+        <ui:VisualElement name="PauseCardShadow" />
+        <ui:VisualElement name="PauseCard" view-data-key="PauseCardPivot">
+            <ui:VisualElement name="PauseTopAccent" />
+            <ui:VisualElement name="PauseIcon" />
+            <ui:Label name="PauseTitle" text="PAUSED" />
+            <ui:VisualElement name="PauseDivider" />
+            <ui:Button name="ResumeButton" text="RESUME" class="pause-button" />
+            <ui:Button name="PauseMainMenuButton" text="MAIN MENU" class="pause-button" />
+            <ui:Button name="PauseQuitButton" text="QUIT" class="pause-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

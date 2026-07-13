@@ -1,0 +1,139 @@
+/* ===== PausePanel.uss ===== */
+@import url("Shared.uss");
+
+/* === Root: full-screen overlay === */
+#PausePanel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: rgba(5, 6, 9, 0.92);
+}
+
+/* === Vignette === */
+#PauseVignette {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: resource("Images/ui_vignette");
+    background-size: cover;
+}
+
+/* === CardShadow === */
+#PauseCardShadow {
+    position: absolute;
+    width: 800px;
+    height: 760px;
+    left: 50%;
+    top: 50%;
+    margin-left: -400px;
+    margin-top: -368px;
+    background-image: resource("Images/ui_shadow");
+    -unity-slice-left: 48;
+    -unity-slice-right: 48;
+    -unity-slice-top: 48;
+    -unity-slice-bottom: 48;
+    opacity: 0.6;
+}
+
+/* === PauseCard === */
+#PauseCard {
+    width: 760px;
+    height: 720px;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(25, 30, 37);
+    border-radius: var(--radius-m);
+    opacity: 0;
+    scale: var(--panel-start-scale);
+    transition: opacity var(--panel-in-duration) ease-out, scale var(--panel-in-duration) ease-out;
+}
+
+#PauseCard.visible {
+    opacity: 1;
+    scale: 1;
+}
+
+/* === TopAccent (blue for pause) === */
+#PauseTopAccent {
+    width: 760px;
+    height: 7px;
+    flex-shrink: 0;
+    background-color: rgb(92, 158, 235);
+    border-top-left-radius: var(--radius-m);
+    border-top-right-radius: var(--radius-m);
+}
+
+/* === Pause Icon === */
+#PauseIcon {
+    width: 58px;
+    height: 58px;
+    margin-top: 24px;
+    flex-shrink: 0;
+    background-image: resource("Icons/icon_pause");
+    -unity-background-image-tint-color: rgb(179, 217, 255);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* === Title "PAUSED" === */
+#PauseTitle {
+    font-size: 92px;
+    -unity-font: resource("Fonts/Anton");
+    -unity-text-align: middle-center;
+    letter-spacing: 6px;
+    width: 720px;
+    height: 130px;
+    margin-top: 16px;
+    flex-shrink: 0;
+    color: rgb(245, 245, 245);
+    -unity-text-outline-color: rgba(0, 0, 0, 0.5);
+    -unity-text-outline-width: 2px;
+}
+
+/* === Divider === */
+#PauseDivider {
+    width: 620px;
+    height: 2px;
+    flex-shrink: 0;
+    margin-top: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* === Buttons === */
+.pause-button {
+    width: 380px;
+    height: 66px;
+    flex-shrink: 0;
+    margin: 4px 0;
+    font-size: 28px;
+    -unity-font: resource("Fonts/Outfit-SemiBold");
+    color: var(--color-text-primary);
+    -unity-text-align: middle-center;
+    background-image: resource("Images/ui_button");
+    -unity-slice-left: 8;
+    -unity-slice-right: 8;
+    -unity-slice-top: 8;
+    -unity-slice-bottom: 8;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    transition: scale 0.1s ease-out;
+}
+
+.pause-button:hover {
+    scale: var(--hover-scale);
+}
+
+.pause-button:active {
+    scale: var(--press-scale);
+}
