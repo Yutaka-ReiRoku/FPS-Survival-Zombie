@@ -1,0 +1,86 @@
+/* ===== HealthCluster.uss ===== */
+@import url("Shared.uss");
+
+#HealthCluster {
+    position: absolute;
+    left: 48px;
+    bottom: 48px;
+    flex-direction: column;
+    width: 470px;
+    padding: 10px 20px 16px;
+    background-color: rgba(15, 13, 18, 0.62);
+}
+
+#HealthLabel {
+    font-size: 18px;
+    -unity-font: resource("Fonts/Outfit-SemiBold");
+    color: rgba(204, 191, 153, 0.85);
+    height: 24px;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+
+#HealthBarRow {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+#HealthTrack {
+    position: relative;
+    width: 330px;
+    height: 26px;
+    flex-shrink: 0;
+    background-color: rgba(36, 31, 31, 0.9);
+    overflow: hidden;
+}
+
+#HealthGhost {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(184, 31, 31, 0.7);
+}
+
+#HealthFill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(217, 199, 115);
+}
+
+#HealthValue {
+    font-size: 44px;
+    -unity-font: resource("Fonts/Outfit-SemiBold");
+    color: rgb(235, 224, 199);
+    width: 104px;
+    height: 56px;
+    flex-shrink: 0;
+    -unity-text-align: middle-left;
+}
+
+#ShieldRoot {
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+
+#ShieldTrack {
+    position: relative;
+    width: 330px;
+    height: 12px;
+    background-color: rgba(36, 31, 31, 0.9);
+    overflow: hidden;
+}
+
+#ShieldFill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(115, 199, 242);
+}

@@ -1,6 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:Style src="project://database/Assets/UI/USS/GameOverPanel.uss" />
     <ui:Style src="project://database/Assets/UI/USS/PausePanel.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/HealthCluster.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -35,6 +36,23 @@
             <ui:Button name="ResumeButton" text="RESUME" class="pause-button" />
             <ui:Button name="PauseMainMenuButton" text="MAIN MENU" class="pause-button" />
             <ui:Button name="PauseQuitButton" text="QUIT" class="pause-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Health Cluster (Phase 3) -->
+    <ui:VisualElement name="HealthCluster">
+        <ui:Label name="HealthLabel" text="HEALTH" />
+        <ui:VisualElement name="HealthBarRow">
+            <ui:VisualElement name="HealthTrack">
+                <ui:VisualElement name="HealthGhost" />
+                <ui:VisualElement name="HealthFill" />
+            </ui:VisualElement>
+            <ui:Label name="HealthValue" text="100" />
+        </ui:VisualElement>
+        <ui:VisualElement name="ShieldRoot">
+            <ui:VisualElement name="ShieldTrack">
+                <ui:VisualElement name="ShieldFill" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
