@@ -1,70 +1,60 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
-/// <summary>
-/// Directional damage indicator on the unified HUD. The engine's PlayerStats.Damage
-/// carries no direction, so attackers (ZombieAI.AttackHit) call ShowDamageFrom(worldPos)
-/// here; we compute the bearing relative to the camera's facing and flash a red arc on
-/// that side of the screen. Pooled so multiple simultaneous hits show. Self-building,
-/// engine-free, unscaled time, singleton, root stays active.
-/// </summary>
 public class DamageDirectionHUD : MonoBehaviour
 {
     public static DamageDirectionHUD Instance { get; private set; }
 
-    [Tooltip("Ring radius (reference px) the arc sits at from screen center.")]
     public float radius = 160f;
     public float arcWidth = 120f, arcHeight = 16f;
     public float fadeTime = 1.0f;
     public int poolSize = 8;
 
-    private readonly List<RectTransform> _pivots = new List<RectTransform>();
-    private readonly List<CanvasGroup> _groups = new List<CanvasGroup>();
-    private Color _color = new Color(0.95f, 0.32f, 0.27f, 1f);
+    private readonly List<VisualElement> _pivots = new List<VisualElement>();
+    private VisualElement _root;
 
-    private void Awake()
+    private static readonly Color ArcColor = new Color(0.898f, 0.282f, 0.235f, 1f);
+
+    private void OnEnable()
     {
-        if (Instance != null && Instance != this) { Destroy(this); return; }
+        if (Instance != null && Instance != this) { enabled = false; return; }
         Instance = this;
-        var th = UITheme.Active;
-        if (th != null) _color = th.dangerTop;
+        var doc = GetComponent<UIDocument>();
+        if (doc == null) { enabled = false; return; }
+        _root = doc.rootVisualElement.Q("DamageDirection");
+        if (_root == null) { enabled = false; return; }
         Build();
     }
 
-    private void OnDestroy() { if (Instance == this) Instance = null; }
+    private void OnDisable()
+    {
+        if (Instance == this) Instance = null;
+    }
 
     private void Build()
     {
+        _root.Clear();
+        _pivots.Clear();
         for (int i = 0; i < poolSize; i++)
         {
-            var pivot = new GameObject("Dir", typeof(RectTransform));
-            pivot.transform.SetParent(transform, false);
-            var prt = (RectTransform)pivot.transform;
-            prt.anchorMin = prt.anchorMax = new Vector2(0.5f, 0.5f);
-            prt.pivot = new Vector2(0.5f, 0.5f);
-            prt.anchoredPosition = Vector2.zero;
-            prt.sizeDelta = Vector2.zero;
-            var cg = pivot.AddComponent<CanvasGroup>();
-            cg.alpha = 0f; cg.interactable = false; cg.blocksRaycasts = false;
+            var pivot = new VisualElement();
+            pivot.name = "Dir";
+            pivot.AddToClassList("dir-pivot");
+            _root.Add(pivot);
+            _pivots.Add(pivot);
 
-            // arc sits above center; rotating the pivot moves it around the ring.
-            var arc = new GameObject("Arc", typeof(RectTransform));
-            arc.transform.SetParent(prt, false);
-            var art = (RectTransform)arc.transform;
-            art.anchorMin = art.anchorMax = new Vector2(0.5f, 0.5f);
-            art.pivot = new Vector2(0.5f, 0.5f);
-            art.anchoredPosition = new Vector2(0f, radius);
-            art.sizeDelta = new Vector2(arcWidth, arcHeight);
-            var img = arc.AddComponent<Image>();
-            img.color = _color; img.raycastTarget = false;
-
-            _pivots.Add(prt);
-            _groups.Add(cg);
+            var arc = new VisualElement();
+            arc.name = "Arc";
+            arc.AddToClassList("dir-arc");
+            arc.style.width = arcWidth;
+            arc.style.height = arcHeight;
+            arc.style.backgroundColor = new StyleColor(ArcColor);
+            arc.style.translate = new Translate(0, -radius);
+            pivot.Add(arc);
         }
     }
 
-    /// <summary>Flash an indicator pointing toward a world-space attacker position.</summary>
     public void ShowDamageFrom(Vector3 worldAttackerPos)
     {
         var cam = Camera.main;
@@ -73,22 +63,26 @@ public class DamageDirectionHUD : MonoBehaviour
         dir.y = 0f;
         if (dir.sqrMagnitude < 0.0001f) return;
         Vector3 fwd = cam.transform.forward; fwd.y = 0f;
-        float bearing = Vector3.SignedAngle(fwd, dir, Vector3.up); // +right, -left
+        float bearing = Vector3.SignedAngle(fwd, dir, Vector3.up);
 
-        // pick the most-faded indicator to reuse
         int idx = 0; float min = float.MaxValue;
-        for (int i = 0; i < _groups.Count; i++)
-            if (_groups[i].alpha < min) { min = _groups[i].alpha; idx = i; }
-
-        _pivots[idx].localEulerAngles = new Vector3(0f, 0f, -bearing); // uGUI Z+ is CCW
-        _groups[idx].alpha = 1f;
+        for (int i = 0; i < _pivots.Count; i++)
+        {
+            float a = _pivots[i].style.opacity.value;
+            if (a < min) { min = a; idx = i; }
+        }
+        _pivots[idx].style.rotate = new Rotate(Angle.Degrees(-bearing));
+        _pivots[idx].style.opacity = 1f;
     }
 
     private void Update()
     {
         float drop = Time.unscaledDeltaTime / Mathf.Max(0.01f, fadeTime);
-        for (int i = 0; i < _groups.Count; i++)
-            if (_groups[i].alpha > 0f)
-                _groups[i].alpha = Mathf.Max(0f, _groups[i].alpha - drop);
+        for (int i = 0; i < _pivots.Count; i++)
+        {
+            float a = _pivots[i].style.opacity.value;
+            if (a > 0f)
+                _pivots[i].style.opacity = Mathf.Max(0f, a - drop);
+        }
     }
 }

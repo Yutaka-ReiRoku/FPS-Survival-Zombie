@@ -1,0 +1,29 @@
+/* ===== DamageDirection.uss — Directional Damage Indicator ===== */
+
+#DamageDirection {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.dir-pivot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    translate: TranslateX(-50%) TranslateY(-50%);
+    opacity: 0;
+}
+
+.dir-arc {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    translate: TranslateX(-50%);
+    background-color: var(--color-accent-red);
+    border-radius: 8px;
+}

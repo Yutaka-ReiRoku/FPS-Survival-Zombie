@@ -15,6 +15,7 @@
     <ui:Style src="project://database/Assets/UI/USS/InteractPrompt.uss" />
     <ui:Style src="project://database/Assets/UI/USS/WaveAnnouncer.uss" />
     <ui:Style src="project://database/Assets/UI/USS/CombatFeedback.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/DamageDirection.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -147,4 +148,7 @@
         <ui:VisualElement name="DamageNumbers" />
         <ui:VisualElement name="Killfeed" />
     </ui:VisualElement>
+
+    <!-- Damage Direction HUD (Phase 17) -->
+    <ui:VisualElement name="DamageDirection" />
 </ui:UXML>
