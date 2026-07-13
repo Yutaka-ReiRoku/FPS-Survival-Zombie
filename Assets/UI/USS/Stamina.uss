@@ -1,0 +1,30 @@
+/* Stamina.uss — Thin stamina bar at bottom center */
+
+#StaminaCluster {
+    position: absolute;
+    left: 50%;
+    translate: TranslateX(-50%);
+    bottom: 85px;
+    width: 300px;
+    height: 9px;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+#StaminaBg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(20, 24, 30, 0.85);
+}
+
+#StaminaFill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(79, 224, 138);
+}

@@ -8,6 +8,7 @@
     <ui:Style src="project://database/Assets/UI/USS/ReloadIndicator.uss" />
     <ui:Style src="project://database/Assets/UI/USS/WeaponInventory.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Compass.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Stamina.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -109,4 +110,10 @@
         <ui:VisualElement name="CompassBlips" />
     </ui:VisualElement>
     <ui:Label name="CompassHeading" text="0" />
+
+    <!-- Stamina Cluster (Phase 10) -->
+    <ui:VisualElement name="StaminaCluster">
+        <ui:VisualElement name="StaminaBg" />
+        <ui:VisualElement name="StaminaFill" />
+    </ui:VisualElement>
 </ui:UXML>
