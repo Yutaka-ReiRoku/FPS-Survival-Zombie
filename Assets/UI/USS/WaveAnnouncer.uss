@@ -1,0 +1,37 @@
+#WaveAnnouncer {
+    position: absolute;
+    left: 50%;
+    top: 220px;
+    translate: TranslateX(-50%);
+    width: 900px;
+    height: 160px;
+    opacity: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#WaveAnnouncer.wave-visible {
+    display: flex;
+}
+
+.wave-title {
+    font-family: resource("Fonts/Anton");
+    font-size: 72px;
+    -unity-text-align: middle-center;
+    color: var(--color-text-gold, #D8C773);
+    margin-bottom: 4px;
+    width: 100%;
+    text-align: center;
+}
+
+.wave-sub {
+    font-family: resource("Fonts/Oswald-Bold");
+    font-size: 30px;
+    -unity-text-align: middle-center;
+    color: var(--color-text-muted, #9EA8B8);
+    width: 100%;
+    text-align: center;
+    white-space: normal;
+}

@@ -13,6 +13,7 @@
     <ui:Style src="project://database/Assets/UI/USS/FPS.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Dash.uss" />
     <ui:Style src="project://database/Assets/UI/USS/InteractPrompt.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/WaveAnnouncer.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -132,4 +133,10 @@
 
     <!-- Interact Prompt (Phase 14) -->
     <ui:VisualElement name="InteractPrompt" class="interact-prompt" />
+
+    <!-- Wave Announcer (Phase 15) -->
+    <ui:VisualElement name="WaveAnnouncer">
+        <ui:Label name="WaveTitle" class="wave-title" text="WAVE 1" />
+        <ui:Label name="WaveSub" class="wave-sub" text="SURVIVE" />
+    </ui:VisualElement>
 </ui:UXML>
