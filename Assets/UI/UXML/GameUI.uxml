@@ -7,6 +7,7 @@
     <ui:Style src="project://database/Assets/UI/USS/WeaponIndicator.uss" />
     <ui:Style src="project://database/Assets/UI/USS/ReloadIndicator.uss" />
     <ui:Style src="project://database/Assets/UI/USS/WeaponInventory.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Compass.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -101,4 +102,11 @@
 
     <!-- Weapon Inventory (Phase 8) -->
     <ui:VisualElement name="WeaponInventoryCluster" />
+
+    <!-- Compass (Phase 9) -->
+    <ui:VisualElement name="CompassViewport">
+        <ui:VisualElement name="CompassStrip" />
+        <ui:VisualElement name="CompassBlips" />
+    </ui:VisualElement>
+    <ui:Label name="CompassHeading" text="0" />
 </ui:UXML>
