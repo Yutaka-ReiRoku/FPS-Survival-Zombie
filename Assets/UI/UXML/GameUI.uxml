@@ -5,6 +5,7 @@
     <ui:Style src="project://database/Assets/UI/USS/AmmoCluster.uss" />
     <ui:Style src="project://database/Assets/UI/USS/ProgressionCluster.uss" />
     <ui:Style src="project://database/Assets/UI/USS/WeaponIndicator.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/ReloadIndicator.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -90,5 +91,10 @@
     <ui:VisualElement name="WeaponIndicator">
         <ui:Label name="WeaponName" text="" />
         <ui:VisualElement name="WeaponIcon" />
+    </ui:VisualElement>
+
+    <!-- Reload Indicator (Phase 7) -->
+    <ui:VisualElement name="ReloadIndicator">
+        <ui:VisualElement name="ReloadRing" />
     </ui:VisualElement>
 </ui:UXML>

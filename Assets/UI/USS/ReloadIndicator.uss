@@ -1,0 +1,18 @@
+/* ReloadIndicator.uss — Radial reload sweep indicator */
+/* Positioned at screen center, offset 120px below center (match UGUI layout) */
+
+ReloadIndicator {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: Translate(-50%, calc(-50% + -120px));
+    width: 64px;
+    height: 64px;
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+}
+
+#ReloadRing {
+    width: 64px;
+    height: 64px;
+}
