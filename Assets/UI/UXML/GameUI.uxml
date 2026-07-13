@@ -10,6 +10,7 @@
     <ui:Style src="project://database/Assets/UI/USS/Compass.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Stamina.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Crosshair.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/FPS.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -120,4 +121,7 @@
 
     <!-- Crosshair (Phase 11) -->
     <ui:VisualElement name="Crosshair" class="crosshair-container" />
+
+    <!-- FPS Counter (Phase 12) -->
+    <ui:Label name="FPSLabel" text="-- FPS" class="fps-counter" />
 </ui:UXML>
