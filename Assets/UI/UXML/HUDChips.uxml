@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="HUDChips">
+        <ui:VisualElement name="WaveChip" class="chip-root chip-wave chip-hidden">
+            <ui:VisualElement name="ChipIcon" class="chip-icon chip-wave-icon" />
+            <ui:Label name="ChipLabel" class="chip-label" text="Wave 1 · 0/10" />
+        </ui:VisualElement>
+        <ui:VisualElement name="KillsChip" class="chip-root chip-kills chip-hidden">
+            <ui:VisualElement name="ChipIcon" class="chip-icon chip-kills-icon" />
+            <ui:Label name="ChipLabel" class="chip-label" text="Kills : 0" />
+        </ui:VisualElement>
+        <ui:VisualElement name="ScoreChip" class="chip-root chip-score chip-hidden">
+            <ui:VisualElement name="ChipIcon" class="chip-icon chip-score-icon" />
+            <ui:Label name="ChipLabel" class="chip-label" text="Score : 0" />
+        </ui:VisualElement>
+        <ui:VisualElement name="CoinsChip" class="chip-root chip-coins chip-hidden">
+            <ui:VisualElement name="ChipIcon" class="chip-icon chip-coins-icon" />
+            <ui:Label name="ChipLabel" class="chip-label" text="Coins : 0" />
+        </ui:VisualElement>
+        <ui:VisualElement name="HeadshotsChip" class="chip-root chip-headshots chip-hidden">
+            <ui:VisualElement name="ChipIcon" class="chip-icon chip-headshots-icon" />
+            <ui:Label name="ChipLabel" class="chip-label" text="Crits : 0" />
+        </ui:VisualElement>
+        <ui:VisualElement name="TimerChip" class="chip-root chip-timer chip-hidden">
+            <ui:VisualElement name="ChipIcon" class="chip-icon chip-timer-icon" />
+            <ui:Label name="ChipLabel" class="chip-label" text="00:00" />
+        </ui:VisualElement>
+        <ui:VisualElement name="CollectiblesChip" class="chip-root chip-collectibles chip-hidden">
+            <ui:VisualElement name="ChipIcon" class="chip-icon chip-collectibles-icon" />
+            <ui:Label name="ChipLabel" class="chip-label" text="Journals : 0/0" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

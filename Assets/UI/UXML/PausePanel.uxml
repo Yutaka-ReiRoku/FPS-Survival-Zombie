@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="PausePanel" style="display: none;">
+        <ui:VisualElement name="PauseVignette" />
+        <ui:VisualElement name="PauseCardShadow" />
+        <ui:VisualElement name="PauseCard" view-data-key="PauseCardPivot">
+            <ui:VisualElement name="PauseTopAccent" />
+            <ui:VisualElement name="PauseIcon" />
+            <ui:Label name="PauseTitle" text="PAUSED" />
+            <ui:VisualElement name="PauseDivider" />
+            <ui:Button name="ResumeButton" text="RESUME" class="pause-button" />
+            <ui:Button name="PauseMainMenuButton" text="MAIN MENU" class="pause-button" />
+            <ui:Button name="PauseQuitButton" text="QUIT" class="pause-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
