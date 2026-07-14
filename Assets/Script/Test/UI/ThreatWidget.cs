@@ -6,6 +6,7 @@ public class ThreatWidget : MonoBehaviour
     private VisualElement _fill;
     private Label _state;
     private Label _warn;
+    private IVisualElementScheduledItem _warnSched;
 
     private Color _calm = new Color(0.31f, 0.878f, 0.541f, 1f);
     private Color _build = new Color(1f, 0.83f, 0.30f, 1f);
@@ -22,16 +23,28 @@ public class ThreatWidget : MonoBehaviour
         _fill = root.Q<VisualElement>("ThreatFill");
         _state = root.Q<Label>("ThreatState");
         _warn = root.Q<Label>("ThreatWarn");
+
+        var d = AIDirector.Instance;
+        if (d != null)
+        {
+            d.OnThreatChanged += Refresh;
+            Refresh();
+        }
+
+        _warnSched = _warn?.schedule.Execute(AnimateWarn).Every(50);
     }
 
     private void OnDisable()
     {
+        _warnSched?.Pause();
+        var d = AIDirector.Instance;
+        if (d != null) d.OnThreatChanged -= Refresh;
         _fill = null;
         _state = null;
         _warn = null;
     }
 
-    private void Update()
+    private void Refresh()
     {
         var d = AIDirector.Instance;
         if (d == null || _fill == null || _state == null || _warn == null) return;
@@ -50,8 +63,12 @@ public class ThreatWidget : MonoBehaviour
         _fill.style.backgroundColor = c;
         if (_state.text != label) _state.text = label;
         _state.style.color = c;
+    }
 
-        bool flank = d.ShouldPunishCamper();
+    private void AnimateWarn()
+    {
+        if (_warn == null) return;
+        bool flank = AIDirector.Instance != null && AIDirector.Instance.ShouldPunishCamper();
         _warn.style.opacity = flank ? (0.55f + 0.45f * Mathf.Sin(Time.unscaledTime * 8f)) : 0f;
     }
 }

@@ -29,13 +29,13 @@ public class LeaderboardWidget : MonoBehaviour
 
     private void Awake()
     {
+        var asset = Resources.Load<VisualTreeAsset>("LeaderboardWidget");
+        if (asset == null) { enabled = false; return; }
+
         var go = new GameObject("Leaderboard_Doc", typeof(UIDocument));
         go.transform.SetParent(transform, false);
         _doc = go.GetComponent<UIDocument>();
         _doc.sortingOrder = 100;
-
-        var asset = Resources.Load<VisualTreeAsset>("LeaderboardWidget");
-        if (asset == null) { enabled = false; return; }
 
         asset.CloneTree(_doc.rootVisualElement);
         _initialized = true;
@@ -151,14 +151,14 @@ public class LeaderboardWidget : MonoBehaviour
         var pm = PlayFabManager.Instance;
         if (pm == null || !pm.IsLoggedIn)
         {
-            if (_statusText != null) _statusText.text = "Vui lòng đăng nhập để xem bảng xếp hạng.";
+            if (_statusText != null) _statusText.text = "Please log in to view the leaderboard.";
             ClearRows();
             return;
         }
 
         if (_loading) return;
         _loading = true;
-        if (_statusText != null) _statusText.text = "Đang tải...";
+        if (_statusText != null) _statusText.text = "Loading...";
         ClearRows();
 
         pm.GetLeaderboard(maxResults, entries =>
@@ -168,11 +168,11 @@ public class LeaderboardWidget : MonoBehaviour
 
             if (entries == null || entries.Count == 0)
             {
-                if (_statusText != null) _statusText.text = "Chưa có dữ liệu bảng xếp hạng.";
+                if (_statusText != null) _statusText.text = "No leaderboard data yet.";
                 return;
             }
 
-            if (_statusText != null) _statusText.text = $"Top {entries.Count} người chơi";
+            if (_statusText != null) _statusText.text = $"Top {entries.Count} players";
             BuildRows(entries);
         });
     }

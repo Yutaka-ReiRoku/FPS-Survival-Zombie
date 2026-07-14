@@ -7,22 +7,22 @@ public class UpgradesWidget : MonoBehaviour
     public float fontSize = 20f;
 
     private Label _label;
-    private int _lastH = int.MinValue, _lastS = int.MinValue;
-    private float _lastSta = float.MinValue, _lastDmg = float.MinValue;
 
     private void OnEnable()
     {
         var doc = GetComponent<UIDocument>();
         if (doc == null) { enabled = false; return; }
         _label = doc.rootVisualElement.Q<Label>("UpgradesWidget");
+        PlayerUpgradeManager.Instance.OnUpgradesChanged += Refresh;
     }
 
     private void OnDisable()
     {
+        PlayerUpgradeManager.Instance.OnUpgradesChanged -= Refresh;
         _label = null;
     }
 
-    private void Update()
+    private void Refresh()
     {
         var m = PlayerUpgradeManager.Instance;
         if (m == null) return;
@@ -30,8 +30,6 @@ public class UpgradesWidget : MonoBehaviour
         int s = m.bonusShield;
         float sta = m.bonusStamina;
         float dmg = m.bonusDamage;
-        if (h == _lastH && s == _lastS && Mathf.Approximately(sta, _lastSta) && Mathf.Approximately(dmg, _lastDmg)) return;
-        _lastH = h; _lastS = s; _lastSta = sta; _lastDmg = dmg;
 
         if (_label == null) return;
 

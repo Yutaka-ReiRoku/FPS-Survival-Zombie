@@ -32,13 +32,13 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void Awake()
     {
+        var asset = Resources.Load<VisualTreeAsset>("PlayFabLogin");
+        if (asset == null) { enabled = false; return; }
+
         var go = new GameObject("PlayFabLogin_Doc", typeof(UIDocument));
         go.transform.SetParent(transform, false);
         _doc = go.GetComponent<UIDocument>();
         _doc.sortingOrder = 100;
-
-        var asset = Resources.Load<VisualTreeAsset>("PlayFabLogin");
-        if (asset == null) { enabled = false; return; }
         asset.CloneTree(_doc.rootVisualElement);
 
         var root = _doc.rootVisualElement;

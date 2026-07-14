@@ -3,11 +3,11 @@
     <ui:Style src="project://database/Assets/UI/USS/Shared.uss" />
     <ui:Style src="project://database/Assets/UI/Resources/EpilogueSlide.uss" />
 
-    <ui:VisualElement name="EpilogueRoot" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; opacity: 0;" picking-mode="Ignore">
-        <ui:VisualElement name="Background" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0;" />
-        <ui:VisualElement name="Content" style="position: absolute; left: 50%; top: 50%; translate: -50% -50%; align-items: center; justify-content: center; width: 80%;">
-            <ui:VisualElement name="Illustration" style="width: 720px; height: 420px; margin-bottom: 30px;" />
-            <ui:Label name="BodyText" style="font-size: 34px; white-space: normal; -unity-text-align: middle-center;" />
+    <ui:VisualElement name="EpilogueRoot" picking-mode="Ignore">
+        <ui:VisualElement name="Background" />
+        <ui:VisualElement name="Content">
+            <ui:VisualElement name="Illustration" />
+            <ui:Label name="BodyText" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

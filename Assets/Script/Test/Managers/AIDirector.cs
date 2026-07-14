@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using cowsins;
@@ -31,6 +32,8 @@ public class AIDirector : MonoBehaviour
     [Header("Movement")]
     public float distanceMoved;
     public float camperTime;
+
+    public event Action OnThreatChanged;
 
     [Header("Debug")]
     public DirectorState currentState;
@@ -79,6 +82,7 @@ public class AIDirector : MonoBehaviour
             UpdatePlayerHealth();
             CalculateThreat();
             UpdateState();
+            OnThreatChanged?.Invoke();
             updateTimer = 0f;
         }
     }
@@ -252,21 +256,21 @@ public class AIDirector : MonoBehaviour
 
     #region Spawning
 
-    public int GetRecommendedSpawnCount()
+        public int GetRecommendedSpawnCount()
     {
         switch (currentState)
         {
             case DirectorState.Calm:
-                return Random.Range(2, 4);
+                return UnityEngine.Random.Range(2, 4);
 
             case DirectorState.BuildUp:
-                return Random.Range(4, 8);
+                return UnityEngine.Random.Range(4, 8);
 
             case DirectorState.Attack:
-                return Random.Range(8, 15);
+                return UnityEngine.Random.Range(8, 15);
 
             case DirectorState.Recovery:
-                return Random.Range(0, 2);
+                return UnityEngine.Random.Range(0, 2);
         }
 
         return minSpawnCount;

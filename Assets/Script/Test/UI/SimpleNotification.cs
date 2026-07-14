@@ -30,6 +30,7 @@ public class SimpleNotification : MonoBehaviour
             {
                 var go = new GameObject("SimpleNotification");
                 _instance = go.AddComponent<SimpleNotification>();
+                Object.DontDestroyOnLoad(go);
             }
             return _instance;
         }

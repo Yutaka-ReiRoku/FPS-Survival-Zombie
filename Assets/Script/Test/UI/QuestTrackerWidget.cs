@@ -99,7 +99,7 @@ public class QuestTrackerWidget : MonoBehaviour
     {
         var cm = CollectibleManager.Instance;
         if (cm == null || _collectibles == null) return;
-        _collectibles.text = $"Nhật ký: {cm.Count}/{cm.Total}";
+        _collectibles.text = $"Journals: {cm.Count}/{cm.Total}";
     }
 
     private void UpdateDisplay()
@@ -118,13 +118,13 @@ public class QuestTrackerWidget : MonoBehaviour
 
         if (sm.StoryComplete)
         {
-            _chapter.text = "CỐT TRUYỆN HOÀN THÀNH";
+            _chapter.text = "STORY COMPLETE";
             _title.text = "";
             _objective.text = "";
         }
         else
         {
-            _chapter.text = "CHƯƠNG " + sm.CurrentChapter;
+            _chapter.text = "CHAPTER " + sm.CurrentChapter;
             var q = sm.ActiveQuest;
             if (q != null)
             {
@@ -135,7 +135,7 @@ public class QuestTrackerWidget : MonoBehaviour
             {
                 var sqm = SideQuestManager.Instance;
                 _title.text = (sqm != null && sqm.ActiveQuests.Count > 0)
-                    ? "— Khám phá side quests —"
+                    ? "— Discover side quests —"
                     : "—";
                 _objective.text = "";
             }

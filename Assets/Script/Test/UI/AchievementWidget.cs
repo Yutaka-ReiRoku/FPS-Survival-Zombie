@@ -56,7 +56,7 @@ public class AchievementWidget : MonoBehaviour
         _listHint = _listPanel?.Q<Label>("ListHint");
 
         if (_scrim != null) _scrim.RegisterCallback<ClickEvent>(_ => ToggleList());
-        if (_listHint != null) _listHint.text = $"Nhấn {toggleKey} để đóng";
+        if (_listHint != null) _listHint.text = $"Press {toggleKey} to close";
     }
 
     private void OnEnable()

@@ -3,9 +3,9 @@
     <ui:Style src="project://database/Assets/UI/USS/Shared.uss" />
     <ui:Style src="project://database/Assets/UI/Resources/EnemyHealthBar.uss" />
 
-    <ui:VisualElement name="HealthBarRoot" style="position: absolute; left: 0; top: 0;">
-        <ui:VisualElement name="FillArea" style="position: absolute; left: 2; right: 2; top: 2; bottom: 2;">
-            <ui:VisualElement name="Fill" style="position: absolute; left: 0; top: 0; bottom: 0; width: 100%;" />
+    <ui:VisualElement name="HealthBarRoot">
+        <ui:VisualElement name="FillArea">
+            <ui:VisualElement name="Fill" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

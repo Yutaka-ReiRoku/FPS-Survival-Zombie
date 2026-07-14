@@ -37,7 +37,7 @@
     top: 3px;
     bottom: 3px;
     overflow: hidden;
-    border-radius: 6px;
+    border-radius: var(--radius-xs);
 }
 
 .boss-fill {

@@ -12,7 +12,7 @@
 
 .crosshair-bar {
     position: absolute;
-    background-color: var(--color-stamina, rgb(44, 255, 0));
+    background-color: var(--color-text-primary);
     transition: translate var(--transition-fast, 0.08s) ease-out, width var(--transition-fast, 0.08s) ease-out, height var(--transition-fast, 0.08s) ease-out;
 }
 

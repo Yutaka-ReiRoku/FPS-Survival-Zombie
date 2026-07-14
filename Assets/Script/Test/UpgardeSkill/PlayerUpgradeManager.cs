@@ -1,10 +1,12 @@
 using UnityEngine;
+using System;
 
 namespace cowsins
 {
     public class PlayerUpgradeManager : MonoBehaviour
     {
         public static PlayerUpgradeManager Instance;
+        public event Action OnUpgradesChanged;
 
         [Header("Permanent Upgrades")]
         public int bonusHealth;
@@ -49,11 +51,13 @@ namespace cowsins
                 stats.health = Mathf.Min(stats.health + amount, stats.maxHealth);
                 stats.Events.OnHealthChanged?.Invoke(stats.health, stats.shield, false);
             }
+            OnUpgradesChanged?.Invoke();
         }
 
         public void AddShield(int amount)
         {
             bonusShield += amount;
+            OnUpgradesChanged?.Invoke();
         }
 
         public void AddMagazine(int amount)
@@ -74,12 +78,9 @@ namespace cowsins
             {
                 movement.playerSettings.maxStamina += amount;
             }
+            OnUpgradesChanged?.Invoke();
         }
 
-        /// <summary>
-        /// Increases the player's damage multiplier by <paramref name="amount"/> and
-        /// applies it to the live PlayerMultipliers so shots deal more damage immediately.
-        /// </summary>
         public void AddDamage(float amount)
         {
             bonusDamage += amount;
@@ -89,6 +90,7 @@ namespace cowsins
             {
                 multipliers.DamageMultiplier += amount;
             }
+            OnUpgradesChanged?.Invoke();
         }
 
     }

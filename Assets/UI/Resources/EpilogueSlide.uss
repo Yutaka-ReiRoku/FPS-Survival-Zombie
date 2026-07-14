@@ -2,5 +2,41 @@
 @import url("../USS/Shared.uss");
 
 #EpilogueRoot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    opacity: 0;
     transition: opacity var(--transition-medium, 1.5s) ease-out;
+}
+
+#Background {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+#Content {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+}
+
+#Illustration {
+    width: 720px;
+    height: 420px;
+    margin-bottom: 30px;
+}
+
+#BodyText {
+    font-size: var(--fs-xxl, 36px);
+    white-space: normal;
+    -unity-text-align: middle-center;
 }

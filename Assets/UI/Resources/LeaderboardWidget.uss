@@ -163,6 +163,11 @@
     scale: var(--press-scale, 0.95);
 }
 
+#CloseButton {
+    width: 40px;
+    height: 36px;
+}
+
 .leaderboard-btn .btn-label {
     font-size: var(--fs-s, 16px);
     -unity-font: var(--font-body);

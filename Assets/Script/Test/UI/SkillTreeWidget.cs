@@ -21,6 +21,7 @@ public class SkillTreeWidget : MonoBehaviour
     private Transform _canvasRoot;
     private bool _open;
     private bool _initialized;
+    private int _lastSp = -1;
 
     private static readonly string[] TreeNames = { "MOVEMENT", "AIM", "INTELLIGENCE" };
     private const int NodesPerTree = 5;
@@ -138,7 +139,7 @@ public class SkillTreeWidget : MonoBehaviour
             if (_open) Close();
             else if (!gameOver && !pauseOpen && !journalOpen) Open();
         }
-        if (_open) Refresh();
+        if (_open) RefreshIfDirty();
     }
 
     private void Open()
@@ -177,7 +178,19 @@ public class SkillTreeWidget : MonoBehaviour
     {
         if (_mgr == null) return;
         bool ok = tree == 0 ? _mgr.UpgradeMovement() : tree == 1 ? _mgr.UpgradeAim() : _mgr.UpgradeIntelligence();
-        if (ok) Refresh();
+        if (ok)
+        {
+            Refresh();
+            _lastSp = _mgr.CurrentSkillPoints;
+        }
+    }
+
+    private void RefreshIfDirty()
+    {
+        int sp = _mgr != null ? _mgr.CurrentSkillPoints : 0;
+        if (sp == _lastSp) return;
+        _lastSp = sp;
+        Refresh();
     }
 
     private void Refresh()

@@ -47,6 +47,14 @@
     margin-bottom: var(--space-xs, 4px);
 }
 
+#UsernameInput {
+    margin-bottom: var(--space-m, 12px);
+}
+
+#PasswordInput {
+    margin-bottom: var(--space-l, 16px);
+}
+
 /* --- Text Input --- */
 #LoginPanel .login-input {
     height: 40px;

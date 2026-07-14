@@ -46,15 +46,15 @@ public class WaveAnnouncer : MonoBehaviour
 
     private void OnWaveStarted(int wave)
     {
-        _title.text = "WAVE " + wave;
-        _sub.text = "SURVIVE";
+        if (_title != null) _title.text = "WAVE " + wave;
+        if (_sub != null) _sub.text = "SURVIVE";
         Show();
     }
 
     private void OnWaveCompleted(int wave)
     {
-        _title.text = "WAVE " + wave;
-        _sub.text = "WAVE CLEARED   +" + (wave * bonusPerWave);
+        if (_title != null) _title.text = "WAVE " + wave;
+        if (_sub != null) _sub.text = "WAVE CLEARED   +" + (wave * bonusPerWave);
         Show();
     }
 
@@ -62,16 +62,16 @@ public class WaveAnnouncer : MonoBehaviour
     {
         _root.style.display = DisplayStyle.Flex;
         _root.schedule.Execute(() => {
-            _root.EnableInClassList("wave-visible", true);
+            if (_root != null) _root.EnableInClassList("wave-visible", true);
         });
 
         float totalVisible = fadeIn + hold;
         _root.schedule.Execute(() => {
-            _root.EnableInClassList("wave-visible", false);
+            if (_root != null) _root.EnableInClassList("wave-visible", false);
         }).StartingIn(Mathf.RoundToInt(totalVisible * 1000f));
 
         _root.schedule.Execute(() => {
-            _root.style.display = DisplayStyle.None;
+            if (_root != null) _root.style.display = DisplayStyle.None;
         }).StartingIn(Mathf.RoundToInt((totalVisible + fadeOut) * 1000f));
     }
 }

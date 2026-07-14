@@ -43,12 +43,12 @@ public class StatsPanelUI : MonoBehaviour
         {
             var row = new VisualElement();
             row.name = "Row" + i;
-            row.AddToClassList("sp-row");
+            row.AddToClassList("stats-row");
 
             var label = new Label();
             label.name = "Label";
             label.text = StatLabels[i];
-            label.AddToClassList("sp-label");
+            label.AddToClassList("stats-label");
             if (StatLabels[i].StartsWith("  "))
                 label.AddToClassList("sub");
             row.Add(label);
@@ -57,7 +57,7 @@ public class StatsPanelUI : MonoBehaviour
             var value = new Label();
             value.name = "Value";
             value.text = "--";
-            value.AddToClassList("sp-value");
+            value.AddToClassList("stats-value");
             row.Add(value);
             _values.Add(value);
 
@@ -67,19 +67,33 @@ public class StatsPanelUI : MonoBehaviour
 
         _visible = false;
         _fade = 0f;
+
+        StartCoroutine(PollStats());
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(toggleKey))
             Toggle();
-
         float target = _visible ? 1f : 0f;
         if (!Mathf.Approximately(_fade, target))
             _fade = Mathf.MoveTowards(_fade, target, 1f / Mathf.Max(0.01f, fadeDuration) * Time.unscaledDeltaTime);
+    }
 
-        if (_visible)
-            RefreshValues();
+    private System.Collections.IEnumerator PollStats()
+    {
+        var wait = new WaitForSecondsRealtime(0.5f);
+        while (true)
+        {
+            if (_visible && _root != null)
+                RefreshValues();
+            yield return wait;
+        }
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
     }
 
     public void Toggle()

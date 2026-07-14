@@ -8,9 +8,9 @@
             <ui:Label name="LoginTitle" class="login-title" text="LOGIN" />
             <ui:Label name="LoginStatus" class="login-status" text="" />
             <ui:Label name="UsernameLabel" class="field-label" text="Username" />
-            <ui:TextField name="UsernameInput" class="login-input" style="margin-bottom: 12px;" />
+            <ui:TextField name="UsernameInput" class="login-input" />
             <ui:Label name="PasswordLabel" class="field-label" text="Password" />
-            <ui:TextField name="PasswordInput" class="login-input" password="true" style="margin-bottom: 16px;" />
+            <ui:TextField name="PasswordInput" class="login-input" password="true" />
             <ui:VisualElement name="ActionButton" class="login-action-btn">
                 <ui:Label name="ActionLabel" class="btn-label" text="LOGIN" />
             </ui:VisualElement>

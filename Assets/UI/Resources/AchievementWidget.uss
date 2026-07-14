@@ -47,7 +47,7 @@
     position: absolute;
     left: 92px;
     top: 14px;
-    font-size: 24px;
+    font-size: var(--fs-xl, 28px);
     -unity-font: var(--font-body);
     color: var(--color-accent-gold, rgb(217, 199, 115));
 }

@@ -106,13 +106,17 @@
 }
 
 #ProfilePanel #AchList Label {
-    font-size: 13px;
+    font-size: var(--fs-xs, 14px);
     margin-bottom: 2px;
 }
 
 /* --- Spacer --- */
 #ProfilePanel .panel-spacer {
     flex-grow: 1;
+}
+
+#LogoutButton {
+    margin-top: var(--space-s, 8px);
 }
 
 /* --- Buttons --- */

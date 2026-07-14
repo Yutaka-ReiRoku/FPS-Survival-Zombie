@@ -48,7 +48,7 @@
 }
 
 #SidePanel {
-    background-color: var(--color-card-face, rgba(20, 36, 20, 0.85));
+    background-color: var(--color-card-face);
     border-radius: var(--radius-s, 8px);
     padding: var(--space-s, 8px) var(--space-m, 12px);
     margin-top: var(--space-s, 8px);

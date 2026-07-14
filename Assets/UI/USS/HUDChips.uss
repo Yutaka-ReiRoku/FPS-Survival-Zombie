@@ -8,30 +8,9 @@
 }
 
 .hud-chip-root {
-    flex-direction: row;
-    align-items: center;
-    width: 280px;
-    height: 52px;
     background-color: var(--color-card-face, rgb(25, 30, 37));
-    border-radius: var(--radius-s, 8px);
-    padding: var(--space-s, 8px) var(--space-m, 12px);
     margin-bottom: var(--space-xs, 4px);
     overflow: hidden;
-}
-
-.hud-chip-icon {
-    width: 28px;
-    height: 28px;
-    margin-right: var(--space-s, 8px);
-    flex-shrink: 0;
-}
-
-.hud-chip-label {
-    font-size: var(--fs-s, 16px);
-    -unity-font: var(--font-body);
-    color: var(--color-text-primary);
-    -unity-text-align: middle-left;
-    flex-grow: 1;
 }
 
 .hud-chip-hidden {

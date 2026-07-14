@@ -23,46 +23,8 @@
     background-size: cover;
 }
 
-#PauseCardShadow {
-    position: absolute;
-    width: var(--panel-shadow-width);
-    height: var(--panel-shadow-height);
-    left: 50%;
-    top: 50%;
-    margin-left: -400px;
-    margin-top: -368px;
-    background-image: resource("Images/ui_shadow");
-    -unity-slice-left: var(--slice-panel);
-    -unity-slice-right: var(--slice-panel);
-    -unity-slice-top: var(--slice-panel);
-    -unity-slice-bottom: var(--slice-panel);
-    opacity: var(--opacity-medium);
-}
-
-#PauseCard {
-    width: var(--panel-card-width);
-    height: var(--panel-card-height);
-    flex-direction: column;
-    align-items: center;
-    background-color: var(--color-card-face);
-    border-radius: var(--radius-m);
-    opacity: 0;
-    scale: var(--panel-start-scale);
-    transition: opacity var(--panel-in-duration) var(--panel-easing), scale var(--panel-in-duration) var(--panel-easing);
-}
-
-#PauseCard.visible {
-    opacity: 1;
-    scale: 1;
-}
-
 #PauseTopAccent {
-    width: var(--panel-card-width);
-    height: 7px;
-    flex-shrink: 0;
     background-color: var(--color-accent-blue);
-    border-top-left-radius: var(--radius-m);
-    border-top-right-radius: var(--radius-m);
 }
 
 #PauseIcon {
@@ -99,32 +61,4 @@
     background-color: var(--color-divider);
 }
 
-.pause-button {
-    width: var(--button-width);
-    height: var(--button-height);
-    flex-shrink: 0;
-    margin: var(--space-xs) 0;
-    font-size: var(--fs-xl);
-    -unity-font: var(--font-body);
-    color: var(--color-text-primary);
-    -unity-text-align: middle-center;
-    background-image: resource("Images/ui_button");
-    -unity-slice-left: var(--slice-button);
-    -unity-slice-right: var(--slice-button);
-    -unity-slice-top: var(--slice-button);
-    -unity-slice-bottom: var(--slice-button);
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
-    border-bottom-width: 0;
-    background-color: rgba(0, 0, 0, 0);
-    transition: scale var(--transition-fast) var(--panel-easing);
-}
 
-.pause-button:hover {
-    scale: var(--hover-scale);
-}
-
-.pause-button:active {
-    scale: var(--press-scale);
-}

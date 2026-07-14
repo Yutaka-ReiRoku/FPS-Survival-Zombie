@@ -30,7 +30,9 @@
 }
 
 /* Sliced shadow behind cards */
-.card-shadow {
+.card-shadow,
+#CardShadow,
+#PauseCardShadow {
     position: absolute;
     width: var(--panel-shadow-width, 800px);
     height: var(--panel-shadow-height, 760px);
@@ -47,7 +49,9 @@
 }
 
 /* Card panel with 9-slice background + animation */
-.panel-card {
+.panel-card,
+#Card,
+#PauseCard {
     width: var(--panel-card-width, 760px);
     height: var(--panel-card-height, 720px);
     flex-direction: column;
@@ -60,13 +64,17 @@
                 scale var(--panel-in-duration, 0.22s) var(--panel-easing, ease-out);
 }
 
-.panel-card.visible {
+.panel-card.visible,
+#Card.visible,
+#PauseCard.visible {
     opacity: 1;
     scale: 1;
 }
 
 /* Accent bar at top of card */
-.card-accent {
+.card-accent,
+#TopAccent,
+#PauseTopAccent {
     width: var(--panel-card-width, 760px);
     height: 7px;
     flex-shrink: 0;
@@ -108,7 +116,9 @@
 }
 
 /* Sliced button background (reused by gameover-button, pause-button, menu-button, etc.) */
-.button-sliced {
+.button-sliced,
+.gameover-button,
+.pause-button {
     width: var(--button-width, 380px);
     height: var(--button-height, 66px);
     flex-shrink: 0;
@@ -218,7 +228,8 @@
 
 /* ===================== CHIP COMPONENTS ===================== */
 
-.chip-root {
+.chip-root,
+.hud-chip-root {
     flex-direction: row;
     align-items: center;
     width: 280px;
@@ -232,7 +243,8 @@
     display: none;
 }
 
-.chip-icon {
+.chip-icon,
+.hud-chip-icon {
     width: 28px;
     height: 28px;
     flex-shrink: 0;
@@ -242,7 +254,8 @@
     margin-right: var(--space-s, 8px);
 }
 
-.chip-label {
+.chip-label,
+.hud-chip-label {
     font-size: var(--fs-s, 16px);
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-text-primary, rgba(245, 245, 245, 1));

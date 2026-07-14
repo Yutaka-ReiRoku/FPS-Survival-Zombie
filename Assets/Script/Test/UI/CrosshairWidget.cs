@@ -47,7 +47,6 @@ public class CrosshairWidget : MonoBehaviour
         if (!_initialized)
         {
             var doc = GetComponent<UIDocument>();
-            if (doc == null) doc = FindFirstObjectByType<UIDocument>();
             if (doc == null) { enabled = false; return; }
             _container = doc.rootVisualElement.Q("Crosshair");
             if (_container == null) { enabled = false; return; }

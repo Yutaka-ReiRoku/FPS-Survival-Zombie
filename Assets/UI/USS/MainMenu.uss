@@ -68,7 +68,7 @@
 }
 
 #Subtitle {
-    font-size: 24px;
+    font-size: var(--fs-xxl);
     color: var(--mm-text-muted);
     letter-spacing: 4px;
     margin-bottom: var(--space-3xl, 32px);
@@ -120,7 +120,7 @@
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
-    border-radius: 6px;
+    border-radius: var(--radius-s);
     border-color: var(--mm-gold-dim);
     border-width: 1px;
     transition: background-color var(--transition-normal, 0.2s);
@@ -172,18 +172,18 @@
     flex-direction: row;
     align-items: center;
     padding: 10px 20px;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: var(--color-surface-mid);
     background-image: resource("Images/ui_panel");
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
-    border-radius: 6px;
+    border-radius: var(--radius-s);
     margin-top: var(--space-l, 16px);
 }
 
 #BestChip_Icon {
     background-image: resource("Icons/icon_trophy");
-    margin-right: 10px;
+    margin-right: var(--space-s);
 }
 
 .chip-icon {

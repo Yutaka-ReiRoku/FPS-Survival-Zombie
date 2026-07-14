@@ -2,15 +2,28 @@
 @import url("../USS/Shared.uss");
 
 #HealthBarRoot {
-    background-color: rgba(0, 0, 0, 0.6);
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: var(--color-surface-bottom);
     border-radius: var(--radius-xs, 4px);
 }
 
 #FillArea {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 2px;
+    bottom: 2px;
     overflow: hidden;
 }
 
 #Fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
     background-color: var(--color-accent-gold, rgb(217, 199, 115));
     transition: width var(--transition-fast, 0.15s) ease-out;
 }
