@@ -1,4 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <ui:Style src="project://database/Assets/UI/USS/MainMenu.uss" />
     <ui:Style src="project://database/Assets/UI/USS/MainMenuTheme.uss" />
     <ui:VisualElement name="MainMenuRoot">
@@ -36,7 +36,6 @@
         </ui:VisualElement>
 
         <!-- Bottom bar -->
-        <ui:VisualElement name="Content" />
         <ui:Label name="Version" text="v1.0" />
     </ui:VisualElement>
 </ui:UXML>

@@ -1,4 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/USS/Theme.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shared.uss" />
     <!-- Health -->
     <ui:VisualElement name="HealthCluster">
         <ui:Label name="HealthLabel" text="HEALTH" />
@@ -97,7 +99,7 @@
         <ui:Label name="ThreatWarn" class="threat-warn" text="FLANKED &#x2014; MOVE!" />
     </ui:VisualElement>
     <!-- Upgrades -->
-    <ui:Label name="UpgradesWidget" text="" />
+    <ui:VisualElement name="UpgradesWidget" />
     <!-- Health Flash + Low Health Vignette -->
     <ui:VisualElement name="HealthFlash" />
     <ui:VisualElement name="LowHealthVignette" />

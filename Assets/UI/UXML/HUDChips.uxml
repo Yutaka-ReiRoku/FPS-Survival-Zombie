@@ -1,4 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/USS/Theme.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shared.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/HUDChips.uss" />
     <ui:VisualElement name="HUDChips">
         <ui:VisualElement name="WaveChip" class="hud-chip-root hud-chip-wave hud-chip-hidden">
             <ui:VisualElement name="WaveIcon" class="hud-chip-icon hud-chip-wave-icon" />

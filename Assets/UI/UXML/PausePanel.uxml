@@ -1,4 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/USS/Theme.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shared.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/PausePanel.uss" />
     <ui:VisualElement name="PausePanel" style="display: none;">
         <ui:VisualElement name="PauseVignette" />
         <ui:VisualElement name="PauseCardShadow" />
