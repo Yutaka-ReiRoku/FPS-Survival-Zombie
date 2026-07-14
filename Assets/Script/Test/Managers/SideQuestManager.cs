@@ -16,7 +16,7 @@ using cowsins;
 ///   StoryManager.CompleteActiveQuest, which we DON'T want for side quests).
 /// - Stay decoupled from StoryManager's linear flow: completing a side quest
 ///   must not advance the main story.
-/// - Show side quests in the QuestTrackerUI alongside (or instead of) the main
+/// - Show side quests in the QuestTrackerWidget alongside (or instead of) the main
 ///   quest when the main story for that chapter is done.
 ///
 /// Implementation:

@@ -176,13 +176,13 @@ public static class StoryChapter1Builder
         EditorUtility.SetDirty(ch1);
         Debug.Log("[StoryChapter1Builder] ChapterBoundary wired for Ch1 (trigger volume, no walls).");
 
-        // 9) Add QuestTrackerUI to the QuestTrackerWidget.
-        var qtwGO = GameObject.Find("=== UI ===/GameUICanvas/QuestTrackerWidget");
-        if (qtwGO != null)
+        // 9) Add QuestTrackerWidget to GameUICanvas (UITK).
+        var uiCanvasGO = GameObject.Find("=== UI ===/GameUICanvas");
+        if (uiCanvasGO != null)
         {
-            GetOrAdd<QuestTrackerUI>(qtwGO);
-            EditorUtility.SetDirty(qtwGO);
-            Debug.Log("[StoryChapter1Builder] QuestTrackerUI added to QuestTrackerWidget.");
+            GetOrAdd<QuestTrackerWidget>(uiCanvasGO);
+            EditorUtility.SetDirty(uiCanvasGO);
+            Debug.Log("[StoryChapter1Builder] QuestTrackerWidget added to GameUICanvas.");
         }
 
         // 10) Disable the main Spawner at start — Ch1 uses SpawnOnQuestEvent only.

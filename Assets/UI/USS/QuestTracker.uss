@@ -1,0 +1,75 @@
+@import url("Shared.uss");
+
+#QuestTracker {
+    position: absolute;
+    left: 24px;
+    top: 24px;
+    width: 440px;
+    flex-direction: column;
+}
+
+#MainPanel {
+    background-color: rgba(15, 13, 18, 0.62);
+    border-radius: var(--radius-s, 8px);
+    padding: 12px 16px;
+    flex-direction: column;
+}
+
+#Chapter {
+    color: var(--color-text-gold, rgb(217, 199, 115));
+    font-size: 22px;
+    font-family: var(--font-display);
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+    white-space: normal;
+}
+
+#Title {
+    color: var(--color-text-primary, rgb(245, 245, 245));
+    font-size: 28px;
+    font-family: var(--font-body);
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+    white-space: normal;
+}
+
+#Objective {
+    color: var(--color-text-muted, rgb(158, 168, 184));
+    font-size: 18px;
+    font-family: var(--font-body);
+    white-space: normal;
+}
+
+#Collectibles {
+    color: rgb(102, 204, 255);
+    font-size: 16px;
+    font-family: var(--font-body);
+    margin-top: 4px;
+}
+
+#SidePanel {
+    background-color: rgba(20, 36, 20, 0.85);
+    border-radius: var(--radius-s, 8px);
+    padding: 8px 12px;
+    margin-top: 8px;
+    flex-direction: column;
+}
+
+#SideHeader {
+    color: rgb(85, 187, 85);
+    font-size: 16px;
+    -unity-font-style: bold;
+    font-family: var(--font-body);
+    margin-bottom: 4px;
+}
+
+#SideLines {
+    flex-direction: column;
+}
+
+.side-line {
+    color: rgb(136, 221, 136);
+    font-size: 18px;
+    font-family: var(--font-body);
+    height: 26px;
+}

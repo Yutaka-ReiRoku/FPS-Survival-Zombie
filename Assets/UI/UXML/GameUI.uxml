@@ -22,6 +22,7 @@
     <ui:Style src="project://database/Assets/UI/USS/SkillTreeWidget.uss" />
     <ui:Style src="project://database/Assets/UI/USS/HealthFlash.uss" />
     <ui:Style src="project://database/Assets/UI/USS/LowHealthVignette.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/QuestTracker.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -182,8 +183,21 @@
     <!-- Upgrades Widget (Phase 20) -->
     <ui:Label name="UpgradesWidget" text="" />
 
+    <!-- Quest Tracker (Phase 24) -->
+    <ui:VisualElement name="QuestTracker">
+        <ui:VisualElement name="MainPanel">
+            <ui:Label name="Chapter" text="" />
+            <ui:Label name="Title" text="" />
+            <ui:Label name="Objective" text="" />
+            <ui:Label name="Collectibles" text="" />
+        </ui:VisualElement>
+        <ui:VisualElement name="SidePanel">
+            <ui:Label name="SideHeader" text="SIDE QUESTS" />
+            <ui:VisualElement name="SideLines" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
     <!-- Health Flash (Phase 22) -->
-    <ui:VisualElement name="HealthFlash" />
 
     <!-- Skill Tree Widget (Phase 21) -->
     <ui:VisualElement name="SkillTreeWidget">
