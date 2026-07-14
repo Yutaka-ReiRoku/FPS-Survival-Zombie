@@ -10,7 +10,7 @@
     bottom: 0;
     justify-content: center;
     align-items: center;
-    background-color: rgba(5, 8, 13, 0.88);
+    background-color: var(--color-bg-root, rgba(5, 8, 13, 0.88));
 }
 
 /* === Card container (sliced) === */
@@ -21,13 +21,13 @@
     align-items: center;
     position: relative;
     background-image: resource("Images/ui_panel");
-    -unity-slice-left: 8;
-    -unity-slice-right: 8;
-    -unity-slice-top: 8;
-    -unity-slice-bottom: 8;
+    -unity-slice-left: var(--slice-button, 8);
+    -unity-slice-right: var(--slice-button, 8);
+    -unity-slice-top: var(--slice-button, 8);
+    -unity-slice-bottom: var(--slice-button, 8);
     opacity: 0;
-    scale: var(--panel-start-scale);
-    transition: opacity var(--panel-in-duration) ease-out, scale var(--panel-in-duration) ease-out;
+    scale: var(--panel-start-scale, 0.9);
+    transition: opacity var(--panel-in-duration, 0.22s) var(--panel-easing, ease-out), scale var(--panel-in-duration, 0.22s) var(--panel-easing, ease-out);
 }
 
 #JournalUI.visible .journal-card {
@@ -38,13 +38,13 @@
 /* === Title === */
 .journal-title {
     position: absolute;
-    left: 24px;
-    right: 24px;
-    top: 24px;
+    left: var(--space-xxl, 24px);
+    right: var(--space-xxl, 24px);
+    top: var(--space-xxl, 24px);
     height: 72px;
-    font-size: 36px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
-    color: var(--color-text-gold);
+    font-size: var(--fs-xxl, 36px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: var(--color-text-gold, rgb(217, 199, 115));
     -unity-text-align: middle-left;
     -unity-font-style: bold;
     white-space: normal;
@@ -65,13 +65,13 @@
 /* === Content text === */
 .journal-content {
     position: absolute;
-    left: 24px;
-    right: 24px;
+    left: var(--space-xxl, 24px);
+    right: var(--space-xxl, 24px);
     top: 300px;
     bottom: 80px;
-    font-size: 26px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
-    color: var(--color-text-primary);
+    font-size: var(--fs-xl, 28px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: var(--color-text-primary, rgba(245, 245, 245, 1));
     -unity-text-align: upper-left;
     white-space: normal;
 }
@@ -84,27 +84,27 @@
     width: 240px;
     height: 60px;
     background-image: resource("Images/ui_button");
-    -unity-slice-left: 8;
-    -unity-slice-right: 8;
-    -unity-slice-top: 8;
-    -unity-slice-bottom: 8;
+    -unity-slice-left: var(--slice-button, 8);
+    -unity-slice-right: var(--slice-button, 8);
+    -unity-slice-top: var(--slice-button, 8);
+    -unity-slice-bottom: var(--slice-button, 8);
     border-left-width: 0;
     border-right-width: 0;
     border-top-width: 0;
     border-bottom-width: 0;
     background-color: rgba(0, 0, 0, 0);
-    font-size: 26px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
+    font-size: var(--fs-xl, 28px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-scrim-bottom, #05080DFF);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    transition: scale 0.1s ease-out;
+    transition: scale var(--transition-normal, 0.1s) var(--panel-easing, ease-out);
 }
 
 .journal-button:hover {
-    scale: var(--hover-scale);
+    scale: var(--hover-scale, 1.06);
 }
 
 .journal-button:active {
-    scale: var(--press-scale);
+    scale: var(--press-scale, 0.95);
 }

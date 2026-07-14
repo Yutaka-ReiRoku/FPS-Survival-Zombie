@@ -1,3 +1,5 @@
+@import url("Shared.uss");
+
 /* ===== BossHealthBar.uss ===== */
 
 #BossHealthBar {
@@ -6,13 +8,12 @@
     right: 0;
     top: 0;
     bottom: 0;
-    pointer-events: none;
 }
 
 .boss-root {
     position: absolute;
-    width: 760px;
-    height: 40px;
+    width: var(--boss-bar-width, 760px);
+    height: var(--boss-bar-height, 40px);
     left: 50%;
     top: 28px;
     translate: -50% 0;
@@ -25,7 +26,7 @@
     right: 0;
     top: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.65);
+    background-color: var(--shadow-color-dark, rgba(0, 0, 0, 0.65));
     border-radius: var(--radius-s, 8px);
 }
 
@@ -41,8 +42,8 @@
 
 .boss-fill {
     height: 100%;
-    background-color: rgb(242, 82, 69);
-    transition: width 0.15s ease-out;
+    background-color: var(--color-danger-top, rgb(242, 82, 69));
+    transition: width var(--transition-normal, 0.15s) ease-out;
 }
 
 .boss-label {
@@ -51,7 +52,7 @@
     right: 0;
     top: 0;
     bottom: 0;
-    font-size: 22px;
+    font-size: var(--fs-l, 22px);
     -unity-text-align: middle-center;
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));

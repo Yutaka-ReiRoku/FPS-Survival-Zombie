@@ -1,7 +1,6 @@
 /* ===== PausePanel.uss ===== */
 @import url("Shared.uss");
 
-/* === Root: full-screen overlay === */
 #PausePanel {
     position: absolute;
     left: 0;
@@ -11,10 +10,9 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: rgba(5, 6, 9, 0.92);
+    background-color: var(--color-bg-root);
 }
 
-/* === Vignette === */
 #PauseVignette {
     position: absolute;
     left: 0;
@@ -25,34 +23,32 @@
     background-size: cover;
 }
 
-/* === CardShadow === */
 #PauseCardShadow {
     position: absolute;
-    width: 800px;
-    height: 760px;
+    width: var(--panel-shadow-width);
+    height: var(--panel-shadow-height);
     left: 50%;
     top: 50%;
     margin-left: -400px;
     margin-top: -368px;
     background-image: resource("Images/ui_shadow");
-    -unity-slice-left: 48;
-    -unity-slice-right: 48;
-    -unity-slice-top: 48;
-    -unity-slice-bottom: 48;
-    opacity: 0.6;
+    -unity-slice-left: var(--slice-panel);
+    -unity-slice-right: var(--slice-panel);
+    -unity-slice-top: var(--slice-panel);
+    -unity-slice-bottom: var(--slice-panel);
+    opacity: var(--opacity-medium);
 }
 
-/* === PauseCard === */
 #PauseCard {
-    width: 760px;
-    height: 720px;
+    width: var(--panel-card-width);
+    height: var(--panel-card-height);
     flex-direction: column;
     align-items: center;
-    background-color: rgb(25, 30, 37);
+    background-color: var(--color-card-face);
     border-radius: var(--radius-m);
     opacity: 0;
     scale: var(--panel-start-scale);
-    transition: opacity var(--panel-in-duration) ease-out, scale var(--panel-in-duration) ease-out;
+    transition: opacity var(--panel-in-duration) var(--panel-easing), scale var(--panel-in-duration) var(--panel-easing);
 }
 
 #PauseCard.visible {
@@ -60,74 +56,69 @@
     scale: 1;
 }
 
-/* === TopAccent (blue for pause) === */
 #PauseTopAccent {
-    width: 760px;
+    width: var(--panel-card-width);
     height: 7px;
     flex-shrink: 0;
-    background-color: rgb(92, 158, 235);
+    background-color: var(--color-accent-blue);
     border-top-left-radius: var(--radius-m);
     border-top-right-radius: var(--radius-m);
 }
 
-/* === Pause Icon === */
 #PauseIcon {
     width: 58px;
     height: 58px;
-    margin-top: 24px;
+    margin-top: var(--space-xxl);
     flex-shrink: 0;
     background-image: resource("Icons/icon_pause");
-    -unity-background-image-tint-color: rgb(179, 217, 255);
+    -unity-background-image-tint-color: var(--color-accent-blue-light);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
 }
 
-/* === Title "PAUSED" === */
 #PauseTitle {
-    font-size: 92px;
-    -unity-font: resource("Fonts/Anton");
+    font-size: var(--fs-display);
+    -unity-font: var(--font-display);
     -unity-text-align: middle-center;
     letter-spacing: 6px;
     width: 720px;
     height: 130px;
-    margin-top: 16px;
+    margin-top: var(--space-l);
     flex-shrink: 0;
-    color: rgb(245, 245, 245);
-    -unity-text-outline-color: rgba(0, 0, 0, 0.5);
-    -unity-text-outline-width: 2px;
+    color: var(--color-text-primary);
+    -unity-text-outline-color: var(--shadow-color-default);
+    -unity-text-outline-width: var(--shadow-text-md);
 }
 
-/* === Divider === */
 #PauseDivider {
     width: 620px;
     height: 2px;
     flex-shrink: 0;
-    margin-top: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
+    margin-top: var(--space-s);
+    background-color: var(--color-divider);
 }
 
-/* === Buttons === */
 .pause-button {
-    width: 380px;
-    height: 66px;
+    width: var(--button-width);
+    height: var(--button-height);
     flex-shrink: 0;
-    margin: 4px 0;
-    font-size: 28px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
+    margin: var(--space-xs) 0;
+    font-size: var(--fs-xl);
+    -unity-font: var(--font-body);
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
     background-image: resource("Images/ui_button");
-    -unity-slice-left: 8;
-    -unity-slice-right: 8;
-    -unity-slice-top: 8;
-    -unity-slice-bottom: 8;
+    -unity-slice-left: var(--slice-button);
+    -unity-slice-right: var(--slice-button);
+    -unity-slice-top: var(--slice-button);
+    -unity-slice-bottom: var(--slice-button);
     border-left-width: 0;
     border-right-width: 0;
     border-top-width: 0;
     border-bottom-width: 0;
     background-color: rgba(0, 0, 0, 0);
-    transition: scale 0.1s ease-out;
+    transition: scale var(--transition-fast) var(--panel-easing);
 }
 
 .pause-button:hover {

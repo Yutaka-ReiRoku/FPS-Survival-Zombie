@@ -1,13 +1,6 @@
+@import url("Shared.uss");
+
 /* SkillTreeWidget.uss — Skill Tree Panel (Phase 21) */
-/* Mirror UITheme colors as USS variables */
---st-accent: rgb(217, 199, 115);
---st-card-bottom: rgb(13, 14, 12);
---st-card-top: rgb(20, 23, 30);
---st-text-primary: rgb(245, 245, 245);
---st-text-muted: rgb(107, 122, 147);
---st-ready: rgb(30, 138, 79);
---st-dim-line: rgba(107, 122, 147, 0.3);
---st-scrim: rgba(0, 0, 0, 0.85);
 
 /* Root — fills screen, hidden by default */
 #SkillTreeWidget {
@@ -26,7 +19,7 @@
 /* Scrim — full-screen click blocker */
 #scrim {
     flex-grow: 1;
-    background-color: var(--st-scrim);
+    background-color: var(--color-scrim-bottom, rgba(0, 0, 0, 0.85));
 }
 
 /* Card — centered panel */
@@ -37,10 +30,10 @@
     translate: -50% -50%;
     width: 920px;
     height: 720px;
-    background-color: var(--st-card-bottom);
+    background-color: var(--color-card-face, rgb(25, 30, 37));
     border-radius: var(--radius-m, 16px);
     opacity: 0;
-    scale: 0.9;
+    scale: var(--panel-start-scale, 0.9);
     transition: opacity var(--panel-in-duration, 0.22s), scale var(--panel-in-duration, 0.22s);
 }
 #SkillTreeWidget.open #card {
@@ -52,13 +45,13 @@
 #title {
     position: absolute;
     left: 50%;
-    top: 40px;
+    top: var(--space-4xl, 40px);
     translate: -50%;
     width: 700px;
     height: 56px;
-    color: var(--st-accent);
-    font-size: 40px;
-    -unity-font: var(--font-display, sans-serif);
+    color: var(--color-text-gold, rgb(217, 199, 115));
+    font-size: var(--fs-xxl, 36px);
+    -unity-font: var(--font-display, resource("Fonts/Anton"));
     -unity-text-align: middle-center;
 }
 
@@ -70,9 +63,9 @@
     translate: -50%;
     width: 700px;
     height: 36px;
-    color: var(--st-text-primary);
-    font-size: 24px;
-    -unity-font: var(--font-body, sans-serif);
+    color: var(--color-text-primary, rgba(245, 245, 245, 1));
+    font-size: var(--fs-xl, 28px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     -unity-text-align: middle-center;
 }
 
@@ -84,23 +77,23 @@
     flex-direction: column;
     align-items: center;
 }
-#branch0 { left: calc(50% - 300px); top: 160px; translate: -50%; }
-#branch1 { left: 50%; top: 160px; translate: -50%; }
-#branch2 { left: calc(50% + 300px); top: 160px; translate: -50%; }
+#branch0 { left: 100px; top: 160px; }
+#branch1 { left: 340px; top: 160px; }
+#branch2 { left: 580px; top: 160px; }
 
 .branch-header {
     height: 32px;
-    color: var(--st-accent);
-    font-size: 22px;
-    -unity-font: var(--font-display, sans-serif);
+    color: var(--color-text-gold, rgb(217, 199, 115));
+    font-size: var(--fs-l, 22px);
+    -unity-font: var(--font-display, resource("Fonts/Anton"));
     -unity-text-align: middle-center;
 }
 
 .branch-sub {
     height: 24px;
-    color: var(--st-text-muted);
-    font-size: 16px;
-    -unity-font: var(--font-body, sans-serif);
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    font-size: var(--fs-s, 16px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     -unity-text-align: middle-center;
 }
 
@@ -109,7 +102,7 @@
     width: 60px;
     height: 400px;
     margin-top: 6px;
-    margin-bottom: 4px;
+    margin-bottom: var(--space-xs, 4px);
 }
 
 /* Skill node circles */
@@ -117,34 +110,34 @@
     position: absolute;
     width: 60px;
     height: 60px;
-    border-radius: 30px;
-    background-color: var(--st-card-top);
-    cursor: pointer;
-    transition: background-color 0.2s, scale 0.15s;
+    border-radius: var(--radius-round, 1000px);
+    background-color: var(--color-surface-top, rgba(31, 38, 46, 1));
+    cursor: link;
+    transition: background-color var(--transition-medium, 0.22s), scale var(--transition-fast, 0.08s);
 }
 .skill-node:hover {
-    scale: 1.1;
+    scale: var(--hover-scale, 1.06);
 }
 .skill-node.unlocked {
-    background-color: var(--st-accent);
+    background-color: var(--color-accent-gold, rgb(217, 199, 115));
 }
 .skill-node.available {
-    background-color: var(--st-ready);
+    background-color: var(--color-success-bottom, rgb(30, 138, 79));
 }
 .skill-node.locked {
-    background-color: var(--st-card-top);
+    background-color: var(--color-surface-top, rgba(31, 38, 46, 1));
 }
 .skill-node.unlocked .node-label,
 .skill-node.available .node-label {
-    color: var(--st-card-bottom);
+    color: var(--color-card-face, rgb(25, 30, 37));
 }
 
 /* Node number label */
 .node-label {
     -unity-text-align: middle-center;
-    font-size: 22px;
-    color: var(--st-text-muted);
-    -unity-font: var(--font-display, sans-serif);
+    font-size: var(--fs-l, 22px);
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    -unity-font: var(--font-display, resource("Fonts/Anton"));
 }
 
 /* Connection lines */
@@ -152,17 +145,17 @@
     position: absolute;
     width: 6px;
     height: 20px;
-    background-color: var(--st-dim-line);
-    transition: background-color 0.2s;
+    background-color: var(--color-divider, rgba(255, 255, 255, 0.1));
+    transition: background-color var(--transition-medium, 0.22s);
 }
 
 /* Next-node description */
 .next-desc {
     height: 22px;
     width: 260px;
-    color: var(--st-text-muted);
-    font-size: 16px;
-    -unity-font: var(--font-body, sans-serif);
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    font-size: var(--fs-s, 16px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     -unity-text-align: middle-center;
 }
 
@@ -170,30 +163,30 @@
 .cost-label {
     height: 24px;
     width: 220px;
-    font-size: 18px;
-    -unity-font: var(--font-display, sans-serif);
+    font-size: var(--fs-m, 18px);
+    -unity-font: var(--font-display, resource("Fonts/Anton"));
     -unity-text-align: middle-center;
 }
 .cost-label.ready {
-    color: var(--st-ready);
+    color: var(--color-success-bottom, rgb(30, 138, 79));
 }
 .cost-label.muted {
-    color: var(--st-text-muted);
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
 }
 .cost-label.accent {
-    color: var(--st-accent);
+    color: var(--color-accent-gold, rgb(217, 199, 115));
 }
 
 /* Hint */
 #hint {
     position: absolute;
     left: 50%;
-    bottom: 30px;
+    bottom: var(--space-3xl, 30px);
     translate: -50%;
     width: 700px;
     height: 28px;
-    color: var(--st-text-muted);
-    font-size: 18px;
-    -unity-font: var(--font-body, sans-serif);
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    font-size: var(--fs-m, 18px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     -unity-text-align: middle-center;
 }

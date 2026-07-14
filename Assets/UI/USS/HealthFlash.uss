@@ -1,3 +1,5 @@
+@import url("Shared.uss");
+
 /* HealthFlash.uss — Phase 22: Full-screen flash overlay */
 
 #HealthFlash {
@@ -6,13 +8,12 @@
     right: 0;
     top: 0;
     bottom: 0;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    picking-mode: ignore;
+    opacity: var(--opacity-zero, 0);
+    transition: opacity var(--transition-slow, 0.5s) ease;
     -unity-background-scale-mode: stretch-to-fill;
 }
 
 #HealthFlash.flash {
-    opacity: 1;
+    opacity: var(--opacity-full, 1);
     transition: none;
 }

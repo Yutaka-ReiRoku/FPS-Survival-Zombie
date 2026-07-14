@@ -3,21 +3,21 @@
 
 #HealthCluster {
     position: absolute;
-    left: 48px;
-    bottom: 48px;
+    left: var(--hud-cluster-left, 48px);
+    bottom: var(--hud-cluster-bottom, 48px);
     flex-direction: column;
-    width: 470px;
-    padding: 10px 20px 16px;
-    background-color: var(--color-panel-bg, rgba(15, 13, 18, 0.62));
+    width: var(--hud-cluster-width, 470px);
+    padding: var(--hud-cluster-padding-v, 10px) var(--hud-cluster-padding-h, 20px) var(--hud-bottom-margin, 16px);
+    background-color: var(--color-panel-bg, rgba(14, 17, 21, 0.92));
 }
 
 #HealthLabel {
-    font-size: 18px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
+    font-size: var(--fs-m, 18px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-text-gold, rgba(204, 191, 153, 0.85));
     height: 24px;
     flex-shrink: 0;
-    margin-bottom: 4px;
+    margin-bottom: var(--space-xs, 4px);
 }
 
 #HealthBarRow {
@@ -27,19 +27,10 @@
 
 #HealthTrack {
     position: relative;
-    width: 330px;
-    height: 26px;
+    width: var(--track-width, 330px);
+    height: var(--track-height-sm, 26px);
     flex-shrink: 0;
-    margin-right: 8px;
-    background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
-    overflow: hidden;
-}
-
-#HealthTrack {
-    position: relative;
-    width: 330px;
-    height: 26px;
-    flex-shrink: 0;
+    margin-right: var(--space-s, 8px);
     background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
     overflow: hidden;
 }
@@ -63,11 +54,11 @@
 }
 
 #HealthValue {
-    font-size: 44px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
+    font-size: var(--fs-value-xl, 44px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-ammo-normal, rgb(235, 224, 199));
-    width: 104px;
-    height: 56px;
+    width: var(--value-width, 104px);
+    height: var(--value-height, 56px);
     flex-shrink: 0;
     -unity-text-align: middle-left;
 }
@@ -79,8 +70,8 @@
 
 #ShieldTrack {
     position: relative;
-    width: 330px;
-    height: 12px;
+    width: var(--track-width, 330px);
+    height: var(--track-height-xs, 12px);
     background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
     overflow: hidden;
 }

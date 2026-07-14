@@ -91,11 +91,6 @@
     flex-shrink: 0;
 }
 
-/* ===================== PICKING MODE ===================== */
-.picking-ignore {
-    pointer-events: none;
-}
-
 /* ===================== BUTTON COMPONENTS ===================== */
 
 /* Shared button base — all game buttons should use this + modifier */
@@ -258,7 +253,7 @@
 /* ===================== SCROLLER ===================== */
 
 .scroller {
-    overflow-y: auto;
+    overflow: auto;
     flex-grow: 1;
 }
 

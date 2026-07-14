@@ -1,10 +1,12 @@
+@import url("Shared.uss");
+
 #CompassViewport {
     position: absolute;
     top: 12px;
     left: 50%;
     margin-left: -210px;
-    width: 420px;
-    height: 30px;
+    width: var(--compass-width, 420px);
+    height: var(--compass-height, 30px);
     overflow: hidden;
 }
 
@@ -22,8 +24,8 @@
 
 .compass-blip {
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: var(--compass-blip-size, 18px);
+    height: var(--compass-blip-size, 18px);
 }
 
 #CompassHeading {
@@ -33,7 +35,7 @@
     margin-left: -40px;
     width: 80px;
     height: 24px;
-    font-size: 18px;
+    font-size: var(--fs-m, 18px);
     -unity-text-align: middle-center;
-    color: rgb(235, 224, 199);
+    color: var(--color-ammo-normal, rgb(235, 224, 199));
 }

@@ -22,7 +22,7 @@
     bottom: 0;
     background-color: var(--color-scrim-bottom, rgba(0, 0, 0, 0.86));
     opacity: 0;
-    transition: opacity var(--panel-in-duration, 0.18s);
+    transition: opacity var(--panel-in-duration, 0.22s);
 }
 .stats-root.open .stats-scrim {
     opacity: 1;
@@ -38,7 +38,7 @@
     background-color: var(--color-surface-top, rgba(31, 38, 46, 0.96));
     opacity: 0;
     scale: 0.92;
-    transition: opacity var(--panel-in-duration, 0.18s), scale var(--panel-in-duration, 0.18s);
+    transition: opacity var(--panel-in-duration, 0.22s), scale var(--panel-in-duration, 0.22s);
 }
 .stats-root.open .stats-card {
     opacity: 1;
@@ -56,11 +56,11 @@
 
 .stats-title {
     position: absolute;
-    left: 20px;
-    right: 20px;
-    top: 24px;
+    left: var(--space-xl, 20px);
+    right: var(--space-xl, 20px);
+    top: var(--space-xxl, 24px);
     height: 56px;
-    font-size: 38px;
+    font-size: var(--fs-xxl, 36px);
     -unity-font: var(--font-display, resource("Fonts/Anton"));
     color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
@@ -68,20 +68,20 @@
 
 .stats-divider {
     position: absolute;
-    left: 24px;
-    right: 24px;
+    left: var(--space-xxl, 24px);
+    right: var(--space-xxl, 24px);
     top: 86px;
     height: 2px;
     background-color: var(--color-accent-gold-dark, rgb(217, 199, 115));
-    opacity: 0.5;
+    opacity: var(--opacity-medium, 0.6);
 }
 
 .stats-grid {
     position: absolute;
-    left: 24px;
-    right: 24px;
+    left: var(--space-xxl, 24px);
+    right: var(--space-xxl, 24px);
     top: 100px;
-    bottom: 20px;
+    bottom: var(--space-xl, 20px);
     flex-direction: column;
 }
 
@@ -93,11 +93,11 @@
 
 .stats-label {
     flex-grow: 1;
-    font-size: 20px;
+    font-size: var(--fs-l, 22px);
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     -unity-text-align: middle-left;
-    padding-left: 8px;
+    padding-left: var(--space-s, 8px);
 }
 .stats-label.sub {
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
@@ -105,9 +105,9 @@
 
 .stats-value {
     width: 220px;
-    font-size: 22px;
+    font-size: var(--fs-l, 22px);
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-accent-gold-dark, rgb(217, 199, 115));
     -unity-text-align: middle-right;
-    padding-right: 8px;
+    padding-right: var(--space-s, 8px);
 }

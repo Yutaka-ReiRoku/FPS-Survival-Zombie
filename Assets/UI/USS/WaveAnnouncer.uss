@@ -1,11 +1,13 @@
+@import url("Shared.uss");
+
 #WaveAnnouncer {
     position: absolute;
     left: 50%;
     top: 220px;
-    translate: TranslateX(-50%);
+    translate: -50% 0;
     width: 900px;
     height: 160px;
-    opacity: 0;
+    opacity: var(--opacity-zero, 0);
     display: none;
     flex-direction: column;
     align-items: center;
@@ -17,17 +19,17 @@
 }
 
 .wave-title {
-    font-family: resource("Fonts/Anton");
+    -unity-font: var(--font-display, resource("Fonts/Anton"));
     font-size: 72px;
     -unity-text-align: middle-center;
     color: var(--color-text-gold, #D8C773);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-xs, 4px);
     width: 100%;
     text-align: center;
 }
 
 .wave-sub {
-    font-family: resource("Fonts/Oswald-Bold");
+    -unity-font: resource("Fonts/Oswald-Bold");
     font-size: 30px;
     -unity-text-align: middle-center;
     color: var(--color-text-muted, #9EA8B8);

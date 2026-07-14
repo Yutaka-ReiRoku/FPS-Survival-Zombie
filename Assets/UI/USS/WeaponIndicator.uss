@@ -3,13 +3,13 @@
 
 #WeaponIndicator {
     position: absolute;
-    right: 48px;
+    right: var(--hud-cluster-right, 48px);
     bottom: 210px;
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
     height: 64px;
-    padding: 0 12px;
+    padding: 0 var(--space-m, 12px);
     background-image: resource("Images/ui_panel");
     -unity-slice-top: 16;
     -unity-slice-bottom: 16;
@@ -18,9 +18,9 @@
 }
 
 #WeaponName {
-    -unity-font: resource("Fonts/Outfit-SemiBold");
-    font-size: 28px;
-    color: rgb(235, 224, 199);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    font-size: var(--fs-xl, 28px);
+    color: var(--color-ammo-normal, rgb(235, 224, 199));
     -unity-text-align: middle-right;
     width: 244px;
     height: 48px;

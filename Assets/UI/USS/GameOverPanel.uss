@@ -1,7 +1,6 @@
 /* ===== GameOverPanel.uss ===== */
 @import url("Shared.uss");
 
-/* === Root: full-screen overlay === */
 #GameOverPanel {
     position: absolute;
     left: 0;
@@ -11,10 +10,9 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: rgba(5, 6, 9, 0.92);
+    background-color: var(--color-bg-root);
 }
 
-/* === Vignette overlay === */
 #Vignette {
     position: absolute;
     left: 0;
@@ -25,34 +23,32 @@
     background-size: cover;
 }
 
-/* === CardShadow (sliced, offset 12px down) === */
 #CardShadow {
     position: absolute;
-    width: 800px;
-    height: 760px;
+    width: var(--panel-shadow-width);
+    height: var(--panel-shadow-height);
     left: 50%;
     top: 50%;
     margin-left: -400px;
     margin-top: -368px;
     background-image: resource("Images/ui_shadow");
-    -unity-slice-left: 48;
-    -unity-slice-right: 48;
-    -unity-slice-top: 48;
-    -unity-slice-bottom: 48;
-    opacity: 0.6;
+    -unity-slice-left: var(--slice-panel);
+    -unity-slice-right: var(--slice-panel);
+    -unity-slice-top: var(--slice-panel);
+    -unity-slice-bottom: var(--slice-panel);
+    opacity: var(--opacity-medium);
 }
 
-/* === Card container === */
 #Card {
-    width: 760px;
-    height: 720px;
+    width: var(--panel-card-width);
+    height: var(--panel-card-height);
     flex-direction: column;
     align-items: center;
-    background-color: rgb(25, 30, 37);
+    background-color: var(--color-card-face);
     border-radius: var(--radius-m);
     opacity: 0;
     scale: var(--panel-start-scale);
-    transition: opacity var(--panel-in-duration) ease-out, scale var(--panel-in-duration) ease-out;
+    transition: opacity var(--panel-in-duration) var(--panel-easing), scale var(--panel-in-duration) var(--panel-easing);
 }
 
 #Card.visible {
@@ -60,9 +56,8 @@
     scale: 1;
 }
 
-/* === TopAccent bar === */
 #TopAccent {
-    width: 760px;
+    width: var(--panel-card-width);
     height: 7px;
     flex-shrink: 0;
     background-color: var(--color-accent-red);
@@ -70,11 +65,10 @@
     border-top-right-radius: var(--radius-m);
 }
 
-/* === Skull Icon === */
 #SkullIcon {
     width: 72px;
     height: 72px;
-    margin-top: 24px;
+    margin-top: var(--space-xxl);
     flex-shrink: 0;
     background-image: resource("Icons/icon_skull");
     -unity-background-image-tint-color: var(--color-accent-red);
@@ -83,80 +77,75 @@
     background-position: center;
 }
 
-/* === Title "GAME OVER" === */
 #Title {
-    font-size: 92px;
-    -unity-font: resource("Fonts/Anton");
+    font-size: var(--fs-display);
+    -unity-font: var(--font-display);
     -unity-text-align: middle-center;
     letter-spacing: 6px;
     width: 720px;
     height: 130px;
-    margin-top: 16px;
+    margin-top: var(--space-l);
     flex-shrink: 0;
     color: var(--color-title-top);
     -unity-text-outline-color: var(--color-title-bottom);
-    -unity-text-outline-width: 2px;
+    -unity-text-outline-width: var(--shadow-text-md);
 }
 
-/* === Divider === */
 #Divider {
     width: 620px;
     height: 2px;
     flex-shrink: 0;
-    margin-top: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
+    margin-top: var(--space-s);
+    background-color: var(--color-divider);
 }
 
-/* === StatWell === */
 #StatWell {
-    width: 640px;
-    height: 250px;
+    width: var(--stat-well-width);
+    height: var(--stat-well-height);
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 24px;
+    margin-top: var(--space-xxl);
     flex-shrink: 0;
-    background-color: rgba(14, 17, 21, 0.92);
+    background-color: var(--color-stat-well-bg);
     border-radius: var(--radius-s);
 }
 
-/* === Stat labels === */
 .stat-text {
-    font-size: 28px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
+    font-size: var(--fs-xl);
+    -unity-font: var(--font-body);
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
     width: 100%;
     height: 36px;
     flex-shrink: 0;
-    margin: 4px 0;
+    margin: var(--space-xs) 0;
 }
 
 .stat-text.gold {
     color: var(--color-text-gold);
 }
 
-/* === Buttons === */
 .gameover-button {
-    width: 380px;
-    height: 66px;
+    width: var(--button-width);
+    height: var(--button-height);
     flex-shrink: 0;
-    margin: 4px 0;
-    font-size: 28px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
+    margin: var(--space-xs) 0;
+    font-size: var(--fs-xl);
+    -unity-font: var(--font-body);
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
     background-image: resource("Images/ui_button");
-    -unity-slice-left: 8;
-    -unity-slice-right: 8;
-    -unity-slice-top: 8;
-    -unity-slice-bottom: 8;
+    -unity-slice-left: var(--slice-button);
+    -unity-slice-right: var(--slice-button);
+    -unity-slice-top: var(--slice-button);
+    -unity-slice-bottom: var(--slice-button);
     border-left-width: 0;
     border-right-width: 0;
     border-top-width: 0;
     border-bottom-width: 0;
     background-color: rgba(0, 0, 0, 0);
-    transition: scale 0.1s ease-out;
+    transition: scale var(--transition-fast) var(--panel-easing);
 }
 
 .gameover-button:hover {

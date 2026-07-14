@@ -1,9 +1,11 @@
+@import url("Shared.uss");
+
 /* ===== InteractPrompt.uss — Phase 14: Interaction prompt HUD element ===== */
 
 #InteractPrompt {
     position: absolute;
     left: 50%;
-    translate: TranslateX(-50%);
+    translate: -50% 0;
     bottom: 200px;
     width: 540px;
     height: 64px;
@@ -18,9 +20,9 @@
 
 .interact-label {
     position: absolute;
-    left: 16px;
+    left: var(--space-l, 16px);
     top: 6px;
-    right: 16px;
+    right: var(--space-l, 16px);
     bottom: 10px;
     font-size: 26px;
     -unity-font: var(--font-body);
@@ -37,17 +39,17 @@
 
 .interact-progress {
     position: absolute;
-    left: 4px;
-    right: 4px;
-    bottom: 4px;
+    left: var(--space-xs, 4px);
+    right: var(--space-xs, 4px);
+    bottom: var(--space-xs, 4px);
     height: 5px;
     display: none;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 2px;
+    background-color: var(--shadow-color-default, rgba(0, 0, 0, 0.5));
+    border-radius: var(--crosshair-radius, 2px);
 }
 
 .interact-progress-fill {
     height: 100%;
     background-color: var(--color-accent-gold-dark);
-    border-radius: 2px;
+    border-radius: var(--crosshair-radius, 2px);
 }

@@ -1,3 +1,5 @@
+@import url("Shared.uss");
+
 /* ===== ThreatWidget.uss ===== */
 
 #ThreatWidget {
@@ -6,13 +8,12 @@
     right: 0;
     top: 0;
     bottom: 0;
-    pointer-events: none;
 }
 
 .threat-root {
     position: absolute;
-    width: 320px;
-    height: 80px;
+    width: var(--threat-widget-width, 320px);
+    height: var(--threat-widget-height, 80px);
     left: 50%;
     top: 58px;
     translate: -50% 0;
@@ -23,7 +24,7 @@
     left: 0;
     right: 0;
     top: 2px;
-    font-size: 18px;
+    font-size: var(--fs-m, 18px);
     -unity-text-align: middle-center;
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
@@ -33,20 +34,20 @@
 
 .threat-bar-bg {
     position: absolute;
-    width: 240px;
-    height: 6px;
+    width: var(--threat-bar-width, 240px);
+    height: var(--threat-bar-height, 6px);
     left: 50%;
-    top: 24px;
+    top: var(--space-xxl, 24px);
     translate: -50% 0;
-    background-color: rgba(20, 24, 29, 0.85);
+    background-color: var(--color-surface-top, rgba(20, 24, 29, 0.85));
     border-radius: var(--radius-s, 8px);
     overflow: hidden;
 }
 
 .threat-fill {
     height: 100%;
-    background-color: rgb(79, 224, 138);
-    transition: width 0.15s ease-out;
+    background-color: var(--color-success-top, rgb(79, 224, 138));
+    transition: width var(--transition-normal, 0.15s) ease-out;
 }
 
 .threat-warn {
@@ -54,10 +55,10 @@
     left: 0;
     right: 0;
     top: 36px;
-    font-size: 24px;
+    font-size: var(--fs-xl, 28px);
     -unity-text-align: middle-center;
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
-    color: rgb(242, 82, 69);
+    color: var(--color-danger-top, rgb(242, 82, 69));
     opacity: 0;
     white-space: nowrap;
     overflow: visible;

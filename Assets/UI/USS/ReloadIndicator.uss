@@ -1,15 +1,16 @@
 /* ReloadIndicator.uss — Radial reload sweep indicator */
 /* Positioned at screen center, offset 120px below center (match UGUI layout) */
+@import url("Shared.uss");
 
 ReloadIndicator {
     position: absolute;
     left: 50%;
     top: 50%;
-    translate: Translate(-50%, calc(-50% + -120px));
+    translate: -50% -50%;
     width: 64px;
     height: 64px;
-    opacity: 0;
-    transition: opacity 0.15s ease-out;
+    opacity: var(--opacity-zero, 0);
+    transition: opacity var(--transition-normal, 0.15s) var(--panel-easing, ease-out);
 }
 
 #ReloadRing {

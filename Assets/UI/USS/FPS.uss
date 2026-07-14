@@ -1,18 +1,22 @@
+@import url("Shared.uss");
+
 /* FPS.uss — Phase 12: FPS Counter */
 
---color-fps-good: #4FE08A;
---color-fps-ok: #FFD44D;
---color-fps-bad: #D95926;
+* {
+    --color-fps-good: var(--color-stamina, #4FE08A);
+    --color-fps-ok: #FFD44D;
+    --color-fps-bad: var(--color-ammo-low, #D95926);
+}
 
 .fps-counter {
     position: absolute;
     top: 18px;
     left: 50%;
     margin-left: -110px;
-    font-size: 22px;
+    font-size: var(--fs-l, 22px);
     -unity-font: var(--font-body);
     -unity-text-align: middle-center;
     color: var(--color-fps-good);
     width: 220px;
-    height: 30px;
+    height: var(--compass-height, 30px);
 }

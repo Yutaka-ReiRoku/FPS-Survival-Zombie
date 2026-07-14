@@ -3,12 +3,12 @@
 
 #AmmoCluster {
     position: absolute;
-    right: 48px;
-    bottom: 48px;
+    right: var(--hud-cluster-right, 48px);
+    bottom: var(--hud-cluster-bottom, 48px);
     flex-direction: column;
     align-items: flex-end;
     width: 360px;
-    padding: 12px 20px 10px;
+    padding: var(--space-m, 12px) var(--hud-cluster-padding-h, 20px) 10px;
     background-image: resource("Images/ui_panel");
     -unity-slice-top: 16;
     -unity-slice-bottom: 16;
@@ -17,8 +17,8 @@
 }
 
 #AmmoLabel {
-    font-size: 18px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
+    font-size: var(--fs-m, 18px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-text-gold, rgba(204, 191, 153, 0.85));
     height: 24px;
     flex-shrink: 0;
@@ -41,7 +41,7 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(217, 199, 115, 0.15);
+    background-color: var(--color-accent-gold, rgba(217, 199, 115, 0.15));
 }
 
 #AmmoPunchRoot {
@@ -54,7 +54,7 @@
 
 #AmmoValue {
     font-size: 84px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-ammo-normal, rgb(235, 224, 199));
     -unity-text-align: middle-right;
     flex-grow: 0;
@@ -63,19 +63,19 @@
 
 #AmmoReserve {
     font-size: 30px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-text-gold, rgba(191, 184, 158, 0.9));
     height: 34px;
     flex-shrink: 0;
     -unity-text-align: middle-right;
     width: 100%;
-    margin-top: 2px;
+    margin-top: var(--space-2xs, 2px);
 }
 
 #HeatBarTrack {
     position: relative;
     width: 100%;
-    height: 8px;
+    height: var(--track-heat-height, 8px);
     flex-shrink: 0;
     margin-top: 6px;
     background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));

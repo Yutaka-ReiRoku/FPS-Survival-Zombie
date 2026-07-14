@@ -1,4 +1,5 @@
 /* ===== DamageDirection.uss — Directional Damage Indicator ===== */
+@import url("Shared.uss");
 
 #DamageDirection {
     position: absolute;
@@ -6,7 +7,6 @@
     right: 0;
     top: 0;
     bottom: 0;
-    pointer-events: none;
 }
 
 .dir-pivot {
@@ -15,7 +15,7 @@
     top: 50%;
     width: 0;
     height: 0;
-    translate: TranslateX(-50%) TranslateY(-50%);
+    translate: -50% -50%;
     opacity: 0;
 }
 
@@ -23,7 +23,7 @@
     position: absolute;
     left: 50%;
     top: 0;
-    translate: TranslateX(-50%);
+    translate: -50% 0;
     background-color: var(--color-accent-red);
-    border-radius: 8px;
+    border-radius: var(--radius-s);
 }
