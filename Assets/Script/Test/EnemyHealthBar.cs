@@ -36,40 +36,23 @@ public class EnemyHealthBar : MonoBehaviour
 
         var doc = _barGO.GetComponent<UIDocument>();
         doc.sortingOrder = 100;
-
-        // Set world-space sizing (120x16 world units)
         doc.worldSpaceSize = new Vector2(barSize.x * worldScale, barSize.y * worldScale);
 
-        var root = new VisualElement();
-        root.name = "HealthBarRoot";
-        root.style.position = Position.Absolute;
-        root.style.left = 0;
-        root.style.top = 0;
+        var asset = Resources.Load<VisualTreeAsset>("EnemyHealthBar");
+        if (asset == null) return;
+        asset.CloneTree(doc.rootVisualElement);
+
+        var root = doc.rootVisualElement.Q("HealthBarRoot");
+        if (root == null) return;
         root.style.width = barSize.x;
         root.style.height = barSize.y;
-        root.style.backgroundColor = new Color(0f, 0f, 0f, 0.6f);
 
-        var area = new VisualElement();
-        area.name = "FillArea";
-        area.style.position = Position.Absolute;
-        area.style.left = 2;
-        area.style.right = 2;
-        area.style.top = 2;
-        area.style.bottom = 2;
-        root.Add(area);
-
-        _fill = new VisualElement();
-        _fill.name = "Fill";
-        _fill.usageHints = UsageHints.DynamicTransform;
-        _fill.style.position = Position.Absolute;
-        _fill.style.left = 0;
-        _fill.style.top = 0;
-        _fill.style.bottom = 0;
-        _fill.style.width = Length.Percent(100);
-        _fill.style.backgroundColor = _full;
-        area.Add(_fill);
-
-        doc.rootVisualElement.Add(root);
+        _fill = doc.rootVisualElement.Q("Fill");
+        if (_fill != null)
+        {
+            _fill.usageHints = UsageHints.DynamicTransform;
+            _fill.style.backgroundColor = _full;
+        }
     }
 
     private void OnEnable()

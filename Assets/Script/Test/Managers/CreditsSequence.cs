@@ -125,32 +125,18 @@ public class CreditsSequence : MonoBehaviour
         var doc = _docGO.GetComponent<UIDocument>();
         doc.sortingOrder = 1800;
 
-        _root = new VisualElement();
-        _root.name = "CreditsRoot";
-        _root.AddToClassList("credits-root");
+        var asset = Resources.Load<VisualTreeAsset>("CreditsSequence");
+        if (asset == null) return;
+        asset.CloneTree(doc.rootVisualElement);
+
+        _root = doc.rootVisualElement.Q("CreditsRoot");
+        _scrollContent = doc.rootVisualElement.Q("ScrollContent");
+        if (_root == null || _scrollContent == null) return;
+
         _root.style.opacity = 0f;
         _root.pickingMode = PickingMode.Ignore;
-
-        var sheet = Resources.Load<StyleSheet>("CreditsSequence");
-        if (sheet != null) _root.styleSheets.Add(sheet);
-
-        var bg = new VisualElement();
-        bg.name = "Background";
-        bg.style.position = Position.Absolute;
-        bg.style.left = 0;
-        bg.style.right = 0;
-        bg.style.top = 0;
-        bg.style.bottom = 0;
-        bg.style.backgroundColor = backgroundColor;
-        _root.Add(bg);
-
-        _scrollContent = new VisualElement();
-        _scrollContent.name = "ScrollContent";
-        _scrollContent.style.position = Position.Absolute;
-        _scrollContent.style.left = Length.Percent(50);
-        _scrollContent.style.translate = new Translate(Length.Percent(-50), 0);
-        _scrollContent.style.width = 1000;
-        _root.Add(_scrollContent);
+        var bg = _root.Q("Background");
+        if (bg != null) bg.style.backgroundColor = backgroundColor;
 
         float y = 0f;
 

@@ -60,60 +60,31 @@ public class EpilogueSlide : MonoBehaviour
         _docGO.transform.SetParent(transform, false);
         var doc = _docGO.GetComponent<UIDocument>();
         doc.sortingOrder = 1500;
-        var sheet = Resources.Load<StyleSheet>("EpilogueSlide");
-        if (sheet != null) doc.rootVisualElement.styleSheets.Add(sheet);
 
-        _root = new VisualElement();
-        _root.name = "EpilogueRoot";
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0;
-        _root.style.right = 0;
-        _root.style.top = 0;
-        _root.style.bottom = 0;
-        _root.style.opacity = 0f;
+        var asset = Resources.Load<VisualTreeAsset>("EpilogueSlide");
+        if (asset == null) return;
+        asset.CloneTree(doc.rootVisualElement);
+
+        _root = doc.rootVisualElement.Q("EpilogueRoot");
+        if (_root == null) return;
         _root.pickingMode = PickingMode.Ignore;
+        _root.style.opacity = 0f;
 
-        var bg = new VisualElement();
-        bg.name = "Background";
-        bg.style.position = Position.Absolute;
-        bg.style.left = 0;
-        bg.style.right = 0;
-        bg.style.top = 0;
-        bg.style.bottom = 0;
-        bg.style.backgroundColor = backgroundColor;
-        _root.Add(bg);
+        var bg = _root.Q("Background");
+        if (bg != null) bg.style.backgroundColor = backgroundColor;
 
-        var container = new VisualElement();
-        container.name = "Content";
-        container.style.position = Position.Absolute;
-        container.style.left = Length.Percent(50);
-        container.style.top = Length.Percent(50);
-        container.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
-        container.style.alignItems = Align.Center;
-        container.style.justifyContent = Justify.Center;
-        container.style.width = Length.Percent(80);
-        _root.Add(container);
-
-        _illustrationEl = new VisualElement();
-        _illustrationEl.name = "Illustration";
-        _illustrationEl.style.width = 720;
-        _illustrationEl.style.height = 420;
-        _illustrationEl.style.marginBottom = 30;
-        if (illustration != null)
+        _illustrationEl = _root.Q("Illustration");
+        if (_illustrationEl != null && illustration != null)
         {
             _illustrationEl.style.backgroundImage = new StyleBackground(illustration);
             _illustrationEl.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
         }
-        container.Add(_illustrationEl);
 
-        _text = new Label(bodyText);
-        _text.name = "BodyText";
-        _text.style.fontSize = 34;
-        _text.style.color = textColor;
-        _text.style.unityTextAlign = TextAnchor.MiddleCenter;
-        _text.style.whiteSpace = WhiteSpace.Normal;
-        container.Add(_text);
-
-        doc.rootVisualElement.Add(_root);
+        _text = _root.Q<Label>("BodyText");
+        if (_text != null)
+        {
+            _text.text = bodyText;
+            _text.style.color = textColor;
+        }
     }
 }

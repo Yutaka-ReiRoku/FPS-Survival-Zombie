@@ -1,0 +1,16 @@
+@import url("../USS/Theme.uss");
+@import url("../USS/Shared.uss");
+
+#HealthBarRoot {
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: var(--radius-xs, 4px);
+}
+
+#FillArea {
+    overflow: hidden;
+}
+
+#Fill {
+    background-color: var(--color-accent-gold, rgb(217, 199, 115));
+    transition: width var(--transition-fast, 0.15s) ease-out;
+}
