@@ -4,7 +4,7 @@
 
 /* === Button Motion (replaces UIButtonMotion.cs) === */
 .game-button {
-    cursor: pointer;
+    cursor: link;
     transition: scale 0.08s;
 }
 .game-button:hover {

@@ -23,7 +23,16 @@
 #HealthBarRow {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+}
+
+#HealthTrack {
+    position: relative;
+    width: 330px;
+    height: 26px;
+    flex-shrink: 0;
+    margin-right: 8px;
+    background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
+    overflow: hidden;
 }
 
 #HealthTrack {

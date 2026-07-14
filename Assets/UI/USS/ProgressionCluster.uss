@@ -23,7 +23,16 @@
 #XpBarRow {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+}
+
+#XpTrack {
+    position: relative;
+    width: 330px;
+    height: 26px;
+    flex-shrink: 0;
+    margin-right: 8px;
+    background-color: rgba(36, 31, 31, 0.9);
+    overflow: hidden;
 }
 
 #XpTrack {

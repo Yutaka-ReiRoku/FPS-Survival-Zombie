@@ -41,7 +41,7 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(to bottom, var(--color-ammo-normal, rgb(235, 224, 199)), var(--color-health-full, rgb(217, 199, 115)));
+    background-color: rgba(217, 199, 115, 0.15);
 }
 
 #AmmoPunchRoot {

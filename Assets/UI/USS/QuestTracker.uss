@@ -18,7 +18,7 @@
 #Chapter {
     color: var(--color-text-gold, rgb(217, 199, 115));
     font-size: 22px;
-    font-family: var(--font-display);
+    -unity-font: var(--font-display);
     -unity-font-style: bold;
     margin-bottom: 4px;
     white-space: normal;
@@ -27,7 +27,7 @@
 #Title {
     color: var(--color-text-primary, rgb(245, 245, 245));
     font-size: 28px;
-    font-family: var(--font-body);
+    -unity-font: var(--font-body);
     -unity-font-style: bold;
     margin-bottom: 6px;
     white-space: normal;
@@ -36,14 +36,14 @@
 #Objective {
     color: var(--color-text-muted, rgb(158, 168, 184));
     font-size: 18px;
-    font-family: var(--font-body);
+    -unity-font: var(--font-body);
     white-space: normal;
 }
 
 #Collectibles {
     color: rgb(102, 204, 255);
     font-size: 16px;
-    font-family: var(--font-body);
+    -unity-font: var(--font-body);
     margin-top: 4px;
 }
 
@@ -59,7 +59,7 @@
     color: rgb(85, 187, 85);
     font-size: 16px;
     -unity-font-style: bold;
-    font-family: var(--font-body);
+    -unity-font: var(--font-body);
     margin-bottom: 4px;
 }
 
@@ -70,6 +70,6 @@
 .side-line {
     color: rgb(136, 221, 136);
     font-size: 18px;
-    font-family: var(--font-body);
+    -unity-font: var(--font-body);
     height: 26px;
 }

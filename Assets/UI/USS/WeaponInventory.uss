@@ -16,10 +16,6 @@
     position: relative;
 }
 
-.weapon-inventory-slot:first-child {
-    margin-left: 0;
-}
-
 .weapon-inventory-icon {
     position: absolute;
     left: 8px;

@@ -83,12 +83,12 @@
     top: 100px;
     bottom: 20px;
     flex-direction: column;
-    gap: var(--space-s, 6px);
 }
 
 .stats-row {
     flex-direction: row;
     height: 28px;
+    margin-bottom: var(--space-s, 6px);
 }
 
 .stats-label {

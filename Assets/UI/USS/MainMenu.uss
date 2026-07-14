@@ -12,7 +12,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-display);
+    -unity-font: var(--font-display);
 }
 
 /* ===== BACKGROUND LAYER ===== */
@@ -56,7 +56,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
 }
 
 /* ===== TITLE ===== */
@@ -65,7 +64,7 @@
     color: var(--mm-gold);
     -unity-font-style: bold;
     letter-spacing: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 20px;
 }
 
 #Subtitle {
@@ -80,8 +79,12 @@
     width: 280px;
     height: 60px;
     position: relative;
-    cursor: pointer;
+    cursor: link;
     transition: opacity 0.2s;
+}
+
+#PlayButton {
+    margin-bottom: 16px;
 }
 
 .menu-button:hover {
@@ -153,7 +156,7 @@
     font-size: 22px;
     -unity-font-style: bold;
     letter-spacing: 4px;
-    unity-text-align: middle-center;
+    -unity-text-align: middle-center;
 }
 
 #PlayButton_Icon {
@@ -164,15 +167,10 @@
     background-image: resource("Icons/icon_exit");
 }
 
-#BestChip_Icon {
-    background-image: resource("Icons/icon_trophy");
-}
-
 /* ===== CHIP (Best Score) ===== */
 .chip {
     flex-direction: row;
     align-items: center;
-    gap: 10px;
     padding: 10px 20px;
     background-color: rgba(0, 0, 0, 0.3);
     background-image: resource("Images/ui_panel");
@@ -181,6 +179,11 @@
     background-size: cover;
     border-radius: 6px;
     margin-top: 16px;
+}
+
+#BestChip_Icon {
+    background-image: resource("Icons/icon_trophy");
+    margin-right: 10px;
 }
 
 .chip-icon {
