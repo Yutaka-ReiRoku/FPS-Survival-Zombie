@@ -1,20 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
-/// <summary>
-/// Achievement UI: shows a transient toast popup when an achievement is unlocked,
-/// and a full achievement list panel toggled with a key. Self-building, engine-free,
-/// follows the same pattern as WaveAnnouncer / SkillTreeWidget.
-///
-/// Placement: child of the GameUICanvas (same parent as WaveAnnouncer, SkillTreeWidget, etc.).
-/// </summary>
 public class AchievementWidget : MonoBehaviour
 {
     [Header("Toggle")]
-    [Tooltip("Key to open/close the achievement list panel.")]
     public KeyCode toggleKey = KeyCode.J;
 
     [Header("Popup Timing")]
@@ -25,7 +16,7 @@ public class AchievementWidget : MonoBehaviour
     [Header("Popup Layout (px @ 1920x1080)")]
     public float popupWidth = 520f;
     public float popupHeight = 90f;
-    public float popupYOffset = 200f; // from top
+    public float popupYOffset = 200f;
 
     [Header("List Panel Layout")]
     public float panelWidth = 700f;
@@ -33,37 +24,31 @@ public class AchievementWidget : MonoBehaviour
     public float rowHeight = 70f;
     public float rowSpacing = 8f;
 
-    // ---- Runtime refs ----
-    private CanvasGroup _popupGroup;
-    private TMP_Text _popupTitle;
-    private TMP_Text _popupDesc;
-    private Image _popupIcon;
+    private VisualElement _popupRoot;
+    private Label _popupTitle;
+    private Label _popupDesc;
+    private VisualElement _popupIcon;
     private Coroutine _popupAnim;
 
-    private GameObject _listPanel;
-    private CanvasGroup _listGroup;
+    private VisualElement _scrim;
+    private VisualElement _listPanel;
+    private VisualElement _listContent;
     private bool _listOpen;
-    private UIPanelTransition _listTransition;
+    private GameObject _docGO;
 
-    // Cached theme values
-    private Color _accent;
-    private Color _textPrimary;
-    private Color _textMuted;
-    private Color _cardTop;
-    private Color _cardBottom;
-    private Color _scrimTop;
-    private Color _scrimBottom;
-    private TMP_FontAsset _displayFont;
-    private TMP_FontAsset _headerFont;
-    private TMP_FontAsset _bodyFont;
+    private Color _accent = new Color(0.85f, 0.78f, 0.45f, 1f);
+    private Color _textPrimary = new Color(0.96f, 0.96f, 0.96f, 1f);
+    private Color _textMuted = new Color(0.62f, 0.66f, 0.72f, 1f);
+    private Color _cardTop = new Color(0.122f, 0.149f, 0.18f, 1f);
+    private Color _cardBottom = new Color(0.075f, 0.09f, 0.11f, 1f);
+    private Color _scrimColor = new Color(0.04f, 0.05f, 0.07f, 0.90f);
 
-    // Queue for popups (if multiple unlock at once)
     private readonly Queue<AchievementData> _popupQueue = new Queue<AchievementData>();
     private bool _popupPlaying;
 
     private void Awake()
     {
-        LoadTheme();
+        BuildDoc();
         BuildPopup();
         BuildListPanel();
     }
@@ -84,7 +69,6 @@ public class AchievementWidget : MonoBehaviour
 
     private void Start()
     {
-        // Late-bind in case AchievementManager.Awake hasn't run yet.
         var mgr = AchievementManager.Instance;
         if (mgr != null && _subscribed == false)
         {
@@ -101,306 +85,251 @@ public class AchievementWidget : MonoBehaviour
             ToggleList();
     }
 
-    // ---- Theme ----
-
-    private void LoadTheme()
+    private void BuildDoc()
     {
-        var th = UITheme.Active;
-        _accent = th != null ? th.accent : new Color(0.85f, 0.78f, 0.45f, 1f);
-        _textPrimary = th != null ? th.textPrimary : new Color(0.96f, 0.96f, 0.96f, 1f);
-        _textMuted = th != null ? th.textMuted : new Color(0.62f, 0.66f, 0.72f, 1f);
-        _cardTop = th != null ? th.cardTop : new Color(0.122f, 0.149f, 0.18f, 1f);
-        _cardBottom = th != null ? th.cardBottom : new Color(0.075f, 0.09f, 0.11f, 1f);
-        _scrimTop = th != null ? th.scrimTop : new Color(0.04f, 0.05f, 0.07f, 0.90f);
-        _scrimBottom = th != null ? th.scrimBottom : new Color(0f, 0f, 0f, 0.93f);
-        _displayFont = th != null ? th.displayFont : null;
-        _headerFont = th != null ? th.headerFont : null;
-        _bodyFont = th != null ? th.bodyFont : null;
-    }
+        _docGO = new GameObject("Achievement_Doc", typeof(UIDocument));
+        _docGO.transform.SetParent(transform, false);
+        var doc = _docGO.GetComponent<UIDocument>();
+        doc.sortingOrder = 100;
 
-    // ---- Popup build ----
+        var root = new VisualElement();
+        root.name = "AchievementRoot";
+        root.style.position = Position.Absolute;
+        root.style.left = 0;
+        root.style.right = 0;
+        root.style.top = 0;
+        root.style.bottom = 0;
+        root.pickingMode = PickingMode.Ignore;
+        doc.rootVisualElement.Add(root);
+    }
 
     private void BuildPopup()
     {
-        // Root container — anchored top-center, offset down from top.
-        var root = new GameObject("AchievementPopup", typeof(RectTransform));
-        root.transform.SetParent(transform, false);
-        var rrt = (RectTransform)root.transform;
-        rrt.anchorMin = rrt.anchorMax = new Vector2(0.5f, 1f);
-        rrt.pivot = new Vector2(0.5f, 1f);
-        rrt.anchoredPosition = new Vector2(0f, -popupYOffset);
-        rrt.sizeDelta = new Vector2(popupWidth, popupHeight);
+        _popupRoot = new VisualElement();
+        _popupRoot.name = "AchievementPopup";
+        _popupRoot.style.position = Position.Absolute;
+        _popupRoot.style.left = Length.Percent(50);
+        _popupRoot.style.top = popupYOffset;
+        _popupRoot.style.translate = new Translate(Length.Percent(-50), 0);
+        _popupRoot.style.width = popupWidth;
+        _popupRoot.style.height = popupHeight;
+        _popupRoot.style.backgroundColor = _cardBottom;
+        _popupRoot.style.opacity = 0f;
+        _popupRoot.pickingMode = PickingMode.Ignore;
 
-        _popupGroup = root.AddComponent<CanvasGroup>();
-        _popupGroup.alpha = 0f;
-        _popupGroup.interactable = false;
-        _popupGroup.blocksRaycasts = false;
+        var accentBar = new VisualElement();
+        accentBar.name = "AccentBar";
+        accentBar.style.position = Position.Absolute;
+        accentBar.style.left = 0;
+        accentBar.style.top = 0;
+        accentBar.style.bottom = 0;
+        accentBar.style.width = 6;
+        accentBar.style.backgroundColor = _accent;
+        _popupRoot.Add(accentBar);
 
-        // Background card with vertical gradient (simple two-color via Image).
-        var bg = new GameObject("BG", typeof(RectTransform));
-        bg.transform.SetParent(root.transform, false);
-        var brt = (RectTransform)bg.transform;
-        brt.anchorMin = Vector2.zero; brt.anchorMax = Vector2.one;
-        brt.offsetMin = brt.offsetMax = Vector2.zero;
-        var bgImg = bg.AddComponent<Image>();
-        bgImg.color = _cardBottom;
-        bgImg.raycastTarget = false;
+        _popupIcon = new VisualElement();
+        _popupIcon.name = "Icon";
+        _popupIcon.style.position = Position.Absolute;
+        _popupIcon.style.left = 18;
+        _popupIcon.style.top = Length.Percent(50);
+        _popupIcon.style.translate = new Translate(0, Length.Percent(-50));
+        _popupIcon.style.width = 56;
+        _popupIcon.style.height = 56;
+        _popupIcon.style.backgroundColor = new Color(_accent.r, _accent.g, _accent.b, 0.25f);
+        _popupRoot.Add(_popupIcon);
 
-        // Accent bar on the left.
-        var bar = new GameObject("AccentBar", typeof(RectTransform));
-        bar.transform.SetParent(root.transform, false);
-        var bart = (RectTransform)bar.transform;
-        bart.anchorMin = new Vector2(0f, 0f); bart.anchorMax = new Vector2(0f, 1f);
-        bart.pivot = new Vector2(0f, 0.5f);
-        bart.anchoredPosition = Vector2.zero;
-        bart.sizeDelta = new Vector2(6f, 0f);
-        var barImg = bar.AddComponent<Image>();
-        barImg.color = _accent;
-        barImg.raycastTarget = false;
+        _popupTitle = new Label();
+        _popupTitle.name = "Title";
+        _popupTitle.style.position = Position.Absolute;
+        _popupTitle.style.left = 92;
+        _popupTitle.style.top = 14;
+        _popupTitle.style.fontSize = 24;
+        _popupTitle.style.color = _accent;
+        _popupRoot.Add(_popupTitle);
 
-        // Icon placeholder.
-        var iconGo = new GameObject("Icon", typeof(RectTransform));
-        iconGo.transform.SetParent(root.transform, false);
-        var irt = (RectTransform)iconGo.transform;
-        irt.anchorMin = irt.anchorMax = new Vector2(0f, 0.5f);
-        irt.pivot = new Vector2(0f, 0.5f);
-        irt.anchoredPosition = new Vector2(18f, 0f);
-        irt.sizeDelta = new Vector2(56f, 56f);
-        _popupIcon = iconGo.AddComponent<Image>();
-        _popupIcon.color = new Color(_accent.r, _accent.g, _accent.b, 0.25f);
-        _popupIcon.raycastTarget = false;
+        _popupDesc = new Label();
+        _popupDesc.name = "Desc";
+        _popupDesc.style.position = Position.Absolute;
+        _popupDesc.style.left = 92;
+        _popupDesc.style.top = 46;
+        _popupDesc.style.fontSize = 16;
+        _popupDesc.style.color = _textMuted;
+        _popupRoot.Add(_popupDesc);
 
-        // Title text.
-        _popupTitle = MakeText(root.transform, "Title", 24f, new Vector2(92f, 14f),
-                               new Vector2(popupWidth - 100f, 30f), _headerFont, _accent);
-        _popupTitle.alignment = TextAlignmentOptions.Left;
-
-        // Description text.
-        _popupDesc = MakeText(root.transform, "Desc", 16f, new Vector2(92f, -18f),
-                              new Vector2(popupWidth - 100f, 24f), _bodyFont, _textMuted);
-        _popupDesc.alignment = TextAlignmentOptions.Left;
+        var root = _docGO.GetComponent<UIDocument>().rootVisualElement;
+        root.Add(_popupRoot);
     }
-
-    // ---- List panel build ----
 
     private void BuildListPanel()
     {
-        // Scrim (full-screen dark overlay).
-        var scrim = new GameObject("AchievementScrim", typeof(RectTransform));
-        scrim.transform.SetParent(transform, false);
-        var srt = (RectTransform)scrim.transform;
-        srt.anchorMin = srt.anchorMax = new Vector2(0.5f, 0.5f);
-        srt.pivot = new Vector2(0.5f, 0.5f);
-        srt.anchoredPosition = Vector2.zero;
-        srt.sizeDelta = new Vector2(4000f, 4000f);
-        var scrimImg = scrim.AddComponent<Image>();
-        scrimImg.color = _scrimBottom;
-        scrimImg.raycastTarget = true;
-        var scrimCg = scrim.AddComponent<CanvasGroup>();
-        scrimCg.alpha = 0f;
-        scrimCg.interactable = false;
-        scrimCg.blocksRaycasts = false;
+        var root = _docGO.GetComponent<UIDocument>().rootVisualElement;
 
-        // Panel card.
-        var panel = new GameObject("AchievementListPanel", typeof(RectTransform));
-        panel.transform.SetParent(transform, false);
-        var prt = (RectTransform)panel.transform;
-        prt.anchorMin = prt.anchorMax = new Vector2(0.5f, 0.5f);
-        prt.pivot = new Vector2(0.5f, 0.5f);
-        prt.anchoredPosition = Vector2.zero;
-        prt.sizeDelta = new Vector2(panelWidth, panelHeight);
-        var panelImg = panel.AddComponent<Image>();
-        panelImg.color = _cardBottom;
-        panelImg.raycastTarget = true;
+        _scrim = new VisualElement();
+        _scrim.name = "AchievementScrim";
+        _scrim.style.position = Position.Absolute;
+        _scrim.style.left = 0;
+        _scrim.style.right = 0;
+        _scrim.style.top = 0;
+        _scrim.style.bottom = 0;
+        _scrim.style.backgroundColor = _scrimColor;
+        _scrim.style.opacity = 0f;
+        _scrim.style.display = DisplayStyle.None;
+        _scrim.RegisterCallback<ClickEvent>(_ => ToggleList());
+        root.Add(_scrim);
 
-        _listGroup = panel.AddComponent<CanvasGroup>();
-        _listGroup.alpha = 0f;
-        _listGroup.interactable = false;
-        _listGroup.blocksRaycasts = false;
+        _listPanel = new VisualElement();
+        _listPanel.name = "AchievementListPanel";
+        _listPanel.style.position = Position.Absolute;
+        _listPanel.style.left = Length.Percent(50);
+        _listPanel.style.top = Length.Percent(50);
+        _listPanel.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
+        _listPanel.style.width = panelWidth;
+        _listPanel.style.backgroundColor = _cardBottom;
+        _listPanel.style.paddingLeft = 20;
+        _listPanel.style.paddingRight = 20;
+        _listPanel.style.paddingTop = 20;
+        _listPanel.style.paddingBottom = 20;
+        _listPanel.style.opacity = 0f;
+        _listPanel.style.display = DisplayStyle.None;
+        root.Add(_listPanel);
 
-        _listTransition = panel.AddComponent<UIPanelTransition>();
-        // UIPanelTransition handles fade/scale; we just toggle the CanvasGroup.
+        var header = new Label("THÀNH TỰU");
+        header.style.fontSize = 36;
+        header.style.color = _accent;
+        header.style.unityTextAlign = TextAnchor.MiddleCenter;
+        header.style.marginBottom = 8;
+        _listPanel.Add(header);
 
-        // Header.
-        var header = MakeText(panel.transform, "Header", 36f, new Vector2(0f, panelHeight * 0.5f - 40f),
-                              new Vector2(panelWidth - 40f, 44f), _displayFont, _accent);
-        header.alignment = TextAlignmentOptions.Center;
-        header.text = "THÀNH TỰU";
+        var hint = new Label($"Nhấn {toggleKey} để đóng");
+        hint.style.fontSize = 16;
+        hint.style.color = _textMuted;
+        hint.style.unityTextAlign = TextAnchor.MiddleCenter;
+        hint.style.marginBottom = 16;
+        _listPanel.Add(hint);
 
-        // Sub-header hint.
-        var hint = MakeText(panel.transform, "Hint", 16f, new Vector2(0f, panelHeight * 0.5f - 78f),
-                            new Vector2(panelWidth - 40f, 22f), _bodyFont, _textMuted);
-        hint.alignment = TextAlignmentOptions.Center;
-        hint.text = $"Nhấn {toggleKey} để đóng";
-
-        // Scroll area for achievement rows.
-        var scrollGo = new GameObject("ScrollArea", typeof(RectTransform));
-        scrollGo.transform.SetParent(panel.transform, false);
-        var scrt = (RectTransform)scrollGo.transform;
-        scrt.anchorMin = scrt.anchorMax = new Vector2(0.5f, 0f);
-        scrt.pivot = new Vector2(0.5f, 0f);
-        scrt.anchoredPosition = new Vector2(0f, 20f);
-        scrt.sizeDelta = new Vector2(panelWidth - 40f, panelHeight - 130f);
-
-        // Build rows.
-        BuildRows(scrollGo.transform);
-
-        // Store refs.
-        _listPanel = panel;
-        _scrimCg = scrimCg;
-        _listPanel.SetActive(false);
-        _scrimGo = scrim;
-        _scrimGo.SetActive(false);
+        _listContent = new VisualElement();
+        _listContent.name = "ScrollArea";
+        _listContent.style.flexGrow = 1;
+        _listContent.style.overflow = Overflow.Hidden;
+        _listPanel.Add(_listContent);
     }
 
-    private CanvasGroup _scrimCg;
-    private GameObject _scrimGo;
-
-    private void BuildRows(Transform parent)
+    private void BuildRows(VisualElement parent)
     {
         var mgr = AchievementManager.Instance;
         if (mgr == null || mgr.achievements == null) return;
 
-        float yCursor = 0f;
         foreach (var ach in mgr.achievements)
         {
             if (ach == null) continue;
             bool unlocked = mgr.IsUnlocked(ach);
             int progress = mgr.GetProgress(ach);
             int target = ach.targetValue;
-            float rowY = -yCursor;
 
-            // Row container.
-            var row = new GameObject($"Row_{ach.id}", typeof(RectTransform));
-            row.transform.SetParent(parent, false);
-            var rrt = (RectTransform)row.transform;
-            rrt.anchorMin = rrt.anchorMax = new Vector2(0.5f, 1f);
-            rrt.pivot = new Vector2(0.5f, 1f);
-            rrt.anchoredPosition = new Vector2(0f, rowY);
-            rrt.sizeDelta = new Vector2(panelWidth - 40f, rowHeight);
+            var row = new VisualElement();
+            row.name = $"Row_{ach.id}";
+            row.style.minHeight = rowHeight;
+            row.style.marginBottom = rowSpacing;
+            row.style.backgroundColor = unlocked ? new Color(_accent.r, _accent.g, _accent.b, 0.12f) : _cardTop;
+            row.style.paddingLeft = 12;
+            row.style.paddingTop = 4;
+            row.style.paddingBottom = 4;
+            parent.Add(row);
 
-            // Row background.
-            var rowBg = new GameObject("BG", typeof(RectTransform));
-            rowBg.transform.SetParent(row.transform, false);
-            var rbrt = (RectTransform)rowBg.transform;
-            rbrt.anchorMin = rbrt.anchorMax = Vector2.one;
-            rbrt.offsetMin = rbrt.offsetMax = Vector2.zero;
-            var rowBgImg = rowBg.AddComponent<Image>();
-            rowBgImg.color = unlocked ? new Color(_accent.r, _accent.g, _accent.b, 0.12f) : _cardTop;
-            rowBgImg.raycastTarget = false;
+            var iconEl = new VisualElement();
+            iconEl.name = "Icon";
+            iconEl.style.width = 46;
+            iconEl.style.height = 46;
+            iconEl.style.backgroundColor = unlocked ? _accent : new Color(_textMuted.r, _textMuted.g, _textMuted.b, 0.3f);
+            iconEl.style.marginRight = 8;
+            iconEl.style.flexShrink = 0;
+            if (ach.icon != null)
+                iconEl.style.backgroundImage = new StyleBackground(ach.icon);
+            row.Add(iconEl);
 
-            // Icon.
-            var iconGo = new GameObject("Icon", typeof(RectTransform));
-            iconGo.transform.SetParent(row.transform, false);
-            var irt = (RectTransform)iconGo.transform;
-            irt.anchorMin = irt.anchorMax = new Vector2(0f, 0.5f);
-            irt.pivot = new Vector2(0f, 0.5f);
-            irt.anchoredPosition = new Vector2(12f, 0f);
-            irt.sizeDelta = new Vector2(46f, 46f);
-            var iconImg = iconGo.AddComponent<Image>();
-            iconImg.color = unlocked ? _accent : new Color(_textMuted.r, _textMuted.g, _textMuted.b, 0.3f);
-            iconImg.raycastTarget = false;
-            if (ach.icon != null) iconImg.sprite = ach.icon;
+            var textCol = new VisualElement();
+            textCol.style.flexGrow = 1;
+            row.Add(textCol);
 
-            // Title.
-            var title = MakeText(row.transform, "Title", 20f, new Vector2(70f, 14f),
-                                 new Vector2(panelWidth - 160f, 26f), _headerFont,
-                                 unlocked ? _textPrimary : _textMuted);
-            title.alignment = TextAlignmentOptions.Left;
-            title.text = ach.title;
+            var title = new Label(ach.title);
+            title.style.fontSize = 20;
+            title.style.color = unlocked ? _textPrimary : _textMuted;
+            textCol.Add(title);
 
-            // Description / progress.
-            var desc = MakeText(row.transform, "Desc", 14f, new Vector2(70f, -14f),
-                                new Vector2(panelWidth - 160f, 22f), _bodyFont, _textMuted);
-            desc.alignment = TextAlignmentOptions.Left;
-            if (unlocked)
-                desc.text = ach.description;
-            else if (ach.isProgression)
-                desc.text = $"{ach.description}  ({progress}/{target})";
-            else
-                desc.text = ach.description;
+            string descText = unlocked
+                ? ach.description
+                : ach.isProgression
+                    ? $"{ach.description}  ({progress}/{target})"
+                    : ach.description;
+            var desc = new Label(descText);
+            desc.style.fontSize = 14;
+            desc.style.color = _textMuted;
+            textCol.Add(desc);
 
-            // Status badge.
-            var badge = MakeText(row.transform, "Badge", 14f, new Vector2(panelWidth * 0.5f - 30f, 0f),
-                                 new Vector2(80f, 24f), _bodyFont,
-                                 unlocked ? _accent : _textMuted);
-            badge.alignment = TextAlignmentOptions.Right;
-            badge.text = unlocked ? "✓" : "[ ]";
-
-            yCursor += rowHeight + rowSpacing;
+            var badgeText = unlocked ? "✓" : "[ ]";
+            var badge = new Label(badgeText);
+            badge.style.fontSize = 14;
+            badge.style.color = unlocked ? _accent : _textMuted;
+            badge.style.width = 40;
+            badge.style.unityTextAlign = TextAnchor.MiddleRight;
+            badge.style.flexShrink = 0;
+            row.Add(badge);
         }
     }
-
-    // ---- Toggle list ----
 
     private void ToggleList()
     {
         _listOpen = !_listOpen;
         if (_listOpen)
         {
-            _listPanel.SetActive(true);
-            _scrimGo.SetActive(true);
-            // Rebuild rows to reflect current state.
+            _listPanel.style.display = DisplayStyle.Flex;
+            _scrim.style.display = DisplayStyle.Flex;
             RebuildRows();
-            StartCoroutine(FadePanel(_listGroup, _scrimCg, 0f, 1f, 0.2f));
+            StartCoroutine(FadePanel(0f, 1f, 0.2f));
         }
         else
         {
-            StartCoroutine(FadePanelClose(_listGroup, _scrimCg, 1f, 0f, 0.2f));
+            StartCoroutine(FadePanelClose(1f, 0f, 0.2f));
         }
     }
 
     private void RebuildRows()
     {
-        // Destroy old scroll area children and rebuild.
-        var scrollArea = _listPanel.transform.Find("ScrollArea");
-        if (scrollArea == null) return;
-        for (int i = scrollArea.childCount - 1; i >= 0; i--)
-            Destroy(scrollArea.GetChild(i).gameObject);
-        BuildRows(scrollArea);
+        _listContent.Clear();
+        BuildRows(_listContent);
     }
 
-    private IEnumerator FadePanel(CanvasGroup panel, CanvasGroup scrim, float a, float b, float dur)
-    {
-        panel.interactable = true;
-        panel.blocksRaycasts = true;
-        scrim.interactable = true;
-        scrim.blocksRaycasts = true;
-        float t = 0f;
-        while (t < dur)
-        {
-            t += Time.unscaledDeltaTime;
-            float f = dur > 0f ? t / dur : 1f;
-            panel.alpha = Mathf.Lerp(a, b, f);
-            scrim.alpha = Mathf.Lerp(a * 0.8f, b * 0.8f, f);
-            yield return null;
-        }
-        panel.alpha = b;
-        scrim.alpha = b * 0.8f;
-    }
-
-    private IEnumerator FadePanelClose(CanvasGroup panel, CanvasGroup scrim, float a, float b, float dur)
+    private IEnumerator FadePanel(float from, float to, float dur)
     {
         float t = 0f;
         while (t < dur)
         {
             t += Time.unscaledDeltaTime;
             float f = dur > 0f ? t / dur : 1f;
-            panel.alpha = Mathf.Lerp(a, b, f);
-            scrim.alpha = Mathf.Lerp(a * 0.8f, b * 0.8f, f);
+            _listPanel.style.opacity = Mathf.Lerp(from, to, f);
+            _scrim.style.opacity = Mathf.Lerp(from * 0.8f, to * 0.8f, f);
             yield return null;
         }
-        panel.alpha = b;
-        scrim.alpha = b * 0.8f;
-        panel.interactable = false;
-        panel.blocksRaycasts = false;
-        scrim.interactable = false;
-        scrim.blocksRaycasts = false;
-        _listPanel.SetActive(false);
-        _scrimGo.SetActive(false);
+        _listPanel.style.opacity = to;
+        _scrim.style.opacity = to * 0.8f;
     }
 
-    // ---- Popup handling ----
+    private IEnumerator FadePanelClose(float from, float to, float dur)
+    {
+        float t = 0f;
+        while (t < dur)
+        {
+            t += Time.unscaledDeltaTime;
+            float f = dur > 0f ? t / dur : 1f;
+            _listPanel.style.opacity = Mathf.Lerp(from, to, f);
+            _scrim.style.opacity = Mathf.Lerp(from * 0.8f, to * 0.8f, f);
+            yield return null;
+        }
+        _listPanel.style.opacity = to;
+        _scrim.style.opacity = to * 0.8f;
+        _listPanel.style.display = DisplayStyle.None;
+        _scrim.style.display = DisplayStyle.None;
+    }
 
     private void HandleUnlocked(AchievementData ach)
     {
@@ -417,48 +346,26 @@ public class AchievementWidget : MonoBehaviour
             var ach = _popupQueue.Dequeue();
             _popupTitle.text = ach.title;
             _popupDesc.text = ach.description;
-            if (ach.icon != null) _popupIcon.sprite = ach.icon;
+            if (ach.icon != null)
+                _popupIcon.style.backgroundImage = new StyleBackground(ach.icon);
 
-            // Fade in.
             yield return FadePopup(0f, 1f, popupFadeIn);
-            // Hold.
             float t = 0f;
             while (t < popupHold) { t += Time.unscaledDeltaTime; yield return null; }
-            // Fade out.
             yield return FadePopup(1f, 0f, popupFadeOut);
         }
         _popupPlaying = false;
     }
 
-    private IEnumerator FadePopup(float a, float b, float dur)
+    private IEnumerator FadePopup(float from, float to, float dur)
     {
         float t = 0f;
         while (t < dur)
         {
             t += Time.unscaledDeltaTime;
-            _popupGroup.alpha = Mathf.Lerp(a, b, dur > 0f ? t / dur : 1f);
+            _popupRoot.style.opacity = Mathf.Lerp(from, to, dur > 0f ? t / dur : 1f);
             yield return null;
         }
-        _popupGroup.alpha = b;
-    }
-
-    // ---- Utility ----
-
-    private TMP_Text MakeText(Transform parent, string name, float size, Vector2 pos, Vector2 sizeDelta,
-                              TMP_FontAsset font, Color color)
-    {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.transform.SetParent(parent, false);
-        var rt = (RectTransform)go.transform;
-        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.anchoredPosition = pos;
-        rt.sizeDelta = sizeDelta;
-        var t = go.AddComponent<TextMeshProUGUI>();
-        t.fontSize = size;
-        t.color = color;
-        t.raycastTarget = false;
-        if (font != null) t.font = font;
-        return t;
+        _popupRoot.style.opacity = to;
     }
 }

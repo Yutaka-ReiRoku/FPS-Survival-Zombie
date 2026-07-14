@@ -1,52 +1,36 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
-/// <summary>
-/// Self-building login/register panel for PlayFab authentication.
-/// Creates all UI elements in code (no prefab needed) using the project's
-/// UITheme design system. Shows a login form with username/password fields,
-/// a register toggle, and a status message. On successful login, the panel
-/// hides itself and the game can proceed.
-///
-/// Place on a child of the GameUICanvas (or any Canvas). The panel is
-/// shown automatically on enable if not logged in, and hidden on
-/// PlayFabManager.OnLoginSuccess.
-/// </summary>
 public class PlayFabLoginUI : MonoBehaviour
 {
     [Header("Panel Size (px @1920x1080)")]
     public float panelWidth = 420f;
     public float panelHeight = 520f;
 
-    [Header("References (optional — auto-created if null)")]
-    [Tooltip("Assign a TMP_FontAsset to use for all text. If null, falls back to default.")]
-    public TMP_FontAsset fontAsset;
-
     [Header("Main Menu (optional — auto-detected if null)")]
-    [Tooltip("The main menu content (Title/Play/Quit/BestChip). Hidden until login succeeds. If null, auto-detected as the sibling 'Content' under the same Canvas.")]
     public GameObject mainMenuContent;
-    [Tooltip("The player profile widget. Hidden until login succeeds. If null, auto-detected via GetComponentInChildren on the canvas.")]
     public GameObject profileWidget;
 
-    private GameObject _panel;
-    private TMP_InputField _usernameInput;
-    private TMP_InputField _passwordInput;
-    private TMP_Text _statusText;
-    private TMP_Text _titleText;
-    private TMP_Text _toggleText;
-    private Button _actionButton;
-    private Button _toggleButton;
-    private Button _logoutButton;
+    private VisualElement _root;
+    private VisualElement _panel;
+    private TextField _usernameInput;
+    private TextField _passwordInput;
+    private Label _statusText;
+    private Label _titleText;
+    private Label _toggleText;
+    private VisualElement _actionButton;
+    private Label _actionButtonLabel;
+    private VisualElement _toggleButton;
+    private Label _toggleButtonLabel;
+    private VisualElement _logoutButton;
+    private GameObject _docGO;
 
     private bool _isRegisterMode;
     private bool _isBusy;
 
     private static readonly Color BgColor = new Color(0.078f, 0.094f, 0.118f, 0.96f);
-    private static readonly Color InputBgColor = new Color(0.12f, 0.14f, 0.18f, 1f);
     private static readonly Color ButtonColor = new Color(0.31f, 0.878f, 0.541f, 1f);
-    private static readonly Color ButtonHoverColor = new Color(0.4f, 0.95f, 0.6f, 1f);
     private static readonly Color TextPrimary = new Color(0.96f, 0.96f, 0.96f, 1f);
     private static readonly Color TextMuted = new Color(0.62f, 0.66f, 0.72f, 1f);
     private static readonly Color ErrorColor = new Color(0.85f, 0.35f, 0.15f, 1f);
@@ -60,55 +44,30 @@ public class PlayFabLoginUI : MonoBehaviour
     private void OnEnable()
     {
         AutoDetectMainMenu();
-        // Hide the main menu immediately so it never flashes on screen while
-        // we wait for PlayFabManager. It will be re-shown only after a
-        // successful login (or if already logged in).
         HideMainMenu();
         StartCoroutine(BindAndShow());
     }
 
-    /// <summary>
-    /// Auto-detect the main menu content and profile widget if not assigned.
-    /// Looks for a sibling named "Content" under the same Canvas, and a
-    /// "PlayerProfileWidget" sibling.
-    /// </summary>
     private void AutoDetectMainMenu()
     {
         if (mainMenuContent == null)
         {
-            var canvas = GetComponentInParent<Canvas>();
-            if (canvas != null)
-            {
-                var contentTr = canvas.transform.Find("Content");
-                if (contentTr != null)
-                    mainMenuContent = contentTr.gameObject;
-            }
+            var tr = transform.parent?.Find("Content");
+            if (tr != null) mainMenuContent = tr.gameObject;
         }
-
         if (profileWidget == null)
         {
-            var canvas = GetComponentInParent<Canvas>();
-            if (canvas != null)
-            {
-                var widgetTr = canvas.transform.Find("PlayerProfileWidget");
-                if (widgetTr != null)
-                    profileWidget = widgetTr.gameObject;
-            }
+            var tr = transform.parent?.Find("PlayerProfileWidget");
+            if (tr != null) profileWidget = tr.gameObject;
         }
     }
 
-    /// <summary>
-    /// Hide the main menu content + profile widget (called when showing the login panel).
-    /// </summary>
     private void HideMainMenu()
     {
         if (mainMenuContent != null) mainMenuContent.SetActive(false);
         if (profileWidget != null) profileWidget.SetActive(false);
     }
 
-    /// <summary>
-    /// Show the main menu content + profile widget (called after a successful login).
-    /// </summary>
     private void ShowMainMenu()
     {
         if (mainMenuContent != null) mainMenuContent.SetActive(true);
@@ -126,223 +85,148 @@ public class PlayFabLoginUI : MonoBehaviour
         }
     }
 
-    // =========================================================================
-    //  UI Construction
-    // =========================================================================
-
     private void Build()
     {
-        // Root panel — centered, sized
-        _panel = new GameObject("PlayFabLoginPanel", typeof(RectTransform));
-        _panel.transform.SetParent(transform, false);
-        var prt = (RectTransform)_panel.transform;
-        prt.anchorMin = prt.anchorMax = new Vector2(0.5f, 0.5f);
-        prt.pivot = new Vector2(0.5f, 0.5f);
-        prt.anchoredPosition = Vector2.zero;
-        prt.sizeDelta = new Vector2(panelWidth, panelHeight);
+        _docGO = new GameObject("PlayFabLogin_Doc", typeof(UIDocument));
+        _docGO.transform.SetParent(transform, false);
+        var doc = _docGO.GetComponent<UIDocument>();
+        doc.sortingOrder = 100;
 
-        var panelImg = _panel.AddComponent<Image>();
-        panelImg.color = BgColor;
-        panelImg.raycastTarget = true;
+        _root = new VisualElement();
+        _root.name = "PlayFabLoginRoot";
+        _root.style.position = Position.Absolute;
+        _root.style.left = 0;
+        _root.style.right = 0;
+        _root.style.top = 0;
+        _root.style.bottom = 0;
+        _root.style.alignItems = Align.Center;
+        _root.style.justifyContent = Justify.Center;
 
-        // Use a vertical layout group to stack elements
-        var vlg = _panel.AddComponent<VerticalLayoutGroup>();
-        vlg.padding = new RectOffset(40, 40, 40, 40);
-        vlg.spacing = 16;
-        vlg.childAlignment = TextAnchor.UpperCenter;
-        vlg.childControlWidth = true;
-        vlg.childControlHeight = false;
-        vlg.childForceExpandWidth = true;
-        vlg.childForceExpandHeight = false;
+        _panel = new VisualElement();
+        _panel.name = "LoginPanel";
+        _panel.style.width = panelWidth;
+        _panel.style.backgroundColor = BgColor;
+        _panel.style.paddingLeft = 40;
+        _panel.style.paddingRight = 40;
+        _panel.style.paddingTop = 40;
+        _panel.style.paddingBottom = 40;
+        _panel.style.flexDirection = FlexDirection.Column;
+        _root.Add(_panel);
 
-        // --- Title ---
-        _titleText = CreateText("Title", prt, "LOGIN", 28, TextPrimary, TextAnchor.UpperCenter);
-        SetLayoutElement(_titleText.gameObject, minHeight: 40, flexibleHeight: 0);
+        _titleText = new Label("LOGIN");
+        _titleText.name = "Title";
+        _titleText.style.fontSize = 28;
+        _titleText.style.color = TextPrimary;
+        _titleText.style.unityTextAlign = TextAnchor.UpperCenter;
+        _titleText.style.marginBottom = 16;
+        _titleText.style.height = 40;
+        _panel.Add(_titleText);
 
-        // --- Status ---
-        _statusText = CreateText("Status", prt, "", 14, TextMuted, TextAnchor.UpperCenter);
-        SetLayoutElement(_statusText.gameObject, minHeight: 24);
+        _statusText = new Label("");
+        _statusText.name = "Status";
+        _statusText.style.fontSize = 14;
+        _statusText.style.color = TextMuted;
+        _statusText.style.unityTextAlign = TextAnchor.UpperCenter;
+        _statusText.style.height = 24;
+        _statusText.style.marginBottom = 8;
+        _panel.Add(_statusText);
 
-        // --- Username label + input ---
-        CreateText("UsernameLabel", prt, "Username", 14, TextMuted, TextAnchor.MiddleLeft);
-        _usernameInput = CreateInputField("UsernameInput", prt, "Enter username");
+        AddFieldRow("UsernameLabel", "Username", 14, TextMuted);
+        _usernameInput = new TextField();
+        _usernameInput.name = "UsernameInput";
+        _usernameInput.style.height = 40;
+        _usernameInput.style.marginBottom = 12;
+        StylizeInput(_usernameInput);
+        _panel.Add(_usernameInput);
 
-        // --- Password label + input ---
-        CreateText("PasswordLabel", prt, "Password", 14, TextMuted, TextAnchor.MiddleLeft);
-        _passwordInput = CreateInputField("PasswordInput", prt, "Enter password");
-        _passwordInput.inputType = TMP_InputField.InputType.Password;
+        AddFieldRow("PasswordLabel", "Password", 14, TextMuted);
+        _passwordInput = new TextField();
+        _passwordInput.name = "PasswordInput";
+        _passwordInput.isPasswordField = true;
+        _passwordInput.style.height = 40;
+        _passwordInput.style.marginBottom = 16;
+        StylizeInput(_passwordInput);
+        _panel.Add(_passwordInput);
 
-        // --- Action button (Login / Register) ---
-        _actionButton = CreateButton("ActionButton", prt, "LOGIN", ButtonColor);
-        SetLayoutElement(_actionButton.gameObject, minHeight: 44);
-        _actionButton.onClick.AddListener(OnActionButtonClicked);
+        _actionButton = CreateButton("ActionButton", "LOGIN", ButtonColor);
+        _actionButton.style.height = 44;
+        _actionButton.style.marginBottom = 12;
+        _actionButton.RegisterCallback<ClickEvent>(_ => OnActionButtonClicked());
+        _panel.Add(_actionButton);
 
-        // --- Toggle (switch between login and register) ---
-        var toggleRow = new GameObject("ToggleRow", typeof(RectTransform));
-        toggleRow.transform.SetParent(prt, false);
-        var trt = (RectTransform)toggleRow.transform;
-        var tlg = toggleRow.AddComponent<HorizontalLayoutGroup>();
-        tlg.childAlignment = TextAnchor.MiddleCenter;
-        tlg.spacing = 8;
-        tlg.childControlWidth = true;
-        tlg.childForceExpandWidth = true;
+        var toggleRow = new VisualElement();
+        toggleRow.name = "ToggleRow";
+        toggleRow.style.flexDirection = FlexDirection.Row;
+        toggleRow.style.alignItems = Align.Center;
+        toggleRow.style.justifyContent = Justify.Center;
+        toggleRow.style.marginBottom = 12;
+        _panel.Add(toggleRow);
 
-        _toggleText = CreateText("ToggleLabel", trt, "Don't have an account? Register", 13, TextMuted, TextAnchor.MiddleCenter);
-        _toggleButton = CreateButton("ToggleButton", trt, "Register", new Color(0.2f, 0.25f, 0.3f, 1f));
-        _toggleButton.onClick.AddListener(ToggleMode);
+        _toggleText = new Label("Don't have an account? Register");
+        _toggleText.style.fontSize = 13;
+        _toggleText.style.color = TextMuted;
+        toggleRow.Add(_toggleText);
 
-        // --- Logout button (hidden until logged in) ---
-        _logoutButton = CreateButton("LogoutButton", prt, "LOGOUT", new Color(0.5f, 0.2f, 0.2f, 1f));
-        SetLayoutElement(_logoutButton.gameObject, minHeight: 36);
-        _logoutButton.onClick.AddListener(OnLogoutClicked);
-        _logoutButton.gameObject.SetActive(false);
+        _toggleButton = CreateButton("ToggleButton", "Register", new Color(0.2f, 0.25f, 0.3f, 1f));
+        _toggleButton.style.width = 80;
+        _toggleButton.style.height = 30;
+        _toggleButton.RegisterCallback<ClickEvent>(_ => ToggleMode());
+        toggleRow.Add(_toggleButton);
 
-        // --- Spacer to push content up ---
-        var spacer = new GameObject("Spacer", typeof(RectTransform));
-        spacer.transform.SetParent(prt, false);
-        SetLayoutElement(spacer, flexibleHeight: 1);
+        _logoutButton = CreateButton("LogoutButton", "LOGOUT", new Color(0.5f, 0.2f, 0.2f, 1f));
+        _logoutButton.style.height = 36;
+        _logoutButton.style.display = DisplayStyle.None;
+        _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
+        _panel.Add(_logoutButton);
+
+        doc.rootVisualElement.Add(_root);
     }
 
-    private TMP_Text CreateText(string name, Transform parent, string content, float fontSize, Color color, TextAnchor anchor)
+    private void AddFieldRow(string name, string label, float fontSize, Color color)
     {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.transform.SetParent(parent, false);
-        var txt = go.AddComponent<TextMeshProUGUI>();
-        txt.text = content;
-        txt.fontSize = fontSize;
-        txt.color = color;
-        txt.alignment = ConvertAnchor(anchor);
-        txt.raycastTarget = false;
-        if (fontAsset != null) txt.font = fontAsset;
-        return txt;
+        var lbl = new Label(label);
+        lbl.name = name;
+        lbl.style.fontSize = fontSize;
+        lbl.style.color = color;
+        lbl.style.unityTextAlign = TextAnchor.MiddleLeft;
+        lbl.style.marginBottom = 4;
+        _panel.Add(lbl);
     }
 
-    private TMP_InputField CreateInputField(string name, Transform parent, string placeholder)
+    private void StylizeInput(TextField tf)
     {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.transform.SetParent(parent, false);
-        var rt = (RectTransform)go.transform;
-        rt.sizeDelta = new Vector2(0, 40);
-
-        var bg = go.AddComponent<Image>();
-        bg.color = InputBgColor;
-        bg.raycastTarget = true;
-
-        var input = go.AddComponent<TMP_InputField>();
-        input.targetGraphic = bg;
-
-        // Text area
-        var textArea = new GameObject("Text Area", typeof(RectTransform));
-        textArea.transform.SetParent(go.transform, false);
-        var taRt = (RectTransform)textArea.transform;
-        taRt.anchorMin = Vector2.zero; taRt.anchorMax = Vector2.one;
-        taRt.offsetMin = new Vector2(10, 6); taRt.offsetMax = new Vector2(-10, -6);
-        var taRectMask = textArea.AddComponent<RectMask2D>();
-        taRectMask.padding = new Vector4(0, 0, 0, 0);
-
-        // Placeholder
-        var phGo = new GameObject("Placeholder", typeof(RectTransform));
-        phGo.transform.SetParent(textArea.transform, false);
-        var phRt = (RectTransform)phGo.transform;
-        phRt.anchorMin = Vector2.zero; phRt.anchorMax = Vector2.one;
-        phRt.offsetMin = Vector2.zero; phRt.offsetMax = Vector2.zero;
-        var ph = phGo.AddComponent<TextMeshProUGUI>();
-        ph.text = placeholder;
-        ph.fontSize = 16;
-        ph.color = new Color(0.5f, 0.5f, 0.55f, 0.6f);
-        ph.fontStyle = FontStyles.Italic;
-        ph.raycastTarget = false;
-        if (fontAsset != null) ph.font = fontAsset;
-
-        // Actual text
-        var textGo = new GameObject("Text", typeof(RectTransform));
-        textGo.transform.SetParent(textArea.transform, false);
-        var textRt = (RectTransform)textGo.transform;
-        textRt.anchorMin = Vector2.zero; textRt.anchorMax = Vector2.one;
-        textRt.offsetMin = Vector2.zero; textRt.offsetMax = Vector2.zero;
-        var text = textGo.AddComponent<TextMeshProUGUI>();
-        text.text = "";
-        text.fontSize = 16;
-        text.color = TextPrimary;
-        text.raycastTarget = false;
-        if (fontAsset != null) text.font = fontAsset;
-
-        input.textViewport = taRt;
-        input.textComponent = text;
-        input.placeholder = ph;
-        input.contentType = TMP_InputField.ContentType.Standard;
-
-        return input;
+        tf.style.backgroundColor = new Color(0.12f, 0.14f, 0.18f, 1f);
+        tf.style.borderLeftWidth = 0;
+        tf.style.borderRightWidth = 0;
+        tf.style.borderTopWidth = 0;
+        tf.style.borderBottomWidth = 0;
+        tf.style.color = TextPrimary;
+        tf.style.fontSize = 16;
     }
 
-    private Button CreateButton(string name, Transform parent, string label, Color bgColor)
+    private VisualElement CreateButton(string name, string label, Color bgColor)
     {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.transform.SetParent(parent, false);
-        var rt = (RectTransform)go.transform;
-        rt.sizeDelta = new Vector2(0, 40);
+        var btn = new VisualElement();
+        btn.name = name;
+        btn.style.backgroundColor = bgColor;
+        btn.style.alignItems = Align.Center;
+        btn.style.justifyContent = Justify.Center;
+        btn.style.unityTextAlign = TextAnchor.MiddleCenter;
+        btn.focusable = true;
+        btn.RegisterCallback<PointerEnterEvent>(_ => btn.style.backgroundColor = Color.Lerp(bgColor, Color.white, 0.15f));
+        btn.RegisterCallback<PointerLeaveEvent>(_ => btn.style.backgroundColor = bgColor);
 
-        var img = go.AddComponent<Image>();
-        img.color = bgColor;
-        img.raycastTarget = true;
-
-        var btn = go.AddComponent<Button>();
-        btn.targetGraphic = img;
-        var colors = btn.colors;
-        colors.normalColor = bgColor;
-        colors.highlightedColor = ButtonHoverColor;
-        colors.pressedColor = new Color(bgColor.r * 0.8f, bgColor.g * 0.8f, bgColor.b * 0.8f, 1f);
-        btn.colors = colors;
-
-        // Label
-        var labelGo = new GameObject("Label", typeof(RectTransform));
-        labelGo.transform.SetParent(go.transform, false);
-        var lRt = (RectTransform)labelGo.transform;
-        lRt.anchorMin = Vector2.zero; lRt.anchorMax = Vector2.one;
-        lRt.offsetMin = Vector2.zero; lRt.offsetMax = Vector2.zero;
-        var labelTxt = labelGo.AddComponent<TextMeshProUGUI>();
-        labelTxt.text = label;
-        labelTxt.fontSize = 16;
-        labelTxt.color = Color.white;
-        labelTxt.alignment = TextAlignmentOptions.Center;
-        labelTxt.raycastTarget = false;
-        if (fontAsset != null) labelTxt.font = fontAsset;
+        var lbl = new Label(label);
+        lbl.style.fontSize = 16;
+        lbl.style.color = Color.white;
+        lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
+        btn.Add(lbl);
 
         return btn;
     }
 
-    private void SetLayoutElement(GameObject go, float minHeight = -1, float flexibleHeight = -1)
-    {
-        var le = go.GetComponent<LayoutElement>();
-        if (le == null) le = go.AddComponent<LayoutElement>();
-        if (minHeight >= 0) le.minHeight = minHeight;
-        if (flexibleHeight >= 0) le.flexibleHeight = flexibleHeight;
-    }
-
-    private TextAlignmentOptions ConvertAnchor(TextAnchor anchor)
-    {
-        switch (anchor)
-        {
-            case TextAnchor.UpperLeft: return TextAlignmentOptions.TopLeft;
-            case TextAnchor.UpperCenter: return TextAlignmentOptions.Top;
-            case TextAnchor.UpperRight: return TextAlignmentOptions.TopRight;
-            case TextAnchor.MiddleLeft: return TextAlignmentOptions.Left;
-            case TextAnchor.MiddleCenter: return TextAlignmentOptions.Center;
-            case TextAnchor.MiddleRight: return TextAlignmentOptions.Right;
-            case TextAnchor.LowerLeft: return TextAlignmentOptions.BottomLeft;
-            case TextAnchor.LowerCenter: return TextAlignmentOptions.Bottom;
-            case TextAnchor.LowerRight: return TextAlignmentOptions.BottomRight;
-            default: return TextAlignmentOptions.Center;
-        }
-    }
-
-    // =========================================================================
-    //  Logic
-    // =========================================================================
-
     private IEnumerator BindAndShow()
     {
-        // Wait for PlayFabManager
         float timeout = 10f;
         while (PlayFabManager.Instance == null && timeout > 0f)
         {
@@ -355,7 +239,7 @@ public class PlayFabLoginUI : MonoBehaviour
         {
             Debug.LogWarning("[PlayFabLoginUI] PlayFabManager not found.");
             ShowStatus("PlayFabManager not found.", ErrorColor);
-            _panel.SetActive(true);
+            _panel.style.display = DisplayStyle.Flex;
             yield break;
         }
 
@@ -363,17 +247,15 @@ public class PlayFabLoginUI : MonoBehaviour
         pm.OnLoginError += HandleLoginError;
         pm.OnLogout += HandleLogout;
 
-        // If already logged in, hide login panel and show main menu
         if (pm.IsLoggedIn)
         {
-            _panel.SetActive(false);
+            _panel.style.display = DisplayStyle.None;
             ShowMainMenu();
             yield break;
         }
 
-        // Not logged in: hide main menu, show login panel
         HideMainMenu();
-        _panel.SetActive(true);
+        _panel.style.display = DisplayStyle.Flex;
         UpdateUI();
     }
 
@@ -388,16 +270,20 @@ public class PlayFabLoginUI : MonoBehaviour
         if (_isRegisterMode)
         {
             _titleText.text = "REGISTER";
-            _actionButton.GetComponentInChildren<TextMeshProUGUI>().text = "CREATE ACCOUNT";
+            _actionButtonLabel = _actionButton.Q<Label>();
+            if (_actionButtonLabel != null) _actionButtonLabel.text = "CREATE ACCOUNT";
             _toggleText.text = "Already have an account?";
-            _toggleButton.GetComponentInChildren<TextMeshProUGUI>().text = "Login";
+            _toggleButtonLabel = _toggleButton.Q<Label>();
+            if (_toggleButtonLabel != null) _toggleButtonLabel.text = "Login";
         }
         else
         {
             _titleText.text = "LOGIN";
-            _actionButton.GetComponentInChildren<TextMeshProUGUI>().text = "LOGIN";
+            _actionButtonLabel = _actionButton.Q<Label>();
+            if (_actionButtonLabel != null) _actionButtonLabel.text = "LOGIN";
             _toggleText.text = "Don't have an account?";
-            _toggleButton.GetComponentInChildren<TextMeshProUGUI>().text = "Register";
+            _toggleButtonLabel = _toggleButton.Q<Label>();
+            if (_toggleButtonLabel != null) _toggleButtonLabel.text = "Register";
         }
     }
 
@@ -458,35 +344,26 @@ public class PlayFabLoginUI : MonoBehaviour
     private void OnLogoutClicked()
     {
         PlayFabManager.Instance?.Logout();
-        _panel.SetActive(true);
-        _logoutButton.gameObject.SetActive(false);
+        _panel.style.display = DisplayStyle.Flex;
+        _logoutButton.style.display = DisplayStyle.None;
         HideMainMenu();
         ShowStatus("Logged out.", TextMuted);
     }
 
-    /// <summary>
-    /// Called automatically when PlayFabManager fires OnLogout (e.g. when the
-    /// player logs out from the PlayerProfileWidget). Re-shows the login panel
-    /// and hides the main menu so the player can log in again.
-    /// </summary>
     private void HandleLogout()
     {
         _isRegisterMode = false;
         _isBusy = false;
-        if (_usernameInput != null) _usernameInput.text = "";
-        if (_passwordInput != null) _passwordInput.text = "";
-        if (_actionButton != null) _actionButton.interactable = true;
-        _logoutButton.gameObject.SetActive(false);
+        if (_usernameInput != null) _usernameInput.value = "";
+        if (_passwordInput != null) _passwordInput.value = "";
+        _actionButton.SetEnabled(true);
+        _logoutButton.style.display = DisplayStyle.None;
         HideMainMenu();
-        _panel.SetActive(true);
+        _panel.style.display = DisplayStyle.Flex;
         UpdateUI();
         ShowStatus("Logged out. Please log in again.", TextMuted);
     }
 
-    /// <summary>
-    /// Public entry point to programmatically show the login panel (e.g. when
-    /// the player clicks the profile chip while not logged in).
-    /// </summary>
     public void ShowLoginPanel()
     {
         HandleLogout();
@@ -495,10 +372,8 @@ public class PlayFabLoginUI : MonoBehaviour
     private void HandleLoginSuccess(string username)
     {
         ShowStatus($"Welcome, {username}!", SuccessColor);
-        // Hide panel after a short delay so the user sees the success message,
-        // then reveal the main menu.
         StartCoroutine(HideAfterDelay(0.8f));
-        _logoutButton.gameObject.SetActive(true);
+        _logoutButton.style.display = DisplayStyle.Flex;
     }
 
     private void HandleLoginError(string error)
@@ -510,7 +385,7 @@ public class PlayFabLoginUI : MonoBehaviour
     private IEnumerator HideAfterDelay(float delay)
     {
         yield return new WaitForSecondsRealtime(delay);
-        _panel.SetActive(false);
+        _panel.style.display = DisplayStyle.None;
         ShowMainMenu();
     }
 
@@ -519,14 +394,13 @@ public class PlayFabLoginUI : MonoBehaviour
         if (_statusText != null)
         {
             _statusText.text = message;
-            _statusText.color = color;
+            _statusText.style.color = color;
         }
     }
 
     private void SetBusy(bool busy)
     {
         _isBusy = busy;
-        if (_actionButton != null)
-            _actionButton.interactable = !busy;
+        _actionButton.SetEnabled(!busy);
     }
 }
