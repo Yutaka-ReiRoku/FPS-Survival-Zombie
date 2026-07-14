@@ -99,6 +99,7 @@
     <!-- Upgrades -->
     <ui:Label name="UpgradesWidget" text="" />
     <!-- Health Flash + Low Health Vignette -->
+    <ui:VisualElement name="HealthFlash" />
     <ui:VisualElement name="LowHealthVignette" />
     <!-- Quest + Journal -->
     <ui:VisualElement name="QuestTracker">

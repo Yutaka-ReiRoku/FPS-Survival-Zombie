@@ -351,4 +351,14 @@ public class LeaderboardWidget : MonoBehaviour
         }
         return null;
     }
+
+    private void OnDestroy()
+    {
+        if (_docGO != null)
+        {
+            if (Application.isPlaying) Destroy(_docGO);
+            else DestroyImmediate(_docGO);
+            _docGO = null;
+        }
+    }
 }

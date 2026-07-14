@@ -64,18 +64,6 @@ public class AchievementWidget : MonoBehaviour
             mgr.OnAchievementUnlocked -= HandleUnlocked;
     }
 
-    private void Start()
-    {
-        var mgr = AchievementManager.Instance;
-        if (mgr != null && _subscribed == false)
-        {
-            mgr.OnAchievementUnlocked += HandleUnlocked;
-            _subscribed = true;
-        }
-    }
-
-    private bool _subscribed;
-
     private void Update()
     {
         if (Input.GetKeyDown(toggleKey))
@@ -307,5 +295,15 @@ public class AchievementWidget : MonoBehaviour
             yield return null;
         }
         _popupRoot.style.opacity = to;
+    }
+
+    private void OnDestroy()
+    {
+        if (_docGO != null)
+        {
+            if (Application.isPlaying) Destroy(_docGO);
+            else DestroyImmediate(_docGO);
+            _docGO = null;
+        }
     }
 }

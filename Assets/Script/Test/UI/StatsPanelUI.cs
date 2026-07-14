@@ -43,12 +43,12 @@ public class StatsPanelUI : MonoBehaviour
         {
             var row = new VisualElement();
             row.name = "Row" + i;
-            row.AddToClassList("stats-row");
+            row.AddToClassList("sp-row");
 
             var label = new Label();
             label.name = "Label";
             label.text = StatLabels[i];
-            label.AddToClassList("stats-label");
+            label.AddToClassList("sp-label");
             if (StatLabels[i].StartsWith("  "))
                 label.AddToClassList("sub");
             row.Add(label);
@@ -57,7 +57,7 @@ public class StatsPanelUI : MonoBehaviour
             var value = new Label();
             value.name = "Value";
             value.text = "--";
-            value.AddToClassList("stats-value");
+            value.AddToClassList("sp-value");
             row.Add(value);
             _values.Add(value);
 

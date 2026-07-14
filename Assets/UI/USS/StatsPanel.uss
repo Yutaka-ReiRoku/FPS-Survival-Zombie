@@ -85,13 +85,13 @@
     flex-direction: column;
 }
 
-.stats-row {
+.sp-row {
     flex-direction: row;
     height: 28px;
-    margin-bottom: var(--space-s, 6px);
+    margin-bottom: var(--space-s, 8px);
 }
 
-.stats-label {
+.sp-label {
     flex-grow: 1;
     font-size: var(--fs-l, 22px);
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
@@ -99,11 +99,11 @@
     -unity-text-align: middle-left;
     padding-left: var(--space-s, 8px);
 }
-.stats-label.sub {
+.sp-label.sub {
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
 }
 
-.stats-value {
+.sp-value {
     width: 220px;
     font-size: var(--fs-l, 22px);
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));

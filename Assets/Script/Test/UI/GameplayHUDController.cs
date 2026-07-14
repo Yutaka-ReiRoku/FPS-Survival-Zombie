@@ -29,13 +29,13 @@ public class GameplayHUDController : MonoBehaviour
         _timerChip = _hudChips.Q("TimerChip");
         _collectiblesChip = _hudChips.Q("CollectiblesChip");
 
-        _waveLabel = _waveChip?.Q<Label>("ChipLabel");
-        _killsLabel = _killsChip?.Q<Label>("ChipLabel");
-        _scoreLabel = _scoreChip?.Q<Label>("ChipLabel");
-        _coinsLabel = _coinsChip?.Q<Label>("ChipLabel");
-        _critsLabel = _critsChip?.Q<Label>("ChipLabel");
-        _timerLabel = _timerChip?.Q<Label>("ChipLabel");
-        _collectiblesLabel = _collectiblesChip?.Q<Label>("ChipLabel");
+        _waveLabel = _waveChip?.Q<Label>("WaveLabel");
+        _killsLabel = _killsChip?.Q<Label>("KillsLabel");
+        _scoreLabel = _scoreChip?.Q<Label>("ScoreLabel");
+        _coinsLabel = _coinsChip?.Q<Label>("CoinsLabel");
+        _critsLabel = _critsChip?.Q<Label>("HeadshotsLabel");
+        _timerLabel = _timerChip?.Q<Label>("TimerLabel");
+        _collectiblesLabel = _collectiblesChip?.Q<Label>("CollectiblesLabel");
 
         if (CowsinsHUDAdapter.Instance != null)
             CowsinsHUDAdapter.Instance.OnCoinsChanged += OnCoinsChanged;
@@ -59,9 +59,9 @@ public class GameplayHUDController : MonoBehaviour
     {
         if (chip == null) return;
         if (show)
-            chip.RemoveFromClassList("chip-hidden");
+            chip.RemoveFromClassList("hud-chip-hidden");
         else
-            chip.AddToClassList("chip-hidden");
+            chip.AddToClassList("hud-chip-hidden");
     }
 
     private void UpdateWave()

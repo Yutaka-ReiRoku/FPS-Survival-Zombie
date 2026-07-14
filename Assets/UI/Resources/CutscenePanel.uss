@@ -1,7 +1,9 @@
 /* CutscenePanel.uss — Runtime-loaded styles for CutscenePlayer (Phase B) */
-/* Vars duplicated from Theme.uss for runtime Resources loading */
---color-accent-gold-dark: rgb(217, 199, 115);
---color-text-primary: rgba(245, 245, 245, 1);
+* {
+    /* Vars duplicated from Theme.uss for runtime Resources loading */
+    --color-accent-gold-dark: rgb(217, 199, 115);
+    --color-text-primary: rgba(245, 245, 245, 1);
+}
 
 .cutscene-panel {
     position: absolute;

@@ -10,6 +10,7 @@ public class DashWidget : MonoBehaviour
     private VisualElement _root;
     private readonly List<VisualElement> _pips = new List<VisualElement>();
     private readonly List<VisualElement> _regen = new List<VisualElement>();
+    private readonly List<EventCallback<GenerateVisualContent>> _regenCallbacks = new List<EventCallback<GenerateVisualContent>>();
     private int _current, _max;
     private float _regenStart;
     private CowsinsHUDAdapter _adapter;
@@ -34,6 +35,12 @@ public class DashWidget : MonoBehaviour
     private void OnDisable()
     {
         if (_adapter != null) _adapter.OnDashChanged -= HandleDash;
+        for (int i = 0; i < _regen.Count; i++)
+        {
+            if (i < _regenCallbacks.Count)
+                _regen[i].generateVisualContent -= _regenCallbacks[i];
+        }
+        _regenCallbacks.Clear();
     }
 
     private void HandleDash(int current, int max)
@@ -76,7 +83,9 @@ public class DashWidget : MonoBehaviour
             regen.AddToClassList("dash-pip__regen");
             regen.style.display = DisplayStyle.None;
             var captured = regen;
-            captured.generateVisualContent += (ctx) => OnGenerateRegen(ctx, captured);
+            EventCallback<GenerateVisualContent> cb = (ctx) => OnGenerateRegen(ctx, captured);
+            regen.generateVisualContent += cb;
+            _regenCallbacks.Add(cb);
             pip.Add(regen);
             _regen.Add(regen);
         }

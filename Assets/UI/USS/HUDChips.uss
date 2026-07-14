@@ -7,7 +7,7 @@
     flex-direction: column;
 }
 
-.chip-root {
+.hud-chip-root {
     flex-direction: row;
     align-items: center;
     width: 280px;
@@ -19,14 +19,14 @@
     overflow: hidden;
 }
 
-.chip-icon {
+.hud-chip-icon {
     width: 28px;
     height: 28px;
     margin-right: var(--space-s, 8px);
     flex-shrink: 0;
 }
 
-.chip-label {
+.hud-chip-label {
     font-size: var(--fs-s, 16px);
     -unity-font: var(--font-body);
     color: var(--color-text-primary);
@@ -34,22 +34,22 @@
     flex-grow: 1;
 }
 
-.chip-hidden {
+.hud-chip-hidden {
     display: none;
 }
 
-.chip-wave .chip-label { color: var(--color-chip-wave, #9ED9FF); }
-.chip-kills .chip-label { color: var(--color-chip-kills, #FF8578); }
-.chip-score .chip-label { color: var(--color-chip-score, #F2C24E); }
-.chip-coins .chip-label { color: var(--color-chip-coins, #FFD700); }
-.chip-headshots .chip-label { color: var(--color-chip-headshots, #FF6B6B); }
-.chip-timer .chip-label { color: var(--color-chip-timer, #4ECDC4); }
-.chip-collectibles .chip-label { color: var(--color-chip-collectibles, #45B7D1); }
+.hud-chip-wave .hud-chip-label { color: var(--color-chip-wave, #9ED9FF); }
+.hud-chip-kills .hud-chip-label { color: var(--color-chip-kills, #FF8578); }
+.hud-chip-score .hud-chip-label { color: var(--color-chip-score, #F2C24E); }
+.hud-chip-coins .hud-chip-label { color: var(--color-chip-coins, #FFD700); }
+.hud-chip-headshots .hud-chip-label { color: var(--color-chip-headshots, #FF6B6B); }
+.hud-chip-timer .hud-chip-label { color: var(--color-chip-timer, #4ECDC4); }
+.hud-chip-collectibles .hud-chip-label { color: var(--color-chip-collectibles, #45B7D1); }
 
-.chip-wave-icon { background-image: resource("Icons/icon_wave"); }
-.chip-kills-icon { background-image: resource("Icons/icon_skull"); }
-.chip-score-icon { background-image: resource("Icons/icon_star"); }
-.chip-coins-icon { background-image: resource("Icons/icon_coin"); }
-.chip-headshots-icon { background-image: resource("Icons/icon_target"); }
-.chip-timer-icon { background-image: resource("Icons/icon_timer"); }
-.chip-collectibles-icon { background-image: resource("Icons/icon_trophy"); }
+.hud-chip-wave-icon { background-image: resource("Icons/icon_wave"); }
+.hud-chip-kills-icon { background-image: resource("Icons/icon_skull"); }
+.hud-chip-score-icon { background-image: resource("Icons/icon_star"); }
+.hud-chip-coins-icon { background-image: resource("Icons/icon_coin"); }
+.hud-chip-headshots-icon { background-image: resource("Icons/icon_target"); }
+.hud-chip-timer-icon { background-image: resource("Icons/icon_timer"); }
+.hud-chip-collectibles-icon { background-image: resource("Icons/icon_trophy"); }

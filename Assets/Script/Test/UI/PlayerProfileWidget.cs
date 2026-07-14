@@ -338,4 +338,14 @@ public class PlayerProfileWidget : MonoBehaviour
         _panelAchievements.text = $"{unlocked} / {total} unlocked";
         _panelAchievements.style.color = unlocked > 0 ? AccentColor : TextMuted;
     }
+
+    private void OnDestroy()
+    {
+        if (_docGO != null)
+        {
+            if (Application.isPlaying) Destroy(_docGO);
+            else DestroyImmediate(_docGO);
+            _docGO = null;
+        }
+    }
 }

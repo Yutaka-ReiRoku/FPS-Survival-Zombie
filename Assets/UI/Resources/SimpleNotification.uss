@@ -1,5 +1,7 @@
 /* SimpleNotification.uss — Runtime-loaded for notification popup (Phase B) */
---color-text-primary: rgba(245, 245, 245, 1);
+* {
+    --color-text-primary: rgba(245, 245, 245, 1);
+}
 
 .notification-root {
     position: absolute;

@@ -33,34 +33,15 @@ public class QuestTrackerWidget : MonoBehaviour
         _sideLinesContainer = root.Q("SideLines");
     }
 
-    private void Start()
-    {
-        if (StoryManager.Instance != null)
-        {
-            StoryManager.Instance.OnActiveQuestChanged += HandleQuestChanged;
-            StoryManager.Instance.OnChapterChanged += HandleChapterChanged;
-        }
-        if (SideQuestManager.Instance != null)
-        {
-            SideQuestManager.Instance.OnSideQuestCompleted += HandleSideQuestChanged;
-            SideQuestManager.Instance.OnSideQuestActivated += HandleSideQuestChanged;
-        }
-        UpdateDisplay();
-    }
-
     private void OnEnable()
     {
         if (StoryManager.Instance != null)
         {
-            StoryManager.Instance.OnActiveQuestChanged -= HandleQuestChanged;
-            StoryManager.Instance.OnChapterChanged -= HandleChapterChanged;
             StoryManager.Instance.OnActiveQuestChanged += HandleQuestChanged;
             StoryManager.Instance.OnChapterChanged += HandleChapterChanged;
         }
         if (SideQuestManager.Instance != null)
         {
-            SideQuestManager.Instance.OnSideQuestCompleted -= HandleSideQuestChanged;
-            SideQuestManager.Instance.OnSideQuestActivated -= HandleSideQuestChanged;
             SideQuestManager.Instance.OnSideQuestCompleted += HandleSideQuestChanged;
             SideQuestManager.Instance.OnSideQuestActivated += HandleSideQuestChanged;
         }

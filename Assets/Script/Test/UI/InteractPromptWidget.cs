@@ -60,12 +60,14 @@ public class InteractPromptWidget : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_adapter != null && _bound)
+        var a = _adapter ?? CowsinsHUDAdapter.Instance;
+        if (a != null && _bound)
         {
-            _adapter.OnInteractPrompt -= HandlePrompt;
-            _adapter.OnInteractForbidden -= HandleForbidden;
-            _adapter.OnInteractProgress -= HandleProgress;
+            a.OnInteractPrompt -= HandlePrompt;
+            a.OnInteractForbidden -= HandleForbidden;
+            a.OnInteractProgress -= HandleProgress;
         }
+        _adapter = null;
         _bound = false;
     }
 
