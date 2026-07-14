@@ -91,11 +91,9 @@ public class CowsinsHUDAdapter : MonoBehaviour
     public event Action<int> OnWeaponSelected;
 
     // ---- Stamina ----
-    // The engine (StaminaBehaviour) has no continuous stamina value event; its only
-    // public output is the assigned UI Slider, which it mirrors currentStamina into
-    // every Tick. We give it a headless data Slider we own (the "sink"), then poll it
-    // and re-broadcast engine-free. The original Cowsins stamina Slider is retired
-    // (disabled in scene); once we repoint the reference the engine never touches it.
+    // The engine (StaminaBehaviour) has no continuous stamina value event; its
+    // currentStamina field is private. We read it via reflection every poll tick
+    // and re-broadcast engine-free via OnStaminaChanged.
     public float Stamina { get; private set; }
     public float MaxStamina { get; private set; }
     public bool UsesStamina { get; private set; }
@@ -136,7 +134,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
     private WeaponController _weapon;
     private PlayerDependencies _deps;
     private PlayerMovement _pm;
-    private UnityEngine.UI.Slider _staminaSink;
+    private System.Reflection.FieldInfo _staminaField;
     private float _lastStaminaPolled = -1f;
     private IPlayerMovementStateProvider _moveState;
     private IWeaponBehaviourProvider _weaponBehaviourProv;
@@ -160,8 +158,6 @@ public class CowsinsHUDAdapter : MonoBehaviour
     {
         Unbind();
         UnsubscribeStatic();
-        if (_pm != null && _staminaSink != null && _pm.playerSettings.staminaSlider == _staminaSink)
-            _pm.playerSettings.staminaSlider = null;
         StopAllCoroutines();
     }
 
@@ -181,9 +177,8 @@ public class CowsinsHUDAdapter : MonoBehaviour
             if (_weapon == null) _weapon = FindAnyObjectByType<WeaponController>();
             if (_deps == null) _deps = FindAnyObjectByType<PlayerDependencies>();
             if (_pm == null) _pm = FindAnyObjectByType<PlayerMovement>();
-            // Repoint the engine's stamina output to our headless sink as early as
-            // possible so the original Cowsins slider is never re-activated.
-            if (_pm != null && _staminaSink == null) SetupStaminaSink();
+            // Cache stamina field reflection handle (one-time).
+            if (_pm != null && _staminaField == null) CacheStaminaField();
             if (_stats != null && _weapon != null) break;
             timeout -= Time.unscaledDeltaTime;
             yield return null;
@@ -199,7 +194,7 @@ public class CowsinsHUDAdapter : MonoBehaviour
 
         // Fallback: if the loop broke on stats/weapon before PlayerMovement appeared.
         if (_pm == null) _pm = FindAnyObjectByType<PlayerMovement>();
-        if (_pm != null && _staminaSink == null) SetupStaminaSink();
+        if (_pm != null && _staminaField == null) CacheStaminaField();
 
         // Crosshair-supporting providers (populated in PlayerDependencies.Awake).
         // NOTE: This adapter has [DefaultExecutionOrder(-50)], so our OnEnable/AcquireAndBind
@@ -360,10 +355,6 @@ public class CowsinsHUDAdapter : MonoBehaviour
             _interactEvents.OnFinishInteraction.RemoveListener(HandleInteractHide);
             _interactEvents.OnInteractionProgressChanged.RemoveListener(HandleInteractProgress);
         }
-
-        // Drop the stamina reference so the engine never writes to a destroyed sink.
-        if (_pm != null && _staminaSink != null && _pm.playerSettings.staminaSlider == _staminaSink)
-            _pm.playerSettings.staminaSlider = null;
 
         _bound = false;
     }
@@ -529,38 +520,33 @@ public class CowsinsHUDAdapter : MonoBehaviour
     private void HandleDashUsed(int cur) { CurrentDashes = cur; if (cur > MaxDashes) MaxDashes = cur; OnDashChanged?.Invoke(CurrentDashes, MaxDashes); }
     private void HandleDashGained(int cur) { CurrentDashes = cur; if (cur > MaxDashes) MaxDashes = cur; OnDashChanged?.Invoke(CurrentDashes, MaxDashes); }
 
-    private void SetupStaminaSink()
+    private void CacheStaminaField()
     {
-        if (_pm == null || _staminaSink != null) return;
+        if (_pm == null || _staminaField != null) return;
+        if (_pm.staminaBehaviour == null) return;
+        _staminaField = typeof(StaminaBehaviour).GetField("currentStamina",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        if (_staminaField == null) return;
         UsesStamina = _pm.playerSettings.usesStamina;
         float max = _pm.playerSettings.maxStamina;
-        var go = new GameObject("StaminaSink", typeof(RectTransform));
-        go.transform.SetParent(transform, false);
-        _staminaSink = go.AddComponent<UnityEngine.UI.Slider>();
-        _staminaSink.transition = UnityEngine.UI.Selectable.Transition.None;
-        _staminaSink.navigation = new UnityEngine.UI.Navigation { mode = UnityEngine.UI.Navigation.Mode.None };
-        _staminaSink.interactable = false;
-        _staminaSink.minValue = 0f;
-        _staminaSink.maxValue = max;
-        _staminaSink.value = max;
         MaxStamina = max;
-        Stamina = max;
-        _lastStaminaPolled = max;
-        // Repoint the engine's stamina UI hook to our headless sink.
-        _pm.playerSettings.staminaSlider = _staminaSink;
+        Stamina = (float)_staminaField.GetValue(_pm.staminaBehaviour);
+        _lastStaminaPolled = Stamina;
         OnStaminaChanged?.Invoke(Stamina, MaxStamina);
     }
 
     private void PollStamina()
     {
-        if (_staminaSink == null) return;
-        float v = _staminaSink.value;
-        float mx = _staminaSink.maxValue;
-        if (!Mathf.Approximately(v, _lastStaminaPolled) || !Mathf.Approximately(mx, MaxStamina))
+        if (_pm == null) return;
+        if (_staminaField == null) { CacheStaminaField(); if (_staminaField == null) return; }
+        float current = (float)_staminaField.GetValue(_pm.staminaBehaviour);
+        float mx = _pm.playerSettings.maxStamina;
+        UsesStamina = _pm.playerSettings.usesStamina;
+        if (!Mathf.Approximately(current, _lastStaminaPolled) || !Mathf.Approximately(mx, MaxStamina))
         {
-            Stamina = v;
+            Stamina = current;
             MaxStamina = mx;
-            _lastStaminaPolled = v;
+            _lastStaminaPolled = current;
             OnStaminaChanged?.Invoke(Stamina, MaxStamina);
         }
     }
