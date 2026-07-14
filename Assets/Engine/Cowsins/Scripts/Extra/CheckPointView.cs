@@ -1,10 +1,6 @@
-/// <summary>
-/// This script belongs to cowsins� as a part of the cowsins� FPS Engine. All rights reserved. 
-/// </summary>
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 namespace cowsins
 {
     public class CheckPointView : MonoBehaviour
@@ -13,10 +9,9 @@ namespace cowsins
         {
             metres, kilometres, inches, feet, yards, miles
         }
-        #region variables
 
-        [Tooltip("Attach the text where you want the distance to be displayed"), SerializeField]
-        private TextMeshProUGUI text;
+        private Label _text;
+        private VisualElement _root;
 
         [Tooltip("Select a measure unit among the following"), SerializeField]
         private MeasureType measureType;
@@ -27,25 +22,19 @@ namespace cowsins
         [Tooltip("How fast you want the text to display the new distance"), SerializeField]
         private float updatePeriod;
 
-        [Tooltip("When enabled, the checkpoint icon and distance text render on top of everything (visible through walls)."), SerializeField]
-        private bool seeThrough = true;
+        [Tooltip("When enabled, the checkpoint icon and distance text render on top of everything (visible through walls). No longer uses shader tricks — screen-space UIDocument is always on top.")]
+        [SerializeField] private bool seeThrough = true;
 
-        [Tooltip("Maximum distance at which the checkpoint view is visible. Set to 0 or less to always show."), SerializeField]
-        private float maxViewDistance = 50f;
+        [Tooltip("Maximum distance at which the checkpoint view is visible. Set to 0 or less to always show.")]
+        [SerializeField] private float maxViewDistance = 50f;
 
         private Transform playerTransform;
-
-        private Canvas canvas;
-        #endregion
+        private UIDocument _doc;
+        private bool _ready;
 
         private readonly float[] ConversionFactors =
         {
-            1f,                  // Metres
-            0.001f,              // Kilometres
-            39.37f,              // Inches
-            3.28084f,            // Feet
-            1.09361f,            // Yards
-            0.000621371192f      // Miles
+            1f, 0.001f, 39.37f, 3.28084f, 1.09361f, 0.000621371192f
         };
 
         private readonly string[] UnitLabels =
@@ -56,57 +45,54 @@ namespace cowsins
         private void Start()
         {
             playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
-            canvas = GetComponentInChildren<Canvas>(true);
-
-            if (seeThrough) MakeSeeThrough();
-
+            BuildUI();
             StartCoroutine(UpdateValue());
         }
 
-        private Material _clonedFontMat;
-        private System.Collections.Generic.List<Material> _clonedImageMats = new System.Collections.Generic.List<Material>();
-
-        /// <summary>
-        /// Overrides the ZTest on the checkpoint's UI materials so the icon and
-        /// distance text are visible through walls/geometry. Both the TMP SDF
-        /// shader and the built-in UI/Default shader read the
-        /// "unity_GUIZTestMode" property, so we clone each material and set it
-        /// to Always (8) on the instance only — leaving global UI unaffected.
-        /// </summary>
-        private void MakeSeeThrough()
+        private void BuildUI()
         {
-            const float zTestAlways = (float)UnityEngine.Rendering.CompareFunction.Always;
-
-            if (text != null)
+            _doc = GetComponent<UIDocument>();
+            if (_doc == null)
             {
-                _clonedFontMat = new Material(text.fontSharedMaterial);
-                _clonedFontMat.SetFloat("unity_GUIZTestMode", zTestAlways);
-                text.fontMaterial = _clonedFontMat;
+                var go = new GameObject("CheckPointUI_Doc", typeof(UIDocument));
+                go.transform.SetParent(transform, false);
+                _doc = go.GetComponent<UIDocument>();
             }
+            _doc.sortingOrder = 500;
 
-            foreach (var img in GetComponentsInChildren<Image>(true))
-            {
-                if (img.material == null) continue;
-                var mat = new Material(img.material);
-                mat.SetFloat("unity_GUIZTestMode", zTestAlways);
-                img.material = mat;
-                _clonedImageMats.Add(mat);
-            }
+            var hudDoc = FindFirstObjectByType<UIDocument>();
+            if (hudDoc != null) _doc.panelSettings = hudDoc.panelSettings;
+
+            _root = new VisualElement();
+            _root.name = "CheckPointView";
+            _root.style.position = Position.Absolute;
+            _root.style.left = 0;
+            _root.style.top = 0;
+            _root.style.width = 200;
+            _root.style.height = 60;
+            _root.style.alignItems = Align.Center;
+            _root.style.justifyContent = Justify.Center;
+            _root.style.display = DisplayStyle.None;
+
+            var icon = new VisualElement();
+            icon.name = "Icon";
+            icon.style.width = 24;
+            icon.style.height = 24;
+            icon.style.backgroundColor = new Color(1, 1, 0, 0.8f);
+            icon.style.marginBottom = 2;
+            _root.Add(icon);
+
+            _text = new Label();
+            _text.name = "DistanceText";
+            _text.style.fontSize = 18;
+            _text.style.color = Color.white;
+            _text.style.unityTextAlign = TextAnchor.MiddleCenter;
+            _root.Add(_text);
+
+            _doc.rootVisualElement.Add(_root);
+            _ready = true;
         }
 
-        private void OnDestroy()
-        {
-            if (_clonedFontMat != null) Destroy(_clonedFontMat);
-            foreach (var mat in _clonedImageMats)
-            {
-                if (mat != null) Destroy(mat);
-            }
-            _clonedImageMats.Clear();
-        }
-
-        /// <summary>
-        /// Updates the displayed distance at the specified update period.
-        /// </summary>
         private IEnumerator UpdateValue()
         {
             var wait = new WaitForSeconds(updatePeriod);
@@ -118,28 +104,37 @@ namespace cowsins
             }
         }
 
-        /// <summary>
-        /// Calculates and updates the distance text.
-        /// </summary>
         private void UpdateDistanceText()
         {
-            if (playerTransform == null) return;
+            if (!_ready || playerTransform == null) return;
 
             float baseDistance = Vector3.Distance(transform.position, playerTransform.position);
 
-            // Toggle visibility based on max view distance.
-            if (canvas != null)
+            bool shouldShow = maxViewDistance <= 0f || baseDistance <= maxViewDistance;
+            if (_root != null)
+                _root.style.display = shouldShow ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (!shouldShow) return;
+
+            float converted = baseDistance * ConversionFactors[(int)measureType];
+            string text = converted.ToString($"F{decimals}") + UnitLabels[(int)measureType];
+
+            if (_text != null)
+                _text.text = text;
+
+            if (_root != null && Camera.main != null)
             {
-                bool shouldShow = maxViewDistance <= 0f || baseDistance <= maxViewDistance;
-                if (canvas.gameObject.activeSelf != shouldShow)
-                    canvas.gameObject.SetActive(shouldShow);
+                Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 2f);
+                if (screenPos.z > 0)
+                {
+                    _root.style.left = screenPos.x - 100;
+                    _root.style.top = Screen.height - screenPos.y - 30;
+                }
+                else
+                {
+                    _root.style.display = DisplayStyle.None;
+                }
             }
-
-            float convertedDistance = baseDistance * ConversionFactors[(int)measureType];
-            string distanceText = convertedDistance.ToString($"F{decimals}") + UnitLabels[(int)measureType];
-
-            if (text != null)
-                text.text = distanceText;
         }
     }
 }

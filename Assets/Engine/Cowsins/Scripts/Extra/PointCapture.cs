@@ -1,18 +1,11 @@
-/// <summary>
-/// This script belongs to cowsins™ as a part of the cowsins´ FPS Engine. All rights reserved. 
-/// </summary>
 #if UNITY_EDITOR
 using UnityEditor;
-#endif 
+#endif
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Events;
+using UnityEngine.UIElements;
 namespace cowsins
 {
-    /// <summary>
-    /// Basic Point Capture script
-    /// This is the core of the system.
-    /// </summary>
     public class PointCapture : Trigger
     {
         [System.Serializable]
@@ -20,7 +13,7 @@ namespace cowsins
         {
             public UnityEvent OnCapture;
         }
-        public PointCaptureEvents captureEvents; // custom events
+        public PointCaptureEvents captureEvents;
 
         [Tooltip(" how fast the point will be captured "), SerializeField]
         private float captureSpeed;
@@ -37,33 +30,73 @@ namespace cowsins
 
         [SaveField] private float progress;
 
-        private GameObject ui;
+        private VisualElement _progressBar;
+        private VisualElement _progressFill;
+        private GameObject _docGO;
 
         private void Start()
         {
-            // Initial stuff
             progress = 0;
             captured = false;
         }
-        
+
         void Update()
         {
-            // if player is not inside and we wanna lose progress then lose it
             if (!beingCaptured && progress > 0 && loseProgressIfNotCapturing) progress -= Time.deltaTime * losingProgressCaptureSpeed;
         }
+
+        private void BuildUI()
+        {
+            if (_docGO != null) return;
+            _docGO = new GameObject("PointCaptureUI_Doc", typeof(UIDocument));
+            _docGO.transform.SetParent(transform, false);
+            var doc = _docGO.GetComponent<UIDocument>();
+            doc.sortingOrder = 100;
+
+            var root = new VisualElement();
+            root.name = "PointCaptureRoot";
+            root.style.position = Position.Absolute;
+            root.style.left = 0;
+            root.style.right = 0;
+            root.style.top = 0;
+            root.style.bottom = 0;
+            root.pickingMode = PickingMode.Ignore;
+            root.style.alignItems = Align.Center;
+            root.style.justifyContent = Justify.FlexEnd;
+            root.style.paddingBottom = 104;
+
+            var track = new VisualElement();
+            track.name = "Track";
+            track.style.width = 160;
+            track.style.height = 20;
+            track.style.backgroundColor = new Color(0, 0, 0, 0.33f);
+            track.style.unitySliceScale = 0.64f;
+            root.Add(track);
+
+            _progressFill = new VisualElement();
+            _progressFill.name = "Fill";
+            _progressFill.style.position = Position.Absolute;
+            _progressFill.style.left = 0;
+            _progressFill.style.top = 0;
+            _progressFill.style.bottom = 0;
+            _progressFill.style.width = Length.Percent(0);
+            _progressFill.style.backgroundColor = Color.white;
+            track.Add(_progressFill);
+
+            doc.rootVisualElement.Add(root);
+        }
+
         public override void TriggerStay(Collider other)
         {
-            // If we are player and point is not captured, try to cap
             if (!captured)
             {
-                if (!beingCaptured && ui == null) ui = Instantiate(Resources.Load("PointCaptureUI")) as GameObject; // Instantiate cool UI
+                if (_docGO == null) BuildUI();
                 beingCaptured = true;
                 progress += Time.deltaTime * captureSpeed;
 
-                // Check if we already captured
                 if (progress >= 100)
                 {
-                    captured = true; 
+                    captured = true;
                     OnCapture();
                 }
 
@@ -72,52 +105,43 @@ namespace cowsins
 #endif
             }
 
-            // Handle UI, we do not wanna do this if there is no UI currently (We are not inside the point)
-            if (ui == null) return;
-
-            // It will show progress while you are in
-            Slider slider = ui.transform.Find("Progress").GetComponent<Slider>();
-            slider.value = progress;
+            if (_progressFill == null) return;
+            _progressFill.style.width = Length.Percent(Mathf.Clamp01(progress / 100f) * 100f);
         }
-        // Stop capping
+
         public override void TriggerExit(Collider other)
         {
             if (!captured)
             {
                 beingCaptured = false;
-                Destroy(ui.gameObject);
+                if (_docGO != null)
+                {
+                    Destroy(_docGO);
+                    _docGO = null;
+                }
             }
         }
 
-        /// <summary>
-        /// This is called whenever you capture the point
-        /// </summary>
         public virtual void OnCapture()
         {
-            captureEvents.OnCapture.Invoke(); // Call our custom event 
-
-            /*Since it is a public virtual void, you can override this method on a new script that inherits from PointCapture. 
-            However, do not forget to use base.OnCapture(); if
-            you still want to perform these actions on that new script.
-
-             EXAMPLE: on a new class (public class MyNewPointCapture : PointCapture) we will write the following structure
-            public override void OnCapture() { // Write here whatever you want }
-
-             (You can always edit this one if you do not plan to add more different kinds of capture points, just to avoid unncessary scripts)*/
+            captureEvents.OnCapture.Invoke();
 
             Debug.Log("You captured the point!");
 
-            Destroy(ui);
+            if (_docGO != null)
+            {
+                Destroy(_docGO);
+                _docGO = null;
+            }
             Destroy(this.gameObject);
         }
 
 #if SAVE_LOAD_ADD_ON
-        // If the point is captured after loading the progress, Destroy it.
         public override void LoadedState()
         {
             if (progress >= 100)
             {
-                Destroy(ui);
+                Destroy(_docGO);
                 Destroy(this.gameObject);
             }
         }
