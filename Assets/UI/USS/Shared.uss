@@ -1,26 +1,293 @@
-/* ===== Shared.uss — Shared Utility Classes ===== */
-/* Theme variables moved to Theme.uss */
+/* ============================================================
+   Shared.uss — Shared Utility Classes & Components
+   ============================================================ */
 @import url("Theme.uss");
 
-/* === Button Motion (replaces UIButtonMotion.cs) === */
+/* ===================== LAYOUT UTILITIES ===================== */
+
+/* Full-screen overlay */
+.overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: var(--color-bg-root, rgba(5, 6, 9, 0.92));
+}
+
+/* Vignette overlay */
+.vignette {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: resource("Images/ui_vignette");
+    background-size: cover;
+}
+
+/* Sliced shadow behind cards */
+.card-shadow {
+    position: absolute;
+    width: var(--panel-shadow-width, 800px);
+    height: var(--panel-shadow-height, 760px);
+    left: 50%;
+    top: 50%;
+    margin-left: -400px;
+    margin-top: -368px;
+    background-image: resource("Images/ui_shadow");
+    -unity-slice-left: var(--slice-panel, 48);
+    -unity-slice-right: var(--slice-panel, 48);
+    -unity-slice-top: var(--slice-panel, 48);
+    -unity-slice-bottom: var(--slice-panel, 48);
+    opacity: var(--opacity-medium, 0.6);
+}
+
+/* Card panel with 9-slice background + animation */
+.panel-card {
+    width: var(--panel-card-width, 760px);
+    height: var(--panel-card-height, 720px);
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--color-card-face, rgb(25, 30, 37));
+    border-radius: var(--radius-m, 16px);
+    opacity: 0;
+    scale: var(--panel-start-scale, 0.9);
+    transition: opacity var(--panel-in-duration, 0.22s) var(--panel-easing, ease-out),
+                scale var(--panel-in-duration, 0.22s) var(--panel-easing, ease-out);
+}
+
+.panel-card.visible {
+    opacity: 1;
+    scale: 1;
+}
+
+/* Accent bar at top of card */
+.card-accent {
+    width: var(--panel-card-width, 760px);
+    height: 7px;
+    flex-shrink: 0;
+    border-top-left-radius: var(--radius-m, 16px);
+    border-top-right-radius: var(--radius-m, 16px);
+}
+
+/* Divider line */
+.divider {
+    width: 620px;
+    height: 2px;
+    flex-shrink: 0;
+    margin-top: var(--space-s, 8px);
+    background-color: var(--color-divider, rgba(255, 255, 255, 0.1));
+}
+
+/* Icon utility */
+.icon-base {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+/* ===================== PICKING MODE ===================== */
+.picking-ignore {
+    pointer-events: none;
+}
+
+/* ===================== BUTTON COMPONENTS ===================== */
+
+/* Shared button base — all game buttons should use this + modifier */
 .game-button {
     cursor: link;
-    transition: scale 0.08s;
+    transition: scale var(--transition-fast, 0.08s) var(--panel-easing, ease-out);
 }
+
 .game-button:hover {
     scale: var(--hover-scale, 1.06);
 }
+
 .game-button:active {
     scale: var(--press-scale, 0.95);
 }
 
-/* === Panel Transition (replaces UIPanelTransition.cs) === */
-.panel-card {
-    opacity: 0;
-    scale: var(--panel-start-scale, 0.9);
-    transition: opacity var(--panel-in-duration, 0.22s), scale var(--panel-in-duration, 0.22s);
+/* Sliced button background (reused by gameover-button, pause-button, menu-button, etc.) */
+.button-sliced {
+    width: var(--button-width, 380px);
+    height: var(--button-height, 66px);
+    flex-shrink: 0;
+    margin: var(--space-xs, 4px) 0;
+    font-size: var(--fs-xl, 28px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: var(--color-text-primary, rgba(245, 245, 245, 1));
+    -unity-text-align: middle-center;
+    background-image: resource("Images/ui_button");
+    -unity-slice-left: var(--slice-button, 8);
+    -unity-slice-right: var(--slice-button, 8);
+    -unity-slice-top: var(--slice-button, 8);
+    -unity-slice-bottom: var(--slice-button, 8);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    background-color: rgba(0, 0, 0, 0);
 }
-.panel-card.visible {
-    opacity: 1;
-    scale: 1;
+
+/* ===================== TEXT HIERARCHY ===================== */
+
+.text-display {
+    font-size: var(--fs-display, 92px);
+    -unity-font: var(--font-display, resource("Fonts/Anton"));
+    -unity-text-align: middle-center;
+    letter-spacing: 6px;
+    width: 720px;
+    height: 130px;
+    margin-top: var(--space-l, 16px);
+    flex-shrink: 0;
+    -unity-text-outline-color: var(--shadow-color-default, rgba(0, 0, 0, 0.5));
+    -unity-text-outline-width: var(--shadow-text-md, 2px);
+}
+
+.text-hero {
+    font-size: var(--fs-hero, 64px);
+    -unity-font: var(--font-display, resource("Fonts/Anton"));
+    -unity-text-align: middle-center;
+    letter-spacing: 4px;
+}
+
+.text-xl {
+    font-size: var(--fs-xl, 28px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+}
+
+.text-l {
+    font-size: var(--fs-l, 22px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+}
+
+.text-m {
+    font-size: var(--fs-m, 18px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+}
+
+.text-s {
+    font-size: var(--fs-s, 16px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+}
+
+.text-xs {
+    font-size: var(--fs-xs, 14px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+}
+
+.text-center {
+    -unity-text-align: middle-center;
+}
+
+.text-gold {
+    color: var(--color-text-gold, rgb(217, 199, 115));
+}
+
+.text-muted {
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+}
+
+/* ===================== BAR & TRACK COMPONENTS ===================== */
+
+/* Track background (health, xp, shield, heat) */
+.track-bg {
+    position: relative;
+    background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* Fill overlay inside track */
+.track-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Ghost/delayed-fill overlay */
+.track-ghost {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* ===================== CHIP COMPONENTS ===================== */
+
+.chip-root {
+    flex-direction: row;
+    align-items: center;
+    width: 280px;
+    height: 52px;
+    padding-left: var(--space-m, 12px);
+    background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
+    border-radius: var(--radius-s, 8px);
+}
+
+.chip-root.chip-hidden {
+    display: none;
+}
+
+.chip-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-right: var(--space-s, 8px);
+}
+
+.chip-label {
+    font-size: var(--fs-s, 16px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: var(--color-text-primary, rgba(245, 245, 245, 1));
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+}
+
+/* ===================== SCROLLER ===================== */
+
+.scroller {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* ===================== STATS GRID ===================== */
+
+.stats-row {
+    flex-direction: row;
+    height: 28px;
+    margin-bottom: var(--space-s, 6px);
+}
+
+.stats-label {
+    flex-grow: 1;
+    font-size: var(--fs-xl, 20px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: var(--color-text-primary, rgba(245, 245, 245, 1));
+    -unity-text-align: middle-left;
+    padding-left: var(--space-s, 8px);
+}
+
+.stats-label.sub {
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+}
+
+.stats-value {
+    width: 220px;
+    font-size: var(--fs-l, 22px);
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: var(--color-accent-gold-dark, rgb(217, 199, 115));
+    -unity-text-align: middle-right;
+    padding-right: var(--space-s, 8px);
 }
