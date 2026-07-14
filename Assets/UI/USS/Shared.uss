@@ -262,12 +262,12 @@
 .stats-row {
     flex-direction: row;
     height: 28px;
-    margin-bottom: var(--space-s, 6px);
+    margin-bottom: var(--space-s, 8px);
 }
 
 .stats-label {
     flex-grow: 1;
-    font-size: var(--fs-xl, 20px);
+    font-size: var(--fs-xl, 28px);
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     -unity-text-align: middle-left;

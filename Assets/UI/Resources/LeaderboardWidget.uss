@@ -1,3 +1,6 @@
+@import url("../USS/Theme.uss");
+@import url("../USS/Shared.uss");
+
 /* ===== LeaderboardWidget.uss (Runtime-loaded) ===== */
 
 /* --- Root --- */
@@ -26,23 +29,23 @@
 }
 
 #LeaderboardChip:hover {
-    background-color: rgba(26, 31, 38, 0.96);
+    background-color: var(--color-surface-top, rgba(31, 38, 46, 1));
 }
 
 #LeaderboardChip:active {
-    scale: 0.95;
+    scale: var(--press-scale, 0.95);
 }
 
 #LeaderboardChip #Icon {
     width: 24px;
     height: 24px;
-    margin-right: 8px;
+    margin-right: var(--space-s, 8px);
     background-color: var(--color-accent-gold, rgb(217, 199, 115));
     border-radius: var(--radius-xs, 4px);
 }
 
 #LeaderboardChip .chip-label {
-    font-size: var(--fs-xs, 15px);
+    font-size: var(--fs-xs, 14px);
     -unity-font: var(--font-body);
     color: var(--color-text-primary, white);
 }
@@ -65,20 +68,20 @@
     translate: -50% -50%;
     background-color: var(--color-panel-bg, rgba(14, 17, 21, 0.92));
     border-radius: var(--radius-m, 16px);
-    padding-left: 28px;
-    padding-right: 28px;
-    padding-top: 24px;
-    padding-bottom: 24px;
+    padding-left: var(--space-xxl, 24px);
+    padding-right: var(--space-xxl, 24px);
+    padding-top: var(--space-xxl, 24px);
+    padding-bottom: var(--space-xxl, 24px);
 }
 
 #LeaderboardPanel .panel-header {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-s, 8px);
 }
 
 #LeaderboardPanel .panel-title {
-    font-size: var(--fs-xl, 26px);
+    font-size: var(--fs-xl, 28px);
     -unity-font: var(--font-body);
     flex-grow: 1;
     color: var(--color-accent-gold, rgb(217, 199, 115));
@@ -87,31 +90,31 @@
 #LeaderboardPanel .panel-divider {
     height: 1px;
     background-color: var(--color-divider, rgba(255, 255, 255, 0.1));
-    margin-bottom: 8px;
+    margin-bottom: var(--space-s, 8px);
 }
 
 /* --- Column Headers --- */
 #LeaderboardPanel .col-header {
     flex-direction: row;
-    padding-left: 12px;
-    padding-right: 12px;
-    margin-bottom: 4px;
+    padding-left: var(--space-m, 12px);
+    padding-right: var(--space-m, 12px);
+    margin-bottom: var(--space-xs, 4px);
 }
 
 #LeaderboardPanel .col-header .col-rank {
-    font-size: 14px;
+    font-size: var(--fs-xs, 14px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     width: 50px;
 }
 
 #LeaderboardPanel .col-header .col-name {
-    font-size: 14px;
+    font-size: var(--fs-xs, 14px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     flex-grow: 1;
 }
 
 #LeaderboardPanel .col-header .col-score {
-    font-size: 14px;
+    font-size: var(--fs-xs, 14px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     width: 100px;
     -unity-text-align: middle-right;
@@ -122,16 +125,16 @@
     background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
     min-height: 200px;
     flex-grow: 1;
-    padding: 8px;
+    padding: var(--space-s, 8px);
     border-radius: var(--radius-s, 8px);
 }
 
 #LeaderboardPanel .status-text {
-    font-size: 16px;
+    font-size: var(--fs-s, 16px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     -unity-text-align: middle-center;
     height: 24px;
-    margin-top: 8px;
+    margin-top: var(--space-s, 8px);
 }
 
 #LeaderboardPanel .panel-footer {
@@ -150,17 +153,17 @@
 }
 
 .leaderboard-btn:hover {
-    background-color: rgba(51, 89, 128, 0.7);
-    scale: 1.06;
+    background-color: var(--color-accent-blue, rgba(51, 89, 128, 0.7));
+    scale: var(--hover-scale, 1.06);
 }
 
 .leaderboard-btn:active {
-    scale: 0.95;
+    scale: var(--press-scale, 0.95);
 }
 
 .leaderboard-btn .btn-label {
-    font-size: 15px;
+    font-size: var(--fs-s, 16px);
     -unity-font: var(--font-body);
-    color: white;
+    color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
 }

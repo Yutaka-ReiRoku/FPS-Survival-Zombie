@@ -1,3 +1,6 @@
+@import url("../USS/Theme.uss");
+@import url("../USS/Shared.uss");
+
 /* SimpleNotification.uss — Runtime-loaded for notification popup (Phase B) */
 * {
     --color-text-primary: rgba(245, 245, 245, 1);

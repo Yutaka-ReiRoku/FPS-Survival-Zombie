@@ -1,3 +1,6 @@
+@import url("../USS/Theme.uss");
+@import url("../USS/Shared.uss");
+
 /* CreditsSequence.uss — Runtime-loaded for end credits scroll */
 .credits-root {
     position: absolute;

@@ -181,7 +181,7 @@
 #hint {
     position: absolute;
     left: 50%;
-    bottom: var(--space-3xl, 30px);
+    bottom: var(--space-3xl, 32px);
     translate: -50%;
     width: 700px;
     height: 28px;

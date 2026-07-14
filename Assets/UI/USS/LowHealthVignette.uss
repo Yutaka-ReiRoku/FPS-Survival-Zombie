@@ -7,10 +7,10 @@
     top: 0;
     bottom: 0;
     opacity: var(--opacity-zero, 0);
-    transition: opacity var(--transition-normal, 0.3s) ease;
+    transition: opacity var(--transition-normal, 0.15s) ease;
     -unity-background-scale-mode: stretch-to-fill;
     background-image: resource("Images/ui_vignette");
-    -unity-background-image-tint-color: var(--color-accent-red-dark, rgb(160, 0, 0));
+    -unity-background-image-tint-color: var(--color-accent-red-dark, rgb(168, 23, 33));
 }
 
 #LowHealthVignette.low {

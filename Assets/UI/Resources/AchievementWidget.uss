@@ -1,3 +1,6 @@
+@import url("../USS/Theme.uss");
+@import url("../USS/Shared.uss");
+
 /* ===== AchievementWidget.uss (Runtime-loaded) ===== */
 
 /* --- Root --- */
@@ -53,7 +56,7 @@
     position: absolute;
     left: 92px;
     top: 46px;
-    font-size: 16px;
+    font-size: var(--fs-s, 16px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
 }
 
@@ -64,7 +67,7 @@
     right: 0;
     top: 0;
     bottom: 0;
-    background-color: rgba(10, 13, 18, 0.9);
+    background-color: var(--color-surface-bottom, rgba(19, 23, 28, 1));
     transition: opacity var(--transition-medium, 0.22s);
 }
 
@@ -76,7 +79,7 @@
     translate: -50% -50%;
     background-color: var(--color-surface-bottom, rgba(19, 23, 28, 1));
     border-radius: var(--radius-m, 16px);
-    padding: 20px;
+    padding: var(--space-xl, 20px);
     transition: opacity var(--transition-medium, 0.22s);
 }
 
@@ -85,14 +88,14 @@
     -unity-font: var(--font-display);
     -unity-text-align: middle-center;
     color: var(--color-accent-gold, rgb(217, 199, 115));
-    margin-bottom: 8px;
+    margin-bottom: var(--space-s, 8px);
 }
 
 #AchievementListPanel .list-hint {
-    font-size: 16px;
+    font-size: var(--fs-s, 16px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     -unity-text-align: middle-center;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-l, 16px);
 }
 
 #AchievementListPanel #ScrollArea {
@@ -104,16 +107,16 @@
 .ach-row {
     flex-direction: row;
     align-items: center;
-    padding-left: 12px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-left: var(--space-m, 12px);
+    padding-top: var(--space-xs, 4px);
+    padding-bottom: var(--space-xs, 4px);
     border-radius: var(--radius-s, 8px);
 }
 
 .ach-row .ach-icon {
     width: 46px;
     height: 46px;
-    margin-right: 8px;
+    margin-right: var(--space-s, 8px);
     flex-shrink: 0;
     border-radius: var(--radius-xs, 4px);
 }
@@ -123,17 +126,17 @@
 }
 
 .ach-row .ach-title {
-    font-size: var(--fs-xl, 20px);
+    font-size: var(--fs-xl, 28px);
     -unity-font: var(--font-body);
 }
 
 .ach-row .ach-desc {
-    font-size: 14px;
+    font-size: var(--fs-xs, 14px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
 }
 
 .ach-row .ach-badge {
-    font-size: 14px;
+    font-size: var(--fs-xs, 14px);
     width: 40px;
     -unity-text-align: middle-right;
     flex-shrink: 0;

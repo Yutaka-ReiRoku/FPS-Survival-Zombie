@@ -1,3 +1,6 @@
+@import url("../USS/Theme.uss");
+@import url("../USS/Shared.uss");
+
 /* ===== PlayerProfileWidget.uss (Runtime-loaded) ===== */
 
 /* --- Root --- */
@@ -24,17 +27,17 @@
 }
 
 #PlayerChip:hover {
-    background-color: rgba(26, 31, 38, 0.96);
+    background-color: var(--color-surface-top, rgba(31, 38, 46, 0.96));
 }
 
 #PlayerChip:active {
-    scale: 0.95;
+    scale: var(--press-scale, 0.95);
 }
 
 #PlayerChip #Avatar {
     width: 32px;
     height: 32px;
-    margin-right: 10px;
+    margin-right: var(--space-s, 8px);
     border-radius: var(--radius-round, 50%);
 }
 
@@ -44,13 +47,13 @@
 }
 
 #PlayerChip #Username {
-    font-size: 14px;
+    font-size: var(--fs-xs, 14px);
     -unity-font: var(--font-body);
     color: var(--color-text-primary, white);
 }
 
 #PlayerChip #Status {
-    font-size: 11px;
+    font-size: var(--fs-xs, 14px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
 }
 
@@ -62,14 +65,14 @@
     translate: -50% -50%;
     background-color: var(--color-panel-bg, rgba(14, 17, 21, 0.92));
     border-radius: var(--radius-m, 16px);
-    padding: 32px;
+    padding: var(--space-3xl, 32px);
 }
 
 #ProfilePanel .panel-header {
     flex-direction: row;
     align-items: center;
     height: 32px;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-s, 8px);
 }
 
 #ProfilePanel .panel-title {
@@ -82,15 +85,15 @@
 #ProfilePanel .panel-divider {
     height: 1px;
     background-color: var(--color-divider, rgba(255, 255, 255, 0.1));
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: var(--space-s, 8px);
+    margin-bottom: var(--space-s, 8px);
 }
 
 /* --- Field Labels --- */
 #ProfilePanel .field-label {
     font-size: 12px;
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
-    margin-top: 8px;
+    margin-top: var(--space-s, 8px);
 }
 
 /* --- Achievement List --- */
@@ -98,7 +101,7 @@
     min-height: 120px;
     flex-grow: 1;
     background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
-    padding: 10px 12px;
+    padding: var(--space-s, 8px) var(--space-m, 12px);
     border-radius: var(--radius-s, 8px);
 }
 
@@ -117,25 +120,25 @@
     height: 36px;
     align-items: center;
     justify-content: center;
-    background-color: rgba(128, 51, 51, 1);
+    background-color: var(--color-accent-red-dark, rgb(168, 23, 33));
     border-radius: var(--radius-s, 8px);
     cursor: link;
     transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
 }
 
 .profile-btn:hover {
-    background-color: rgba(128, 51, 51, 0.7);
-    scale: 1.06;
+    background-color: var(--color-accent-red-dark, rgb(168, 23, 33));
+    scale: var(--hover-scale, 1.06);
 }
 
 .profile-btn:active {
-    scale: 0.95;
+    scale: var(--press-scale, 0.95);
 }
 
 .profile-btn .btn-label {
-    font-size: 15px;
+    font-size: var(--fs-s, 16px);
     -unity-font: var(--font-body);
-    color: white;
+    color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
 }
 
@@ -145,23 +148,23 @@
     height: 32px;
     align-items: center;
     justify-content: center;
-    background-color: rgba(128, 51, 51, 1);
+    background-color: var(--color-accent-red-dark, rgb(168, 23, 33));
     border-radius: var(--radius-s, 8px);
     cursor: link;
     transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
 }
 
 .profile-close-btn:hover {
-    background-color: rgba(128, 51, 51, 0.7);
-    scale: 1.06;
+    background-color: var(--color-accent-red-dark, rgb(168, 23, 33));
+    scale: var(--hover-scale, 1.06);
 }
 
 .profile-close-btn:active {
-    scale: 0.95;
+    scale: var(--press-scale, 0.95);
 }
 
 .profile-close-btn .btn-label {
-    font-size: 15px;
-    color: white;
+    font-size: var(--fs-s, 16px);
+    color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
 }

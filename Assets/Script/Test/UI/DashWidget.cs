@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,7 +11,7 @@ public class DashWidget : MonoBehaviour
     private VisualElement _root;
     private readonly List<VisualElement> _pips = new List<VisualElement>();
     private readonly List<VisualElement> _regen = new List<VisualElement>();
-    private readonly List<EventCallback<GenerateVisualContent>> _regenCallbacks = new List<EventCallback<GenerateVisualContent>>();
+    private readonly List<Action<MeshGenerationContext>> _regenCallbacks = new List<Action<MeshGenerationContext>>();
     private int _current, _max;
     private float _regenStart;
     private CowsinsHUDAdapter _adapter;
@@ -83,7 +84,7 @@ public class DashWidget : MonoBehaviour
             regen.AddToClassList("dash-pip__regen");
             regen.style.display = DisplayStyle.None;
             var captured = regen;
-            EventCallback<GenerateVisualContent> cb = (ctx) => OnGenerateRegen(ctx, captured);
+            Action<MeshGenerationContext> cb = (ctx) => OnGenerateRegen(ctx, captured);
             regen.generateVisualContent += cb;
             _regenCallbacks.Add(cb);
             pip.Add(regen);

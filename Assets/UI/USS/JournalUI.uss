@@ -98,7 +98,7 @@
     color: var(--color-scrim-bottom, #05080DFF);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    transition: scale var(--transition-normal, 0.1s) var(--panel-easing, ease-out);
+    transition: scale var(--transition-normal, 0.15s) var(--panel-easing, ease-out);
 }
 
 .journal-button:hover {

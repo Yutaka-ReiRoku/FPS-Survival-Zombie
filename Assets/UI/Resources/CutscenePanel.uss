@@ -1,3 +1,6 @@
+@import url("../USS/Theme.uss");
+@import url("../USS/Shared.uss");
+
 /* CutscenePanel.uss — Runtime-loaded styles for CutscenePlayer (Phase B) */
 * {
     /* Vars duplicated from Theme.uss for runtime Resources loading */
