@@ -288,10 +288,10 @@ MonoBehaviour:
     m_Bits: 4294967295
   sightEyeHeight: 1.5
   attackRange: 1.5
-  attackCooldown: 1.2
+  attackCooldown: 1
   attackDamage: 40
-  damageApplyDelay: 0.4
-  screamDuration: 1.5
+  damageApplyDelay: 0.35
+  screamDuration: 1.2
   stuckTimeThreshold: 3
   stuckMoveThreshold: 1
   stuckRepathRadius: 5

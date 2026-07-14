@@ -50,14 +50,14 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
     [Header("Attack")]
     public float attackRange = 1.5f;
-    public float attackCooldown = 1.2f;
+    public float attackCooldown = 1.0f;
     public float attackDamage = 40f;
     [Tooltip("Delay sau trigger Attack trước khi áp dụng damage (sync với animation hit frame).")]
-    public float damageApplyDelay = 0.4f;
+    public float damageApplyDelay = 0.35f;
 
     [Header("Scream")]
     [Tooltip("Thời gian gào trước khi bắt đầu lao vào player (giây).")]
-    public float screamDuration = 1.5f;
+    public float screamDuration = 1.2f;
 
     [Header("Stuck Recovery")]
     public float stuckTimeThreshold = 3f;
@@ -153,6 +153,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     private static readonly int IsDeathHash = Animator.StringToHash("isDeath");
     private static readonly int DeathHash = Animator.StringToHash("Death");
     private static readonly int HitHash = Animator.StringToHash("Hit");
+    private static readonly int AttackResetHash = Animator.StringToHash("attackReset");
 
     // --- Cached player references ---
     private float findPlayerTimer;
@@ -278,7 +279,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         if (animator != null)
         {
             float targetAnimSpeed = agent != null && agent.isOnNavMesh ? agent.velocity.magnitude / runSpeed : 0f;
-            animator.SetFloat(SpeedHash, targetAnimSpeed, 0.15f, Time.deltaTime);
+            animator.SetFloat(SpeedHash, targetAnimSpeed, 0.1f, Time.deltaTime);
         }
     }
 
@@ -504,6 +505,10 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     {
         isAttacking = false;
         state = WitchState.Chasing;
+
+        // Trigger animator transition Attack → Run immediately
+        if (animator != null)
+            animator.SetTrigger(AttackResetHash);
 
         if (agent != null)
             agent.isStopped = false;
