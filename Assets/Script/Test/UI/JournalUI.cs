@@ -38,6 +38,17 @@ public class JournalUI : MonoBehaviour
             _panel.style.display = DisplayStyle.None;
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+        if (_open)
+        {
+            Time.timeScale = 1f;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
+
     private void Start()
     {
         var player = GameObject.FindGameObjectWithTag("Player");

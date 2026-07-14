@@ -41,6 +41,9 @@
 --color-card-top:            rgba(31, 38, 46, 1);
 --color-card-bottom:         rgba(19, 23, 28, 1);
 --color-card-face:           rgb(25, 30, 37);
+--color-surface-mid:          rgba(26, 32, 39, 1);
+--color-surface-hover:        rgba(48, 56, 66, 1);
+--color-surface-active:       rgba(58, 68, 80, 1);
 --color-scrim-top:           rgba(10, 13, 18, 0.9);
 --color-scrim-bottom:        rgba(0, 0, 0, 0.93);
 --color-panel-bg:            rgba(14, 17, 21, 0.92);

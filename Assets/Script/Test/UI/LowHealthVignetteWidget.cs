@@ -12,10 +12,13 @@ public class LowHealthVignetteWidget : MonoBehaviour
 
     private void Awake()
     {
-        _vignette = GetComponent<UIDocument>().rootVisualElement.Q("LowHealthVignette");
+        var doc = GetComponent<UIDocument>();
+        if (doc == null) { enabled = false; return; }
+        _vignette = doc.rootVisualElement.Q("LowHealthVignette");
         if (_vignette == null)
         {
             Debug.LogError("[LowHealthVignetteWidget] #LowHealthVignette not found");
+            enabled = false;
             return;
         }
         if (vignetteTexture != null)

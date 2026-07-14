@@ -33,6 +33,23 @@ public class SkillTreeWidget : MonoBehaviour
         if (!_initialized) Initialize();
     }
 
+    private void OnDisable()
+    {
+        if (_open) Close();
+        _initialized = false;
+    }
+
+    private void OnDestroy()
+    {
+        if (JournalUI.Instance != null && JournalUI.Instance.IsOpen) return;
+        if (_open)
+        {
+            Time.timeScale = 1f;
+            UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+            UnityEngine.Cursor.visible = false;
+        }
+    }
+
     private void Initialize()
     {
         _doc = GetComponent<UIDocument>();

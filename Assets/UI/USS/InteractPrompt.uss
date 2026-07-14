@@ -14,17 +14,17 @@
 
 .interact-panel {
     flex-grow: 1;
-    background-color: rgba(35, 42, 51, 0.94);
+    background-color: var(--color-surface-top, rgba(35, 42, 51, 0.94));
     border-radius: var(--radius-s);
 }
 
 .interact-label {
     position: absolute;
     left: var(--space-l, 16px);
-    top: 6px;
+    top: var(--space-xs, 4px);
     right: var(--space-l, 16px);
-    bottom: 10px;
-    font-size: 26px;
+    bottom: var(--space-s, 8px);
+    font-size: var(--fs-xl, 28px);
     -unity-font: var(--font-body);
     -unity-text-align: middle-center;
     color: var(--color-text-primary);
@@ -34,7 +34,7 @@
 }
 
 .interact-label--forbidden {
-    color: rgb(240, 180, 180);
+    color: var(--color-danger-top, rgb(240, 180, 180));
 }
 
 .interact-progress {

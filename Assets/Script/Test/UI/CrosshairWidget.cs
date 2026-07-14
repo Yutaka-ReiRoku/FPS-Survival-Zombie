@@ -34,6 +34,8 @@ public class CrosshairWidget : MonoBehaviour
         "CHBL_H", "CHBL_V", "CHBR_H", "CHBR_V"
     };
 
+    private bool _initialized;
+
     private void Awake()
     {
         _spread = defaultSpread;
@@ -42,18 +44,21 @@ public class CrosshairWidget : MonoBehaviour
 
     private void OnEnable()
     {
-        var doc = GetComponent<UIDocument>();
-        if (doc == null) doc = FindFirstObjectByType<UIDocument>();
-        if (doc == null) { enabled = false; return; }
-        _container = doc.rootVisualElement.Q("Crosshair");
-        if (_container == null) { enabled = false; return; }
-        Build();
+        if (!_initialized)
+        {
+            var doc = GetComponent<UIDocument>();
+            if (doc == null) doc = FindFirstObjectByType<UIDocument>();
+            if (doc == null) { enabled = false; return; }
+            _container = doc.rootVisualElement.Q("Crosshair");
+            if (_container == null) { enabled = false; return; }
+            Build();
+            _initialized = true;
+        }
         StartCoroutine(Bind());
     }
 
     private void Build()
     {
-        _container.Clear();
         _bars = new VisualElement[BarCount];
         for (int i = 0; i < BarCount; i++)
         {

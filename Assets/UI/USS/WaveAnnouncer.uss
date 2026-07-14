@@ -21,20 +21,20 @@
 }
 
 .wave-title {
-    -unity-font: var(--font-display, resource("Fonts/Anton"));
-    font-size: 72px;
+    -unity-font: var(--font-display);
+    font-size: var(--fs-hero, 64px);
     -unity-text-align: middle-center;
-    color: var(--color-text-gold, #D8C773);
-    margin-bottom: var(--space-xs, 4px);
+    color: var(--color-text-gold);
+    margin-bottom: var(--space-xs);
     width: 100%;
     text-align: center;
 }
 
 .wave-sub {
-    -unity-font: resource("Fonts/Oswald-Bold");
-    font-size: 30px;
+    -unity-font: var(--font-body);
+    font-size: var(--fs-xxl, 36px);
     -unity-text-align: middle-center;
-    color: var(--color-text-muted, #9EA8B8);
+    color: var(--color-text-muted);
     width: 100%;
     text-align: center;
     white-space: normal;

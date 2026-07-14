@@ -18,7 +18,9 @@ public class FPSWidget : MonoBehaviour
     private void OnEnable()
     {
         var doc = GetComponent<UIDocument>();
+        if (doc == null) { enabled = false; return; }
         _label = doc.rootVisualElement.Q<Label>("FPSLabel");
+        if (_label == null) { enabled = false; return; }
         _deltas = new float[Mathf.Max(8, window)];
         _timer = refreshRate;
     }

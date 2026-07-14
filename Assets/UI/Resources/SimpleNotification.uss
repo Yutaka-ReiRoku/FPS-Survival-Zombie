@@ -2,17 +2,13 @@
 @import url("../USS/Shared.uss");
 
 /* SimpleNotification.uss — Runtime-loaded for notification popup (Phase B) */
-* {
-    --color-text-primary: rgba(245, 245, 245, 1);
-}
-
 .notification-root {
     position: absolute;
     left: 50%;
     bottom: 60px;
     translate: -50%;
-    width: 800px;
-    height: 60px;
+    width: var(--notification-width, 800px);
+    height: var(--notification-height, 60px);
     justify-content: center;
     align-items: center;
     opacity: 0;
@@ -25,13 +21,13 @@
     right: 0;
     top: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--color-surface-top, rgba(0, 0, 0, 0.6));
 }
 
 .notification-label {
-    font-size: 28px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
-    color: var(--color-text-primary, rgba(230, 217, 179, 1));
+    font-size: var(--fs-xl, 28px);
+    -unity-font: var(--font-body);
+    color: var(--color-text-primary);
     -unity-text-align: middle-center;
     width: 100%;
     height: 100%;

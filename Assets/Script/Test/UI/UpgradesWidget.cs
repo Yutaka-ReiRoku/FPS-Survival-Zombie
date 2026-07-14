@@ -12,8 +12,9 @@ public class UpgradesWidget : MonoBehaviour
 
     private void OnEnable()
     {
-        var root = GetComponent<UIDocument>()?.rootVisualElement;
-        if (root != null) _label = root.Q<Label>("UpgradesWidget");
+        var doc = GetComponent<UIDocument>();
+        if (doc == null) { enabled = false; return; }
+        _label = doc.rootVisualElement.Q<Label>("UpgradesWidget");
     }
 
     private void OnDisable()
@@ -24,10 +25,11 @@ public class UpgradesWidget : MonoBehaviour
     private void Update()
     {
         var m = PlayerUpgradeManager.Instance;
-        int h = m != null ? m.bonusHealth : 0;
-        int s = m != null ? m.bonusShield : 0;
-        float sta = m != null ? m.bonusStamina : 0f;
-        float dmg = m != null ? m.bonusDamage : 0f;
+        if (m == null) return;
+        int h = m.bonusHealth;
+        int s = m.bonusShield;
+        float sta = m.bonusStamina;
+        float dmg = m.bonusDamage;
         if (h == _lastH && s == _lastS && Mathf.Approximately(sta, _lastSta) && Mathf.Approximately(dmg, _lastDmg)) return;
         _lastH = h; _lastS = s; _lastSta = sta; _lastDmg = dmg;
 

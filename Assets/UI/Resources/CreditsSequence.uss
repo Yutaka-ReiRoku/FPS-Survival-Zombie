@@ -13,18 +13,18 @@
 }
 
 .credits-header {
-    font-size: 32px;
-    -unity-font: resource("Fonts/ZacbelX-Bold");
-    color: rgb(217, 199, 115);
+    font-size: var(--fs-xxl, 36px);
+    -unity-font: var(--font-display);
+    color: var(--color-text-gold);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
     width: 900px;
 }
 
 .credits-line {
-    font-size: 24px;
-    -unity-font: resource("Fonts/Outfit-SemiBold");
-    color: rgb(230, 230, 230);
+    font-size: var(--fs-xl, 28px);
+    -unity-font: var(--font-body);
+    color: var(--color-text-primary);
     -unity-text-align: middle-center;
     width: 900px;
 }

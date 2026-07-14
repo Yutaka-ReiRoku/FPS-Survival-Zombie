@@ -4,7 +4,7 @@
 
 * {
     --color-fps-good: var(--color-stamina, #4FE08A);
-    --color-fps-ok: #FFD44D;
+    --color-fps-ok: var(--color-chip-score, #FFD44D);
     --color-fps-bad: var(--color-ammo-low, #D95926);
 }
 

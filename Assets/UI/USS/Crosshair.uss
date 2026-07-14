@@ -12,7 +12,7 @@
 
 .crosshair-bar {
     position: absolute;
-    background-color: rgb(44, 255, 0);
+    background-color: var(--color-stamina, rgb(44, 255, 0));
     transition: translate var(--transition-fast, 0.08s) ease-out, width var(--transition-fast, 0.08s) ease-out, height var(--transition-fast, 0.08s) ease-out;
 }
 
@@ -21,5 +21,5 @@
 }
 
 .crosshair-bar--enemy {
-    background-color: rgb(220, 50, 50);
+    background-color: var(--color-danger-top, rgb(220, 50, 50));
 }

@@ -1,3 +1,6 @@
+@import url("../USS/Theme.uss");
+@import url("../USS/Shared.uss");
+
 #EpilogueRoot {
     transition: opacity var(--transition-medium, 1.5s) ease-out;
 }

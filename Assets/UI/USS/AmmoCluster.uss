@@ -8,7 +8,7 @@
     flex-direction: column;
     align-items: flex-end;
     width: 360px;
-    padding: var(--space-m, 12px) var(--hud-cluster-padding-h, 20px) 10px;
+    padding: var(--space-m, 12px) var(--hud-cluster-padding-h, 20px) var(--space-m, 12px);
     background-image: resource("Images/ui_panel");
     -unity-slice-top: 16;
     -unity-slice-bottom: 16;
@@ -53,7 +53,7 @@
 }
 
 #AmmoValue {
-    font-size: 84px;
+    font-size: var(--fs-value-xl, 44px);
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-ammo-normal, rgb(235, 224, 199));
     -unity-text-align: middle-right;
@@ -62,7 +62,7 @@
 }
 
 #AmmoReserve {
-    font-size: 30px;
+    font-size: var(--fs-xxl, 36px);
     -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
     color: var(--color-text-gold, rgba(191, 184, 158, 0.9));
     height: 34px;
@@ -77,7 +77,7 @@
     width: 100%;
     height: var(--track-heat-height, 8px);
     flex-shrink: 0;
-    margin-top: 6px;
+    margin-top: var(--space-xs, 4px);
     background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
     overflow: hidden;
 }
