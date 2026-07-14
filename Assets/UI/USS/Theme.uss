@@ -1,3 +1,4 @@
+* {
 /* ===== Theme.uss — Design Tokens (from UITheme.cs) ===== */
 
 /* === Status Colors === */
@@ -71,3 +72,4 @@
 /* === Animations === */
 --panel-in-duration: 0.22s;
 --panel-start-scale: 0.9;
+}
