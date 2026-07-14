@@ -20,6 +20,7 @@
     <ui:Style src="project://database/Assets/UI/USS/ThreatWidget.uss" />
     <ui:Style src="project://database/Assets/UI/USS/UpgradesWidget.uss" />
     <ui:Style src="project://database/Assets/UI/USS/SkillTreeWidget.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/HealthFlash.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -176,6 +177,9 @@
 
     <!-- Upgrades Widget (Phase 20) -->
     <ui:Label name="UpgradesWidget" text="" />
+
+    <!-- Health Flash (Phase 22) -->
+    <ui:VisualElement name="HealthFlash" />
 
     <!-- Skill Tree Widget (Phase 21) -->
     <ui:VisualElement name="SkillTreeWidget">

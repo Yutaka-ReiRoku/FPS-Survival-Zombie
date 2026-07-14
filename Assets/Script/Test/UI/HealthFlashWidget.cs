@@ -1,49 +1,38 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
-/// <summary>
-/// Full-screen edge-vignette flash on the unified HUD, replacing the Cowsins
-/// "HealthStatesEffect" image that lived on the separate PlayerUI canvas. Pulses a
-/// tinted vignette on damage (red), heal (green), coin pickup (gold) and xp gain
-/// (violet), then fades out. Reads CowsinsHUDAdapter only; uses unscaled time so the
-/// fade completes even if a pause/death freezes timeScale. Keeps its root active so
-/// the adapter subscriptions are never torn down.
-/// </summary>
 public class HealthFlashWidget : MonoBehaviour
 {
-    [Tooltip("White vignette sprite tinted per event (Cowsins HurtVignetteWhite).")]
     public Sprite vignetteSprite;
-    [Tooltip("Alpha units removed per second during fade (Cowsins fadeOutTime).")]
     public float fadeOutSpeed = 0.5f;
 
-    // Faithful to the Cowsins UIController colours.
     public Color damageColor = new Color(1f, 0.382f, 0.382f, 0.71f);
     public Color healColor = new Color(0.637f, 1f, 0.683f, 0.78f);
     public Color coinColor = new Color(1f, 0.946f, 0.382f, 0.851f);
     public Color xpColor = new Color(0.5f, 0.099f, 1f, 0.604f);
 
-    private Image _img;
+    private VisualElement _flash;
     private CowsinsHUDAdapter _adapter;
+    private IVisualElementScheduledItem _fadeSched;
     private float _lastHp = -1f;
     private int _lastCoins = -1;
     private float _lastXpFill = -1f;
     private int _lastLevel = -1;
 
-    private void Awake() { Build(); }
-
-    private void Build()
+    private void Awake()
     {
-        var go = new GameObject("Flash", typeof(RectTransform));
-        go.transform.SetParent(transform, false);
-        var rt = (RectTransform)go.transform;
-        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
-        rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
-        _img = go.AddComponent<Image>();
-        _img.sprite = vignetteSprite;
-        _img.type = Image.Type.Simple;
-        _img.raycastTarget = false;
-        var c = damageColor; c.a = 0f; _img.color = c;
+        var doc = GetComponent<UIDocument>();
+        if (doc != null)
+            _flash = doc.rootVisualElement.Q("HealthFlash");
+        if (_flash == null)
+        {
+            Debug.LogError("HealthFlashWidget: #HealthFlash not found in UIDocument");
+            enabled = false;
+            return;
+        }
+        if (vignetteSprite != null)
+            _flash.style.backgroundImage = new StyleBackground(vignetteSprite);
     }
 
     private void OnEnable() { StartCoroutine(Bind()); }
@@ -71,6 +60,8 @@ public class HealthFlashWidget : MonoBehaviour
             _adapter.OnCoinsChanged -= OnCoins;
             _adapter.OnXpChanged -= OnXp;
         }
+        _fadeSched?.Pause();
+        _fadeSched = null;
         StopAllCoroutines();
     }
 
@@ -97,18 +88,14 @@ public class HealthFlashWidget : MonoBehaviour
 
     private void Flash(Color color)
     {
-        if (_img == null) return;
-        _img.color = color; // includes the event's target alpha
-    }
+        if (_flash == null) return;
+        _fadeSched?.Pause();
+        _flash.style.unityBackgroundImageTintColor = color;
+        _flash.AddToClassList("flash");
 
-    private void Update()
-    {
-        if (_img == null) return;
-        var c = _img.color;
-        if (c.a > 0f)
+        _fadeSched = _flash.schedule.Execute(() =>
         {
-            c.a = Mathf.Max(0f, c.a - Time.unscaledDeltaTime * fadeOutSpeed);
-            _img.color = c;
-        }
+            _flash.RemoveFromClassList("flash");
+        }).StartingIn(32);
     }
 }
