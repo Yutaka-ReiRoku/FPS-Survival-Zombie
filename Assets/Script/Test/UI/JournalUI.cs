@@ -1,33 +1,39 @@
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 using cowsins;
+using Cursor = UnityEngine.Cursor;
 
 public class JournalUI : MonoBehaviour
 {
     public static JournalUI Instance;
 
-    public GameObject panel;
-
-    public TMP_Text title;
-
-    public TMP_Text content;
-
-    public Image image;
-
-    public AudioSource audioSource;
-
+    private UIDocument _doc;
+    private VisualElement _panel;
+    private Label _title;
+    private Label _content;
+    private VisualElement _illustration;
+    private Button _closeButton;
+    private AudioSource _audioSource;
     private PlayerControl _playerControl;
     private bool _open;
 
-    /// <summary>True while the journal panel is visible.</summary>
     public bool IsOpen => _open;
 
     void Awake()
     {
         Instance = this;
+        _doc = GetComponent<UIDocument>();
+        _audioSource = GetComponent<AudioSource>();
 
-        panel.SetActive(false);
+        var root = _doc.rootVisualElement;
+        _panel = root.Q("JournalUI");
+        _title = root.Q<Label>("JournalTitle");
+        _content = root.Q<Label>("JournalContent");
+        _illustration = root.Q("Illustration");
+        _closeButton = root.Q<Button>("CloseButton");
+
+        _closeButton.RegisterCallback<ClickEvent>(_ => Close());
+        _panel.style.display = DisplayStyle.None;
     }
 
     private void Start()
@@ -39,7 +45,6 @@ public class JournalUI : MonoBehaviour
 
     public void Show(JournalData journal)
     {
-        // Don't open the journal while the pause menu or skill tree is already open.
         bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
         bool skillTreeOpen = false;
         var skillTree = FindAnyObjectByType<SkillTreeWidget>();
@@ -47,18 +52,18 @@ public class JournalUI : MonoBehaviour
         if (pauseOpen || skillTreeOpen) return;
 
         _open = true;
-        panel.SetActive(true);
+        _panel.style.display = DisplayStyle.Flex;
+        _panel.AddToClassList("visible");
 
-        title.text = journal.title;
-        content.text = journal.content;
-
-        image.sprite = journal.image;
+        _title.text = journal.title;
+        _content.text = journal.content;
+        _illustration.style.backgroundImage = new StyleBackground(journal.image);
 
         if (journal.voiceLog != null)
         {
-            audioSource.Stop();
-            audioSource.clip = journal.voiceLog;
-            audioSource.Play();
+            _audioSource.Stop();
+            _audioSource.clip = journal.voiceLog;
+            _audioSource.Play();
         }
 
         Cursor.lockState = CursorLockMode.None;
@@ -66,26 +71,21 @@ public class JournalUI : MonoBehaviour
 
         Time.timeScale = 0;
 
-        // Strip control from the player so they can't shoot/look around while
-        // the journal is open (Time.timeScale=0 alone doesn't block input).
         if (_playerControl != null)
             _playerControl.LoseControl();
 
-        // Hide gameplay HUD while the journal is open.
-        var canvas = transform.parent.GetComponentInParent<Canvas>();
-        PauseManager.SetHUDVisible(canvas != null ? canvas.transform : transform.parent, false);
+        PauseManager.SetHUDVisible(transform, false);
     }
 
     public void Close()
     {
         if (!_open) return;
         _open = false;
-        panel.SetActive(false);
+        _panel.style.display = DisplayStyle.None;
+        _panel.RemoveFromClassList("visible");
 
-        audioSource.Stop();
+        _audioSource.Stop();
 
-        // Only restore time/cursor/control if neither the pause menu nor the
-        // skill tree is holding them, and the game isn't over.
         bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
         bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
         if (!pauseOpen && !gameOver)
@@ -98,9 +98,7 @@ public class JournalUI : MonoBehaviour
             if (_playerControl != null)
                 _playerControl.GrantControl();
 
-            // Restore gameplay HUD when no other overlay is holding it.
-            var canvas = transform.parent.GetComponentInParent<Canvas>();
-            PauseManager.SetHUDVisible(canvas != null ? canvas.transform : transform.parent, true);
+            PauseManager.SetHUDVisible(transform, true);
         }
     }
 }

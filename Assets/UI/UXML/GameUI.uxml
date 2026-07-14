@@ -23,6 +23,7 @@
     <ui:Style src="project://database/Assets/UI/USS/HealthFlash.uss" />
     <ui:Style src="project://database/Assets/UI/USS/LowHealthVignette.uss" />
     <ui:Style src="project://database/Assets/UI/USS/QuestTracker.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/JournalUI.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -194,6 +195,16 @@
         <ui:VisualElement name="SidePanel">
             <ui:Label name="SideHeader" text="SIDE QUESTS" />
             <ui:VisualElement name="SideLines" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Journal UI (Phase 25) -->
+    <ui:VisualElement name="JournalUI">
+        <ui:VisualElement name="Card" class="journal-card">
+            <ui:Label name="JournalTitle" class="journal-title" text="" />
+            <ui:VisualElement name="Illustration" class="journal-illustration" />
+            <ui:Label name="JournalContent" class="journal-content" text="" />
+            <ui:Button name="CloseButton" text="CLOSE" class="journal-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 

@@ -1,0 +1,110 @@
+/* ===== JournalUI.uss ===== */
+@import url("Shared.uss");
+
+/* === Overlay: full-screen dim === */
+#JournalUI {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(5, 8, 13, 0.88);
+}
+
+/* === Card container (sliced) === */
+.journal-card {
+    width: 900px;
+    height: 560px;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    background-image: resource("Images/ui_panel");
+    -unity-slice-left: 8;
+    -unity-slice-right: 8;
+    -unity-slice-top: 8;
+    -unity-slice-bottom: 8;
+    opacity: 0;
+    scale: var(--panel-start-scale);
+    transition: opacity var(--panel-in-duration) ease-out, scale var(--panel-in-duration) ease-out;
+}
+
+#JournalUI.visible .journal-card {
+    opacity: 1;
+    scale: 1;
+}
+
+/* === Title === */
+.journal-title {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 24px;
+    height: 72px;
+    font-size: 36px;
+    -unity-font: resource("Fonts/Outfit-SemiBold");
+    color: var(--color-text-gold);
+    -unity-text-align: middle-left;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+/* === Illustration area === */
+.journal-illustration {
+    position: absolute;
+    left: 290px;
+    top: 104px;
+    width: 320px;
+    height: 180px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* === Content text === */
+.journal-content {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 300px;
+    bottom: 80px;
+    font-size: 26px;
+    -unity-font: resource("Fonts/Outfit-SemiBold");
+    color: var(--color-text-primary);
+    -unity-text-align: upper-left;
+    white-space: normal;
+}
+
+/* === Close button (sliced) === */
+.journal-button {
+    position: absolute;
+    left: 330px;
+    bottom: 28px;
+    width: 240px;
+    height: 60px;
+    background-image: resource("Images/ui_button");
+    -unity-slice-left: 8;
+    -unity-slice-right: 8;
+    -unity-slice-top: 8;
+    -unity-slice-bottom: 8;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    font-size: 26px;
+    -unity-font: resource("Fonts/Outfit-SemiBold");
+    color: #05080DFF;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    transition: scale 0.1s ease-out;
+}
+
+.journal-button:hover {
+    scale: var(--hover-scale);
+}
+
+.journal-button:active {
+    scale: var(--press-scale);
+}
