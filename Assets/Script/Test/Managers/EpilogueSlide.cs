@@ -1,21 +1,8 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
-/// <summary>
-/// Full-screen epilogue slide shown after the ending cinematic: an optional
-/// illustration image above a body of text, faded in, held, then faded out.
-///
-/// The illustration is intentionally left unassigned by default — drag a
-/// Sprite onto <see cref="illustration"/> in the Inspector when one is ready.
-/// If left empty, the image element is simply invisible and only the text
-/// shows.
-///
-/// Exposes <see cref="Play"/> so an orchestrator (EndingSequenceManager) can
-/// run it as one step of the ending sequence. Does not self-trigger.
-/// </summary>
 public class EpilogueSlide : MonoBehaviour
 {
     [Header("Content")]
@@ -37,10 +24,11 @@ public class EpilogueSlide : MonoBehaviour
     public Color textColor = new Color(0.92f, 0.92f, 0.92f, 1f);
 
     private bool _played;
-    private CanvasGroup _group;
-    private GameObject _canvasGO;
+    private VisualElement _root;
+    private VisualElement _illustrationEl;
+    private Label _text;
+    private GameObject _docGO;
 
-    /// <summary>Plays the slide once, then invokes <paramref name="onComplete"/>.</summary>
     public void Play(Action onComplete = null)
     {
         if (_played) { onComplete?.Invoke(); return; }
@@ -62,7 +50,7 @@ public class EpilogueSlide : MonoBehaviour
         yield return Fade(1f, 0f, fadeOut);
 
         Time.timeScale = prevTimeScale > 0f ? prevTimeScale : 1f;
-        Destroy(_canvasGO);
+        Destroy(_docGO);
 
         onComplete?.Invoke();
     }
@@ -75,78 +63,76 @@ public class EpilogueSlide : MonoBehaviour
 
     private IEnumerator Fade(float from, float to, float duration)
     {
-        _group.alpha = from;
-        if (duration <= 0f) { _group.alpha = to; yield break; }
+        _root.style.opacity = from;
+        if (duration <= 0f) { _root.style.opacity = to; yield break; }
         float t = 0f;
         while (t < duration)
         {
             t += Time.unscaledDeltaTime;
-            _group.alpha = Mathf.Lerp(from, to, t / duration);
+            _root.style.opacity = Mathf.Lerp(from, to, t / duration);
             yield return null;
         }
-        _group.alpha = to;
+        _root.style.opacity = to;
     }
 
     private void Build()
     {
-        _canvasGO = new GameObject("EpilogueSlide_Canvas", typeof(Canvas), typeof(CanvasGroup));
-        _canvasGO.transform.SetParent(transform, false);
-        var canvas = _canvasGO.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 1500;
+        _docGO = new GameObject("EpilogueSlide_Doc", typeof(UIDocument));
+        _docGO.transform.SetParent(transform, false);
+        var doc = _docGO.GetComponent<UIDocument>();
+        doc.sortingOrder = 1500;
 
-        _group = _canvasGO.GetComponent<CanvasGroup>();
-        _group.alpha = 0f;
-        _group.blocksRaycasts = false;
-        _group.interactable = false;
+        _root = new VisualElement();
+        _root.name = "EpilogueRoot";
+        _root.style.position = Position.Absolute;
+        _root.style.left = 0;
+        _root.style.right = 0;
+        _root.style.top = 0;
+        _root.style.bottom = 0;
+        _root.style.opacity = 0f;
+        _root.pickingMode = PickingMode.Ignore;
 
-        // Background.
-        var bgGO = new GameObject("Background", typeof(RectTransform));
-        bgGO.transform.SetParent(_canvasGO.transform, false);
-        var bgRt = (RectTransform)bgGO.transform;
-        bgRt.anchorMin = Vector2.zero;
-        bgRt.anchorMax = Vector2.one;
-        bgRt.offsetMin = bgRt.offsetMax = Vector2.zero;
-        var bgImg = bgGO.AddComponent<Image>();
-        bgImg.color = backgroundColor;
-        bgImg.raycastTarget = false;
+        var bg = new VisualElement();
+        bg.name = "Background";
+        bg.style.position = Position.Absolute;
+        bg.style.left = 0;
+        bg.style.right = 0;
+        bg.style.top = 0;
+        bg.style.bottom = 0;
+        bg.style.backgroundColor = backgroundColor;
+        _root.Add(bg);
 
-        // Illustration (top half). Empty sprite renders invisible until assigned.
-        var imgGO = new GameObject("Illustration", typeof(RectTransform));
-        imgGO.transform.SetParent(_canvasGO.transform, false);
-        var imgRt = (RectTransform)imgGO.transform;
-        imgRt.anchorMin = new Vector2(0.5f, 0.52f);
-        imgRt.anchorMax = new Vector2(0.5f, 0.52f);
-        imgRt.pivot = new Vector2(0.5f, 0.5f);
-        imgRt.sizeDelta = new Vector2(720f, 420f);
-        imgRt.anchoredPosition = Vector2.zero;
-        var img = imgGO.AddComponent<Image>();
-        img.sprite = illustration;
-        img.preserveAspect = true;
-        img.color = illustration != null ? Color.white : new Color(1f, 1f, 1f, 0f);
-        img.raycastTarget = false;
+        var container = new VisualElement();
+        container.name = "Content";
+        container.style.position = Position.Absolute;
+        container.style.left = Length.Percent(50);
+        container.style.top = Length.Percent(50);
+        container.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
+        container.style.alignItems = Align.Center;
+        container.style.justifyContent = Justify.Center;
+        container.style.width = Length.Percent(80);
+        _root.Add(container);
 
-        // Body text (lower half).
-        var textGO = new GameObject("BodyText", typeof(RectTransform));
-        textGO.transform.SetParent(_canvasGO.transform, false);
-        var textRt = (RectTransform)textGO.transform;
-        textRt.anchorMin = new Vector2(0.5f, 0.5f);
-        textRt.anchorMax = new Vector2(0.5f, 0.5f);
-        textRt.pivot = new Vector2(0.5f, 0.5f);
-        textRt.sizeDelta = new Vector2(1400f, 260f);
-        textRt.anchoredPosition = new Vector2(0f, -220f);
-        var text = textGO.AddComponent<TextMeshProUGUI>();
-        text.text = bodyText;
-        text.fontSize = 34f;
-        text.alignment = TextAlignmentOptions.Center;
-        text.color = textColor;
-        text.raycastTarget = false;
-
-        var th = UITheme.Active;
-        if (th != null)
+        _illustrationEl = new VisualElement();
+        _illustrationEl.name = "Illustration";
+        _illustrationEl.style.width = 720;
+        _illustrationEl.style.height = 420;
+        _illustrationEl.style.marginBottom = 30;
+        if (illustration != null)
         {
-            if (th.bodyFont != null) text.font = th.bodyFont;
-            text.color = th.textPrimary;
+            _illustrationEl.style.backgroundImage = new StyleBackground(illustration);
+            _illustrationEl.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
         }
+        container.Add(_illustrationEl);
+
+        _text = new Label(bodyText);
+        _text.name = "BodyText";
+        _text.style.fontSize = 34;
+        _text.style.color = textColor;
+        _text.style.unityTextAlign = TextAnchor.MiddleCenter;
+        _text.style.whiteSpace = WhiteSpace.Normal;
+        container.Add(_text);
+
+        doc.rootVisualElement.Add(_root);
     }
 }

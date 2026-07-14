@@ -1,0 +1,26 @@
+/* CreditsSequence.uss — Runtime-loaded for end credits scroll */
+.credits-root {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.credits-header {
+    font-size: 32px;
+    -unity-font: resource("Fonts/ZacbelX-Bold");
+    color: rgb(217, 199, 115);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    width: 900px;
+}
+
+.credits-line {
+    font-size: 24px;
+    -unity-font: resource("Fonts/Outfit-SemiBold");
+    color: rgb(230, 230, 230);
+    -unity-text-align: middle-center;
+    width: 900px;
+}
