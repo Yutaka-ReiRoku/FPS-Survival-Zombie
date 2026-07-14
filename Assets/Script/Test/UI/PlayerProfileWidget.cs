@@ -8,19 +8,12 @@ public class PlayerProfileWidget : MonoBehaviour
     public float chipWidth = 280f;
     public float chipHeight = 48f;
     public float panelWidth = 460f;
-    public float panelHeight = 560f;
-
-    [Header("Position (anchored, relative to parent)")]
-    public Vector2 chipAnchoredPos = new Vector2(-20f, -20f);
-    public Vector2 chipPivot = new Vector2(1f, 1f);
-    public Vector2 chipAnchorMin = new Vector2(1f, 1f);
-    public Vector2 chipAnchorMax = new Vector2(1f, 1f);
 
     private static readonly Color ButtonColor = new Color(0.31f, 0.878f, 0.541f, 1f);
     private static readonly Color AccentColor = new Color(0.85f, 0.78f, 0.45f, 1f);
     private static readonly Color TextMuted = new Color(0.62f, 0.66f, 0.72f, 1f);
 
-    private GameObject _docGO;
+    private UIDocument _doc;
     private VisualElement _chip;
     private Label _chipUsername;
     private Label _chipStatus;
@@ -37,15 +30,44 @@ public class PlayerProfileWidget : MonoBehaviour
 
     private void Awake()
     {
-        BuildChip();
-        BuildPanel();
+        var go = new GameObject("PlayerProfile_Doc", typeof(UIDocument));
+        go.transform.SetParent(transform, false);
+        _doc = go.GetComponent<UIDocument>();
+        _doc.sortingOrder = 100;
+
+        var asset = Resources.Load<VisualTreeAsset>("PlayerProfileWidget");
+        if (asset == null) { enabled = false; return; }
+        asset.CloneTree(_doc.rootVisualElement);
+
+        var root = _doc.rootVisualElement;
+        _chip = root.Q("PlayerChip");
+        _chipUsername = root.Q<Label>("Username");
+        _chipStatus = root.Q<Label>("Status");
+        _chipAvatar = root.Q("Avatar");
+        _panel = root.Q("ProfilePanel");
+        _panelUsername = root.Q<Label>("PanelUsername");
+        _panelId = root.Q<Label>("PanelId");
+        _panelBestScore = root.Q<Label>("PanelBestScore");
+        _panelBestWave = root.Q<Label>("PanelBestWave");
+        _panelAchievements = root.Q<Label>("PanelAchievements");
+        _achievementList = root.Q("AchList");
+        _logoutButton = root.Q("LogoutButton");
+
+        if (_chip != null)
+        {
+            _chip.style.width = chipWidth;
+            _chip.style.height = chipHeight;
+            _chip.focusable = true;
+            _chip.RegisterCallback<ClickEvent>(_ => TogglePanel());
+        }
+        var closeBtn = root.Q("CloseButton");
+        if (closeBtn != null) closeBtn.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
+        if (_logoutButton != null) _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
+
         _panel.style.display = DisplayStyle.None;
     }
 
-    private void OnEnable()
-    {
-        StartCoroutine(Bind());
-    }
+    private void OnEnable() { StartCoroutine(Bind()); }
 
     private void OnDisable()
     {
@@ -81,135 +103,6 @@ public class PlayerProfileWidget : MonoBehaviour
         RefreshChip();
     }
 
-    private void MakeChipButton(VisualElement ve, System.Action onClick)
-    {
-        ve.focusable = true;
-        ve.RegisterCallback<ClickEvent>(_ => onClick());
-    }
-
-    private void BuildChip()
-    {
-        _docGO = new GameObject("PlayerProfile_Doc", typeof(UIDocument));
-        _docGO.transform.SetParent(transform, false);
-        var doc = _docGO.GetComponent<UIDocument>();
-        doc.sortingOrder = 100;
-
-        var root = new VisualElement();
-        root.name = "ProfileRoot";
-        root.AddToClassList("overlay");
-        root.pickingMode = PickingMode.Ignore;
-
-        _chip = new VisualElement();
-        _chip.name = "PlayerChip";
-        _chip.style.width = chipWidth;
-        _chip.style.height = chipHeight;
-        MakeChipButton(_chip, TogglePanel);
-        root.Add(_chip);
-
-        _chipAvatar = new VisualElement();
-        _chipAvatar.name = "Avatar";
-        _chip.Add(_chipAvatar);
-
-        var textCol = new VisualElement();
-        textCol.name = "TextCol";
-        _chip.Add(textCol);
-
-        _chipUsername = new Label("Not logged in");
-        _chipUsername.name = "Username";
-        textCol.Add(_chipUsername);
-
-        _chipStatus = new Label("Click to login");
-        _chipStatus.name = "Status";
-        textCol.Add(_chipStatus);
-
-        var sheet = Resources.Load<StyleSheet>("PlayerProfileWidget");
-        if (sheet != null) root.styleSheets.Add(sheet);
-
-        doc.rootVisualElement.Add(root);
-    }
-
-    private void AddField(string label, out Label valueOut, float labelSize, float valueSize)
-    {
-        var lbl = new Label(label);
-        lbl.AddToClassList("field-label");
-        _panel.Add(lbl);
-
-        var val = new Label("---");
-        val.style.fontSize = valueSize;
-        val.style.color = Color.white;
-        _panel.Add(val);
-        valueOut = val;
-    }
-
-    private VisualElement MakeDivider()
-    {
-        var div = new VisualElement();
-        div.AddToClassList("panel-divider");
-        return div;
-    }
-
-    private VisualElement MakeButton(string label)
-    {
-        var btn = new VisualElement();
-        btn.AddToClassList("profile-btn");
-        btn.focusable = true;
-
-        var lbl = new Label(label);
-        lbl.AddToClassList("btn-label");
-        btn.Add(lbl);
-        return btn;
-    }
-
-    private void BuildPanel()
-    {
-        _panel = new VisualElement();
-        _panel.name = "ProfilePanel";
-        _panel.style.width = panelWidth;
-
-        var headerRow = new VisualElement();
-        headerRow.AddToClassList("panel-header");
-        _panel.Add(headerRow);
-
-        var headerText = new Label("PLAYER PROFILE");
-        headerText.AddToClassList("panel-title");
-        headerRow.Add(headerText);
-
-        var closeBtn = MakeButton("X");
-        closeBtn.AddToClassList("profile-close-btn");
-        closeBtn.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
-        headerRow.Add(closeBtn);
-
-        _panel.Add(MakeDivider());
-
-        AddField("USERNAME", out _panelUsername, 12, 18);
-        AddField("PLAYFAB ID", out _panelId, 12, 14);
-
-        _panel.Add(MakeDivider());
-
-        AddField("BEST SCORE", out _panelBestScore, 12, 24);
-        AddField("BEST WAVE", out _panelBestWave, 12, 24);
-
-        _panel.Add(MakeDivider());
-
-        AddField("ACHIEVEMENTS", out _panelAchievements, 12, 16);
-
-        _achievementList = new VisualElement();
-        _achievementList.name = "AchList";
-        _achievementList.style.minHeight = 120;
-        _achievementList.style.flexGrow = 1;
-        _panel.Add(_achievementList);
-
-        var spacer = new VisualElement();
-        spacer.AddToClassList("panel-spacer");
-        _panel.Add(spacer);
-
-        _logoutButton = MakeButton("LOGOUT");
-        _logoutButton.style.marginTop = 8;
-        _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
-        _logoutButton.style.display = DisplayStyle.None;
-        _panel.Add(_logoutButton);
-    }
-
     private void TogglePanel()
     {
         var pm = PlayFabManager.Instance;
@@ -236,8 +129,7 @@ public class PlayerProfileWidget : MonoBehaviour
         if (visible) RefreshPanel();
 
         var mainMenu = FindMainMenuContent();
-        if (mainMenu != null)
-            mainMenu.SetActive(!visible);
+        if (mainMenu != null) mainMenu.SetActive(!visible);
     }
 
     private GameObject FindMainMenuContent()
@@ -246,8 +138,7 @@ public class PlayerProfileWidget : MonoBehaviour
         if (parent != null)
         {
             var contentTr = parent.Find("Content");
-            if (contentTr != null)
-                return contentTr.gameObject;
+            if (contentTr != null) return contentTr.gameObject;
         }
         return null;
     }
@@ -255,8 +146,7 @@ public class PlayerProfileWidget : MonoBehaviour
     private PlayFabLoginUI FindLoginUI()
     {
         var parent = transform.parent;
-        if (parent != null)
-            return parent.GetComponentInChildren<PlayFabLoginUI>(true);
+        if (parent != null) return parent.GetComponentInChildren<PlayFabLoginUI>(true);
         return null;
     }
 
@@ -277,17 +167,15 @@ public class PlayerProfileWidget : MonoBehaviour
         var pm = PlayFabManager.Instance;
         if (pm != null && pm.IsLoggedIn)
         {
-            _chipUsername.text = pm.Username ?? "Player";
-            _chipStatus.text = "Online";
-            _chipStatus.style.color = ButtonColor;
-            _chipAvatar.style.backgroundColor = ButtonColor;
+            if (_chipUsername != null) _chipUsername.text = pm.Username ?? "Player";
+            if (_chipStatus != null) { _chipStatus.text = "Online"; _chipStatus.style.color = ButtonColor; }
+            if (_chipAvatar != null) _chipAvatar.style.backgroundColor = ButtonColor;
         }
         else
         {
-            _chipUsername.text = "Not logged in";
-            _chipStatus.text = "Click to login";
-            _chipStatus.style.color = TextMuted;
-            _chipAvatar.style.backgroundColor = TextMuted;
+            if (_chipUsername != null) _chipUsername.text = "Not logged in";
+            if (_chipStatus != null) { _chipStatus.text = "Click to login"; _chipStatus.style.color = TextMuted; }
+            if (_chipAvatar != null) _chipAvatar.style.backgroundColor = TextMuted;
         }
     }
 
@@ -296,20 +184,23 @@ public class PlayerProfileWidget : MonoBehaviour
         var pm = PlayFabManager.Instance;
         bool loggedIn = pm != null && pm.IsLoggedIn;
 
-        _panelUsername.text = loggedIn ? (pm.Username ?? "Player") : "Not logged in";
-        _panelUsername.style.color = loggedIn ? Color.white : TextMuted;
-        _panelId.text = loggedIn ? (pm.PlayFabId ?? "---") : "---";
+        if (_panelUsername != null)
+        {
+            _panelUsername.text = loggedIn ? (pm.Username ?? "Player") : "Not logged in";
+            _panelUsername.style.color = loggedIn ? Color.white : TextMuted;
+        }
+        if (_panelId != null) _panelId.text = loggedIn ? (pm.PlayFabId ?? "---") : "---";
 
         int bestScore = PlayerPrefs.GetInt("BestScore", 0);
         int bestWave = PlayerPrefs.GetInt("BestWave", 0);
-        _panelBestScore.text = bestScore.ToString();
-        _panelBestWave.text = bestWave.ToString();
+        if (_panelBestScore != null) _panelBestScore.text = bestScore.ToString();
+        if (_panelBestWave != null) _panelBestWave.text = bestWave.ToString();
 
-        _logoutButton.style.display = loggedIn ? DisplayStyle.Flex : DisplayStyle.None;
+        if (_logoutButton != null) _logoutButton.style.display = loggedIn ? DisplayStyle.Flex : DisplayStyle.None;
 
         int unlocked = 0;
         int total = 0;
-        _achievementList.Clear();
+        _achievementList?.Clear();
 
         var am = AchievementManager.Instance;
         if (am != null && am.achievements != null)
@@ -322,30 +213,26 @@ public class PlayerProfileWidget : MonoBehaviour
                 if (isUnlocked) unlocked++;
 
                 string status = isUnlocked ? "[v]" : "[ ]";
-                string progress = ach.isProgression
-                    ? $" ({am.GetProgress(ach)}/{ach.targetValue})"
-                    : "";
-                string line = $"{status} {ach.title}{progress}";
+                string progress = ach.isProgression ? $" ({am.GetProgress(ach)}/{ach.targetValue})" : "";
                 Color color = isUnlocked ? ButtonColor : TextMuted;
 
-                var lbl = new Label(line);
+                var lbl = new Label($"{status} {ach.title}{progress}");
                 lbl.style.fontSize = 13;
                 lbl.style.color = color;
-                _achievementList.Add(lbl);
+                _achievementList?.Add(lbl);
             }
         }
 
-        _panelAchievements.text = $"{unlocked} / {total} unlocked";
-        _panelAchievements.style.color = unlocked > 0 ? AccentColor : TextMuted;
+        if (_panelAchievements != null)
+        {
+            _panelAchievements.text = $"{unlocked} / {total} unlocked";
+            _panelAchievements.style.color = unlocked > 0 ? AccentColor : TextMuted;
+        }
     }
 
     private void OnDestroy()
     {
-        if (_docGO != null)
-        {
-            if (Application.isPlaying) Destroy(_docGO);
-            else DestroyImmediate(_docGO);
-            _docGO = null;
-        }
+        if (_doc != null && _doc.gameObject != null)
+            Destroy(_doc.gameObject);
     }
 }

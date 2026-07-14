@@ -6,13 +6,12 @@ public class PlayFabLoginUI : MonoBehaviour
 {
     [Header("Panel Size (px @1920x1080)")]
     public float panelWidth = 420f;
-    public float panelHeight = 520f;
 
     [Header("Main Menu (optional — auto-detected if null)")]
     public GameObject mainMenuContent;
     public GameObject profileWidget;
 
-    private VisualElement _root;
+    private UIDocument _doc;
     private VisualElement _panel;
     private TextField _usernameInput;
     private TextField _passwordInput;
@@ -24,7 +23,6 @@ public class PlayFabLoginUI : MonoBehaviour
     private VisualElement _toggleButton;
     private Label _toggleButtonLabel;
     private VisualElement _logoutButton;
-    private GameObject _docGO;
 
     private bool _isRegisterMode;
     private bool _isBusy;
@@ -34,7 +32,39 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void Awake()
     {
-        Build();
+        var go = new GameObject("PlayFabLogin_Doc", typeof(UIDocument));
+        go.transform.SetParent(transform, false);
+        _doc = go.GetComponent<UIDocument>();
+        _doc.sortingOrder = 100;
+
+        var asset = Resources.Load<VisualTreeAsset>("PlayFabLogin");
+        if (asset == null) { enabled = false; return; }
+        asset.CloneTree(_doc.rootVisualElement);
+
+        var root = _doc.rootVisualElement;
+        _panel = root.Q("LoginPanel");
+        _panel.style.width = panelWidth;
+
+        _titleText = root.Q<Label>("LoginTitle");
+        _statusText = root.Q<Label>("LoginStatus");
+        _usernameInput = root.Q<TextField>("UsernameInput");
+        _passwordInput = root.Q<TextField>("PasswordInput");
+
+        _actionButton = root.Q("ActionButton");
+        _actionButton.focusable = true;
+        _actionButton.RegisterCallback<ClickEvent>(_ => OnActionButtonClicked());
+        _actionButtonLabel = _actionButton.Q<Label>("ActionLabel");
+
+        _toggleText = root.Q<Label>("ToggleText");
+        _toggleButton = root.Q("ToggleButton");
+        _toggleButton.focusable = true;
+        _toggleButton.RegisterCallback<ClickEvent>(_ => ToggleMode());
+        _toggleButtonLabel = _toggleButton.Q<Label>("ToggleBtnLabel");
+
+        _logoutButton = root.Q("LogoutButton");
+        _logoutButton.focusable = true;
+        _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
+        _logoutButton.style.display = DisplayStyle.None;
     }
 
     private void OnEnable()
@@ -81,99 +111,6 @@ public class PlayFabLoginUI : MonoBehaviour
         }
     }
 
-    private void Build()
-    {
-        _docGO = new GameObject("PlayFabLogin_Doc", typeof(UIDocument));
-        _docGO.transform.SetParent(transform, false);
-        var doc = _docGO.GetComponent<UIDocument>();
-        doc.sortingOrder = 100;
-
-        _root = new VisualElement();
-        _root.name = "PlayFabLoginRoot";
-        _root.AddToClassList("overlay");
-
-        _panel = new VisualElement();
-        _panel.name = "LoginPanel";
-        _panel.style.width = panelWidth;
-        _root.Add(_panel);
-
-        _titleText = new Label("LOGIN");
-        _titleText.AddToClassList("login-title");
-        _panel.Add(_titleText);
-
-        _statusText = new Label("");
-        _statusText.AddToClassList("login-status");
-        _panel.Add(_statusText);
-
-        AddFieldRow("UsernameLabel", "Username");
-        _usernameInput = new TextField();
-        _usernameInput.name = "UsernameInput";
-        _usernameInput.AddToClassList("login-input");
-        _usernameInput.style.marginBottom = 12;
-        _panel.Add(_usernameInput);
-
-        AddFieldRow("PasswordLabel", "Password");
-        _passwordInput = new TextField();
-        _passwordInput.name = "PasswordInput";
-        _passwordInput.isPasswordField = true;
-        _passwordInput.AddToClassList("login-input");
-        _passwordInput.style.marginBottom = 16;
-        _panel.Add(_passwordInput);
-
-        _actionButton = new VisualElement();
-        _actionButton.name = "ActionButton";
-        _actionButton.AddToClassList("login-action-btn");
-        _actionButton.focusable = true;
-        _actionButton.RegisterCallback<ClickEvent>(_ => OnActionButtonClicked());
-
-        var actionLabel = new Label("LOGIN");
-        actionLabel.AddToClassList("btn-label");
-        _actionButton.Add(actionLabel);
-        _panel.Add(_actionButton);
-
-        var toggleRow = new VisualElement();
-        toggleRow.name = "ToggleRow";
-        _panel.Add(toggleRow);
-
-        _toggleText = new Label("Don't have an account? Register");
-        _toggleText.AddToClassList("toggle-label");
-        toggleRow.Add(_toggleText);
-
-        _toggleButton = new VisualElement();
-        _toggleButton.name = "ToggleButton";
-        _toggleButton.AddToClassList("login-toggle-btn");
-        _toggleButton.focusable = true;
-        _toggleButton.RegisterCallback<ClickEvent>(_ => ToggleMode());
-        var toggleBtnLabel = new Label("Register");
-        toggleBtnLabel.AddToClassList("btn-label");
-        _toggleButton.Add(toggleBtnLabel);
-        toggleRow.Add(_toggleButton);
-
-        _logoutButton = new VisualElement();
-        _logoutButton.name = "LogoutButton";
-        _logoutButton.AddToClassList("login-logout-btn");
-        _logoutButton.focusable = true;
-        _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
-        _logoutButton.style.display = DisplayStyle.None;
-        var logoutLabel = new Label("LOGOUT");
-        logoutLabel.AddToClassList("btn-label");
-        _logoutButton.Add(logoutLabel);
-        _panel.Add(_logoutButton);
-
-        var sheet = Resources.Load<StyleSheet>("PlayFabLogin");
-        if (sheet != null) _root.styleSheets.Add(sheet);
-
-        doc.rootVisualElement.Add(_root);
-    }
-
-    private void AddFieldRow(string name, string label)
-    {
-        var lbl = new Label(label);
-        lbl.name = name;
-        lbl.AddToClassList("field-label");
-        _panel.Add(lbl);
-    }
-
     private IEnumerator BindAndShow()
     {
         float timeout = 10f;
@@ -218,20 +155,16 @@ public class PlayFabLoginUI : MonoBehaviour
     {
         if (_isRegisterMode)
         {
-            _titleText.text = "REGISTER";
-            _actionButtonLabel = _actionButton.Q<Label>();
+            if (_titleText != null) _titleText.text = "REGISTER";
             if (_actionButtonLabel != null) _actionButtonLabel.text = "CREATE ACCOUNT";
-            _toggleText.text = "Already have an account?";
-            _toggleButtonLabel = _toggleButton.Q<Label>();
+            if (_toggleText != null) _toggleText.text = "Already have an account?";
             if (_toggleButtonLabel != null) _toggleButtonLabel.text = "Login";
         }
         else
         {
-            _titleText.text = "LOGIN";
-            _actionButtonLabel = _actionButton.Q<Label>();
+            if (_titleText != null) _titleText.text = "LOGIN";
             if (_actionButtonLabel != null) _actionButtonLabel.text = "LOGIN";
-            _toggleText.text = "Don't have an account?";
-            _toggleButtonLabel = _toggleButton.Q<Label>();
+            if (_toggleText != null) _toggleText.text = "Don't have an account?";
             if (_toggleButtonLabel != null) _toggleButtonLabel.text = "Register";
         }
     }
@@ -240,8 +173,8 @@ public class PlayFabLoginUI : MonoBehaviour
     {
         if (_isBusy) return;
 
-        string username = _usernameInput.text.Trim();
-        string password = _passwordInput.text;
+        string username = _usernameInput?.text.Trim() ?? "";
+        string password = _passwordInput?.text ?? "";
 
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
@@ -305,7 +238,7 @@ public class PlayFabLoginUI : MonoBehaviour
         _isBusy = false;
         if (_usernameInput != null) _usernameInput.value = "";
         if (_passwordInput != null) _passwordInput.value = "";
-        _actionButton.SetEnabled(true);
+        _actionButton?.SetEnabled(true);
         _logoutButton.style.display = DisplayStyle.None;
         HideMainMenu();
         _panel.style.display = DisplayStyle.Flex;
@@ -313,10 +246,7 @@ public class PlayFabLoginUI : MonoBehaviour
         ShowStatus("Logged out. Please log in again.", new Color(0.62f, 0.66f, 0.72f, 1f));
     }
 
-    public void ShowLoginPanel()
-    {
-        HandleLogout();
-    }
+    public void ShowLoginPanel() { HandleLogout(); }
 
     private void HandleLoginSuccess(string username)
     {
@@ -350,16 +280,12 @@ public class PlayFabLoginUI : MonoBehaviour
     private void SetBusy(bool busy)
     {
         _isBusy = busy;
-        _actionButton.SetEnabled(!busy);
+        _actionButton?.SetEnabled(!busy);
     }
 
     private void OnDestroy()
     {
-        if (_docGO != null)
-        {
-            if (Application.isPlaying) Destroy(_docGO);
-            else DestroyImmediate(_docGO);
-            _docGO = null;
-        }
+        if (_doc != null && _doc.gameObject != null)
+            Destroy(_doc.gameObject);
     }
 }

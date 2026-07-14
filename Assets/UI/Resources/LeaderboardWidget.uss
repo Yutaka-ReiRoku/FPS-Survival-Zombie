@@ -58,6 +58,7 @@
     top: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.8);
+    transition: opacity var(--transition-medium, 0.2s) ease-out;
 }
 
 /* --- Panel --- */
@@ -72,6 +73,7 @@
     padding-right: var(--space-xxl, 24px);
     padding-top: var(--space-xxl, 24px);
     padding-bottom: var(--space-xxl, 24px);
+    transition: opacity var(--transition-medium, 0.2s) ease-out;
 }
 
 #LeaderboardPanel .panel-header {

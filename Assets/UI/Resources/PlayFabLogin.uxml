@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/USS/Theme.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shared.uss" />
+    <ui:Style src="project://database/Assets/UI/Resources/PlayFabLogin.uss" />
+
+    <ui:VisualElement name="PlayFabLoginRoot" class="overlay">
+        <ui:VisualElement name="LoginPanel" class="login-panel">
+            <ui:Label name="LoginTitle" class="login-title" text="LOGIN" />
+            <ui:Label name="LoginStatus" class="login-status" text="" />
+            <ui:Label name="UsernameLabel" class="field-label" text="Username" />
+            <ui:TextField name="UsernameInput" class="login-input" style="margin-bottom: 12px;" />
+            <ui:Label name="PasswordLabel" class="field-label" text="Password" />
+            <ui:TextField name="PasswordInput" class="login-input" password="true" style="margin-bottom: 16px;" />
+            <ui:VisualElement name="ActionButton" class="login-action-btn">
+                <ui:Label name="ActionLabel" class="btn-label" text="LOGIN" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ToggleRow" class="toggle-row">
+                <ui:Label name="ToggleText" class="toggle-label" text="Don't have an account?" />
+                <ui:VisualElement name="ToggleButton" class="login-toggle-btn">
+                    <ui:Label name="ToggleBtnLabel" class="btn-label" text="Register" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="LogoutButton" class="login-logout-btn" style="display: none;">
+                <ui:Label name="LogoutLabel" class="btn-label" text="LOGOUT" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
