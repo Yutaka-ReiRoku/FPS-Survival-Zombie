@@ -131,10 +131,10 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 5
-  m_Acceleration: 20
+  m_Speed: 6.5
+  m_Acceleration: 25
   avoidancePriority: 8
-  m_AngularSpeed: 300
+  m_AngularSpeed: 320
   m_StoppingDistance: 0.75
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
@@ -276,11 +276,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WitchAI
   target: {fileID: 0}
-  maxHealth: 35
+  maxHealth: 60
   currentHealth: 0
-  runSpeed: 5
+  runSpeed: 6.5
   rotationSpeed: 10
-  provokeRadius: 12
+  provokeRadius: 8
   loseSightDistance: 20
   requireLineOfSight: 1
   sightObstructionMask:
@@ -288,20 +288,32 @@ MonoBehaviour:
     m_Bits: 4294967295
   sightEyeHeight: 1.5
   attackRange: 1.5
-  attackCooldown: 1
-  attackDamage: 40
-  damageApplyDelay: 0.35
-  screamDuration: 1.2
+  attackCooldown: 2.5
+  attackDamage: 30
+  damageApplyDelay: 1
+  screamDuration: 3
   stuckTimeThreshold: 3
   stuckMoveThreshold: 1
   stuckRepathRadius: 5
   playerMovedRepathThreshold: 1
   maxRepathInterval: 0.1
+  animSpeedDamping: 0.08
+  scaleAnimBySpeed: 1
+  chaseAnimSpeedMultiplier: 1.15
+  stopDecelTime: 0.25
   cryClip: {fileID: 8300000, guid: 39d3568eb60d451488c0a5d6015dcebf, type: 3}
   screamClip: {fileID: 8300000, guid: f3c755004c4eced4aa8a2184e1d229ca, type: 3}
   attackClip: {fileID: 8300000, guid: d7b67ffbf5beede4ea173a751863bb63, type: 3}
   deathClip: {fileID: 8300000, guid: 169885fb3c7ac7c4f9a744708f472eff, type: 3}
-  lootTable: []
+  lootTable:
+  - prefab: {fileID: 7403018159610325256, guid: 8eb2324d906ba4b479b12c9936d11340, type: 3}
+    dropChance: 100
+    minQuantity: 3
+    maxQuantity: 6
+  - prefab: {fileID: 3821068731288931261, guid: 5144d72f9767e2f4aacd4ed8fdf87ad0, type: 3}
+    dropChance: 100
+    minQuantity: 2
+    maxQuantity: 4
   dropPrefab: {fileID: 0}
   dropChance: 100
   dropHeightOffset: 1.5
@@ -321,8 +333,8 @@ MonoBehaviour:
     xpColor: {r: 0.7, g: 0.25, b: 1, a: 1}
     defaultColor: {r: 1, g: 0.7, b: 0.4, a: 1}
   questTriggerOnDeath: {fileID: 0}
-  experienceReward: 80
-  coinReward: 30
+  experienceReward: 100
+  coinReward: 40
   cleanupDelay: 6
   forceDetectPlayer: 0
 --- !u!114 &8801329785024307589
