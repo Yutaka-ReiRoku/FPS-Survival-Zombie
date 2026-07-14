@@ -32,8 +32,10 @@ public class JournalUI : MonoBehaviour
         _illustration = root.Q("Illustration");
         _closeButton = root.Q<Button>("CloseButton");
 
-        _closeButton.RegisterCallback<ClickEvent>(_ => Close());
-        _panel.style.display = DisplayStyle.None;
+        if (_closeButton != null)
+            _closeButton.RegisterCallback<ClickEvent>(_ => Close());
+        if (_panel != null)
+            _panel.style.display = DisplayStyle.None;
     }
 
     private void Start()

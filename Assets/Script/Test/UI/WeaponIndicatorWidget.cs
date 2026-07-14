@@ -14,8 +14,10 @@ public class WeaponIndicatorWidget : MonoBehaviour
     private void Awake()
     {
         var doc = GetComponent<UIDocument>();
+        if (doc == null) { enabled = false; return; }
         var root = doc.rootVisualElement;
         _root = root.Q("WeaponIndicator");
+        if (_root == null) { enabled = false; return; }
         _weaponName = _root.Q<Label>("WeaponName");
         _weaponIcon = _root.Q("WeaponIcon");
     }

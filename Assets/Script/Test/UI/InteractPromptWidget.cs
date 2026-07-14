@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,7 +11,6 @@ public class InteractPromptWidget : MonoBehaviour
     private VisualElement _progressBar;
     private VisualElement _progressFill;
     private float _forbidTimer;
-    private bool _bound;
 
     private static readonly Color PanelColor = new(0.137f, 0.165f, 0.2f, 0.94f);
     private static readonly Color ForbiddenColor = new(0.66f, 0.09f, 0.13f, 0.95f);
@@ -23,7 +23,7 @@ public class InteractPromptWidget : MonoBehaviour
         if (_root == null) return;
 
         Build();
-        TryBind();
+        StartCoroutine(BindDeferred());
     }
 
     private void Build()
@@ -48,12 +48,10 @@ public class InteractPromptWidget : MonoBehaviour
         _progressBar.Add(_progressFill);
     }
 
-    private void TryBind()
+    private IEnumerator BindDeferred()
     {
+        while (CowsinsHUDAdapter.Instance == null) yield return null;
         _adapter = CowsinsHUDAdapter.Instance;
-        if (_adapter == null) return;
-
-        _bound = true;
         _adapter.OnInteractPrompt += HandlePrompt;
         _adapter.OnInteractForbidden += HandleForbidden;
         _adapter.OnInteractProgress += HandleProgress;
@@ -61,19 +59,24 @@ public class InteractPromptWidget : MonoBehaviour
 
     private void OnDisable()
     {
-        var a = _adapter ?? CowsinsHUDAdapter.Instance;
-        if (a != null && _bound)
+        if (_adapter != null)
         {
-            a.OnInteractPrompt -= HandlePrompt;
-            a.OnInteractForbidden -= HandleForbidden;
-            a.OnInteractProgress -= HandleProgress;
+            _adapter.OnInteractPrompt -= HandlePrompt;
+            _adapter.OnInteractForbidden -= HandleForbidden;
+            _adapter.OnInteractProgress -= HandleProgress;
         }
         _adapter = null;
-        _bound = false;
+        StopAllCoroutines();
+    }
+
+    private bool IsReady()
+    {
+        return _root != null && _label != null && _panel != null && _progressBar != null && _progressFill != null;
     }
 
     private void HandlePrompt(bool visible, string text)
     {
+        if (!IsReady()) return;
         if (visible)
         {
             _label.text = text;
@@ -90,6 +93,7 @@ public class InteractPromptWidget : MonoBehaviour
 
     private void HandleForbidden()
     {
+        if (!IsReady()) return;
         _label.text = "Cannot interact";
         _label.AddToClassList("interact-label--forbidden");
         _panel.style.backgroundColor = ForbiddenColor;
@@ -100,6 +104,7 @@ public class InteractPromptWidget : MonoBehaviour
 
     private void HandleProgress(float v)
     {
+        if (!IsReady()) return;
         if (v > 0f && _root.style.display == DisplayStyle.None)
             _root.style.display = DisplayStyle.Flex;
         SetProgress(v);
@@ -114,22 +119,10 @@ public class InteractPromptWidget : MonoBehaviour
 
     private void Update()
     {
-        if (!_bound)
-        {
-            _adapter = CowsinsHUDAdapter.Instance;
-            if (_adapter != null)
-            {
-                _bound = true;
-                _adapter.OnInteractPrompt += HandlePrompt;
-                _adapter.OnInteractForbidden += HandleForbidden;
-                _adapter.OnInteractProgress += HandleProgress;
-            }
-        }
-
         if (_forbidTimer > 0f)
         {
             _forbidTimer -= Time.unscaledDeltaTime;
-            if (_forbidTimer <= 0f)
+            if (_forbidTimer <= 0f && IsReady())
             {
                 _label.RemoveFromClassList("interact-label--forbidden");
                 _panel.style.backgroundColor = PanelColor;

@@ -20,8 +20,10 @@ public class WeaponInventoryWidget : MonoBehaviour
         var th = UITheme.Active;
         if (th != null) { _slotBg = th.surfaceTop; _selected = th.accent; }
         var doc = GetComponent<UIDocument>();
+        if (doc == null) { enabled = false; return; }
         var root = doc.rootVisualElement;
         _row = root.Q("WeaponInventoryCluster");
+        if (_row == null) { enabled = false; return; }
     }
 
     private void OnEnable() { StartCoroutine(Bind()); }

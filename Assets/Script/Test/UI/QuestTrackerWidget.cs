@@ -33,6 +33,8 @@ public class QuestTrackerWidget : MonoBehaviour
         _sidePanel = root.Q("SidePanel");
         _sideHeader = root.Q<Label>("SideHeader");
         _sideLinesContainer = root.Q("SideLines");
+        if (_chapter == null || _title == null || _objective == null || _sideLinesContainer == null)
+            enabled = false;
     }
 
     private void OnEnable()
@@ -94,6 +96,7 @@ public class QuestTrackerWidget : MonoBehaviour
 
     private void UpdateDisplay()
     {
+        if (_chapter == null || _title == null || _objective == null) return;
         var sm = StoryManager.Instance;
         if (sm == null)
         {
@@ -135,6 +138,7 @@ public class QuestTrackerWidget : MonoBehaviour
 
     private void RebuildSideBlock()
     {
+        if (_sideLinesContainer == null) return;
         _sideLinesContainer.Clear();
         _sideLines.Clear();
 

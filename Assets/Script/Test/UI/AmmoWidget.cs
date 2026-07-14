@@ -25,7 +25,9 @@ public class AmmoWidget : MonoBehaviour
     private void Awake()
     {
         var doc = GetComponent<UIDocument>();
+        if (doc == null) { enabled = false; return; }
         _root = doc.rootVisualElement.Q("AmmoCluster");
+        if (_root == null) { enabled = false; return; }
         _ammoValue = _root.Q<Label>("AmmoValue");
         _ammoReserve = _root.Q<Label>("AmmoReserve");
         _heatBarTrack = _root.Q("HeatBarTrack");
