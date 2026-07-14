@@ -1,48 +1,26 @@
-/* ===== Shared.uss — UI Theme Variables ===== */
-/* Values extracted from UITheme.asset + scene inspection */
+/* ===== Shared.uss — Shared Utility Classes ===== */
+/* Theme variables moved to Theme.uss */
+@import url("Theme.uss");
 
-/* === Colors (from UITheme.asset) === */
---color-surface-top: rgba(31, 38, 46, 1);
---color-surface-bottom: rgba(19, 23, 28, 1);
---color-card-top: rgba(31, 38, 46, 1);
---color-card-bottom: rgba(19, 23, 28, 1);
---color-scrim-top: rgba(10, 13, 18, 0.9);
---color-scrim-bottom: rgba(0, 0, 0, 0.93);
---color-panel-bg: rgba(14, 17, 21, 0.92);
+/* === Button Motion (replaces UIButtonMotion.cs) === */
+.game-button {
+    cursor: pointer;
+    transition: scale 0.08s;
+}
+.game-button:hover {
+    scale: var(--hover-scale, 1.06);
+}
+.game-button:active {
+    scale: var(--press-scale, 0.95);
+}
 
---color-accent-red: rgb(229, 72, 60);
---color-accent-gold-dark: rgb(217, 199, 115);
---color-accent-gold-light: rgb(245, 225, 150);
-
---color-text-primary: rgba(245, 245, 245, 1);
---color-text-muted: rgba(158, 168, 184, 1);
---color-text-gold: rgb(217, 199, 115);
-
---color-shadow: rgba(0, 0, 0, 0.6);
-
---color-title-top: rgb(229, 72, 60);
---color-title-bottom: rgb(122, 15, 18);
-
-/* === Typography === */
---font-display: resource("Fonts/Anton");
---font-body: resource("Fonts/Outfit-SemiBold");
-
-/* === Spacing === */
---space-xs: 4px;
---space-s: 8px;
---space-m: 16px;
---space-l: 24px;
---space-xl: 40px;
-
-/* === Border Radius === */
---radius-s: 8px;
---radius-m: 16px;
---radius-l: 22px;
-
-/* === Button Motion === */
---hover-scale: 1.06;
---press-scale: 0.95;
-
-/* === Animations === */
---panel-in-duration: 0.22s;
---panel-start-scale: 0.9;
+/* === Panel Transition (replaces UIPanelTransition.cs) === */
+.panel-card {
+    opacity: 0;
+    scale: var(--panel-start-scale, 0.9);
+    transition: opacity var(--panel-in-duration, 0.22s), scale var(--panel-in-duration, 0.22s);
+}
+.panel-card.visible {
+    opacity: 1;
+    scale: 1;
+}

@@ -19,7 +19,7 @@
 #AmmoLabel {
     font-size: 18px;
     -unity-font: resource("Fonts/Outfit-SemiBold");
-    color: rgba(204, 191, 153, 0.85);
+    color: var(--color-text-gold, rgba(204, 191, 153, 0.85));
     height: 24px;
     flex-shrink: 0;
     -unity-text-align: middle-right;
@@ -41,7 +41,7 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(to bottom, rgb(235, 224, 199), rgb(217, 199, 115));
+    background-image: linear-gradient(to bottom, var(--color-ammo-normal, rgb(235, 224, 199)), var(--color-health-full, rgb(217, 199, 115)));
 }
 
 #AmmoPunchRoot {
@@ -55,7 +55,7 @@
 #AmmoValue {
     font-size: 84px;
     -unity-font: resource("Fonts/Outfit-SemiBold");
-    color: rgb(235, 224, 199);
+    color: var(--color-ammo-normal, rgb(235, 224, 199));
     -unity-text-align: middle-right;
     flex-grow: 0;
     height: auto;
@@ -64,7 +64,7 @@
 #AmmoReserve {
     font-size: 30px;
     -unity-font: resource("Fonts/Outfit-SemiBold");
-    color: rgba(191, 184, 158, 0.9);
+    color: var(--color-text-gold, rgba(191, 184, 158, 0.9));
     height: 34px;
     flex-shrink: 0;
     -unity-text-align: middle-right;
@@ -78,7 +78,7 @@
     height: 8px;
     flex-shrink: 0;
     margin-top: 6px;
-    background-color: rgba(36, 31, 31, 0.9);
+    background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
     overflow: hidden;
 }
 
@@ -88,5 +88,5 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgb(217, 199, 115);
+    background-color: var(--color-health-full, rgb(217, 199, 115));
 }

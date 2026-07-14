@@ -17,7 +17,7 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(20, 24, 30, 0.85);
+    background-color: var(--color-card-bottom, rgba(20, 24, 30, 0.85));
 }
 
 #StaminaFill {
@@ -26,5 +26,5 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgb(79, 224, 138);
+    background-color: var(--color-stamina, rgb(79, 224, 138));
 }

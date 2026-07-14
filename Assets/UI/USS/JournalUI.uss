@@ -95,7 +95,7 @@
     background-color: rgba(0, 0, 0, 0);
     font-size: 26px;
     -unity-font: resource("Fonts/Outfit-SemiBold");
-    color: #05080DFF;
+    color: var(--color-scrim-bottom, #05080DFF);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
     transition: scale 0.1s ease-out;

@@ -1,0 +1,73 @@
+/* ===== Theme.uss — Design Tokens (from UITheme.cs) ===== */
+
+/* === Status Colors === */
+--color-health-full: rgb(217, 199, 115);
+--color-health-low: rgb(184, 31, 31);
+--color-shield: rgb(115, 199, 242);
+--color-ammo-normal: rgb(235, 224, 199);
+--color-ammo-low: rgb(217, 89, 38);
+--color-stamina: rgb(79, 224, 138);
+
+/* === Semantic Gradients === */
+--color-danger-top: rgb(242, 82, 69);
+--color-danger-bottom: rgb(168, 23, 33);
+--color-success-top: rgb(79, 224, 138);
+--color-success-bottom: rgb(24, 163, 79);
+
+/* === Surface Colors === */
+--color-surface-top: rgba(31, 38, 46, 1);
+--color-surface-bottom: rgba(19, 23, 28, 1);
+--color-card-top: rgba(31, 38, 46, 1);
+--color-card-bottom: rgba(19, 23, 28, 1);
+--color-scrim-top: rgba(10, 13, 18, 0.9);
+--color-scrim-bottom: rgba(0, 0, 0, 0.93);
+--color-panel-bg: rgba(14, 17, 21, 0.92);
+
+/* === Accent Colors === */
+--color-accent-red: rgb(229, 72, 60);
+--color-accent-gold-dark: rgb(217, 199, 115);
+--color-accent-gold-light: rgb(245, 225, 150);
+--color-accent-cyan: rgb(78, 205, 196);
+
+/* === Text Colors === */
+--color-text-primary: rgba(245, 245, 245, 1);
+--color-text-muted: rgba(158, 168, 184, 1);
+--color-text-gold: rgb(217, 199, 115);
+--color-shadow: rgba(0, 0, 0, 0.6);
+
+/* === Title (GameOverPanel) === */
+--color-title-top: rgb(229, 72, 60);
+--color-title-bottom: rgb(122, 15, 18);
+
+/* === Typography === */
+--font-display: resource("Fonts/Anton");
+--font-body: resource("Fonts/Outfit-SemiBold");
+
+/* === Spacing Scale === */
+--space-xs: 4px;
+--space-s: 8px;
+--space-m: 16px;
+--space-l: 24px;
+--space-xl: 40px;
+
+/* === Border Radius === */
+--radius-s: 8px;
+--radius-m: 16px;
+--radius-l: 22px;
+
+/* === Button Motion === */
+--hover-scale: 1.06;
+--press-scale: 0.95;
+
+/* === HUD Chip Colors === */
+--color-chip-wave: #9ED9FF;
+--color-chip-kills: #FF8578;
+--color-chip-score: #F2C24E;
+--color-chip-coins: #FFD700;
+--color-chip-headshots: #FF6B6B;
+--color-chip-timer: #4ECDC4;
+--color-chip-collectibles: #45B7D1;
+
+/* === Animations === */
+--panel-in-duration: 0.22s;
+--panel-start-scale: 0.9;

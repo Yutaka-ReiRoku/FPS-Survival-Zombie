@@ -36,13 +36,13 @@
     display: none;
 }
 
-.chip-wave .chip-label { color: #9ED9FF; }
-.chip-kills .chip-label { color: #FF8578; }
-.chip-score .chip-label { color: #F2C24E; }
-.chip-coins .chip-label { color: #FFD700; }
-.chip-headshots .chip-label { color: #FF6B6B; }
-.chip-timer .chip-label { color: #4ECDC4; }
-.chip-collectibles .chip-label { color: #45B7D1; }
+.chip-wave .chip-label { color: var(--color-chip-wave, #9ED9FF); }
+.chip-kills .chip-label { color: var(--color-chip-kills, #FF8578); }
+.chip-score .chip-label { color: var(--color-chip-score, #F2C24E); }
+.chip-coins .chip-label { color: var(--color-chip-coins, #FFD700); }
+.chip-headshots .chip-label { color: var(--color-chip-headshots, #FF6B6B); }
+.chip-timer .chip-label { color: var(--color-chip-timer, #4ECDC4); }
+.chip-collectibles .chip-label { color: var(--color-chip-collectibles, #45B7D1); }
 
 .chip-wave-icon { background-image: resource("Icons/icon_wave"); }
 .chip-kills-icon { background-image: resource("Icons/icon_skull"); }
