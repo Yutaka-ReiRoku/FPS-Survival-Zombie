@@ -4,6 +4,12 @@ public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance;
 
+    public delegate void ScoreEvent();
+
+    public event ScoreEvent OnScoreChanged;
+    public event ScoreEvent OnKillsChanged;
+    public event ScoreEvent OnCritsChanged;
+
     [Header("Score")]
     public int score;
 
@@ -27,6 +33,8 @@ public class ScoreManager : MonoBehaviour
     {
         kills++;
         score += amount;
+        OnKillsChanged?.Invoke();
+        OnScoreChanged?.Invoke();
         if (PlayerStatsTracker.Instance != null)
             PlayerStatsTracker.Instance.RegisterKill(amount);
     }
@@ -35,6 +43,8 @@ public class ScoreManager : MonoBehaviour
     {
         crits++;
         score += amount;
+        OnCritsChanged?.Invoke();
+        OnScoreChanged?.Invoke();
         if (PlayerStatsTracker.Instance != null)
             PlayerStatsTracker.Instance.RegisterCrit(amount);
     }

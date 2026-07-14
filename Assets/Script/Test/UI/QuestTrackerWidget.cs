@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -16,9 +17,6 @@ public class QuestTrackerWidget : MonoBehaviour
     private Label _sideHeader;
     private VisualElement _sideLinesContainer;
     private readonly List<Label> _sideLines = new();
-
-    private int _lastCollectibleCount = -1;
-    private int _lastSideQuestCount = -1;
 
     private void Awake()
     {
@@ -50,6 +48,7 @@ public class QuestTrackerWidget : MonoBehaviour
             SideQuestManager.Instance.OnSideQuestActivated += HandleSideQuestChanged;
         }
         UpdateDisplay();
+        StartCoroutine(PollRoutine());
     }
 
     private void OnDisable()
@@ -64,28 +63,37 @@ public class QuestTrackerWidget : MonoBehaviour
             SideQuestManager.Instance.OnSideQuestCompleted -= HandleSideQuestChanged;
             SideQuestManager.Instance.OnSideQuestActivated -= HandleSideQuestChanged;
         }
+        StopAllCoroutines();
     }
+
+    private IEnumerator PollRoutine()
+    {
+        var wait = new WaitForSeconds(0.5f);
+        while (true)
+        {
+            yield return wait;
+            var cm = CollectibleManager.Instance;
+            if (cm != null && cm.Count != _lastCollectibleCount)
+            {
+                _lastCollectibleCount = cm.Count;
+                UpdateCollectibleDisplay();
+            }
+            var sqm = SideQuestManager.Instance;
+            int sqCount = sqm != null ? sqm.ActiveQuests.Count : 0;
+            if (sqCount != _lastSideQuestCount)
+            {
+                _lastSideQuestCount = sqCount;
+                UpdateDisplay();
+            }
+        }
+    }
+
+    private int _lastCollectibleCount = -1;
+    private int _lastSideQuestCount = -1;
 
     private void HandleQuestChanged(QuestData oldQuest, QuestData newQuest) => UpdateDisplay();
     private void HandleChapterChanged(int oldCh, int newCh) => UpdateDisplay();
     private void HandleSideQuestChanged(QuestData quest) => UpdateDisplay();
-
-    private void Update()
-    {
-        var cm = CollectibleManager.Instance;
-        if (cm != null && cm.Count != _lastCollectibleCount)
-        {
-            _lastCollectibleCount = cm.Count;
-            UpdateCollectibleDisplay();
-        }
-        var sqm = SideQuestManager.Instance;
-        int sqCount = sqm != null ? sqm.ActiveQuests.Count : 0;
-        if (sqCount != _lastSideQuestCount)
-        {
-            _lastSideQuestCount = sqCount;
-            UpdateDisplay();
-        }
-    }
 
     private void UpdateCollectibleDisplay()
     {

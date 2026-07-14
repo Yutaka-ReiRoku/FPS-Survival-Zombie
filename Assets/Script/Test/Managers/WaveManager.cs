@@ -4,6 +4,10 @@ public class WaveManager : MonoBehaviour
 {
     public static WaveManager Instance;
 
+    public delegate void WaveEvent(int wave);
+    public event WaveEvent OnWaveStarted;
+    public event WaveEvent OnWaveCompleted;
+
     [Header("Wave")]
     public int currentWave = 1;
 
@@ -30,6 +34,7 @@ public class WaveManager : MonoBehaviour
         zombiesToKill =
             baseZombieCount +
             ((currentWave - 1) * 5);
+        OnWaveStarted?.Invoke(currentWave);
 
         Debug.Log(
             "Wave " +
@@ -54,6 +59,7 @@ public class WaveManager : MonoBehaviour
 
     private void NextWave()
     {
+        OnWaveCompleted?.Invoke(currentWave);
         currentWave++;
         ScoreManager.Instance?.
         AddWaveBonus(

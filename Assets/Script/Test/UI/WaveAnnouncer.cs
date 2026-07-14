@@ -10,7 +10,6 @@ public class WaveAnnouncer : MonoBehaviour
     private VisualElement _root;
     private Label _title;
     private Label _sub;
-    private int _lastWave = -1;
 
     private void OnEnable()
     {
@@ -21,21 +20,42 @@ public class WaveAnnouncer : MonoBehaviour
         _title = _root.Q<Label>("WaveTitle");
         _sub = _root.Q<Label>("WaveSub");
         _root.style.display = DisplayStyle.None;
+
+        var wm = WaveManager.Instance;
+        if (wm != null)
+        {
+            wm.OnWaveStarted += OnWaveStarted;
+            wm.OnWaveCompleted += OnWaveCompleted;
+            if (wm.currentWave > 0)
+            {
+                _title.text = "WAVE " + wm.currentWave;
+                _sub.text = "SURVIVE";
+                Show();
+            }
+        }
     }
 
-    private void Update()
+    private void OnDisable()
     {
-        var wm = WaveManager.Instance;
-        if (wm == null) return;
-
-        if (wm.currentWave != _lastWave)
+        if (WaveManager.Instance != null)
         {
-            bool first = _lastWave < 0;
-            _lastWave = wm.currentWave;
-            _title.text = "WAVE " + wm.currentWave;
-            _sub.text = first ? "SURVIVE" : "WAVE CLEARED   +" + (wm.currentWave * bonusPerWave);
-            Show();
+            WaveManager.Instance.OnWaveStarted -= OnWaveStarted;
+            WaveManager.Instance.OnWaveCompleted -= OnWaveCompleted;
         }
+    }
+
+    private void OnWaveStarted(int wave)
+    {
+        _title.text = "WAVE " + wave;
+        _sub.text = "SURVIVE";
+        Show();
+    }
+
+    private void OnWaveCompleted(int wave)
+    {
+        _title.text = "WAVE " + wave;
+        _sub.text = "WAVE CLEARED   +" + (wave * bonusPerWave);
+        Show();
     }
 
     private void Show()

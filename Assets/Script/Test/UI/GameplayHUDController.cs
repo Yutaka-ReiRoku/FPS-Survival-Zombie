@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -41,18 +42,42 @@ public class GameplayHUDController : MonoBehaviour
             CowsinsHUDAdapter.Instance.OnCoinsChanged += OnCoinsChanged;
     }
 
+    private void OnEnable()
+    {
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.OnKillsChanged += OnKillsChanged;
+            ScoreManager.Instance.OnScoreChanged += OnScoreChanged;
+            ScoreManager.Instance.OnCritsChanged += OnCritsChanged;
+        }
+        if (WaveManager.Instance != null)
+        {
+            WaveManager.Instance.OnWaveStarted += OnWaveStarted;
+            WaveManager.Instance.OnWaveCompleted += OnWaveCompleted;
+        }
+        StartCoroutine(TimerRoutine());
+    }
+
+    private void OnDisable()
+    {
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.OnKillsChanged -= OnKillsChanged;
+            ScoreManager.Instance.OnScoreChanged -= OnScoreChanged;
+            ScoreManager.Instance.OnCritsChanged -= OnCritsChanged;
+        }
+        if (WaveManager.Instance != null)
+        {
+            WaveManager.Instance.OnWaveStarted -= OnWaveStarted;
+            WaveManager.Instance.OnWaveCompleted -= OnWaveCompleted;
+        }
+        StopAllCoroutines();
+    }
+
     private void OnDestroy()
     {
         if (CowsinsHUDAdapter.Instance != null)
             CowsinsHUDAdapter.Instance.OnCoinsChanged -= OnCoinsChanged;
-    }
-
-    private void Update()
-    {
-        UpdateWave();
-        UpdateScore();
-        UpdateTimer();
-        UpdateCollectibles();
     }
 
     private void ShowChip(VisualElement chip, bool show)
@@ -64,80 +89,82 @@ public class GameplayHUDController : MonoBehaviour
             chip.AddToClassList("hud-chip-hidden");
     }
 
-    private void UpdateWave()
+    private void OnWaveStarted(int wave)
     {
+        if (_waveChip == null || _waveLabel == null) return;
+        ShowChip(_waveChip, true);
         var wm = WaveManager.Instance;
-        if (wm == null || _waveChip == null || _waveLabel == null) return;
+        if (wm == null) return;
+        _lastWave = wm.currentWave;
+        _lastKilled = wm.zombiesKilledThisWave;
+        _lastToKill = wm.zombiesToKill;
+        _waveLabel.text = $"Wave {wm.currentWave} \u00B7 {wm.zombiesKilledThisWave}/{wm.zombiesToKill}";
+    }
 
-        bool hasWave = wm.currentWave > 0;
-        ShowChip(_waveChip, hasWave);
+    private void OnWaveCompleted(int wave)
+    {
+        if (_waveChip == null || _waveLabel == null) return;
+        _waveLabel.text = $"Wave {wave} Complete!";
+    }
 
-        if (!hasWave) return;
-
-        if (wm.currentWave != _lastWave || wm.zombiesKilledThisWave != _lastKilled || wm.zombiesToKill != _lastToKill)
+    private void OnKillsChanged()
+    {
+        if (_killsChip == null || _killsLabel == null) return;
+        var sm = ScoreManager.Instance;
+        if (sm == null) return;
+        ShowChip(_killsChip, sm.kills > 0);
+        if (sm.kills != _lastKills)
         {
-            _lastWave = wm.currentWave;
-            _lastKilled = wm.zombiesKilledThisWave;
-            _lastToKill = wm.zombiesToKill;
-            _waveLabel.text = $"Wave {wm.currentWave} \u00B7 {wm.zombiesKilledThisWave}/{wm.zombiesToKill}";
+            _lastKills = sm.kills;
+            _killsLabel.text = "Kills : " + sm.kills;
         }
     }
 
-    private void UpdateScore()
+    private void OnScoreChanged()
     {
+        if (_scoreChip == null || _scoreLabel == null) return;
         var sm = ScoreManager.Instance;
         if (sm == null) return;
-
-        if (_killsChip != null && _killsLabel != null)
+        ShowChip(_scoreChip, sm.score > 0);
+        if (sm.score != _lastScore)
         {
-            bool hasKills = sm.kills > 0;
-            ShowChip(_killsChip, hasKills);
-            if (hasKills && sm.kills != _lastKills)
-            {
-                _lastKills = sm.kills;
-                _killsLabel.text = "Kills : " + sm.kills;
-            }
+            _lastScore = sm.score;
+            _scoreLabel.text = "Score : " + sm.score;
         }
+    }
 
-        if (_scoreChip != null && _scoreLabel != null)
+    private void OnCritsChanged()
+    {
+        if (_critsChip == null || _critsLabel == null) return;
+        var sm = ScoreManager.Instance;
+        if (sm == null) return;
+        ShowChip(_critsChip, sm.crits > 0);
+        if (sm.crits != _lastCrits)
         {
-            bool hasScore = sm.score > 0;
-            ShowChip(_scoreChip, hasScore);
-            if (hasScore && sm.score != _lastScore)
-            {
-                _lastScore = sm.score;
-                _scoreLabel.text = "Score : " + sm.score;
-            }
-        }
-
-        if (_coinsChip != null && _coinsLabel != null)
-        {
-            int coins = CowsinsHUDAdapter.Instance != null ? CowsinsHUDAdapter.Instance.Coins : 0;
-            bool hasCoins = coins > 0;
-            ShowChip(_coinsChip, hasCoins);
-        }
-
-        if (_critsChip != null && _critsLabel != null)
-        {
-            bool hasCrits = sm.crits > 0;
-            ShowChip(_critsChip, hasCrits);
-            if (hasCrits && sm.crits != _lastCrits)
-            {
-                _lastCrits = sm.crits;
-                _critsLabel.text = "Crits : " + sm.crits;
-            }
+            _lastCrits = sm.crits;
+            _critsLabel.text = "Crits : " + sm.crits;
         }
     }
 
     private void OnCoinsChanged(int coins)
     {
         if (_coinsLabel == null || _coinsChip == null) return;
-
         ShowChip(_coinsChip, coins > 0);
         if (coins != _lastCoins)
         {
             _lastCoins = coins;
             _coinsLabel.text = "Coins : " + coins;
+        }
+    }
+
+    private IEnumerator TimerRoutine()
+    {
+        var wait = new WaitForSeconds(1f);
+        while (true)
+        {
+            yield return wait;
+            UpdateTimer();
+            UpdateCollectibles();
         }
     }
 
@@ -147,12 +174,8 @@ public class GameplayHUDController : MonoBehaviour
         if (sm == null || _timerChip == null || _timerLabel == null) return;
 
         int sec = Mathf.FloorToInt(sm.GetSurvivalTime());
-        bool hasTime = sec > 0;
-        ShowChip(_timerChip, hasTime);
-
-        if (!hasTime) return;
-
-        if (sec != _lastSec)
+        ShowChip(_timerChip, sec > 0);
+        if (sec > 0 && sec != _lastSec)
         {
             _lastSec = sec;
             int m = sec / 60, s = sec % 60;
@@ -166,12 +189,8 @@ public class GameplayHUDController : MonoBehaviour
         if (cm == null || _collectiblesChip == null || _collectiblesLabel == null) return;
 
         int c = cm.Count;
-        bool hasCollectibles = c > 0;
-        ShowChip(_collectiblesChip, hasCollectibles);
-
-        if (!hasCollectibles) return;
-
-        if (c != _lastCollectibles)
+        ShowChip(_collectiblesChip, c > 0);
+        if (c > 0 && c != _lastCollectibles)
         {
             _lastCollectibles = c;
             _collectiblesLabel.text = $"Journals : {c}/{cm.Total}";
