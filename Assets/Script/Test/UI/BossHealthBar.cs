@@ -22,6 +22,7 @@ public class BossHealthBar : MonoBehaviour
 
         _root = root.Q<VisualElement>("BossHealthBar");
         _fill = _root?.Q<VisualElement>("BossFill");
+        if (_fill != null) _fill.usageHints = UsageHints.DynamicTransform;
         _label = _root?.Q<Label>("BossLabel");
 
         if (_label != null) _label.text = bossLabel;

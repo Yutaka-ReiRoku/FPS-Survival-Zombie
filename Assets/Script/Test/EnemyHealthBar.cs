@@ -60,6 +60,7 @@ public class EnemyHealthBar : MonoBehaviour
 
         _fill = new VisualElement();
         _fill.name = "Fill";
+        _fill.usageHints = UsageHints.DynamicTransform;
         _fill.style.position = Position.Absolute;
         _fill.style.left = 0;
         _fill.style.top = 0;

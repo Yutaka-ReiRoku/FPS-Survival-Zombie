@@ -16,12 +16,33 @@
     width: 40px;
     height: 40px;
     translate: -50% -50%;
-    opacity: 0;
+    opacity: var(--opacity-zero, 0);
+    transition: opacity 0.18s ease-out;
+}
+
+#Hitmarker.hitmarker--visible {
+    opacity: var(--opacity-full, 1);
 }
 
 .hitmarker-bar {
     position: absolute;
+    width: 14px;
+    height: 4px;
     border-radius: var(--radius-xs);
+    background-color: rgb(255, 255, 255);
+}
+
+.hitmarker-bar--tl { left: 13px; top: 18px; rotate: 45deg; }
+.hitmarker-bar--tr { left: 13px; top: 18px; rotate: -45deg; }
+.hitmarker-bar--bl { left: 21px; top: 18px; rotate: -45deg; }
+.hitmarker-bar--br { left: 21px; top: 18px; rotate: 45deg; }
+
+.hitmarker-bar--kill {
+    background-color: rgb(242, 82, 69);
+}
+
+.hitmarker-bar--crit {
+    background-color: rgb(255, 199, 51);
 }
 
 #DamageNumbers {
@@ -41,6 +62,19 @@
     -unity-text-align: middle-center;
     font-size: var(--fs-xl);
     color: var(--color-text-primary);
+    transition: opacity 0.25s ease-out;
+}
+
+.dmg-number--hidden {
+    display: none;
+}
+
+.dmg-number--kill {
+    color: rgb(242, 82, 69);
+}
+
+.dmg-number--crit {
+    color: rgb(255, 199, 51);
 }
 
 #Killfeed {
@@ -64,6 +98,11 @@
     justify-content: flex-end;
     padding-right: var(--space-m);
     margin-bottom: var(--space-s);
+    transition: opacity 0.4s ease-out;
+}
+
+.killfeed-entry--hidden {
+    display: none;
 }
 
 .killfeed-entry-label {

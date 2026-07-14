@@ -9,6 +9,7 @@
     top: 0;
     bottom: 0;
     overflow: hidden;
+    transition: opacity var(--transition-normal, 1s) ease-out;
 }
 
 .credits-header {

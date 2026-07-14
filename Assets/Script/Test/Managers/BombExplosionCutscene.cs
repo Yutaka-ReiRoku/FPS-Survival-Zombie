@@ -56,7 +56,8 @@ public class BombExplosionCutscene : MonoBehaviour
 
         float prevTimeScale = Time.timeScale;
 
-        yield return Fade(0f, 1f, fadeDuration);
+        _fadeRoot.style.opacity = 1f;
+        yield return new WaitForSecondsRealtime(fadeDuration);
 
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         Rigidbody playerRb = playerGO != null ? playerGO.GetComponent<Rigidbody>() : null;
@@ -144,11 +145,13 @@ public class BombExplosionCutscene : MonoBehaviour
             Destroy(sfxGO, explosionSfx.length + 0.5f);
         }
 
-        yield return Fade(1f, 0f, fadeDuration);
+        _fadeRoot.style.opacity = 0f;
+        yield return new WaitForSecondsRealtime(fadeDuration);
 
-        yield return WaitRealtime(holdDuration);
+        yield return new WaitForSecondsRealtime(holdDuration);
 
-        yield return Fade(0f, 1f, fadeDuration);
+        _fadeRoot.style.opacity = 1f;
+        yield return new WaitForSecondsRealtime(fadeDuration);
 
         Destroy(camGO);
         if (mainListener != null) mainListener.enabled = true;
@@ -156,31 +159,12 @@ public class BombExplosionCutscene : MonoBehaviour
 
         Time.timeScale = prevTimeScale > 0f ? prevTimeScale : 1f;
 
-        yield return Fade(1f, 0f, fadeDuration);
+        _fadeRoot.style.opacity = 0f;
+        yield return new WaitForSecondsRealtime(fadeDuration);
 
         Destroy(_fadeDocGO);
         Debug.Log("[BombExplosionCutscene] Sequence complete.");
         onComplete?.Invoke();
-    }
-
-    private IEnumerator WaitRealtime(float seconds)
-    {
-        float t = 0f;
-        while (t < seconds) { t += Time.unscaledDeltaTime; yield return null; }
-    }
-
-    private IEnumerator Fade(float from, float to, float duration)
-    {
-        _fadeRoot.style.opacity = from;
-        if (duration <= 0f) { _fadeRoot.style.opacity = to; yield break; }
-        float t = 0f;
-        while (t < duration)
-        {
-            t += Time.unscaledDeltaTime;
-            _fadeRoot.style.opacity = Mathf.Lerp(from, to, t / duration);
-            yield return null;
-        }
-        _fadeRoot.style.opacity = to;
     }
 
     private void BuildFadeOverlay()
@@ -203,5 +187,7 @@ public class BombExplosionCutscene : MonoBehaviour
 
         _fadeRoot = root;
         doc.rootVisualElement.Add(root);
+        var sheet = Resources.Load<StyleSheet>("BombExplosionCutscene");
+        if (sheet != null) doc.rootVisualElement.styleSheets.Add(sheet);
     }
 }

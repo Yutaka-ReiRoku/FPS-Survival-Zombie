@@ -44,6 +44,7 @@ public class InteractPromptWidget : MonoBehaviour
 
         _progressFill = new VisualElement();
         _progressFill.AddToClassList("interact-progress-fill");
+        _progressFill.usageHints = UsageHints.DynamicTransform;
         _progressBar.Add(_progressFill);
     }
 

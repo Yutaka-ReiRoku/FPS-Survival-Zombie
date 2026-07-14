@@ -23,9 +23,6 @@ public class CombatFeedbackHUD : MonoBehaviour
     private VisualElement _root, _hitmarker, _dmgContainer, _killContainer;
     private readonly List<VisualElement> _hitBars = new List<VisualElement>();
     private float _hitTimer, _hitDuration = 0.18f;
-    private Color _hitNormal = new Color(1f, 1f, 1f, 0.9f);
-    private Color _hitKill = new Color(0.95f, 0.32f, 0.27f, 1f);
-    private Color _critColor = new Color(1f, 0.78f, 0.2f, 1f);
 
     private bool _critPending;
     private int _critFrame;
@@ -65,18 +62,13 @@ public class CombatFeedbackHUD : MonoBehaviour
     private void BuildHitmarkerBars()
     {
         if (_hitmarker.childCount > 0) return;
-        var offsets = new Vector2[] { new Vector2(-12, -12), new Vector2(12, -12), new Vector2(-12, 12), new Vector2(12, 12) };
-        var angles = new float[] { 45, -45, -45, 45 };
+        string[] classes = { "hm-tl", "hm-tr", "hm-bl", "hm-br" };
         for (int i = 0; i < 4; i++)
         {
             var bar = new VisualElement();
             bar.AddToClassList("hitmarker-bar");
-            bar.style.width = 14;
-            bar.style.height = 4;
-            bar.style.left = 20 + offsets[i].x - 7;
-            bar.style.top = 20 - offsets[i].y - 2;
-            bar.style.rotate = new Rotate(Angle.Degrees(angles[i]));
-            bar.style.backgroundColor = _hitNormal;
+            bar.AddToClassList(classes[i]);
+            bar.usageHints = UsageHints.DynamicColor;
             _hitmarker.Add(bar);
             _hitBars.Add(bar);
         }
@@ -89,7 +81,8 @@ public class CombatFeedbackHUD : MonoBehaviour
         {
             var ve = new VisualElement();
             ve.AddToClassList("dmg-number");
-            ve.style.display = DisplayStyle.None;
+            ve.usageHints = UsageHints.DynamicTransform | UsageHints.DynamicColor;
+            ve.AddToClassList("dmg-number--hidden");
             var label = new Label();
             ve.Add(label);
             _dmgContainer.Add(ve);
@@ -103,11 +96,14 @@ public class CombatFeedbackHUD : MonoBehaviour
         _critPending = false;
 
         _hitTimer = _hitDuration;
+        _hitmarker.EnableInClassList("hitmarker--visible", true);
         float scale = crit ? 1.6f : headshot ? 1.4f : 1f;
         _hitmarker.style.scale = new Scale(Vector2.one * scale);
-        var col = crit ? _critColor : headshot ? _hitKill : _hitNormal;
         foreach (var bar in _hitBars)
-            bar.style.backgroundColor = col;
+        {
+            bar.EnableInClassList("hitmarker-bar--kill", headshot);
+            bar.EnableInClassList("hitmarker-bar--crit", crit);
+        }
 
         var d = GetDmg();
         if (d == null) return;
@@ -115,21 +111,23 @@ public class CombatFeedbackHUD : MonoBehaviour
         if (cam != null)
         {
             Vector3 sp = cam.WorldToScreenPoint(worldPos + Vector3.up * 1.6f);
-            if (sp.z < 0f) { d.active = false; d.ve.style.display = DisplayStyle.None; return; }
-            var panel = GetComponent<UIDocument>().rootVisualElement.panel;
+            if (sp.z < 0f) { d.active = false; d.ve.AddToClassList("dmg-number--hidden"); return; }
+            var doc = GetComponent<UIDocument>();
+            if (doc == null) return;
+            var panel = doc.rootVisualElement.panel;
+            if (panel == null) return;
             var panelPos = RuntimePanelUtils.ScreenToPanel(panel, sp);
-            d.ve.style.left = panelPos.x + Random.Range(-18f, 18f);
-            d.ve.style.top = panelPos.y;
+            d.ve.style.translate = new Translate(panelPos.x + Random.Range(-18f, 18f), panelPos.y);
         }
         int dmgInt = Mathf.Max(1, Mathf.RoundToInt(damage));
         d.label.text = GetDamageString(dmgInt, crit);
-        d.label.style.color = crit ? _critColor : headshot ? _hitKill : Color.white;
+        d.label.EnableInClassList("dmg-number--kill", headshot);
+        d.label.EnableInClassList("dmg-number--crit", crit);
         d.label.style.fontSize = crit ? 42 : headshot ? 36 : 28;
-        d.ve.style.opacity = 1f;
+        d.ve.RemoveFromClassList("dmg-number--hidden");
         d.life = _dmgLife;
         d.vel = new Vector2(Random.Range(-10f, 10f), -90f);
         d.active = true;
-        d.ve.style.display = DisplayStyle.Flex;
     }
 
     public void ShowKill(string name)
@@ -148,6 +146,7 @@ public class CombatFeedbackHUD : MonoBehaviour
         {
             var entry = new VisualElement();
             entry.AddToClassList("killfeed-entry");
+            entry.usageHints = UsageHints.DynamicTransform;
             var label = new Label();
             label.AddToClassList("killfeed-entry-label");
             entry.Add(label);
@@ -159,8 +158,7 @@ public class CombatFeedbackHUD : MonoBehaviour
             k.active = true;
         }
 
-        k.entry.style.display = DisplayStyle.Flex;
-        k.entry.style.opacity = 1f;
+        k.entry.RemoveFromClassList("killfeed-entry--hidden");
         k.entry.RemoveFromHierarchy();
         _killContainer.Insert(0, k.entry);
         k.label.text = "Killed  " + (string.IsNullOrEmpty(name) ? "Zombie" : name);
@@ -172,7 +170,7 @@ public class CombatFeedbackHUD : MonoBehaviour
             var oldest = _kills[0];
             _kills.RemoveAt(0);
             oldest.active = false;
-            oldest.entry.style.display = DisplayStyle.None;
+            oldest.entry.AddToClassList("killfeed-entry--hidden");
         }
     }
 
@@ -197,8 +195,7 @@ public class CombatFeedbackHUD : MonoBehaviour
         if (_hitTimer > 0f)
         {
             _hitTimer -= dt;
-            _hitmarker.style.opacity = Mathf.Clamp01(_hitTimer / _hitDuration);
-            if (_hitTimer <= 0f) _hitmarker.style.opacity = 0f;
+            if (_hitTimer <= 0f) _hitmarker.EnableInClassList("hitmarker--visible", false);
         }
 
         for (int i = 0; i < _pool.Count; i++)
@@ -209,13 +206,12 @@ public class CombatFeedbackHUD : MonoBehaviour
             if (d.life <= 0f)
             {
                 d.active = false;
-                d.ve.style.opacity = 0f;
-                d.ve.style.display = DisplayStyle.None;
+                d.ve.AddToClassList("dmg-number--hidden");
                 continue;
             }
-            d.ve.style.left = d.ve.style.left.value.value + d.vel.x * dt;
-            d.ve.style.top = d.ve.style.top.value.value + d.vel.y * dt;
-            d.ve.style.opacity = Mathf.Clamp01(d.life / _dmgLife);
+            d.ve.style.translate = new Translate(
+                d.ve.style.translate.value.x.value + d.vel.x * dt,
+                d.ve.style.translate.value.y.value + d.vel.y * dt);
         }
 
         for (int i = _kills.Count - 1; i >= 0; i--)
@@ -226,11 +222,8 @@ public class CombatFeedbackHUD : MonoBehaviour
             {
                 _kills.RemoveAt(i);
                 k.active = false;
-                k.entry.style.display = DisplayStyle.None;
-                continue;
+                k.entry.AddToClassList("killfeed-entry--hidden");
             }
-            if (k.life < 0.6f)
-                k.entry.style.opacity = Mathf.Clamp01(k.life / 0.6f);
         }
     }
 }

@@ -53,18 +53,9 @@ public class StaminaWidget : MonoBehaviour
     {
         _used = _adapter == null || _adapter.UsesStamina;
         _target = max > 0f ? Mathf.Clamp01(current / max) : 0f;
-    }
-
-    private void Update()
-    {
-        if (_fill == null || _cluster == null) return;
-        float dt = Time.unscaledDeltaTime;
-        float v = Mathf.MoveTowards(_fill.resolvedStyle.width / _fill.parent.resolvedStyle.width, _target, fillSpeed * dt);
-        _fill.style.width = Length.Percent(v * 100f);
-        _fill.style.backgroundColor = Color.Lerp(_low, _full, Mathf.InverseLerp(lowThreshold, 1f, v));
-
-        bool full = v > 0.999f;
-        float targetAlpha = (!_used) ? 0f : (full ? 0f : 1f);
-        _cluster.style.opacity = Mathf.MoveTowards(_cluster.style.opacity.value, targetAlpha, 4f * dt);
+        _fill.style.width = Length.Percent(_target * 100f);
+        _fill.style.backgroundColor = Color.Lerp(_low, _full, Mathf.InverseLerp(lowThreshold, 1f, _target));
+        bool full = _target > 0.999f;
+        _cluster.style.opacity = (!_used) ? 0f : (full ? 0f : 1f);
     }
 }

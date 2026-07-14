@@ -12,10 +12,6 @@ public class WaveAnnouncer : MonoBehaviour
     private Label _sub;
     private int _lastWave = -1;
 
-    private enum AnimState { Idle, FadeIn, Hold, FadeOut }
-    private AnimState _state = AnimState.Idle;
-    private float _timer;
-
     private void OnEnable()
     {
         var doc = GetComponent<UIDocument>();
@@ -40,47 +36,22 @@ public class WaveAnnouncer : MonoBehaviour
             _sub.text = first ? "SURVIVE" : "WAVE CLEARED   +" + (wm.currentWave * bonusPerWave);
             Show();
         }
-
-        if (_state == AnimState.FadeIn)
-        {
-            _timer += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(_timer / fadeIn);
-            _root.style.opacity = t;
-            if (t >= 1f)
-            {
-                _root.style.opacity = 1f;
-                _state = AnimState.Hold;
-                _timer = 0f;
-            }
-        }
-        else if (_state == AnimState.Hold)
-        {
-            _timer += Time.unscaledDeltaTime;
-            if (_timer >= hold)
-            {
-                _state = AnimState.FadeOut;
-                _timer = 0f;
-            }
-        }
-        else if (_state == AnimState.FadeOut)
-        {
-            _timer += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(_timer / fadeOut);
-            _root.style.opacity = 1f - t;
-            if (t >= 1f)
-            {
-                _root.style.opacity = 0f;
-                _state = AnimState.Idle;
-                _root.style.display = DisplayStyle.None;
-            }
-        }
     }
 
     private void Show()
     {
         _root.style.display = DisplayStyle.Flex;
-        _root.style.opacity = 0f;
-        _state = AnimState.FadeIn;
-        _timer = 0f;
+        _root.schedule.Execute(() => {
+            _root.EnableInClassList("wave-visible", true);
+        });
+
+        float totalVisible = fadeIn + hold;
+        _root.schedule.Execute(() => {
+            _root.EnableInClassList("wave-visible", false);
+        }).StartingIn(Mathf.RoundToInt(totalVisible * 1000f));
+
+        _root.schedule.Execute(() => {
+            _root.style.display = DisplayStyle.None;
+        }).StartingIn(Mathf.RoundToInt((totalVisible + fadeOut) * 1000f));
     }
 }

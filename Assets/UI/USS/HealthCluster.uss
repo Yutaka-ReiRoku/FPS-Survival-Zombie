@@ -42,6 +42,7 @@
     width: 100%;
     height: 100%;
     background-color: var(--color-health-low, rgba(184, 31, 31, 0.7));
+    transition: width var(--transition-normal, 0.3s) ease-out;
 }
 
 #HealthFill {
@@ -51,6 +52,7 @@
     width: 100%;
     height: 100%;
     background-color: var(--color-health-full, rgb(217, 199, 115));
+    transition: width var(--transition-fast, 0.15s) ease-out, background-color var(--transition-fast, 0.15s) ease-out;
 }
 
 #HealthValue {
@@ -83,4 +85,5 @@
     width: 100%;
     height: 100%;
     background-color: var(--color-shield, rgb(115, 199, 242));
+    transition: width var(--transition-fast, 0.15s) ease-out;
 }

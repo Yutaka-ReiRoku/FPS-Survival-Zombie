@@ -35,11 +35,9 @@ public class ThreatWidget : MonoBehaviour
     {
         var d = AIDirector.Instance;
         if (d == null || _fill == null || _state == null || _warn == null) return;
-        float dt = Time.unscaledDeltaTime;
 
         float target = Mathf.Clamp01(d.threatLevel / 100f);
-        float cur = _fill.style.width.value.value;
-        _fill.style.width = Length.Percent(Mathf.MoveTowards(cur, target * 100f, 150f * dt));
+        _fill.style.width = Length.Percent(target * 100f);
 
         Color c; string label;
         switch (d.currentState)
@@ -54,7 +52,6 @@ public class ThreatWidget : MonoBehaviour
         _state.style.color = c;
 
         bool flank = d.ShouldPunishCamper();
-        float a = flank ? (0.55f + 0.45f * Mathf.Sin(Time.unscaledTime * 8f)) : 0f;
-        _warn.style.opacity = Mathf.MoveTowards(_warn.style.opacity.value, a, (flank ? 12f : 6f) * dt);
+        _warn.style.opacity = flank ? (0.55f + 0.45f * Mathf.Sin(Time.unscaledTime * 8f)) : 0f;
     }
 }

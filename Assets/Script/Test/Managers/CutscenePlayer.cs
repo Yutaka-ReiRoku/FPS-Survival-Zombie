@@ -102,28 +102,11 @@ public class CutscenePlayer : MonoBehaviour
         float prevTimeScale = Time.timeScale;
         Time.timeScale = 0f;
 
-        float t;
-
-        t = 0f;
-        while (t < fadeIn)
-        {
-            t += Time.unscaledDeltaTime;
-            _root.style.opacity = Mathf.Lerp(0f, 1f, fadeIn > 0f ? t / fadeIn : 1f);
-            yield return null;
-        }
         _root.style.opacity = 1f;
-
-        t = 0f;
-        while (t < hold) { t += Time.unscaledDeltaTime; yield return null; }
-
-        t = 0f;
-        while (t < fadeOut)
-        {
-            t += Time.unscaledDeltaTime;
-            _root.style.opacity = Mathf.Lerp(1f, 0f, fadeOut > 0f ? t / fadeOut : 1f);
-            yield return null;
-        }
+        yield return new WaitForSecondsRealtime(fadeIn + hold);
         _root.style.opacity = 0f;
+        yield return new WaitForSecondsRealtime(fadeOut);
+
         _scrim.pickingMode = PickingMode.Ignore;
         _root.style.display = DisplayStyle.None;
 

@@ -29,4 +29,5 @@
     width: 100%;
     height: 100%;
     background-color: var(--color-stamina, rgb(79, 224, 138));
+    transition: width var(--transition-medium, 0.25s) ease-out, background-color var(--transition-medium, 0.25s) ease-out;
 }

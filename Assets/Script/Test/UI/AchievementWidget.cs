@@ -213,11 +213,17 @@ public class AchievementWidget : MonoBehaviour
             _listPanel.style.display = DisplayStyle.Flex;
             _scrim.style.display = DisplayStyle.Flex;
             RebuildRows();
-            StartCoroutine(FadePanel(0f, 1f, 0.2f));
+            _listPanel.style.opacity = 1f;
+            _scrim.style.opacity = 0.8f;
         }
         else
         {
-            StartCoroutine(FadePanelClose(1f, 0f, 0.2f));
+            _listPanel.style.opacity = 0f;
+            _scrim.style.opacity = 0f;
+            _listPanel.schedule.Execute(() => {
+                _listPanel.style.display = DisplayStyle.None;
+                _scrim.style.display = DisplayStyle.None;
+            }).StartingIn(200);
         }
     }
 
@@ -225,38 +231,6 @@ public class AchievementWidget : MonoBehaviour
     {
         _listContent.Clear();
         BuildRows(_listContent);
-    }
-
-    private IEnumerator FadePanel(float from, float to, float dur)
-    {
-        float t = 0f;
-        while (t < dur)
-        {
-            t += Time.unscaledDeltaTime;
-            float f = dur > 0f ? t / dur : 1f;
-            _listPanel.style.opacity = Mathf.Lerp(from, to, f);
-            _scrim.style.opacity = Mathf.Lerp(from * 0.8f, to * 0.8f, f);
-            yield return null;
-        }
-        _listPanel.style.opacity = to;
-        _scrim.style.opacity = to * 0.8f;
-    }
-
-    private IEnumerator FadePanelClose(float from, float to, float dur)
-    {
-        float t = 0f;
-        while (t < dur)
-        {
-            t += Time.unscaledDeltaTime;
-            float f = dur > 0f ? t / dur : 1f;
-            _listPanel.style.opacity = Mathf.Lerp(from, to, f);
-            _scrim.style.opacity = Mathf.Lerp(from * 0.8f, to * 0.8f, f);
-            yield return null;
-        }
-        _listPanel.style.opacity = to;
-        _scrim.style.opacity = to * 0.8f;
-        _listPanel.style.display = DisplayStyle.None;
-        _scrim.style.display = DisplayStyle.None;
     }
 
     private void HandleUnlocked(AchievementData ach)
@@ -277,24 +251,12 @@ public class AchievementWidget : MonoBehaviour
             if (ach.icon != null)
                 _popupIcon.style.backgroundImage = new StyleBackground(ach.icon);
 
-            yield return FadePopup(0f, 1f, popupFadeIn);
-            float t = 0f;
-            while (t < popupHold) { t += Time.unscaledDeltaTime; yield return null; }
-            yield return FadePopup(1f, 0f, popupFadeOut);
+            _popupRoot.style.opacity = 1f;
+            yield return new WaitForSecondsRealtime(popupFadeIn + popupHold);
+            _popupRoot.style.opacity = 0f;
+            yield return new WaitForSecondsRealtime(popupFadeOut);
         }
         _popupPlaying = false;
-    }
-
-    private IEnumerator FadePopup(float from, float to, float dur)
-    {
-        float t = 0f;
-        while (t < dur)
-        {
-            t += Time.unscaledDeltaTime;
-            _popupRoot.style.opacity = Mathf.Lerp(from, to, dur > 0f ? t / dur : 1f);
-            yield return null;
-        }
-        _popupRoot.style.opacity = to;
     }
 
     private void OnDestroy()

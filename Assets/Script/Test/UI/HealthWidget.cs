@@ -9,10 +9,7 @@ public class HealthWidget : MonoBehaviour
     public Color healthLowColor = new Color(0.72f, 0.12f, 0.12f, 1f);
     public Color shieldColor = new Color(0.45f, 0.78f, 0.95f, 1f);
     [Range(0f, 1f)] public float lowThreshold = 0.3f;
-    public float fillDamping = 12f;
     public float ghostDamping = 3f;
-    public float shieldDamping = 10f;
-    public float colorDamping = 6f;
 
     private VisualElement _root;
     private VisualElement _healthFill;
@@ -23,9 +20,7 @@ public class HealthWidget : MonoBehaviour
     private float _target;
     private float _shieldTarget;
     private Color _colorCurrent;
-    private float _currentFillPct = 1f;
     private float _currentGhostPct = 1f;
-    private float _currentShieldPct = 0f;
     private Coroutine _shake;
 
     private void Awake()
@@ -55,7 +50,7 @@ public class HealthWidget : MonoBehaviour
     {
         var th = UITheme.Active;
         if (th != null) { healthFullColor = th.healthFull; healthLowColor = th.healthLow; shieldColor = th.shield; }
-        while (CowsinsHUDAdapter.Instance == null) yield return null;
+        yield return new WaitUntil(() => CowsinsHUDAdapter.Instance != null);
         var a = CowsinsHUDAdapter.Instance;
         a.OnHealthChanged += OnHealth;
         a.OnShieldChanged += OnShield;
@@ -64,10 +59,20 @@ public class HealthWidget : MonoBehaviour
         _colorCurrent = Color.Lerp(healthLowColor, healthFullColor, Mathf.InverseLerp(lowThreshold, 1f, _target));
     }
 
+    private float _lastHp;
     private void OnHealth(float hp, float max, bool damaged)
     {
         _target = max > 0f ? Mathf.Clamp01(hp / max) : 0f;
         if (_healthValue != null) _healthValue.text = Mathf.CeilToInt(Mathf.Max(0f, hp)).ToString();
+        Color tgt = Color.Lerp(healthLowColor, healthFullColor, Mathf.InverseLerp(lowThreshold, 1f, _target));
+        _colorCurrent = tgt;
+        _healthFill.style.width = Length.Percent(_target * 100f);
+        _healthFill.style.backgroundColor = _colorCurrent;
+
+        if (hp > _lastHp)
+            _healthGhost.style.width = Length.Percent(_target * 100f);
+        _lastHp = hp;
+
         if (damaged && _root != null)
         {
             if (_shake != null) StopCoroutine(_shake);
@@ -80,31 +85,18 @@ public class HealthWidget : MonoBehaviour
         bool has = max > 0f;
         if (_shieldRoot != null) _shieldRoot.style.display = has ? DisplayStyle.Flex : DisplayStyle.None;
         _shieldTarget = has ? Mathf.Clamp01(sh / max) : 0f;
-        if (_shieldFill != null) _shieldFill.style.backgroundColor = shieldColor;
+        _shieldFill.style.backgroundColor = shieldColor;
+        _shieldFill.style.width = Length.Percent(_shieldTarget * 100f);
     }
 
     private void Update()
     {
         float dt = Time.unscaledDeltaTime;
-        if (_healthFill != null)
-        {
-            float k = 1f - Mathf.Exp(-fillDamping * dt);
-            _currentFillPct = Mathf.Lerp(_currentFillPct, _target, k);
-            _healthFill.style.width = Length.Percent(_currentFillPct * 100f);
-            Color tgt = Color.Lerp(healthLowColor, healthFullColor, Mathf.InverseLerp(lowThreshold, 1f, _target));
-            _colorCurrent = Color.Lerp(_colorCurrent, tgt, 1f - Mathf.Exp(-colorDamping * dt));
-            _healthFill.style.backgroundColor = _colorCurrent;
-        }
         if (_healthGhost != null)
         {
             if (_currentGhostPct < _target) _currentGhostPct = _target;
             else _currentGhostPct = Mathf.Lerp(_currentGhostPct, _target, 1f - Mathf.Exp(-ghostDamping * dt));
             _healthGhost.style.width = Length.Percent(_currentGhostPct * 100f);
-        }
-        if (_shieldFill != null)
-        {
-            _currentShieldPct = Mathf.Lerp(_currentShieldPct, _shieldTarget, 1f - Mathf.Exp(-shieldDamping * dt));
-            _shieldFill.style.width = Length.Percent(_currentShieldPct * 100f);
         }
     }
 

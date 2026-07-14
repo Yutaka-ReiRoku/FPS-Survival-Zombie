@@ -47,6 +47,7 @@ public class DamageDirectionHUD : MonoBehaviour
             var arc = new VisualElement();
             arc.name = "Arc";
             arc.AddToClassList("dir-arc");
+            arc.usageHints = UsageHints.DynamicTransform;
             arc.style.width = arcWidth;
             arc.style.height = arcHeight;
             arc.style.backgroundColor = new StyleColor(ArcColor);

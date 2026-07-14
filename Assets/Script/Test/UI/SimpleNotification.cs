@@ -30,7 +30,6 @@ public class SimpleNotification : MonoBehaviour
             {
                 var go = new GameObject("SimpleNotification");
                 _instance = go.AddComponent<SimpleNotification>();
-                DontDestroyOnLoad(go);
             }
             return _instance;
         }
@@ -91,28 +90,10 @@ public class SimpleNotification : MonoBehaviour
 
     private IEnumerator ShowRoutine()
     {
-        float t;
-
-        t = 0f;
-        while (t < fadeIn)
-        {
-            t += Time.unscaledDeltaTime;
-            _root.style.opacity = Mathf.Lerp(0f, 1f, fadeIn > 0f ? t / fadeIn : 1f);
-            yield return null;
-        }
         _root.style.opacity = 1f;
-
-        t = 0f;
-        while (t < hold) { t += Time.unscaledDeltaTime; yield return null; }
-
-        t = 0f;
-        while (t < fadeOut)
-        {
-            t += Time.unscaledDeltaTime;
-            _root.style.opacity = Mathf.Lerp(1f, 0f, fadeOut > 0f ? t / fadeOut : 1f);
-            yield return null;
-        }
+        yield return new WaitForSecondsRealtime(fadeIn + hold);
         _root.style.opacity = 0f;
+        yield return new WaitForSecondsRealtime(fadeOut);
         _routine = null;
     }
 }

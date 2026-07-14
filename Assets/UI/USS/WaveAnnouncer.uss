@@ -12,10 +12,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    transition: opacity var(--transition-normal, 0.3s) ease-out;
 }
 
 #WaveAnnouncer.wave-visible {
     display: flex;
+    opacity: var(--opacity-full, 1);
 }
 
 .wave-title {

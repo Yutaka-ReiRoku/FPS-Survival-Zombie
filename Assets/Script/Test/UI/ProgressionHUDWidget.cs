@@ -34,6 +34,8 @@ public class ProgressionHUDWidget : MonoBehaviour
         _levelValue = _root?.Q<Label>("LevelValue");
         _xpFill = _root?.Q<VisualElement>("XpFill");
         _xpGhost = _root?.Q<VisualElement>("XpGhost");
+        if (_xpFill != null) _xpFill.usageHints = UsageHints.DynamicTransform;
+        if (_xpGhost != null) _xpGhost.usageHints = UsageHints.DynamicTransform;
         if (_root == null) { enabled = false; }
     }
 

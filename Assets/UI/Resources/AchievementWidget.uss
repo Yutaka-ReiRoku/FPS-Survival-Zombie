@@ -19,7 +19,7 @@
     translate: -50% 0;
     background-color: var(--color-surface-bottom, rgba(19, 23, 28, 1));
     border-radius: var(--radius-s, 8px);
-    transition: opacity var(--transition-medium, 0.22s);
+    transition: opacity var(--transition-medium, 0.3s) ease-out;
 }
 
 #AchievementPopup #AccentBar {
@@ -68,7 +68,7 @@
     top: 0;
     bottom: 0;
     background-color: var(--color-surface-bottom, rgba(19, 23, 28, 1));
-    transition: opacity var(--transition-medium, 0.22s);
+    transition: opacity var(--transition-medium, 0.2s) ease-out;
 }
 
 /* --- List Panel --- */
@@ -80,7 +80,7 @@
     background-color: var(--color-surface-bottom, rgba(19, 23, 28, 1));
     border-radius: var(--radius-m, 16px);
     padding: var(--space-xl, 20px);
-    transition: opacity var(--transition-medium, 0.22s);
+    transition: opacity var(--transition-medium, 0.2s) ease-out;
 }
 
 #AchievementListPanel .list-header {

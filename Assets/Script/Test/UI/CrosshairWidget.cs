@@ -20,16 +20,19 @@ public class CrosshairWidget : MonoBehaviour
     [Header("Behaviour")]
     public bool removeCrosshairOnAiming = true;
 
-    [Header("Colours")]
-    public Color defaultColor = new Color(0.171f, 1f, 0f, 1f);
-    public Color enemySpottedColor = new Color(1f, 0f, 0f, 1f);
-
     private VisualElement _container;
-    private VisualElement _top, _down, _left, _right, _center;
-    private VisualElement _tlH, _tlV, _trH, _trV, _blH, _blV, _brH, _brV;
+    private VisualElement[] _bars;
     private CowsinsHUDAdapter _adapter;
     private float _spread;
     private float _thickness;
+
+    private const int BarCount = 13;
+    private static readonly string[] BarNames =
+    {
+        "CHTop", "CHDown", "CHLeft", "CHRight", "CHCenter",
+        "CHTL_H", "CHTL_V", "CHTR_H", "CHTR_V",
+        "CHBL_H", "CHBL_V", "CHBR_H", "CHBR_V"
+    };
 
     private void Awake()
     {
@@ -40,7 +43,7 @@ public class CrosshairWidget : MonoBehaviour
     private void OnEnable()
     {
         var doc = GetComponent<UIDocument>();
-        if (doc == null) doc = FindObjectOfType<UIDocument>();
+        if (doc == null) doc = FindFirstObjectByType<UIDocument>();
         if (doc == null) { enabled = false; return; }
         _container = doc.rootVisualElement.Q("Crosshair");
         if (_container == null) { enabled = false; return; }
@@ -51,23 +54,15 @@ public class CrosshairWidget : MonoBehaviour
     private void Build()
     {
         _container.Clear();
-        _top = MakeBar("CHTop");
-        _down = MakeBar("CHDown");
-        _left = MakeBar("CHLeft");
-        _right = MakeBar("CHRight");
-        _center = MakeBar("CHCenter");
-        _tlH = MakeBar("CHTL_H"); _tlV = MakeBar("CHTL_V");
-        _trH = MakeBar("CHTR_H"); _trV = MakeBar("CHTR_V");
-        _blH = MakeBar("CHBL_H"); _blV = MakeBar("CHBL_V");
-        _brH = MakeBar("CHBR_H"); _brV = MakeBar("CHBR_V");
-    }
-
-    private VisualElement MakeBar(string name)
-    {
-        var el = new VisualElement { name = name };
-        el.AddToClassList("crosshair-bar");
-        _container.Add(el);
-        return el;
+        _bars = new VisualElement[BarCount];
+        for (int i = 0; i < BarCount; i++)
+        {
+            var bar = new VisualElement { name = BarNames[i] };
+            bar.AddToClassList("crosshair-bar");
+            bar.usageHints = UsageHints.DynamicTransform | UsageHints.DynamicColor;
+            _container.Add(bar);
+            _bars[i] = bar;
+        }
     }
 
     private IEnumerator Bind()
@@ -112,11 +107,9 @@ public class CrosshairWidget : MonoBehaviour
             else target = jumpSpread;
         }
         _spread = Mathf.Lerp(_spread, target, resizeSpeed * dt);
+        _thickness = Mathf.Lerp(_thickness, a != null && a.EnemySpotted ? enemyThickness : lineThickness, resizeSpeed * dt);
 
         bool spotted = a != null && a.EnemySpotted;
-        Color col = spotted ? enemySpottedColor : defaultColor;
-        _thickness = Mathf.Lerp(_thickness, spotted ? enemyThickness : lineThickness, resizeSpeed * dt);
-
         float cx = _container.resolvedStyle.width / 2f;
         float cy = _container.resolvedStyle.height / 2f;
         float L = lineLength, t = _thickness;
@@ -124,40 +117,39 @@ public class CrosshairWidget : MonoBehaviour
         float s = _spread;
 
         bool noWeapon = a == null || !a.HasWeapon;
-        Set(_top, noWeapon || a.CHTop, 0f, halfGap, t, L, col, cx, cy);
-        Set(_down, noWeapon || a.CHDown, 0f, -halfGap, t, L, col, cx, cy);
-        Set(_right, noWeapon || a.CHRight, halfGap, 0f, L, t, col, cx, cy);
-        Set(_left, noWeapon || a.CHLeft, -halfGap, 0f, L, t, col, cx, cy);
+        Set(_bars[0],  noWeapon || a.CHTop,      0f,     halfGap,   t,  L,   spotted, cx, cy);
+        Set(_bars[1],  noWeapon || a.CHDown,      0f,     -halfGap,  t,  L,   spotted, cx, cy);
+        Set(_bars[2],  noWeapon || a.CHRight,     halfGap, 0f,       L,  t,   spotted, cx, cy);
+        Set(_bars[3],  noWeapon || a.CHLeft,      -halfGap,0f,       L,  t,   spotted, cx, cy);
 
         float d = Mathf.Min(t, L);
-        Set(_center, a != null && a.HasWeapon && a.CHCenter, 0f, 0f, d, d, col, cx, cy);
+        Set(_bars[4],  a != null && a.HasWeapon && a.CHCenter, 0f, 0f, d, d, spotted, cx, cy);
 
         bool tl = a != null && a.HasWeapon && a.CHTopLeft;
         bool tr = a != null && a.HasWeapon && a.CHTopRight;
         bool bl = a != null && a.HasWeapon && a.CHBottomLeft;
         bool br = a != null && a.HasWeapon && a.CHBottomRight;
-        Set(_tlH, tl, -s + L / 2f, s - t / 2f, L, t, col, cx, cy);
-        Set(_tlV, tl, -s + t / 2f, s - L / 2f, t, L, col, cx, cy);
-        Set(_trH, tr, s - L / 2f, s - t / 2f, L, t, col, cx, cy);
-        Set(_trV, tr, s - t / 2f, s - L / 2f, t, L, col, cx, cy);
-        Set(_blH, bl, -s + L / 2f, -s + t / 2f, L, t, col, cx, cy);
-        Set(_blV, bl, -s + t / 2f, -s + L / 2f, t, L, col, cx, cy);
-        Set(_brH, br, s - L / 2f, -s + t / 2f, L, t, col, cx, cy);
-        Set(_brV, br, s - t / 2f, -s + L / 2f, t, L, col, cx, cy);
+        Set(_bars[5],  tl, -s + L / 2f,  s - t / 2f,  L,  t,  spotted, cx, cy);
+        Set(_bars[6],  tl, -s + t / 2f,  s - L / 2f,  t,  L,  spotted, cx, cy);
+        Set(_bars[7],  tr,  s - L / 2f,  s - t / 2f,  L,  t,  spotted, cx, cy);
+        Set(_bars[8],  tr,  s - t / 2f,  s - L / 2f,  t,  L,  spotted, cx, cy);
+        Set(_bars[9],  bl, -s + L / 2f, -s + t / 2f,  L,  t,  spotted, cx, cy);
+        Set(_bars[10], bl, -s + t / 2f, -s + L / 2f,  t,  L,  spotted, cx, cy);
+        Set(_bars[11], br,  s - L / 2f, -s + t / 2f,  L,  t,  spotted, cx, cy);
+        Set(_bars[12], br,  s - t / 2f, -s + L / 2f,  t,  L,  spotted, cx, cy);
 
         bool hidden = a != null && (a.IsDead || (a.IsAiming && removeCrosshairOnAiming));
         _container.style.opacity = Mathf.MoveTowards(_container.style.opacity.value, hidden ? 0f : 1f, 12f * dt);
     }
 
-    private void Set(VisualElement bar, bool active, float posX, float posY, float w, float h, Color col, float cx, float cy)
+    private void Set(VisualElement bar, bool active, float posX, float posY, float w, float h, bool enemy, float cx, float cy)
     {
         if (bar == null) return;
-        bar.style.display = active ? DisplayStyle.Flex : DisplayStyle.None;
+        bar.EnableInClassList("crosshair-bar--hidden", !active);
         if (!active) return;
-        bar.style.left = cx + posX - w / 2f;
-        bar.style.top = cy - posY - h / 2f;
+        bar.style.translate = new Translate(cx + posX - w / 2f, cy - posY - h / 2f);
         bar.style.width = w;
         bar.style.height = h;
-        bar.style.backgroundColor = new StyleColor(col);
+        bar.EnableInClassList("crosshair-bar--enemy", enemy);
     }
 }

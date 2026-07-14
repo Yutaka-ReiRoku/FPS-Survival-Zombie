@@ -89,7 +89,8 @@ public class CreditsSequence : MonoBehaviour
         global::UnityEngine.Cursor.lockState = CursorLockMode.None;
         global::UnityEngine.Cursor.visible = true;
 
-        yield return Fade(0f, 1f, fadeIn);
+        _root.style.opacity = 1f;
+        yield return new WaitForSecondsRealtime(fadeIn);
 
         float viewportHeight = Screen.height;
         float totalTravel = _contentHeight + viewportHeight;
@@ -105,32 +106,16 @@ public class CreditsSequence : MonoBehaviour
         }
 
         if (!_skipRequested)
-        {
-            float t = 0f;
-            while (t < holdAtEnd) { t += Time.unscaledDeltaTime; yield return null; }
-        }
+            yield return new WaitForSecondsRealtime(holdAtEnd);
 
-        yield return Fade(1f, 0f, fadeOut);
+        _root.style.opacity = 0f;
+        yield return new WaitForSecondsRealtime(fadeOut);
 
         Time.timeScale = prevTimeScale > 0f ? prevTimeScale : 1f;
         AudioListener.pause = false;
         Destroy(_docGO);
 
         SceneManager.LoadScene(mainMenuSceneName);
-    }
-
-    private IEnumerator Fade(float from, float to, float duration)
-    {
-        _root.style.opacity = from;
-        if (duration <= 0f) { _root.style.opacity = to; yield break; }
-        float t = 0f;
-        while (t < duration)
-        {
-            t += Time.unscaledDeltaTime;
-            _root.style.opacity = Mathf.Lerp(from, to, t / duration);
-            yield return null;
-        }
-        _root.style.opacity = to;
     }
 
     private void Build()

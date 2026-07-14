@@ -43,36 +43,15 @@ public class EpilogueSlide : MonoBehaviour
         float prevTimeScale = Time.timeScale;
         Time.timeScale = 0f;
 
-        yield return Fade(0f, 1f, fadeIn);
-
-        yield return WaitRealtime(hold);
-
-        yield return Fade(1f, 0f, fadeOut);
+        _root.style.opacity = 1f;
+        yield return new WaitForSecondsRealtime(fadeIn + hold);
+        _root.style.opacity = 0f;
+        yield return new WaitForSecondsRealtime(fadeOut);
 
         Time.timeScale = prevTimeScale > 0f ? prevTimeScale : 1f;
         Destroy(_docGO);
 
         onComplete?.Invoke();
-    }
-
-    private IEnumerator WaitRealtime(float seconds)
-    {
-        float t = 0f;
-        while (t < seconds) { t += Time.unscaledDeltaTime; yield return null; }
-    }
-
-    private IEnumerator Fade(float from, float to, float duration)
-    {
-        _root.style.opacity = from;
-        if (duration <= 0f) { _root.style.opacity = to; yield break; }
-        float t = 0f;
-        while (t < duration)
-        {
-            t += Time.unscaledDeltaTime;
-            _root.style.opacity = Mathf.Lerp(from, to, t / duration);
-            yield return null;
-        }
-        _root.style.opacity = to;
     }
 
     private void Build()
@@ -81,6 +60,8 @@ public class EpilogueSlide : MonoBehaviour
         _docGO.transform.SetParent(transform, false);
         var doc = _docGO.GetComponent<UIDocument>();
         doc.sortingOrder = 1500;
+        var sheet = Resources.Load<StyleSheet>("EpilogueSlide");
+        if (sheet != null) doc.rootVisualElement.styleSheets.Add(sheet);
 
         _root = new VisualElement();
         _root.name = "EpilogueRoot";

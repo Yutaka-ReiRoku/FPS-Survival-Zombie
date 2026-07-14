@@ -22,7 +22,9 @@ public class QuestTrackerWidget : MonoBehaviour
 
     private void Awake()
     {
-        var root = GetComponent<UIDocument>().rootVisualElement;
+        var doc = GetComponent<UIDocument>();
+        if (doc == null) { enabled = false; return; }
+        var root = doc.rootVisualElement;
         _mainPanel = root.Q("MainPanel");
         _chapter = root.Q<Label>("Chapter");
         _title = root.Q<Label>("Title");

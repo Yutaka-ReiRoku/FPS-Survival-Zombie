@@ -30,6 +30,7 @@
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     white-space: nowrap;
     overflow: visible;
+    transition: color var(--transition-fast, 0.15s) ease-out;
 }
 
 .threat-bar-bg {
@@ -47,7 +48,7 @@
 .threat-fill {
     height: 100%;
     background-color: var(--color-success-top, rgb(79, 224, 138));
-    transition: width var(--transition-normal, 0.15s) ease-out;
+    transition: width var(--transition-normal, 0.15s) ease-out, background-color var(--transition-normal, 0.15s) ease-out;
 }
 
 .threat-warn {
@@ -62,4 +63,5 @@
     opacity: 0;
     white-space: nowrap;
     overflow: visible;
+    transition: opacity var(--transition-fast, 0.15s) ease-out;
 }
