@@ -26,6 +26,7 @@
     <ui:Style src="project://database/Assets/UI/USS/LowHealthVignette.uss" />
     <ui:Style src="project://database/Assets/UI/USS/QuestTracker.uss" />
     <ui:Style src="project://database/Assets/UI/USS/JournalUI.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/StatsPanel.uss" />
     <ui:Style src="project://database/Assets/UI/USS/HUDChips.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
@@ -240,6 +241,17 @@
         <ui:VisualElement name="CollectiblesChip" class="chip-root chip-collectibles chip-hidden">
             <ui:VisualElement name="ChipIcon" class="chip-icon chip-collectibles-icon" />
             <ui:Label name="ChipLabel" class="chip-label" text="Journals : 0/0" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Stats Panel (Phase B) -->
+    <ui:VisualElement name="StatsPanel" class="stats-root">
+        <ui:VisualElement name="StatsScrim" class="stats-scrim" />
+        <ui:VisualElement name="StatsCard" class="stats-card">
+            <ui:VisualElement name="StatsAccent" class="stats-accent" />
+            <ui:Label name="StatsTitle" class="stats-title" text="STATISTICS" />
+            <ui:VisualElement name="StatsDivider" class="stats-divider" />
+            <ui:VisualElement name="StatsGrid" class="stats-grid" />
         </ui:VisualElement>
     </ui:VisualElement>
 

@@ -1,0 +1,47 @@
+/* CutscenePanel.uss — Runtime-loaded styles for CutscenePlayer (Phase B) */
+/* Vars duplicated from Theme.uss for runtime Resources loading */
+--color-accent-gold-dark: rgb(217, 199, 115);
+--color-text-primary: rgba(245, 245, 245, 1);
+
+.cutscene-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+}
+
+.cutscene-scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.cutscene-title {
+    font-size: 64px;
+    -unity-font: resource("Fonts/Anton");
+    color: var(--color-accent-gold-dark, rgb(217, 199, 115));
+    -unity-text-align: middle-center;
+    width: 1400px;
+    height: 100px;
+    position: absolute;
+    top: calc(50% - 60px);
+    left: calc(50% - 700px);
+}
+
+.cutscene-body {
+    font-size: 30px;
+    -unity-font: resource("Fonts/Outfit-SemiBold");
+    color: var(--color-text-primary, rgb(235, 235, 235));
+    -unity-text-align: middle-center;
+    width: 1400px;
+    height: 80px;
+    position: absolute;
+    top: calc(50% + 40px);
+    left: calc(50% - 700px);
+}

@@ -1,0 +1,113 @@
+@import url("Shared.uss");
+
+.stats-root {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+.stats-root.open {
+    display: flex;
+}
+
+.stats-scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--color-scrim-bottom, rgba(0, 0, 0, 0.86));
+    opacity: 0;
+    transition: opacity var(--panel-in-duration, 0.18s);
+}
+.stats-root.open .stats-scrim {
+    opacity: 1;
+}
+
+.stats-card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 620px;
+    height: 800px;
+    background-color: var(--color-surface-top, rgba(31, 38, 46, 0.96));
+    opacity: 0;
+    scale: 0.92;
+    transition: opacity var(--panel-in-duration, 0.18s), scale var(--panel-in-duration, 0.18s);
+}
+.stats-root.open .stats-card {
+    opacity: 1;
+    scale: 1;
+}
+
+.stats-accent {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 4px;
+    background-color: var(--color-accent-gold-dark, rgb(217, 199, 115));
+}
+
+.stats-title {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 24px;
+    height: 56px;
+    font-size: 38px;
+    -unity-font: var(--font-display, resource("Fonts/Anton"));
+    color: var(--color-text-primary, white);
+    -unity-text-align: middle-center;
+}
+
+.stats-divider {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 86px;
+    height: 2px;
+    background-color: var(--color-accent-gold-dark, rgb(217, 199, 115));
+    opacity: 0.5;
+}
+
+.stats-grid {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 100px;
+    bottom: 20px;
+    flex-direction: column;
+    gap: var(--space-s, 6px);
+}
+
+.stats-row {
+    flex-direction: row;
+    height: 28px;
+}
+
+.stats-label {
+    flex-grow: 1;
+    font-size: 20px;
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: var(--color-text-primary, rgba(245, 245, 245, 1));
+    -unity-text-align: middle-left;
+    padding-left: 8px;
+}
+.stats-label.sub {
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+}
+
+.stats-value {
+    width: 220px;
+    font-size: 22px;
+    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    color: var(--color-accent-gold-dark, rgb(217, 199, 115));
+    -unity-text-align: middle-right;
+    padding-right: 8px;
+}
