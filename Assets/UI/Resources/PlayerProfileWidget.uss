@@ -1,0 +1,167 @@
+/* ===== PlayerProfileWidget.uss (Runtime-loaded) ===== */
+
+/* --- Root --- */
+#ProfileRoot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+/* --- Chip --- */
+#PlayerChip {
+    position: absolute;
+    right: var(--space-l, 16px);
+    bottom: var(--space-5xl, 48px);
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-panel-bg, rgba(14, 17, 21, 0.92));
+    border-radius: var(--radius-l, 22px);
+    padding: 6px 12px;
+    cursor: link;
+    transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
+}
+
+#PlayerChip:hover {
+    background-color: rgba(26, 31, 38, 0.96);
+}
+
+#PlayerChip:active {
+    scale: 0.95;
+}
+
+#PlayerChip #Avatar {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    border-radius: var(--radius-round, 50%);
+}
+
+#PlayerChip #TextCol {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+#PlayerChip #Username {
+    font-size: 14px;
+    -unity-font: var(--font-body);
+    color: var(--color-text-primary, white);
+}
+
+#PlayerChip #Status {
+    font-size: 11px;
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+}
+
+/* --- Panel --- */
+#ProfilePanel {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    background-color: var(--color-panel-bg, rgba(14, 17, 21, 0.92));
+    border-radius: var(--radius-m, 16px);
+    padding: 32px;
+}
+
+#ProfilePanel .panel-header {
+    flex-direction: row;
+    align-items: center;
+    height: 32px;
+    margin-bottom: 8px;
+}
+
+#ProfilePanel .panel-title {
+    font-size: var(--fs-l, 22px);
+    -unity-font: var(--font-body);
+    flex-grow: 1;
+    color: var(--color-accent-gold, rgb(217, 199, 115));
+}
+
+#ProfilePanel .panel-divider {
+    height: 1px;
+    background-color: var(--color-divider, rgba(255, 255, 255, 0.1));
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+/* --- Field Labels --- */
+#ProfilePanel .field-label {
+    font-size: 12px;
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    margin-top: 8px;
+}
+
+/* --- Achievement List --- */
+#ProfilePanel #AchList {
+    min-height: 120px;
+    flex-grow: 1;
+    background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
+    padding: 10px 12px;
+    border-radius: var(--radius-s, 8px);
+}
+
+#ProfilePanel #AchList Label {
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+/* --- Spacer --- */
+#ProfilePanel .panel-spacer {
+    flex-grow: 1;
+}
+
+/* --- Buttons --- */
+.profile-btn {
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(128, 51, 51, 1);
+    border-radius: var(--radius-s, 8px);
+    cursor: link;
+    transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
+}
+
+.profile-btn:hover {
+    background-color: rgba(128, 51, 51, 0.7);
+    scale: 1.06;
+}
+
+.profile-btn:active {
+    scale: 0.95;
+}
+
+.profile-btn .btn-label {
+    font-size: 15px;
+    -unity-font: var(--font-body);
+    color: white;
+    -unity-text-align: middle-center;
+}
+
+/* --- Close Button --- */
+.profile-close-btn {
+    width: 36px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(128, 51, 51, 1);
+    border-radius: var(--radius-s, 8px);
+    cursor: link;
+    transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
+}
+
+.profile-close-btn:hover {
+    background-color: rgba(128, 51, 51, 0.7);
+    scale: 1.06;
+}
+
+.profile-close-btn:active {
+    scale: 0.95;
+}
+
+.profile-close-btn .btn-label {
+    font-size: 15px;
+    color: white;
+    -unity-text-align: middle-center;
+}

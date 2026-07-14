@@ -16,13 +16,9 @@ public class PlayerProfileWidget : MonoBehaviour
     public Vector2 chipAnchorMin = new Vector2(1f, 1f);
     public Vector2 chipAnchorMax = new Vector2(1f, 1f);
 
-    private static readonly Color BgColor = new Color(0.078f, 0.094f, 0.118f, 0.96f);
-    private static readonly Color CardColor = new Color(0.12f, 0.14f, 0.18f, 1f);
     private static readonly Color ButtonColor = new Color(0.31f, 0.878f, 0.541f, 1f);
     private static readonly Color AccentColor = new Color(0.85f, 0.78f, 0.45f, 1f);
-    private static readonly Color TextPrimary = new Color(0.96f, 0.96f, 0.96f, 1f);
     private static readonly Color TextMuted = new Color(0.62f, 0.66f, 0.72f, 1f);
-    private static readonly Color DividerColor = new Color(0.2f, 0.22f, 0.26f, 1f);
 
     private GameObject _docGO;
     private VisualElement _chip;
@@ -85,13 +81,10 @@ public class PlayerProfileWidget : MonoBehaviour
         RefreshChip();
     }
 
-    private VisualElement MakeChipButton(VisualElement ve, System.Action onClick)
+    private void MakeChipButton(VisualElement ve, System.Action onClick)
     {
         ve.focusable = true;
         ve.RegisterCallback<ClickEvent>(_ => onClick());
-        ve.RegisterCallback<PointerEnterEvent>(_ => ve.style.backgroundColor = new Color(0.1f, 0.12f, 0.15f, 0.96f));
-        ve.RegisterCallback<PointerLeaveEvent>(_ => ve.style.backgroundColor = BgColor);
-        return ve;
     }
 
     private void BuildChip()
@@ -103,77 +96,47 @@ public class PlayerProfileWidget : MonoBehaviour
 
         var root = new VisualElement();
         root.name = "ProfileRoot";
-        root.style.position = Position.Absolute;
-        root.style.left = 0;
-        root.style.right = 0;
-        root.style.top = 0;
-        root.style.bottom = 0;
+        root.AddToClassList("overlay");
         root.pickingMode = PickingMode.Ignore;
 
         _chip = new VisualElement();
         _chip.name = "PlayerChip";
-        _chip.style.position = Position.Absolute;
         _chip.style.width = chipWidth;
         _chip.style.height = chipHeight;
-        _chip.style.backgroundColor = BgColor;
-        _chip.style.flexDirection = FlexDirection.Row;
-        _chip.style.alignItems = Align.Center;
-        _chip.style.paddingLeft = 12;
-        _chip.style.paddingRight = 12;
-        _chip.style.paddingTop = 6;
-        _chip.style.paddingBottom = 6;
         MakeChipButton(_chip, TogglePanel);
         root.Add(_chip);
 
         _chipAvatar = new VisualElement();
         _chipAvatar.name = "Avatar";
-        _chipAvatar.style.width = 32;
-        _chipAvatar.style.height = 32;
-        _chipAvatar.style.backgroundColor = AccentColor;
-        _chipAvatar.style.marginRight = 10;
         _chip.Add(_chipAvatar);
 
         var textCol = new VisualElement();
         textCol.name = "TextCol";
-        textCol.style.flexDirection = FlexDirection.Column;
-        textCol.style.flexGrow = 1;
         _chip.Add(textCol);
 
         _chipUsername = new Label("Not logged in");
         _chipUsername.name = "Username";
-        _chipUsername.style.fontSize = 14;
-        _chipUsername.style.color = TextPrimary;
         textCol.Add(_chipUsername);
 
         _chipStatus = new Label("Click to login");
         _chipStatus.name = "Status";
-        _chipStatus.style.fontSize = 11;
-        _chipStatus.style.color = TextMuted;
         textCol.Add(_chipStatus);
 
-        doc.rootVisualElement.Add(root);
-    }
+        var sheet = Resources.Load<StyleSheet>("PlayerProfileWidget");
+        if (sheet != null) root.styleSheets.Add(sheet);
 
-    private static VisualElement CreateTextLabel(string name, string content, float size, Color color)
-    {
-        var lbl = new Label(content);
-        lbl.name = name;
-        lbl.style.fontSize = size;
-        lbl.style.color = color;
-        return lbl;
+        doc.rootVisualElement.Add(root);
     }
 
     private void AddField(string label, out Label valueOut, float labelSize, float valueSize)
     {
         var lbl = new Label(label);
-        lbl.style.fontSize = 12;
-        lbl.style.color = TextMuted;
-        lbl.style.marginTop = 8;
+        lbl.AddToClassList("field-label");
         _panel.Add(lbl);
 
         var val = new Label("---");
         val.style.fontSize = valueSize;
-        val.style.color = TextPrimary;
+        val.style.color = Color.white;
         _panel.Add(val);
         valueOut = val;
     }
@@ -181,28 +144,18 @@ public class PlayerProfileWidget : MonoBehaviour
     private VisualElement MakeDivider()
     {
         var div = new VisualElement();
-        div.style.height = 1;
-        div.style.backgroundColor = DividerColor;
-        div.style.marginTop = 8;
-        div.style.marginBottom = 8;
+        div.AddToClassList("panel-divider");
         return div;
     }
 
-    private VisualElement MakeButton(string label, Color bg)
+    private VisualElement MakeButton(string label)
     {
         var btn = new VisualElement();
-        btn.style.backgroundColor = bg;
-        btn.style.alignItems = Align.Center;
-        btn.style.justifyContent = Justify.Center;
-        btn.style.height = 36;
+        btn.AddToClassList("profile-btn");
         btn.focusable = true;
-        btn.RegisterCallback<PointerEnterEvent>(_ => btn.style.backgroundColor = Color.Lerp(bg, Color.white, 0.15f));
-        btn.RegisterCallback<PointerLeaveEvent>(_ => btn.style.backgroundColor = bg);
 
         var lbl = new Label(label);
-        lbl.style.fontSize = 15;
-        lbl.style.color = Color.white;
-        lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
+        lbl.AddToClassList("btn-label");
         btn.Add(lbl);
         return btn;
     }
@@ -211,33 +164,18 @@ public class PlayerProfileWidget : MonoBehaviour
     {
         _panel = new VisualElement();
         _panel.name = "ProfilePanel";
-        _panel.style.position = Position.Absolute;
-        _panel.style.left = Length.Percent(50);
-        _panel.style.top = Length.Percent(50);
-        _panel.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
         _panel.style.width = panelWidth;
-        _panel.style.backgroundColor = BgColor;
-        _panel.style.paddingLeft = 32;
-        _panel.style.paddingRight = 32;
-        _panel.style.paddingTop = 32;
-        _panel.style.paddingBottom = 32;
 
         var headerRow = new VisualElement();
-        headerRow.style.flexDirection = FlexDirection.Row;
-        headerRow.style.alignItems = Align.Center;
-        headerRow.style.height = 32;
-        headerRow.style.marginBottom = 8;
+        headerRow.AddToClassList("panel-header");
         _panel.Add(headerRow);
 
         var headerText = new Label("PLAYER PROFILE");
-        headerText.style.fontSize = 22;
-        headerText.style.color = AccentColor;
-        headerText.style.flexGrow = 1;
+        headerText.AddToClassList("panel-title");
         headerRow.Add(headerText);
 
-        var closeBtn = MakeButton("X", new Color(0.5f, 0.2f, 0.2f, 1f));
-        closeBtn.style.width = 36;
-        closeBtn.style.height = 32;
+        var closeBtn = MakeButton("X");
+        closeBtn.AddToClassList("profile-close-btn");
         closeBtn.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
         headerRow.Add(closeBtn);
 
@@ -259,18 +197,13 @@ public class PlayerProfileWidget : MonoBehaviour
         _achievementList.name = "AchList";
         _achievementList.style.minHeight = 120;
         _achievementList.style.flexGrow = 1;
-        _achievementList.style.backgroundColor = CardColor;
-        _achievementList.style.paddingLeft = 12;
-        _achievementList.style.paddingRight = 12;
-        _achievementList.style.paddingTop = 10;
-        _achievementList.style.paddingBottom = 10;
         _panel.Add(_achievementList);
 
         var spacer = new VisualElement();
-        spacer.style.flexGrow = 1;
+        spacer.AddToClassList("panel-spacer");
         _panel.Add(spacer);
 
-        _logoutButton = MakeButton("LOGOUT", new Color(0.5f, 0.2f, 0.2f, 1f));
+        _logoutButton = MakeButton("LOGOUT");
         _logoutButton.style.marginTop = 8;
         _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
         _logoutButton.style.display = DisplayStyle.None;
@@ -364,7 +297,7 @@ public class PlayerProfileWidget : MonoBehaviour
         bool loggedIn = pm != null && pm.IsLoggedIn;
 
         _panelUsername.text = loggedIn ? (pm.Username ?? "Player") : "Not logged in";
-        _panelUsername.style.color = loggedIn ? TextPrimary : TextMuted;
+        _panelUsername.style.color = loggedIn ? Color.white : TextMuted;
         _panelId.text = loggedIn ? (pm.PlayFabId ?? "---") : "---";
 
         int bestScore = PlayerPrefs.GetInt("BestScore", 0);

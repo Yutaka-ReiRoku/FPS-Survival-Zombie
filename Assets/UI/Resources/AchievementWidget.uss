@@ -1,0 +1,140 @@
+/* ===== AchievementWidget.uss (Runtime-loaded) ===== */
+
+/* --- Root --- */
+#AchievementRoot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+/* --- Achievement Popup --- */
+#AchievementPopup {
+    position: absolute;
+    left: 50%;
+    translate: -50% 0;
+    background-color: var(--color-surface-bottom, rgba(19, 23, 28, 1));
+    border-radius: var(--radius-s, 8px);
+    transition: opacity var(--transition-medium, 0.22s);
+}
+
+#AchievementPopup #AccentBar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: var(--color-accent-gold, rgb(217, 199, 115));
+    border-top-left-radius: var(--radius-s, 8px);
+    border-bottom-left-radius: var(--radius-s, 8px);
+}
+
+#AchievementPopup #Icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    translate: 0 -50%;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-s, 8px);
+}
+
+#AchievementPopup #Title {
+    position: absolute;
+    left: 92px;
+    top: 14px;
+    font-size: 24px;
+    -unity-font: var(--font-body);
+    color: var(--color-accent-gold, rgb(217, 199, 115));
+}
+
+#AchievementPopup #Desc {
+    position: absolute;
+    left: 92px;
+    top: 46px;
+    font-size: 16px;
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+}
+
+/* --- Scrim --- */
+#AchievementScrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(10, 13, 18, 0.9);
+    transition: opacity var(--transition-medium, 0.22s);
+}
+
+/* --- List Panel --- */
+#AchievementListPanel {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    background-color: var(--color-surface-bottom, rgba(19, 23, 28, 1));
+    border-radius: var(--radius-m, 16px);
+    padding: 20px;
+    transition: opacity var(--transition-medium, 0.22s);
+}
+
+#AchievementListPanel .list-header {
+    font-size: var(--fs-xxl, 36px);
+    -unity-font: var(--font-display);
+    -unity-text-align: middle-center;
+    color: var(--color-accent-gold, rgb(217, 199, 115));
+    margin-bottom: 8px;
+}
+
+#AchievementListPanel .list-hint {
+    font-size: 16px;
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    -unity-text-align: middle-center;
+    margin-bottom: 16px;
+}
+
+#AchievementListPanel #ScrollArea {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/* --- Achievement Row --- */
+.ach-row {
+    flex-direction: row;
+    align-items: center;
+    padding-left: 12px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-radius: var(--radius-s, 8px);
+}
+
+.ach-row .ach-icon {
+    width: 46px;
+    height: 46px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    border-radius: var(--radius-xs, 4px);
+}
+
+.ach-row .ach-text-col {
+    flex-grow: 1;
+}
+
+.ach-row .ach-title {
+    font-size: var(--fs-xl, 20px);
+    -unity-font: var(--font-body);
+}
+
+.ach-row .ach-desc {
+    font-size: 14px;
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+}
+
+.ach-row .ach-badge {
+    font-size: 14px;
+    width: 40px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}

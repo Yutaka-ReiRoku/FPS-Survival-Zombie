@@ -20,15 +20,7 @@ public class LeaderboardWidget : MonoBehaviour
     public Vector2 chipAnchorMin = new Vector2(0f, 1f);
     public Vector2 chipAnchorMax = new Vector2(0f, 1f);
 
-    private static readonly Color BgColor = new Color(0.078f, 0.094f, 0.118f, 0.96f);
-    private static readonly Color CardColor = new Color(0.12f, 0.14f, 0.18f, 1f);
-    private static readonly Color RowColor = new Color(0.10f, 0.12f, 0.15f, 1f);
-    private static readonly Color RowHighlightColor = new Color(0.85f, 0.78f, 0.45f, 0.15f);
-    private static readonly Color ButtonHoverColor = new Color(0.4f, 0.95f, 0.6f, 1f);
     private static readonly Color AccentColor = new Color(0.85f, 0.78f, 0.45f, 1f);
-    private static readonly Color TextPrimary = new Color(0.96f, 0.96f, 0.96f, 1f);
-    private static readonly Color TextMuted = new Color(0.62f, 0.66f, 0.72f, 1f);
-    private static readonly Color DividerColor = new Color(0.2f, 0.22f, 0.26f, 1f);
 
     private VisualElement _chip;
     private VisualElement _panel;
@@ -106,22 +98,15 @@ public class LeaderboardWidget : MonoBehaviour
             _chip.style.display = loggedIn ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
-    private VisualElement MakeButton(string label, Color bg, System.Action onClick)
+    private VisualElement MakeButton(string label, System.Action onClick)
     {
         var btn = new VisualElement();
-        btn.style.backgroundColor = bg;
-        btn.style.alignItems = Align.Center;
-        btn.style.justifyContent = Justify.Center;
-        btn.style.height = 40;
+        btn.AddToClassList("leaderboard-btn");
         btn.focusable = true;
         btn.RegisterCallback<ClickEvent>(_ => onClick());
-        btn.RegisterCallback<PointerEnterEvent>(_ => btn.style.backgroundColor = ButtonHoverColor);
-        btn.RegisterCallback<PointerLeaveEvent>(_ => btn.style.backgroundColor = bg);
 
         var lbl = new Label(label);
-        lbl.style.fontSize = 15;
-        lbl.style.color = Color.white;
-        lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
+        lbl.AddToClassList("btn-label");
         btn.Add(lbl);
         return btn;
     }
@@ -135,42 +120,27 @@ public class LeaderboardWidget : MonoBehaviour
 
         var root = new VisualElement();
         root.name = "LeaderboardRoot";
-        root.style.position = Position.Absolute;
-        root.style.left = 0;
-        root.style.right = 0;
-        root.style.top = 0;
-        root.style.bottom = 0;
+        root.AddToClassList("overlay");
         root.pickingMode = PickingMode.Ignore;
 
         _chip = new VisualElement();
         _chip.name = "LeaderboardChip";
-        _chip.style.position = Position.Absolute;
         _chip.style.width = chipWidth;
         _chip.style.height = chipHeight;
-        _chip.style.backgroundColor = BgColor;
-        _chip.style.flexDirection = FlexDirection.Row;
-        _chip.style.alignItems = Align.Center;
-        _chip.style.justifyContent = Justify.Center;
-        _chip.style.paddingLeft = 14;
-        _chip.style.paddingRight = 14;
         _chip.focusable = true;
         _chip.RegisterCallback<ClickEvent>(_ => TogglePanel());
-        _chip.RegisterCallback<PointerEnterEvent>(_ => _chip.style.backgroundColor = new Color(0.1f, 0.12f, 0.15f, 0.96f));
-        _chip.RegisterCallback<PointerLeaveEvent>(_ => _chip.style.backgroundColor = BgColor);
         root.Add(_chip);
 
         var icon = new VisualElement();
         icon.name = "Icon";
-        icon.style.width = 24;
-        icon.style.height = 24;
-        icon.style.backgroundColor = AccentColor;
-        icon.style.marginRight = 8;
         _chip.Add(icon);
 
         var lbl = new Label("BẢNG XẾP HẠNG");
-        lbl.style.fontSize = 15;
-        lbl.style.color = TextPrimary;
+        lbl.AddToClassList("chip-label");
         _chip.Add(lbl);
+
+        var sheet = Resources.Load<StyleSheet>("LeaderboardWidget");
+        if (sheet != null) root.styleSheets.Add(sheet);
 
         doc.rootVisualElement.Add(root);
     }
@@ -179,103 +149,63 @@ public class LeaderboardWidget : MonoBehaviour
     {
         _scrim = new VisualElement();
         _scrim.name = "LeaderboardScrim";
-        _scrim.style.position = Position.Absolute;
-        _scrim.style.left = 0;
-        _scrim.style.right = 0;
-        _scrim.style.top = 0;
-        _scrim.style.bottom = 0;
-        _scrim.style.backgroundColor = new Color(0f, 0f, 0f, 0.8f);
+        _scrim.AddToClassList("overlay");
         _scrim.style.opacity = 0f;
         _scrim.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
 
         _panel = new VisualElement();
         _panel.name = "LeaderboardPanel";
-        _panel.style.position = Position.Absolute;
-        _panel.style.left = Length.Percent(50);
-        _panel.style.top = Length.Percent(50);
-        _panel.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
         _panel.style.width = panelWidth;
-        _panel.style.backgroundColor = BgColor;
-        _panel.style.paddingLeft = 28;
-        _panel.style.paddingRight = 28;
-        _panel.style.paddingTop = 24;
-        _panel.style.paddingBottom = 24;
         _panel.style.opacity = 0f;
 
         var headerRow = new VisualElement();
-        headerRow.style.flexDirection = FlexDirection.Row;
-        headerRow.style.alignItems = Align.Center;
-        headerRow.style.marginBottom = 8;
+        headerRow.AddToClassList("panel-header");
         _panel.Add(headerRow);
 
         var title = new Label("BẢNG XẾP HẠNG");
-        title.style.fontSize = 26;
-        title.style.color = AccentColor;
-        title.style.flexGrow = 1;
+        title.AddToClassList("panel-title");
         headerRow.Add(title);
 
-        var closeBtn = MakeButton("X", new Color(0.5f, 0.2f, 0.2f, 1f), () => SetPanelVisible(false));
+        var closeBtn = MakeButton("X", () => SetPanelVisible(false));
         closeBtn.style.width = 40;
         closeBtn.style.height = 36;
         headerRow.Add(closeBtn);
 
         var div = new VisualElement();
-        div.style.height = 1;
-        div.style.backgroundColor = DividerColor;
-        div.style.marginBottom = 8;
+        div.AddToClassList("panel-divider");
         _panel.Add(div);
 
         var colHeader = new VisualElement();
-        colHeader.style.flexDirection = FlexDirection.Row;
-        colHeader.style.paddingLeft = 12;
-        colHeader.style.paddingRight = 12;
-        colHeader.style.marginBottom = 4;
+        colHeader.AddToClassList("col-header");
         _panel.Add(colHeader);
 
         var rankH = new Label("#");
-        rankH.style.fontSize = 14;
-        rankH.style.color = TextMuted;
-        rankH.style.width = 50;
+        rankH.AddToClassList("col-rank");
         colHeader.Add(rankH);
 
         var nameH = new Label("NGƯỜI CHƠI");
-        nameH.style.fontSize = 14;
-        nameH.style.color = TextMuted;
-        nameH.style.flexGrow = 1;
+        nameH.AddToClassList("col-name");
         colHeader.Add(nameH);
 
         var scoreH = new Label("ĐIỂM");
-        scoreH.style.fontSize = 14;
-        scoreH.style.color = TextMuted;
-        scoreH.style.width = 100;
-        scoreH.style.unityTextAlign = TextAnchor.MiddleRight;
+        scoreH.AddToClassList("col-score");
         colHeader.Add(scoreH);
 
         _listContainer = new VisualElement();
         _listContainer.name = "ListContent";
-        _listContainer.style.backgroundColor = CardColor;
         _listContainer.style.minHeight = 200;
         _listContainer.style.flexGrow = 1;
-        _listContainer.style.paddingLeft = 8;
-        _listContainer.style.paddingRight = 8;
-        _listContainer.style.paddingTop = 8;
-        _listContainer.style.paddingBottom = 8;
-        _listContainer.style.overflow = Overflow.Hidden;
         _panel.Add(_listContainer);
 
         _statusText = new Label("");
-        _statusText.style.fontSize = 16;
-        _statusText.style.color = TextMuted;
-        _statusText.style.unityTextAlign = TextAnchor.MiddleCenter;
-        _statusText.style.height = 24;
-        _statusText.style.marginTop = 8;
+        _statusText.AddToClassList("status-text");
         _panel.Add(_statusText);
 
         var spacer = new VisualElement();
-        spacer.style.flexGrow = 1;
+        spacer.AddToClassList("panel-footer");
         _panel.Add(spacer);
 
-        var refreshBtn = MakeButton("LÀM MỚI", new Color(0.2f, 0.35f, 0.5f, 1f), RefreshLeaderboard);
+        var refreshBtn = MakeButton("LÀM MỚI", RefreshLeaderboard);
         refreshBtn.style.marginTop = 8;
         _panel.Add(refreshBtn);
     }
@@ -368,30 +298,26 @@ public class LeaderboardWidget : MonoBehaviour
 
             var row = new VisualElement();
             row.name = $"Row_{entry.rank}";
-            row.style.flexDirection = FlexDirection.Row;
-            row.style.alignItems = Align.Center;
             row.style.minHeight = rowHeight;
-            row.style.backgroundColor = isMe ? RowHighlightColor : RowColor;
-            row.style.paddingLeft = 12;
-            row.style.paddingRight = 12;
+            row.style.backgroundColor = isMe ? new Color(0.85f, 0.78f, 0.45f, 0.15f) : new Color(0.10f, 0.12f, 0.15f, 1f);
             _listContainer.Add(row);
 
             string rankStr = entry.rank <= 3 ? GetRankMedal(entry.rank) : entry.rank.ToString();
             var rankLbl = new Label(rankStr);
             rankLbl.style.fontSize = 18;
-            rankLbl.style.color = isMe ? AccentColor : (entry.rank <= 3 ? AccentColor : TextPrimary);
+            rankLbl.style.color = isMe || entry.rank <= 3 ? AccentColor : Color.white;
             rankLbl.style.width = 50;
             row.Add(rankLbl);
 
             var nameLbl = new Label(entry.displayName);
             nameLbl.style.fontSize = 16;
-            nameLbl.style.color = isMe ? AccentColor : TextPrimary;
+            nameLbl.style.color = isMe ? AccentColor : Color.white;
             nameLbl.style.flexGrow = 1;
             row.Add(nameLbl);
 
             var scoreLbl = new Label(entry.score.ToString());
             scoreLbl.style.fontSize = 18;
-            scoreLbl.style.color = isMe ? AccentColor : TextPrimary;
+            scoreLbl.style.color = isMe ? AccentColor : Color.white;
             scoreLbl.style.width = 100;
             scoreLbl.style.unityTextAlign = TextAnchor.MiddleRight;
             row.Add(scoreLbl);

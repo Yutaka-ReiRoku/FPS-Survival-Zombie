@@ -29,10 +29,6 @@ public class PlayFabLoginUI : MonoBehaviour
     private bool _isRegisterMode;
     private bool _isBusy;
 
-    private static readonly Color BgColor = new Color(0.078f, 0.094f, 0.118f, 0.96f);
-    private static readonly Color ButtonColor = new Color(0.31f, 0.878f, 0.541f, 1f);
-    private static readonly Color TextPrimary = new Color(0.96f, 0.96f, 0.96f, 1f);
-    private static readonly Color TextMuted = new Color(0.62f, 0.66f, 0.72f, 1f);
     private static readonly Color ErrorColor = new Color(0.85f, 0.35f, 0.15f, 1f);
     private static readonly Color SuccessColor = new Color(0.31f, 0.878f, 0.541f, 1f);
 
@@ -94,135 +90,88 @@ public class PlayFabLoginUI : MonoBehaviour
 
         _root = new VisualElement();
         _root.name = "PlayFabLoginRoot";
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0;
-        _root.style.right = 0;
-        _root.style.top = 0;
-        _root.style.bottom = 0;
-        _root.style.alignItems = Align.Center;
-        _root.style.justifyContent = Justify.Center;
+        _root.AddToClassList("overlay");
 
         _panel = new VisualElement();
         _panel.name = "LoginPanel";
         _panel.style.width = panelWidth;
-        _panel.style.backgroundColor = BgColor;
-        _panel.style.paddingLeft = 40;
-        _panel.style.paddingRight = 40;
-        _panel.style.paddingTop = 40;
-        _panel.style.paddingBottom = 40;
-        _panel.style.flexDirection = FlexDirection.Column;
         _root.Add(_panel);
 
         _titleText = new Label("LOGIN");
-        _titleText.name = "Title";
-        _titleText.style.fontSize = 28;
-        _titleText.style.color = TextPrimary;
-        _titleText.style.unityTextAlign = TextAnchor.UpperCenter;
-        _titleText.style.marginBottom = 16;
-        _titleText.style.height = 40;
+        _titleText.AddToClassList("login-title");
         _panel.Add(_titleText);
 
         _statusText = new Label("");
-        _statusText.name = "Status";
-        _statusText.style.fontSize = 14;
-        _statusText.style.color = TextMuted;
-        _statusText.style.unityTextAlign = TextAnchor.UpperCenter;
-        _statusText.style.height = 24;
-        _statusText.style.marginBottom = 8;
+        _statusText.AddToClassList("login-status");
         _panel.Add(_statusText);
 
-        AddFieldRow("UsernameLabel", "Username", 14, TextMuted);
+        AddFieldRow("UsernameLabel", "Username");
         _usernameInput = new TextField();
         _usernameInput.name = "UsernameInput";
-        _usernameInput.style.height = 40;
+        _usernameInput.AddToClassList("login-input");
         _usernameInput.style.marginBottom = 12;
-        StylizeInput(_usernameInput);
         _panel.Add(_usernameInput);
 
-        AddFieldRow("PasswordLabel", "Password", 14, TextMuted);
+        AddFieldRow("PasswordLabel", "Password");
         _passwordInput = new TextField();
         _passwordInput.name = "PasswordInput";
         _passwordInput.isPasswordField = true;
-        _passwordInput.style.height = 40;
+        _passwordInput.AddToClassList("login-input");
         _passwordInput.style.marginBottom = 16;
-        StylizeInput(_passwordInput);
         _panel.Add(_passwordInput);
 
-        _actionButton = CreateButton("ActionButton", "LOGIN", ButtonColor);
-        _actionButton.style.height = 44;
-        _actionButton.style.marginBottom = 12;
+        _actionButton = new VisualElement();
+        _actionButton.name = "ActionButton";
+        _actionButton.AddToClassList("login-action-btn");
+        _actionButton.focusable = true;
         _actionButton.RegisterCallback<ClickEvent>(_ => OnActionButtonClicked());
+
+        var actionLabel = new Label("LOGIN");
+        actionLabel.AddToClassList("btn-label");
+        _actionButton.Add(actionLabel);
         _panel.Add(_actionButton);
 
         var toggleRow = new VisualElement();
         toggleRow.name = "ToggleRow";
-        toggleRow.style.flexDirection = FlexDirection.Row;
-        toggleRow.style.alignItems = Align.Center;
-        toggleRow.style.justifyContent = Justify.Center;
-        toggleRow.style.marginBottom = 12;
         _panel.Add(toggleRow);
 
         _toggleText = new Label("Don't have an account? Register");
-        _toggleText.style.fontSize = 13;
-        _toggleText.style.color = TextMuted;
+        _toggleText.AddToClassList("toggle-label");
         toggleRow.Add(_toggleText);
 
-        _toggleButton = CreateButton("ToggleButton", "Register", new Color(0.2f, 0.25f, 0.3f, 1f));
-        _toggleButton.style.width = 80;
-        _toggleButton.style.height = 30;
+        _toggleButton = new VisualElement();
+        _toggleButton.name = "ToggleButton";
+        _toggleButton.AddToClassList("login-toggle-btn");
+        _toggleButton.focusable = true;
         _toggleButton.RegisterCallback<ClickEvent>(_ => ToggleMode());
+        var toggleBtnLabel = new Label("Register");
+        toggleBtnLabel.AddToClassList("btn-label");
+        _toggleButton.Add(toggleBtnLabel);
         toggleRow.Add(_toggleButton);
 
-        _logoutButton = CreateButton("LogoutButton", "LOGOUT", new Color(0.5f, 0.2f, 0.2f, 1f));
-        _logoutButton.style.height = 36;
-        _logoutButton.style.display = DisplayStyle.None;
+        _logoutButton = new VisualElement();
+        _logoutButton.name = "LogoutButton";
+        _logoutButton.AddToClassList("login-logout-btn");
+        _logoutButton.focusable = true;
         _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
+        _logoutButton.style.display = DisplayStyle.None;
+        var logoutLabel = new Label("LOGOUT");
+        logoutLabel.AddToClassList("btn-label");
+        _logoutButton.Add(logoutLabel);
         _panel.Add(_logoutButton);
+
+        var sheet = Resources.Load<StyleSheet>("PlayFabLogin");
+        if (sheet != null) _root.styleSheets.Add(sheet);
 
         doc.rootVisualElement.Add(_root);
     }
 
-    private void AddFieldRow(string name, string label, float fontSize, Color color)
+    private void AddFieldRow(string name, string label)
     {
         var lbl = new Label(label);
         lbl.name = name;
-        lbl.style.fontSize = fontSize;
-        lbl.style.color = color;
-        lbl.style.unityTextAlign = TextAnchor.MiddleLeft;
-        lbl.style.marginBottom = 4;
+        lbl.AddToClassList("field-label");
         _panel.Add(lbl);
-    }
-
-    private void StylizeInput(TextField tf)
-    {
-        tf.style.backgroundColor = new Color(0.12f, 0.14f, 0.18f, 1f);
-        tf.style.borderLeftWidth = 0;
-        tf.style.borderRightWidth = 0;
-        tf.style.borderTopWidth = 0;
-        tf.style.borderBottomWidth = 0;
-        tf.style.color = TextPrimary;
-        tf.style.fontSize = 16;
-    }
-
-    private VisualElement CreateButton(string name, string label, Color bgColor)
-    {
-        var btn = new VisualElement();
-        btn.name = name;
-        btn.style.backgroundColor = bgColor;
-        btn.style.alignItems = Align.Center;
-        btn.style.justifyContent = Justify.Center;
-        btn.style.unityTextAlign = TextAnchor.MiddleCenter;
-        btn.focusable = true;
-        btn.RegisterCallback<PointerEnterEvent>(_ => btn.style.backgroundColor = Color.Lerp(bgColor, Color.white, 0.15f));
-        btn.RegisterCallback<PointerLeaveEvent>(_ => btn.style.backgroundColor = bgColor);
-
-        var lbl = new Label(label);
-        lbl.style.fontSize = 16;
-        lbl.style.color = Color.white;
-        lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
-        btn.Add(lbl);
-
-        return btn;
     }
 
     private IEnumerator BindAndShow()
@@ -307,7 +256,7 @@ public class PlayFabLoginUI : MonoBehaviour
         }
 
         SetBusy(true);
-        ShowStatus(_isRegisterMode ? "Creating account..." : "Logging in...", TextMuted);
+        ShowStatus(_isRegisterMode ? "Creating account..." : "Logging in...", new Color(0.62f, 0.66f, 0.72f, 1f));
 
         var pm = PlayFabManager.Instance;
         if (pm == null)
@@ -347,7 +296,7 @@ public class PlayFabLoginUI : MonoBehaviour
         _panel.style.display = DisplayStyle.Flex;
         _logoutButton.style.display = DisplayStyle.None;
         HideMainMenu();
-        ShowStatus("Logged out.", TextMuted);
+        ShowStatus("Logged out.", new Color(0.62f, 0.66f, 0.72f, 1f));
     }
 
     private void HandleLogout()
@@ -361,7 +310,7 @@ public class PlayFabLoginUI : MonoBehaviour
         HideMainMenu();
         _panel.style.display = DisplayStyle.Flex;
         UpdateUI();
-        ShowStatus("Logged out. Please log in again.", TextMuted);
+        ShowStatus("Logged out. Please log in again.", new Color(0.62f, 0.66f, 0.72f, 1f));
     }
 
     public void ShowLoginPanel()

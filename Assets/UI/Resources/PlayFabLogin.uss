@@ -1,0 +1,155 @@
+/* ===== PlayFabLogin.uss (Runtime-loaded) ===== */
+
+/* --- Root --- */
+#PlayFabLoginRoot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Login Panel --- */
+#LoginPanel {
+    flex-direction: column;
+    background-color: var(--color-panel-bg, rgba(14, 17, 21, 0.92));
+    border-radius: var(--radius-m, 16px);
+    padding: 40px;
+}
+
+#LoginPanel .login-title {
+    font-size: var(--fs-xl, 28px);
+    -unity-font: var(--font-body);
+    color: var(--color-text-primary, white);
+    -unity-text-align: upper-center;
+    margin-bottom: 16px;
+    height: 40px;
+}
+
+#LoginPanel .login-status {
+    font-size: 14px;
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    -unity-text-align: upper-center;
+    height: 24px;
+    margin-bottom: 8px;
+}
+
+/* --- Field Labels --- */
+#LoginPanel .field-label {
+    font-size: 14px;
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    -unity-text-align: middle-left;
+    margin-bottom: 4px;
+}
+
+/* --- Text Input --- */
+#LoginPanel .login-input {
+    height: 40px;
+    background-color: rgba(31, 36, 46, 1);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    color: var(--color-text-primary, white);
+    font-size: 16px;
+    -unity-font: var(--font-body);
+    padding-left: 12px;
+    border-radius: var(--radius-s, 8px);
+}
+
+/* --- Action Button --- */
+.login-action-btn {
+    height: 44px;
+    margin-bottom: 12px;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-accent-green, rgba(79, 224, 138, 1));
+    border-radius: var(--radius-s, 8px);
+    cursor: link;
+    transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
+}
+
+.login-action-btn:hover {
+    background-color: rgba(79, 224, 138, 0.7);
+    scale: 1.06;
+}
+
+.login-action-btn:active {
+    scale: 0.95;
+}
+
+.login-action-btn .btn-label {
+    font-size: 16px;
+    -unity-font: var(--font-body);
+    color: white;
+    -unity-text-align: middle-center;
+}
+
+/* --- Toggle Row --- */
+#ToggleRow {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+#ToggleRow .toggle-label {
+    font-size: 13px;
+    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+}
+
+/* --- Toggle Button --- */
+.login-toggle-btn {
+    width: 80px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(51, 64, 77, 1);
+    border-radius: var(--radius-xs, 6px);
+    cursor: link;
+    transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
+}
+
+.login-toggle-btn:hover {
+    background-color: rgba(51, 64, 77, 0.7);
+    scale: 1.06;
+}
+
+.login-toggle-btn:active {
+    scale: 0.95;
+}
+
+.login-toggle-btn .btn-label {
+    font-size: 13px;
+    color: white;
+    -unity-text-align: middle-center;
+}
+
+/* --- Logout Button --- */
+.login-logout-btn {
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(128, 51, 51, 1);
+    border-radius: var(--radius-s, 8px);
+    cursor: link;
+    transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
+}
+
+.login-logout-btn:hover {
+    background-color: rgba(128, 51, 51, 0.7);
+    scale: 1.06;
+}
+
+.login-logout-btn:active {
+    scale: 0.95;
+}
+
+.login-logout-btn .btn-label {
+    font-size: 16px;
+    -unity-font: var(--font-body);
+    color: white;
+    -unity-text-align: middle-center;
+}
