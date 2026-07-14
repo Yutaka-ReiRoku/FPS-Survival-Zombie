@@ -1,0 +1,53 @@
+#HUDChips {
+    position: absolute;
+    left: 24px;
+    top: 24px;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chip-root {
+    flex-direction: row;
+    align-items: center;
+    width: 280px;
+    height: 52px;
+    background-color: rgba(25, 30, 37, 0.94);
+    border-radius: 6px;
+    padding: 8px 12px;
+    overflow: hidden;
+}
+
+.chip-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.chip-label {
+    font-size: 16px;
+    -unity-font: var(--font-body);
+    color: var(--color-text-primary);
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+}
+
+.chip-hidden {
+    display: none;
+}
+
+.chip-wave .chip-label { color: #9ED9FF; }
+.chip-kills .chip-label { color: #FF8578; }
+.chip-score .chip-label { color: #F2C24E; }
+.chip-coins .chip-label { color: #FFD700; }
+.chip-headshots .chip-label { color: #FF6B6B; }
+.chip-timer .chip-label { color: #4ECDC4; }
+.chip-collectibles .chip-label { color: #45B7D1; }
+
+.chip-wave-icon { background-image: resource("Icons/icon_wave"); }
+.chip-kills-icon { background-image: resource("Icons/icon_skull"); }
+.chip-score-icon { background-image: resource("Icons/icon_star"); }
+.chip-coins-icon { background-image: resource("Icons/icon_coin"); }
+.chip-headshots-icon { background-image: resource("Icons/icon_target"); }
+.chip-timer-icon { background-image: resource("Icons/icon_timer"); }
+.chip-collectibles-icon { background-image: resource("Icons/icon_trophy"); }
