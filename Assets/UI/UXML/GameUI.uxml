@@ -21,6 +21,7 @@
     <ui:Style src="project://database/Assets/UI/USS/UpgradesWidget.uss" />
     <ui:Style src="project://database/Assets/UI/USS/SkillTreeWidget.uss" />
     <ui:Style src="project://database/Assets/UI/USS/HealthFlash.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/LowHealthVignette.uss" />
 
     <!-- Game Over Panel (Phase 1) -->
     <ui:VisualElement name="GameOverPanel" style="display: none;">
@@ -57,6 +58,9 @@
             <ui:Button name="PauseQuitButton" text="QUIT" class="pause-button" />
         </ui:VisualElement>
     </ui:VisualElement>
+
+    <!-- Low Health Vignette (Phase 23) -->
+    <ui:VisualElement name="LowHealthVignette" />
 
     <!-- Health Cluster (Phase 3) -->
     <ui:VisualElement name="HealthCluster">

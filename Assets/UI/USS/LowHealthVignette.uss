@@ -1,0 +1,21 @@
+#LowHealthVignette {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    picking-mode: ignore;
+    -unity-background-scale-mode: stretch-to-fill;
+    background-image: resource("Images/ui_vignette");
+    -unity-background-image-tint-color: rgb(160, 0, 0);
+}
+
+#LowHealthVignette.low {
+    opacity: 0.45;
+}
+
+#LowHealthVignette.critical {
+    opacity: 0.85;
+}
