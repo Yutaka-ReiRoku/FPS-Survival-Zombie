@@ -1,0 +1,189 @@
+@import url("Theme.uss");
+@import url("MainMenuTheme.uss");
+
+/* ===== ROOT ===== */
+#MainMenuRoot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--mm-bg-color);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+}
+
+/* ===== BACKGROUND LAYER ===== */
+#Background {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #0d1117;
+}
+
+#Vignette {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--mm-overlay);
+    background-image: linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);
+}
+
+#SkullWatermark {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.08;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+/* ===== CENTER GROUP ===== */
+#CenterGroup {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+/* ===== TITLE ===== */
+#Title {
+    font-size: 64px;
+    color: var(--mm-gold);
+    -unity-font-style: bold;
+    letter-spacing: 8px;
+    margin-bottom: 4px;
+}
+
+#Subtitle {
+    font-size: 24px;
+    color: var(--mm-text-muted);
+    letter-spacing: 4px;
+    margin-bottom: 32px;
+}
+
+/* ===== MENU BUTTONS ===== */
+.menu-button {
+    width: 280px;
+    height: 60px;
+    position: relative;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.menu-button:hover {
+    opacity: 0.9;
+}
+
+.menu-button:active {
+    opacity: 0.8;
+}
+
+.button-shadow {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    right: -2px;
+    bottom: -2px;
+    background-color: var(--mm-shadow);
+    border-radius: 8px;
+}
+
+.button-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--mm-button-fill);
+    border-radius: 6px;
+    border-color: var(--mm-gold-dim);
+    border-width: 1px;
+    transition: background-color 0.2s;
+}
+
+.menu-button:hover .button-fill {
+    background-color: var(--mm-button-hover);
+}
+
+.menu-button:active .button-fill {
+    background-color: var(--mm-button-active);
+}
+
+.button-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    width: 28px;
+    height: 28px;
+    translate: 0 -50%;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.button-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    color: var(--mm-text-primary);
+    font-size: 22px;
+    -unity-font-style: bold;
+    letter-spacing: 4px;
+    unity-text-align: middle-center;
+}
+
+/* ===== CHIP (Best Score) ===== */
+.chip {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    margin-top: 16px;
+}
+
+.chip-icon {
+    width: 24px;
+    height: 24px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.chip-label {
+    font-size: 16px;
+    color: var(--mm-gold);
+    -unity-font-style: bold;
+}
+
+/* ===== CONTENT (bottom decoration) ===== */
+#Content {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    height: 80px;
+}
+
+/* ===== VERSION ===== */
+#Version {
+    position: absolute;
+    right: 20px;
+    bottom: 12px;
+    font-size: 12px;
+    color: var(--mm-text-muted);
+    -unity-font-style: normal;
+}

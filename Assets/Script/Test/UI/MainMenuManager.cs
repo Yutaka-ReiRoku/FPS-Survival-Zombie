@@ -1,39 +1,39 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using TMPro;
+using UnityEngine.UIElements;
 
-/// <summary>
-/// Drives the dedicated Main Menu scene: starts the game, quits, and shows the
-/// persisted best score. Buttons are wired in code (no editor onClick needed).
-/// </summary>
 public class MainMenuManager : MonoBehaviour
 {
-    [Header("Buttons")]
-    public Button playButton;
-    public Button quitButton;
-
     [Header("Scenes")]
-    public string gameSceneName = "Demo_City_Test";
+    public string gameSceneName = "Story mode";
 
-    [Header("Best Score (optional)")]
-    public TMP_Text bestScoreText;
+    private UIDocument _doc;
+    private Label _bestLabel;
 
     private void Awake()
     {
-        if (playButton != null)
-            playButton.onClick.AddListener(PlayGame);
-        if (quitButton != null)
-            quitButton.onClick.AddListener(QuitGame);
+        _doc = GetComponent<UIDocument>();
     }
 
     private void Start()
     {
-        // A menu must be interactive with a visible cursor and normal time.
         Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        UnityEngine.Cursor.lockState = CursorLockMode.None;
+        UnityEngine.Cursor.visible = true;
+
+        if (_doc != null)
+        {
+            var root = _doc.rootVisualElement;
+            var playBtn = root.Q("PlayButton");
+            var quitBtn = root.Q("QuitButton");
+            _bestLabel = root.Q<Label>("BestText");
+
+            if (playBtn != null)
+                playBtn.RegisterCallback<ClickEvent>(_ => PlayGame());
+            if (quitBtn != null)
+                quitBtn.RegisterCallback<ClickEvent>(_ => QuitGame());
+        }
 
         RefreshBestScore();
         StartCoroutine(BindToPlayFab());
@@ -41,8 +41,6 @@ public class MainMenuManager : MonoBehaviour
 
     private IEnumerator BindToPlayFab()
     {
-        // Wait for PlayFabManager to be ready (it may live in a bootstrap
-        // scene and load slightly after this MainMenu scene).
         float timeout = 10f;
         while (PlayFabManager.Instance == null && timeout > 0f)
         {
@@ -55,7 +53,6 @@ public class MainMenuManager : MonoBehaviour
         {
             pm.OnLoginSuccess += HandleLoginSuccess;
             pm.OnCloudDataLoaded += HandleCloudDataLoaded;
-            // If already logged in (e.g. returning to main menu), refresh now.
             if (pm.IsLoggedIn) RefreshBestScore();
         }
     }
@@ -80,16 +77,12 @@ public class MainMenuManager : MonoBehaviour
         if (success) RefreshBestScore();
     }
 
-    /// <summary>
-    /// Refresh the best score text from PlayerPrefs. Call this after cloud
-    /// data has been merged so the UI reflects the logged-in account's stats.
-    /// </summary>
     public void RefreshBestScore()
     {
-        if (bestScoreText == null) return;
+        if (_bestLabel == null) return;
         int bestScore = PlayerPrefs.GetInt("BestScore", 0);
         int bestWave = PlayerPrefs.GetInt("BestWave", 0);
-        bestScoreText.text = bestScore > 0
+        _bestLabel.text = bestScore > 0
             ? ("Best  " + bestScore + "    Wave " + bestWave)
             : "No record yet";
     }
@@ -97,7 +90,6 @@ public class MainMenuManager : MonoBehaviour
     public void PlayGame()
     {
         Time.timeScale = 1f;
-        // Reset achievement progress so it only tracks the upcoming playthrough.
         if (AchievementManager.Instance != null)
             AchievementManager.Instance.ResetProgress();
         SceneManager.LoadScene(gameSceneName);

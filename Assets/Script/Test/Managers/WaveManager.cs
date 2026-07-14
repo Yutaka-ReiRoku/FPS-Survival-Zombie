@@ -1,5 +1,4 @@
 using UnityEngine;
-using TMPro;
 
 public class WaveManager : MonoBehaviour
 {
@@ -14,11 +13,6 @@ public class WaveManager : MonoBehaviour
 
     public int zombiesKilledThisWave;
 
-    [Header("UI")]
-    public TMP_Text waveText;
-
-    private int _lastWave = -1;
-
     private void Awake()
     {
         Instance = this;
@@ -27,19 +21,6 @@ public class WaveManager : MonoBehaviour
     private void Start()
     {
         StartWave();
-    }
-
-    private void Update()
-    {
-        if (waveText != null)
-        {
-            if (currentWave != _lastWave)
-            {
-                _lastWave = currentWave;
-                waveText.text =
-                    "Wave " + currentWave;
-            }
-        }
     }
 
     public void StartWave()

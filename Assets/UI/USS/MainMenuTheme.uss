@@ -1,0 +1,14 @@
+/* MainMenu theme variables */
+* {
+    --mm-bg-color: #0a0d12;
+    --mm-gold: #D8C773;
+    --mm-gold-dim: #C4B55C;
+    --mm-text-primary: #F5F5F5;
+    --mm-text-muted: #9EA8B8;
+    --mm-overlay: rgba(0, 0, 0, 0.65);
+    --mm-button-fill: #1E2530;
+    --mm-button-hover: #2A3340;
+    --mm-button-active: #151A22;
+    --mm-shadow: rgba(0, 0, 0, 0.5);
+    --mm-accent-red: #B0302A;
+}

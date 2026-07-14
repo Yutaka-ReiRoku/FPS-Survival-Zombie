@@ -1,5 +1,4 @@
 using UnityEngine;
-using TMPro;
 
 /// <summary>
 /// Central design-system source of truth for the custom HUD/UI.
@@ -55,12 +54,6 @@ public class UITheme : ScriptableObject
     public float radiusS = 8f;
     public float radiusM = 16f;
     public float radiusL = 22f;
-
-    // ---- Typography (stable references; PremiumUITheme will point here) ----
-    [Header("Typography (TMP)")]
-    public TMP_FontAsset displayFont; // Anton SDF
-    public TMP_FontAsset headerFont;  // Oswald Bold SDF
-    public TMP_FontAsset bodyFont;    // Roboto-Bold SDF
 
     // ---- Motion (house style; matches UIButtonMotion / UIPanelTransition) ----
     [Header("Motion")]
