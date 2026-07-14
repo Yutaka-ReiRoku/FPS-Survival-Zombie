@@ -1,0 +1,199 @@
+/* SkillTreeWidget.uss — Skill Tree Panel (Phase 21) */
+/* Mirror UITheme colors as USS variables */
+--st-accent: rgb(217, 199, 115);
+--st-card-bottom: rgb(13, 14, 12);
+--st-card-top: rgb(20, 23, 30);
+--st-text-primary: rgb(245, 245, 245);
+--st-text-muted: rgb(107, 122, 147);
+--st-ready: rgb(30, 138, 79);
+--st-dim-line: rgba(107, 122, 147, 0.3);
+--st-scrim: rgba(0, 0, 0, 0.85);
+
+/* Root — fills screen, hidden by default */
+#SkillTreeWidget {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: none;
+}
+#SkillTreeWidget.open {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Scrim — full-screen click blocker */
+#scrim {
+    flex-grow: 1;
+    background-color: var(--st-scrim);
+}
+
+/* Card — centered panel */
+#card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 920px;
+    height: 720px;
+    background-color: var(--st-card-bottom);
+    border-radius: var(--radius-m, 16px);
+    opacity: 0;
+    scale: 0.9;
+    transition: opacity var(--panel-in-duration, 0.22s), scale var(--panel-in-duration, 0.22s);
+}
+#SkillTreeWidget.open #card {
+    opacity: 1;
+    scale: 1;
+}
+
+/* Title */
+#title {
+    position: absolute;
+    left: 50%;
+    top: 40px;
+    translate: -50%;
+    width: 700px;
+    height: 56px;
+    color: var(--st-accent);
+    font-size: 40px;
+    -unity-font: var(--font-display, sans-serif);
+    -unity-text-align: middle-center;
+}
+
+/* Skill Points */
+#sp {
+    position: absolute;
+    left: 50%;
+    top: 90px;
+    translate: -50%;
+    width: 700px;
+    height: 36px;
+    color: var(--st-text-primary);
+    font-size: 24px;
+    -unity-font: var(--font-body, sans-serif);
+    -unity-text-align: middle-center;
+}
+
+/* Branches row (3 column layout within card) */
+.branch {
+    position: absolute;
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#branch0 { left: calc(50% - 300px); top: 160px; translate: -50%; }
+#branch1 { left: 50%; top: 160px; translate: -50%; }
+#branch2 { left: calc(50% + 300px); top: 160px; translate: -50%; }
+
+.branch-header {
+    height: 32px;
+    color: var(--st-accent);
+    font-size: 22px;
+    -unity-font: var(--font-display, sans-serif);
+    -unity-text-align: middle-center;
+}
+
+.branch-sub {
+    height: 24px;
+    color: var(--st-text-muted);
+    font-size: 16px;
+    -unity-font: var(--font-body, sans-serif);
+    -unity-text-align: middle-center;
+}
+
+.node-container {
+    position: relative;
+    width: 60px;
+    height: 400px;
+    margin-top: 6px;
+    margin-bottom: 4px;
+}
+
+/* Skill node circles */
+.skill-node {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+    background-color: var(--st-card-top);
+    cursor: pointer;
+    transition: background-color 0.2s, scale 0.15s;
+}
+.skill-node:hover {
+    scale: 1.1;
+}
+.skill-node.unlocked {
+    background-color: var(--st-accent);
+}
+.skill-node.available {
+    background-color: var(--st-ready);
+}
+.skill-node.locked {
+    background-color: var(--st-card-top);
+}
+.skill-node.unlocked .node-label,
+.skill-node.available .node-label {
+    color: var(--st-card-bottom);
+}
+
+/* Node number label */
+.node-label {
+    -unity-text-align: middle-center;
+    font-size: 22px;
+    color: var(--st-text-muted);
+    -unity-font: var(--font-display, sans-serif);
+}
+
+/* Connection lines */
+.skill-line {
+    position: absolute;
+    width: 6px;
+    height: 20px;
+    background-color: var(--st-dim-line);
+    transition: background-color 0.2s;
+}
+
+/* Next-node description */
+.next-desc {
+    height: 22px;
+    width: 260px;
+    color: var(--st-text-muted);
+    font-size: 16px;
+    -unity-font: var(--font-body, sans-serif);
+    -unity-text-align: middle-center;
+}
+
+/* Cost / status label */
+.cost-label {
+    height: 24px;
+    width: 220px;
+    font-size: 18px;
+    -unity-font: var(--font-display, sans-serif);
+    -unity-text-align: middle-center;
+}
+.cost-label.ready {
+    color: var(--st-ready);
+}
+.cost-label.muted {
+    color: var(--st-text-muted);
+}
+.cost-label.accent {
+    color: var(--st-accent);
+}
+
+/* Hint */
+#hint {
+    position: absolute;
+    left: 50%;
+    bottom: 30px;
+    translate: -50%;
+    width: 700px;
+    height: 28px;
+    color: var(--st-text-muted);
+    font-size: 18px;
+    -unity-font: var(--font-body, sans-serif);
+    -unity-text-align: middle-center;
+}
