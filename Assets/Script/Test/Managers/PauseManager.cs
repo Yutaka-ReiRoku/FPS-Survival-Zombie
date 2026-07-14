@@ -27,8 +27,6 @@ public class PauseManager : MonoBehaviour
 
     private bool _uiReady;
 
-    private static System.Reflection.FieldInfo _pauseMenuIsPausedField;
-
     private void Awake()
     {
         Instance = this;
@@ -88,16 +86,6 @@ public class PauseManager : MonoBehaviour
             if (gameRaycaster != null) gameRaycaster.enabled = false;
             Debug.Log("[PauseManager] Disabled GameUICanvas legacy Canvas+GraphicRaycaster");
         }
-    }
-
-    private static void UpdatePauseMenuIsPaused(bool paused)
-    {
-        if (_pauseMenuIsPausedField == null)
-        {
-            _pauseMenuIsPausedField = typeof(PauseMenu).GetField("<isPaused>k__BackingField",
-                System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-        }
-        _pauseMenuIsPausedField?.SetValue(null, paused);
     }
 
     private void OnDisable()
@@ -176,7 +164,6 @@ public class PauseManager : MonoBehaviour
     {
         if (!_uiReady) return;
         IsPaused = true;
-        UpdatePauseMenuIsPaused(true);
         if (_pausePanel != null)
         {
             _pausePanel.style.display = DisplayStyle.Flex;
@@ -195,7 +182,6 @@ public class PauseManager : MonoBehaviour
     {
         if (!_uiReady) return;
         IsPaused = false;
-        UpdatePauseMenuIsPaused(false);
         if (_pausePanel != null)
             _pausePanel.style.display = DisplayStyle.None;
         SetHUDVisible(_canvasRoot, true);
