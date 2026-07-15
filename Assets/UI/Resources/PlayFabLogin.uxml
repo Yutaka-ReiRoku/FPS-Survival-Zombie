@@ -4,82 +4,66 @@
     <ui:Style src="project://database/Assets/UI/Resources/PlayFabLogin.uss" />
 
     <ui:VisualElement name="PlayFabLoginRoot" class="overlay">
-        <!-- Main Floating Tactical HUD Panel -->
-        <ui:VisualElement name="LoginPanel" class="login-panel floating-card">
-            <!-- HUD Corner Brackets for Sci-Fi look -->
-            <ui:VisualElement class="hud-bracket bracket-tl" />
-            <ui:VisualElement class="hud-bracket bracket-tr" />
-            <ui:VisualElement class="hud-bracket bracket-bl" />
-            <ui:VisualElement class="hud-bracket bracket-br" />
+        <!-- Main Floating Tactical HUD Panel Container (Transparent) -->
+        <ui:VisualElement name="LoginPanel" class="login-panel-container">
 
-            <!-- Technical Coordinates & Diagnostic Text Stamps -->
-            <ui:Label class="hud-stamp stamp-top-left" text="[SEC_AUTH_SYSTEM_09]" />
-            <ui:Label class="hud-stamp stamp-top-right" text="SYS.VER_4.12" />
-            <ui:Label class="hud-stamp stamp-bottom-left" text="LAT: 45.32 // LON: -12.08" />
-
-            <!-- Barcode Decal -->
-            <ui:VisualElement name="BarcodeDecal" class="barcode-decal">
-                <ui:VisualElement class="barcode-bar bar-w1" />
-                <ui:VisualElement class="barcode-bar bar-w2" />
-                <ui:VisualElement class="barcode-bar bar-w1" />
-                <ui:VisualElement class="barcode-bar bar-w3" />
-                <ui:VisualElement class="barcode-bar bar-w1" />
-                <ui:VisualElement class="barcode-bar bar-w2" />
-            </ui:VisualElement>
-
-            <!-- Segmented Vertical Diagnostic Bar on the Right Edge -->
-            <ui:VisualElement name="DiagnosticBar" class="diagnostic-bar">
-                <ui:VisualElement class="diag-segment segment-on" />
-                <ui:VisualElement class="diag-segment segment-on" />
-                <ui:VisualElement class="diag-segment segment-on" />
-                <ui:VisualElement class="diag-segment segment-off" />
-                <ui:VisualElement class="diag-segment segment-on" />
-                <ui:VisualElement class="diag-segment segment-off" />
-                <ui:VisualElement class="diag-segment segment-on" />
-                <ui:VisualElement class="diag-segment segment-on" />
-            </ui:VisualElement>
-
-            <!-- Top Accent Bar -->
-            <ui:VisualElement name="TopAccentBar" class="top-accent-bar" />
-
-            <!-- Header section -->
-            <ui:VisualElement name="LoginHeader" class="login-header">
-                <ui:Label name="GameLogo_Zombie" class="game-logo-zombie" text="ZOMBIE" />
-                <ui:Label name="GameLogo_Survival" class="game-logo-survival" text="SURVIVAL" />
-                <ui:Label name="GameLogo_Sub" class="game-logo-sub" text="PlayFab Authentication Gateway" />
-            </ui:VisualElement>
-
-            <!-- Body section -->
-            <ui:VisualElement name="LoginBody" class="login-body">
-                <ui:Label name="LoginTitle" class="login-title" text="LOGIN" />
-                <ui:Label name="LoginStatus" class="login-status" text="" />
+            <!-- Module 1: Header Terminal -->
+            <ui:VisualElement name="HeaderModule" class="hud-module header-module">
+                <ui:VisualElement class="hud-bracket bracket-tl" />
+                <ui:VisualElement class="hud-bracket bracket-tr" />
+                <ui:Label class="hud-stamp stamp-top-left" text="[SECTOR: 09_AUTH]" />
+                <ui:Label class="hud-stamp stamp-top-right" text="SYS.VER_4.12" />
                 
-                <!-- Username Field Group -->
-                <ui:VisualElement class="input-group">
-                    <ui:VisualElement class="label-row">
-                        <ui:Label name="UsernameLabel" class="field-label" text="USERNAME" />
-                        <ui:Label class="field-sub-label" text="[ENTER REGISTRATION ID]" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="scanner-box">
-                        <ui:VisualElement class="input-bracket input-bracket-left" />
-                        <ui:VisualElement class="input-bracket input-bracket-right" />
-                        <ui:TextField name="UsernameInput" class="login-input" />
-                    </ui:VisualElement>
+                <ui:VisualElement name="LoginHeader" class="login-header">
+                    <ui:Label name="GameLogo_Zombie" class="game-logo-zombie" text="ZOMBIE" />
+                    <ui:Label name="GameLogo_Survival" class="game-logo-survival" text="SURVIVAL" />
                 </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Module 2: Username Scanner Module -->
+            <ui:VisualElement name="InputModule_User" class="hud-module input-module">
+                <ui:VisualElement class="hud-bracket bracket-tl" />
+                <ui:VisualElement class="hud-bracket bracket-bl" />
                 
-                <!-- Password Field Group -->
-                <ui:VisualElement class="input-group">
-                    <ui:VisualElement class="label-row">
-                        <ui:Label name="PasswordLabel" class="field-label" text="PASSWORD" />
-                        <ui:Label class="field-sub-label" text="[SECURE KEY DECRYPT]" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="scanner-box">
-                        <ui:VisualElement class="input-bracket input-bracket-left" />
-                        <ui:VisualElement class="input-bracket input-bracket-right" />
-                        <ui:TextField name="PasswordInput" class="login-input" password="true" />
-                    </ui:VisualElement>
+                <!-- Status LED -->
+                <ui:VisualElement class="led-row">
+                    <ui:VisualElement class="led-dot led-orange" />
+                    <ui:Label class="led-label" text="LINK_ID: SEARCHING" />
                 </ui:VisualElement>
+
+                <ui:VisualElement class="input-container-inner">
+                    <ui:Label name="UsernameLabel" class="field-label" text="USERNAME" />
+                    <ui:TextField name="UsernameInput" class="login-input" />
+                </ui:VisualElement>
+                <ui:Label class="module-decals" text="[ID_SCANNER_V2.1]" />
+            </ui:VisualElement>
+
+            <!-- Module 3: Password Decryptor Module -->
+            <ui:VisualElement name="InputModule_Pass" class="hud-module input-module">
+                <ui:VisualElement class="hud-bracket bracket-tl" />
+                <ui:VisualElement class="hud-bracket bracket-bl" />
                 
+                <!-- Status LED -->
+                <ui:VisualElement class="led-row">
+                    <ui:VisualElement class="led-dot led-orange" />
+                    <ui:Label class="led-label" text="DECRYPT: STANDBY" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="input-container-inner">
+                    <ui:Label name="PasswordLabel" class="field-label" text="PASSWORD" />
+                    <ui:TextField name="PasswordInput" class="login-input" password="true" />
+                </ui:VisualElement>
+                <ui:Label class="module-decals" text="[SECURE_KEY_HASH]" />
+            </ui:VisualElement>
+
+            <!-- Module 4: Action & Diagnostics Terminal -->
+            <ui:VisualElement name="ActionModule" class="hud-module action-module">
+                <ui:VisualElement class="hud-bracket bracket-tr" />
+                <ui:VisualElement class="hud-bracket bracket-br" />
+                
+                <ui:Label name="LoginTitle" class="login-title" text="INTERFACE INITIALIZATION" />
+                <ui:Label name="LoginStatus" class="login-status" text="Awaiting credentials..." />
+
                 <!-- Split Action Button -->
                 <ui:VisualElement name="ActionButton" class="login-action-btn split-btn">
                     <ui:VisualElement class="btn-main-section">
@@ -102,17 +86,20 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Footer section -->
-            <ui:VisualElement name="LoginFooter" class="login-footer">
-                <ui:VisualElement name="ServerStatusRow" class="status-row">
-                    <ui:VisualElement name="StatusIndicator" class="status-dot-online" />
-                    <ui:Label name="StatusText" class="status-text" text="SERVER STATUS: ONLINE" />
+            <!-- Module 5: Footer Status Widget -->
+            <ui:VisualElement name="FooterModule" class="hud-module status-module">
+                <ui:VisualElement class="hud-bracket bracket-bl" />
+                <ui:VisualElement class="hud-bracket bracket-br" />
+                
+                <ui:VisualElement name="LoginFooter" class="login-footer">
+                    <ui:VisualElement name="ServerStatusRow" class="status-row">
+                        <ui:VisualElement name="StatusIndicator" class="status-dot-online" />
+                        <ui:Label name="StatusText" class="status-text" text="SERVER STATUS: ONLINE" />
+                    </ui:VisualElement>
+                    <ui:Label name="CopyrightText" class="copyright-text" text="© 2026 ANTIGRAVITY GAMES" />
                 </ui:VisualElement>
-                <ui:Label name="CopyrightText" class="copyright-text" text="© 2026 ANTIGRAVITY GAMES" />
             </ui:VisualElement>
 
-            <!-- Hazard Strip at the bottom edge -->
-            <ui:VisualElement name="HazardStrip" class="hazard-strip" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
