@@ -20,7 +20,7 @@
     top: 0;
     bottom: 0;
     background-image: resource("Images/ui_vignette");
-    background-size: cover;
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 #TopAccent {
@@ -34,9 +34,9 @@
     flex-shrink: 0;
     background-image: resource("Icons/icon_skull");
     -unity-background-image-tint-color: var(--color-accent-red);
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    -unity-background-scale-mode: scale-to-fit;
+    
+    
 }
 
 #Title {

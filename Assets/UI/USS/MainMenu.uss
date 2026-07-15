@@ -33,9 +33,9 @@
     bottom: 0;
     background-color: var(--mm-overlay);
     background-image: resource("Images/ui_vignette");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    center;
+    
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 #SkullWatermark {
@@ -46,9 +46,9 @@
     bottom: 0;
     opacity: 0.08;
     background-image: resource("Icons/icon_skull");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: contain;
+    center;
+    
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 /* ===== CENTER GROUP ===== */
@@ -103,9 +103,9 @@
     bottom: -2px;
     background-color: var(--mm-shadow);
     background-image: resource("Images/ui_shadow");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    center;
+    
+    -unity-background-scale-mode: scale-and-crop;
     border-radius: var(--radius-s, 8px);
 }
 
@@ -117,9 +117,9 @@
     bottom: 0;
     background-color: var(--mm-button-fill);
     background-image: resource("Images/ui_button");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    center;
+    
+    -unity-background-scale-mode: scale-and-crop;
     border-radius: var(--radius-s);
     border-color: var(--mm-gold-dim);
     border-width: 1px;
@@ -141,9 +141,9 @@
     width: 28px;
     height: 28px;
     translate: 0 -50%;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: contain;
+    center;
+    
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .button-label {
@@ -174,9 +174,9 @@
     padding: 10px 20px;
     background-color: var(--color-surface-mid);
     background-image: resource("Images/ui_panel");
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    center;
+    
+    -unity-background-scale-mode: scale-and-crop;
     border-radius: var(--radius-s);
     margin-top: var(--space-l, 16px);
 }
@@ -189,9 +189,9 @@
 .chip-icon {
     width: 24px;
     height: 24px;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: contain;
+    center;
+    
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .chip-label {

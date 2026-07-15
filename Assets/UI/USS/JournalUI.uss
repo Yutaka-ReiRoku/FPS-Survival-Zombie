@@ -57,9 +57,9 @@
     top: 104px;
     width: 320px;
     height: 180px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    -unity-background-scale-mode: scale-to-fit;
+    
+    
 }
 
 /* === Content text === */

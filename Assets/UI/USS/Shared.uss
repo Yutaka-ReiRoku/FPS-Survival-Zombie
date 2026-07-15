@@ -26,7 +26,7 @@
     top: 0;
     bottom: 0;
     background-image: resource("Images/ui_vignette");
-    background-size: cover;
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 /* Sliced shadow behind cards */
@@ -93,9 +93,9 @@
 
 /* Icon utility */
 .icon-base {
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    -unity-background-scale-mode: scale-to-fit;
+    
+    
     flex-shrink: 0;
 }
 
@@ -248,9 +248,9 @@
     width: 28px;
     height: 28px;
     flex-shrink: 0;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    -unity-background-scale-mode: scale-to-fit;
+    
+    
     margin-right: var(--space-s, 8px);
 }
 

@@ -24,9 +24,9 @@
     right: var(--space-s, 8px);
     top: var(--space-s, 8px);
     bottom: var(--space-s, 8px);
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    -unity-background-scale-mode: scale-to-fit;
+    
+    
 }
 
 .weapon-inventory-index {

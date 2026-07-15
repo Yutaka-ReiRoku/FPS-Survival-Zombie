@@ -30,9 +30,9 @@
 #WeaponIcon {
     width: 74px;
     height: 46px;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
+    
+    
+    -unity-background-scale-mode: scale-to-fit;
     flex-shrink: 0;
     margin-left: 10px;
 }

@@ -27,7 +27,7 @@
     color: var(--color-text-gold);
     margin-bottom: var(--space-xs);
     width: 100%;
-    text-align: center;
+    
 }
 
 .wave-sub {
@@ -36,6 +36,6 @@
     -unity-text-align: middle-center;
     color: var(--color-text-muted);
     width: 100%;
-    text-align: center;
+    
     white-space: normal;
 }
