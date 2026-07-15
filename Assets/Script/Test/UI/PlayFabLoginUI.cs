@@ -406,6 +406,7 @@ public class PlayFabLoginUI : MonoBehaviour
                 bgPlaque.style.top = 0;
                 bgPlaque.style.right = 0;
                 bgPlaque.style.bottom = 0;
+                bgPlaque.style.backgroundColor = Color.white; // Triggers UI Toolkit layout engine to draw the background mesh
                 bgPlaque.style.unityMaterial = new StyleMaterialDefinition(customMat);
                 element.Insert(0, bgPlaque);
             }
