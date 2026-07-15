@@ -59,6 +59,7 @@ public class PlayerProfileWidget : MonoBehaviour
         if (_logoutButton != null) _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
 
         _panel.style.display = DisplayStyle.None;
+        if (_chip != null) _chip.style.display = DisplayStyle.None;
     }
 
     private void OnEnable() { StartCoroutine(Bind()); }
@@ -164,12 +165,14 @@ public class PlayerProfileWidget : MonoBehaviour
             if (_chipUsername != null) _chipUsername.text = pm.Username ?? "Player";
             if (_chipStatus != null) { _chipStatus.text = "Online"; _chipStatus.style.color = ButtonColor; }
             if (_chipAvatar != null) _chipAvatar.style.backgroundColor = ButtonColor;
+            if (_chip != null) _chip.style.display = DisplayStyle.Flex;
         }
         else
         {
             if (_chipUsername != null) _chipUsername.text = "Not logged in";
             if (_chipStatus != null) { _chipStatus.text = "Click to login"; _chipStatus.style.color = TextMuted; }
             if (_chipAvatar != null) _chipAvatar.style.backgroundColor = TextMuted;
+            if (_chip != null) _chip.style.display = DisplayStyle.None;
         }
     }
 
