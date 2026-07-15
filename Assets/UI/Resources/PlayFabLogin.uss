@@ -107,13 +107,13 @@
 .stamp-top-left {
     top: 8px;
     left: 16px;
-    color: rgba(230, 80, 40, 0.35);
+    color: rgba(230, 80, 40, 0.75);
 }
 
 .stamp-top-right {
     top: 8px;
     right: 16px;
-    color: rgba(230, 80, 40, 0.35);
+    color: rgba(230, 80, 40, 0.75);
 }
 
 /* --- Module 1: Header Terminal --- */
@@ -219,7 +219,7 @@
     bottom: 4px;
     right: 8px;
     font-size: 7px;
-    color: rgba(158, 168, 184, 0.22);
+    color: rgba(158, 168, 184, 0.6);
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
 }
 
