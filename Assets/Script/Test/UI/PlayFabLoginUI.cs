@@ -27,9 +27,11 @@ public class PlayFabLoginUI : MonoBehaviour
     private VisualElement _passwordInputContainer;
     private VisualElement _btnMainSec;
 
-    private RenderTexture _rt;
-    private Texture2D _tex2D;
-    private Material _crtMaterial;
+    private Material _headerMaterial;
+    private Material _userMaterial;
+    private Material _passMaterial;
+    private Material _actionMaterial;
+    private Material _footerMaterial;
 
     private bool _isRegisterMode;
     private bool _isBusy;
@@ -86,39 +88,36 @@ public class PlayFabLoginUI : MonoBehaviour
             _logoutButton.style.display = DisplayStyle.None;
         }
 
-        // Apply custom vector API chamfer drawing with large prominent cuts for rusted steel aesthetic
-        SetupChamferedPlaque(root.Q("HeaderModule"), 28f, true, false);
-        SetupChamferedPlaque(root.Q("InputModule_User"), 24f, true, false);
-        SetupChamferedPlaque(root.Q("InputModule_Pass"), 24f, true, false);
-        SetupChamferedPlaque(root.Q("ActionModule"), 28f, true, false);
-        SetupChamferedPlaque(root.Q("FooterModule"), 20f, true, false);
-
-        // Find child input fields and button sections to apply matching chamfered cuts
-        _usernameInputContainer = root.Q("InputModule_User")?.Q(className: "input-container-inner");
-        _passwordInputContainer = root.Q("InputModule_Pass")?.Q(className: "input-container-inner");
-        _btnMainSec = root.Q("ActionButton")?.Q(className: "btn-main-section");
-
-        SetupChamferedPlaque(_usernameInputContainer, 10f, false, false);
-        SetupChamferedPlaque(_passwordInputContainer, 10f, false, false);
-        SetupChamferedPlaque(_btnMainSec, 8f, false, true);
-
-        // Load custom CRT glitch shader and build RenderTexture
+        // Load custom CRT glitch shader and instantiate materials for individual modules
         var shader = Shader.Find("Custom/CRTGlitchShader");
         if (shader != null)
         {
-            _crtMaterial = new Material(shader);
+            _headerMaterial = new Material(shader);
+            _userMaterial = new Material(shader);
+            _passMaterial = new Material(shader);
+            _actionMaterial = new Material(shader);
+            _footerMaterial = new Material(shader);
         }
         else
         {
             Debug.LogWarning("[PlayFabLoginUI] Custom/CRTGlitchShader not found. Falling back to solid color rendering.");
         }
 
-        _rt = new RenderTexture(256, 256, 0, RenderTextureFormat.ARGB32);
-        _rt.filterMode = FilterMode.Bilinear;
-        _rt.Create();
+        // Apply custom vector API chamfer drawing with large prominent cuts for rusted steel aesthetic
+        SetupChamferedPlaque(root.Q("HeaderModule"), 28f, true, false, _headerMaterial);
+        SetupChamferedPlaque(root.Q("InputModule_User"), 24f, true, false, _userMaterial);
+        SetupChamferedPlaque(root.Q("InputModule_Pass"), 24f, true, false, _passMaterial);
+        SetupChamferedPlaque(root.Q("ActionModule"), 28f, true, false, _actionMaterial);
+        SetupChamferedPlaque(root.Q("FooterModule"), 20f, true, false, _footerMaterial);
 
-        _tex2D = new Texture2D(256, 256, TextureFormat.ARGB32, false);
-        _tex2D.filterMode = FilterMode.Bilinear;
+        // Find child input fields and button sections to apply matching chamfered cuts
+        _usernameInputContainer = root.Q("InputModule_User")?.Q(className: "input-container-inner");
+        _passwordInputContainer = root.Q("InputModule_Pass")?.Q(className: "input-container-inner");
+        _btnMainSec = root.Q("ActionButton")?.Q(className: "btn-main-section");
+
+        SetupChamferedPlaque(_usernameInputContainer, 10f, false, false, null);
+        SetupChamferedPlaque(_passwordInputContainer, 10f, false, false, null);
+        SetupChamferedPlaque(_btnMainSec, 8f, false, true, null);
     }
 
     private void OnEnable()
@@ -130,19 +129,17 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void Update()
     {
-        // Drive CRT glitch shader rendering onto RenderTexture, then copy to Texture2D via GPU
-        if (_crtMaterial != null && _rt != null && _tex2D != null)
-        {
-            _crtMaterial.SetFloat("_GlitchTime", Time.realtimeSinceStartup);
-            Graphics.Blit(Texture2D.whiteTexture, _rt, _crtMaterial);
-            Graphics.CopyTexture(_rt, _tex2D);
-            _tex2D.IncrementUpdateCount();
-        }
-
-        // Repaint all modules to drive vector laser scanlines and glowing breathing pulse animations
         var root = _doc?.rootVisualElement;
         if (root == null || _loginRoot == null || _loginRoot.style.display == DisplayStyle.None) return;
 
+        // Feed layout-dependent sizes and real-time parameters to module shaders
+        UpdateMaterial(_headerMaterial, root.Q("HeaderModule"), 28f);
+        UpdateMaterial(_userMaterial, root.Q("InputModule_User"), 24f);
+        UpdateMaterial(_passMaterial, root.Q("InputModule_Pass"), 24f);
+        UpdateMaterial(_actionMaterial, root.Q("ActionModule"), 28f);
+        UpdateMaterial(_footerMaterial, root.Q("FooterModule"), 20f);
+
+        // Repaint all modules to drive vector laser scanlines and glowing breathing pulse animations
         root.Q("HeaderModule")?.MarkDirtyRepaint();
         root.Q("InputModule_User")?.MarkDirtyRepaint();
         root.Q("InputModule_Pass")?.MarkDirtyRepaint();
@@ -152,6 +149,18 @@ public class PlayFabLoginUI : MonoBehaviour
         _usernameInputContainer?.MarkDirtyRepaint();
         _passwordInputContainer?.MarkDirtyRepaint();
         _btnMainSec?.MarkDirtyRepaint();
+    }
+
+    private void UpdateMaterial(Material mat, VisualElement element, float chamfer)
+    {
+        if (mat != null && element != null)
+        {
+            var rect = element.layout;
+            mat.SetFloat("_GlitchTime", Time.realtimeSinceStartup);
+            mat.SetFloat("_Width", rect.width);
+            mat.SetFloat("_Height", rect.height);
+            mat.SetFloat("_ChamferSize", chamfer);
+        }
     }
 
     private void AutoDetectMainMenu()
@@ -374,7 +383,7 @@ public class PlayFabLoginUI : MonoBehaviour
         _actionButton?.SetEnabled(!busy);
     }
 
-    private void SetupChamferedPlaque(VisualElement element, float chamferSize, bool drawScanline, bool isButton)
+    private void SetupChamferedPlaque(VisualElement element, float chamferSize, bool drawScanline, bool isButton, Material customMat)
     {
         if (element == null) return;
         
@@ -384,6 +393,23 @@ public class PlayFabLoginUI : MonoBehaviour
         element.style.borderRightWidth = 0;
         element.style.borderTopWidth = 0;
         element.style.borderBottomWidth = 0;
+
+        // Programmatically inject an absolute positioned background plaque element mapped with the shader material
+        if (customMat != null)
+        {
+            var bgPlaque = element.Q("BackgroundPlaque");
+            if (bgPlaque == null)
+            {
+                bgPlaque = new VisualElement() { name = "BackgroundPlaque" };
+                bgPlaque.style.position = Position.Absolute;
+                bgPlaque.style.left = 0;
+                bgPlaque.style.top = 0;
+                bgPlaque.style.right = 0;
+                bgPlaque.style.bottom = 0;
+                bgPlaque.style.unityMaterial = new StyleMaterialDefinition(customMat);
+                element.Insert(0, bgPlaque);
+            }
+        }
 
         bool isHovered = false;
 
@@ -404,32 +430,8 @@ public class PlayFabLoginUI : MonoBehaviour
 
             var painter = mgc.painter2D;
 
-            // 1. Draw background shape
-            if (drawScanline && _tex2D != null) // Draw via Mesh API mapping Texture2D copy of shader
-            {
-                var mesh = mgc.Allocate(6, 12, _tex2D);
-
-                var p0 = new Vector2(chamferSize, 0);
-                var p1 = new Vector2(rect.width, 0);
-                var p2 = new Vector2(rect.width, rect.height - chamferSize);
-                var p3 = new Vector2(rect.width - chamferSize, rect.height);
-                var p4 = new Vector2(0, rect.height);
-                var p5 = new Vector2(0, chamferSize);
-
-                mesh.SetNextVertex(new Vertex() { position = new Vector3(p0.x, p0.y, Vertex.nearZ), uv = new Vector2(chamferSize / rect.width, 1f), tint = Color.white });
-                mesh.SetNextVertex(new Vertex() { position = new Vector3(p1.x, p1.y, Vertex.nearZ), uv = new Vector2(1f, 1f), tint = Color.white });
-                mesh.SetNextVertex(new Vertex() { position = new Vector3(p2.x, p2.y, Vertex.nearZ), uv = new Vector2(1f, chamferSize / rect.height), tint = Color.white });
-                mesh.SetNextVertex(new Vertex() { position = new Vector3(p3.x, p3.y, Vertex.nearZ), uv = new Vector2(1f - chamferSize / rect.width, 0f), tint = Color.white });
-                mesh.SetNextVertex(new Vertex() { position = new Vector3(p4.x, p4.y, Vertex.nearZ), uv = new Vector2(0f, 0f), tint = Color.white });
-                mesh.SetNextVertex(new Vertex() { position = new Vector3(p5.x, p5.y, Vertex.nearZ), uv = new Vector2(0f, 1f - chamferSize / rect.height), tint = Color.white });
-
-                // Triangulation: 4 triangles covering the 6-sided polygon clockwise
-                mesh.SetNextIndex(0); mesh.SetNextIndex(1); mesh.SetNextIndex(5);
-                mesh.SetNextIndex(1); mesh.SetNextIndex(2); mesh.SetNextIndex(5);
-                mesh.SetNextIndex(2); mesh.SetNextIndex(3); mesh.SetNextIndex(5);
-                mesh.SetNextIndex(3); mesh.SetNextIndex(4); mesh.SetNextIndex(5);
-            }
-            else // Draw via Painter2D fallback solid/transparent fill
+            // 1. Draw background shape only for elements NOT using the shader material background plaque
+            if (customMat == null)
             {
                 Color fillCol;
                 if (isButton)
@@ -524,19 +526,11 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Clean up created textures and materials to avoid memory leaks
-        if (_rt != null)
-        {
-            _rt.Release();
-            Destroy(_rt);
-        }
-        if (_tex2D != null)
-        {
-            Destroy(_tex2D);
-        }
-        if (_crtMaterial != null)
-        {
-            Destroy(_crtMaterial);
-        }
+        // Clean up created materials to avoid memory leaks
+        if (_headerMaterial != null) Destroy(_headerMaterial);
+        if (_userMaterial != null) Destroy(_userMaterial);
+        if (_passMaterial != null) Destroy(_passMaterial);
+        if (_actionMaterial != null) Destroy(_actionMaterial);
+        if (_footerMaterial != null) Destroy(_footerMaterial);
     }
 }
