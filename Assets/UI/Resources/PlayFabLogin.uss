@@ -10,158 +10,239 @@
     right: 0;
     top: 0;
     bottom: 0;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     background-color: rgba(0, 0, 0, 0);
 }
 
-/* --- Login Panel --- */
+/* --- Login Panel (Sidebar) --- */
 #LoginPanel {
     flex-direction: column;
-    background-color: var(--color-panel-bg, rgba(14, 17, 21, 0.92));
-    border-radius: var(--radius-m, 16px);
-    padding: var(--space-4xl, 40px);
+    background-color: rgba(9, 12, 17, 0.95);
+    width: 450px;
+    height: 100%;
+    border-radius: 0;
+    padding: 60px 48px 48px 48px;
+    border-right-width: 1.5px;
+    border-right-color: rgba(217, 199, 115, 0.35);
+    justify-content: space-between;
+}
+
+/* --- Header section --- */
+.login-header {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.game-logo-zombie {
+    font-size: 56px;
+    -unity-font-definition: resource("Fonts/Anton SDF");
+    color: rgb(184, 38, 48);
+    -unity-text-align: middle-center;
+    margin-bottom: -15px;
+    letter-spacing: 6px;
+}
+
+.game-logo-survival {
+    font-size: 20px;
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    color: rgb(217, 199, 115);
+    -unity-text-align: middle-center;
+    letter-spacing: 12px;
+    margin-bottom: 12px;
+}
+
+.game-logo-sub {
+    font-size: 11px;
+    color: rgba(158, 168, 184, 0.45);
+    -unity-text-align: middle-center;
+}
+
+/* --- Body section --- */
+.login-body {
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 #LoginPanel .login-title {
-    font-size: var(--fs-xl, 28px);
+    font-size: var(--fs-l, 22px);
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
-    margin-bottom: var(--space-l, 16px);
-    height: 40px;
+    margin-bottom: var(--space-s, 8px);
+    height: 30px;
+    letter-spacing: 2px;
 }
 
 #LoginPanel .login-status {
-    font-size: var(--fs-xs, 14px);
+    font-size: var(--fs-xs, 13px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     -unity-text-align: middle-center;
     height: 24px;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
 }
 
 /* --- Field Labels --- */
 #LoginPanel .field-label {
-    font-size: var(--fs-xs, 14px);
-    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    font-size: 11px;
+    color: rgba(158, 168, 184, 0.55);
     -unity-text-align: middle-left;
     margin-bottom: var(--space-xs, 4px);
+    letter-spacing: 1.5px;
 }
 
 #UsernameInput {
-    margin-bottom: var(--space-m, 12px);
+    margin-bottom: 16px;
 }
 
 #PasswordInput {
-    margin-bottom: var(--space-l, 16px);
+    margin-bottom: 24px;
 }
 
-/* --- Text Input --- */
+/* --- Text Input (Gold Underlined) --- */
 #LoginPanel .login-input {
     height: 40px;
-    background-color: var(--color-surface-mid, rgba(31, 38, 46, 0.96));
+    background-color: rgba(18, 22, 28, 0.45);
     border-left-width: 0;
     border-right-width: 0;
     border-top-width: 0;
-    border-bottom-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(158, 168, 184, 0.15);
     color: var(--color-text-primary, white);
-    font-size: var(--fs-s, 16px);
+    font-size: var(--fs-s, 15px);
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
-    padding-left: var(--space-m, 12px);
-    border-radius: var(--radius-s, 8px);
+    padding-left: var(--space-s, 8px);
+    border-radius: 0;
+    transition: border-bottom-color var(--transition-fast, 0.08s);
 }
 
-/* --- Action Button --- */
+#LoginPanel .login-input:focus {
+    border-bottom-color: rgb(217, 199, 115);
+}
+
+/* --- Action Button (Gold Metallic) --- */
 .login-action-btn {
     height: 44px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-stamina, rgba(79, 224, 138, 1));
-    border-radius: var(--radius-s, 8px);
+    background-color: rgb(217, 199, 115);
+    border-radius: var(--radius-s, 6px);
     cursor: link;
     transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
 }
 
 .login-action-btn:hover {
-    background-color: var(--color-stamina, rgba(79, 224, 138, 0.7));
-    scale: var(--hover-scale, 1.06);
+    background-color: rgba(217, 199, 115, 0.85);
+    scale: var(--hover-scale, 1.04);
 }
 
 .login-action-btn:active {
-    scale: var(--press-scale, 0.95);
+    scale: var(--press-scale, 0.96);
 }
 
 .login-action-btn .btn-label {
-    font-size: var(--fs-s, 16px);
+    font-size: var(--fs-s, 15px);
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
-    color: var(--color-text-primary, white);
+    color: rgb(9, 12, 17);
     -unity-text-align: middle-center;
+    letter-spacing: 2px;
 }
 
 /* --- Toggle Row --- */
-#ToggleRow {
+.toggle-row {
     flex-direction: row;
     align-items: center;
     justify-content: center;
     margin-bottom: 12px;
 }
 
-#ToggleRow .toggle-label {
-    font-size: var(--fs-xs, 14px);
-    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+.toggle-row .toggle-label {
+    font-size: var(--fs-xs, 12px);
+    color: rgba(158, 168, 184, 0.6);
 }
 
 /* --- Toggle Button --- */
 .login-toggle-btn {
-    width: 80px;
-    height: 30px;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-surface-mid, rgba(31, 38, 46, 0.96));
-    border-radius: var(--radius-xs, 6px);
+    background-color: rgba(0, 0, 0, 0);
     cursor: link;
-    transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
-}
-
-.login-toggle-btn:hover {
-    background-color: var(--color-surface-hover, rgba(31, 38, 46, 0.7));
-    scale: var(--hover-scale, 1.06);
-}
-
-.login-toggle-btn:active {
-    scale: var(--press-scale, 0.95);
+    margin-left: 6px;
 }
 
 .login-toggle-btn .btn-label {
-    font-size: var(--fs-xs, 14px);
-    color: var(--color-text-primary, white);
+    font-size: var(--fs-xs, 12px);
+    color: rgb(217, 199, 115);
     -unity-text-align: middle-center;
+    transition: color var(--transition-fast, 0.08s);
+}
+
+.login-toggle-btn:hover .btn-label {
+    color: white;
 }
 
 /* --- Logout Button --- */
 .login-logout-btn {
-    height: 36px;
+    height: 38px;
     align-items: center;
     justify-content: center;
     background-color: var(--color-accent-red-dark, rgb(168, 23, 33));
-    border-radius: var(--radius-s, 8px);
+    border-radius: var(--radius-s, 6px);
     cursor: link;
     transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
 }
 
 .login-logout-btn:hover {
-    background-color: var(--color-accent-red-dark, rgb(168, 23, 33));
-    scale: var(--hover-scale, 1.06);
+    background-color: rgb(190, 30, 42);
+    scale: var(--hover-scale, 1.04);
 }
 
 .login-logout-btn:active {
-    scale: var(--press-scale, 0.95);
+    scale: var(--press-scale, 0.96);
 }
 
 .login-logout-btn .btn-label {
-    font-size: var(--fs-s, 16px);
+    font-size: var(--fs-s, 15px);
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
+    letter-spacing: 1.5px;
+}
+
+/* --- Footer section --- */
+.login-footer {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.status-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.status-dot-online {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgb(79, 224, 138);
+    margin-right: 8px;
+}
+
+.status-text {
+    font-size: 10px;
+    color: rgb(79, 224, 138);
+    letter-spacing: 1.5px;
+}
+
+.copyright-text {
+    font-size: 9px;
+    color: rgba(158, 168, 184, 0.25);
+    letter-spacing: 0.5px;
 }
