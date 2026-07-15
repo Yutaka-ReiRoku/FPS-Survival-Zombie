@@ -15,6 +15,23 @@
     background-color: rgba(0, 0, 0, 0);
 }
 
+/* --- Black cinematic overlay on start --- */
+.black-overlay {
+    position: absolute;
+    left: -200px;
+    right: -200px;
+    top: -200px;
+    bottom: -200px;
+    background-color: black;
+    opacity: 1;
+    transition: opacity 3s ease-in-out;
+    picking-mode: ignore;
+}
+
+.black-overlay.fade-out {
+    opacity: 0;
+}
+
 /* --- Main Modular Container (Transparent) --- */
 .login-panel-container {
     flex-direction: column;
@@ -45,7 +62,29 @@
     position: relative;
     padding: 36px;
     margin-bottom: 24px;
-    transition: border-color 0.12s ease-in-out, box-shadow 0.12s ease-in-out;
+    translate: -800px 0px;
+    transition: translate 1.5s ease-out-back, scale 0.15s ease-out, border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+}
+
+.hud-module.slide-in {
+    translate: 0px 0px;
+}
+
+#HeaderModule {
+    transition-delay: 0s;
+}
+#InputModule_User {
+    transition-delay: 0.15s;
+}
+#InputModule_Pass {
+    transition-delay: 0.3s;
+}
+#ActionModule {
+    transition-delay: 0.45s;
+}
+
+.module-pop {
+    scale: 1.05;
 }
 
 .hud-module:hover {

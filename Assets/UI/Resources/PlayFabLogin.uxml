@@ -4,6 +4,9 @@
     <ui:Style src="project://database/Assets/UI/Resources/PlayFabLogin.uss" />
 
     <ui:VisualElement name="PlayFabLoginRoot" class="overlay">
+        <!-- Full-screen cinematic black overlay for start fade -->
+        <ui:VisualElement name="BlackOverlay" class="black-overlay" />
+
         <!-- Main Floating Tactical HUD Panel Container (Transparent) -->
         <ui:VisualElement name="LoginPanel" class="login-panel-container">
 

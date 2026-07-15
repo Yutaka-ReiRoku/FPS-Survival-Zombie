@@ -27,6 +27,10 @@ public class PlayFabLoginUI : MonoBehaviour
     private VisualElement _passwordInputContainer;
     private VisualElement _btnMainSec;
 
+    // smooth 0.5s transition factors
+    private System.Collections.Generic.Dictionary<VisualElement, float> _transitionFactors = new System.Collections.Generic.Dictionary<VisualElement, float>();
+    private System.Collections.Generic.Dictionary<VisualElement, bool> _hoverStates = new System.Collections.Generic.Dictionary<VisualElement, bool>();
+    private System.Collections.Generic.Dictionary<VisualElement, bool> _focusStates = new System.Collections.Generic.Dictionary<VisualElement, bool>();
 
     private bool _isRegisterMode;
     private bool _isBusy;
@@ -103,6 +107,26 @@ public class PlayFabLoginUI : MonoBehaviour
         SetupChamferedPlaque(_usernameInputContainer, 12f, false, false, null);
         SetupChamferedPlaque(_passwordInputContainer, 12f, false, false, null);
         SetupChamferedPlaque(_btnMainSec, 10f, false, true, null);
+
+        // Hook up focus/blur listeners to trigger smooth transition border glows
+        if (_usernameInput != null)
+        {
+            _usernameInput.RegisterCallback<FocusInEvent>(_ => {
+                if (_usernameInputContainer != null) _focusStates[_usernameInputContainer] = true;
+            });
+            _usernameInput.RegisterCallback<FocusOutEvent>(_ => {
+                if (_usernameInputContainer != null) _focusStates[_usernameInputContainer] = false;
+            });
+        }
+        if (_passwordInput != null)
+        {
+            _passwordInput.RegisterCallback<FocusInEvent>(_ => {
+                if (_passwordInputContainer != null) _focusStates[_passwordInputContainer] = true;
+            });
+            _passwordInput.RegisterCallback<FocusOutEvent>(_ => {
+                if (_passwordInputContainer != null) _focusStates[_passwordInputContainer] = false;
+            });
+        }
     }
 
     private void OnEnable()
@@ -118,14 +142,27 @@ public class PlayFabLoginUI : MonoBehaviour
         var root = _doc?.rootVisualElement;
         if (root == null || _loginRoot == null || _loginRoot.style.display == DisplayStyle.None) return;
 
+        // Smoothly interpolate hover/focus transition factors over 0.5s
+        var keys = new System.Collections.Generic.List<VisualElement>(_transitionFactors.Keys);
+        foreach (var key in keys)
+        {
+            if (key == null) continue;
+            bool active = _hoverStates.ContainsKey(key) && _hoverStates[key];
+            if (_focusStates.ContainsKey(key) && _focusStates[key]) active = true;
+
+            float target = active ? 1f : 0f;
+            float current = _transitionFactors[key];
+            if (current != target)
+            {
+                _transitionFactors[key] = Mathf.MoveTowards(current, target, Time.deltaTime / 0.5f);
+                key.MarkDirtyRepaint();
+            }
+        }
+
         root.Q("HeaderModule")?.MarkDirtyRepaint();
         root.Q("InputModule_User")?.MarkDirtyRepaint();
         root.Q("InputModule_Pass")?.MarkDirtyRepaint();
         root.Q("ActionModule")?.MarkDirtyRepaint();
-
-        _usernameInputContainer?.MarkDirtyRepaint();
-        _passwordInputContainer?.MarkDirtyRepaint();
-        _btnMainSec?.MarkDirtyRepaint();
     }
 
     private void AutoDetectMainMenu()
@@ -205,12 +242,73 @@ public class PlayFabLoginUI : MonoBehaviour
         if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
         _panel.style.display = DisplayStyle.Flex;
         UpdateUI();
+
+        // 1. Reset all modules to slide out of screen at start (CSS handles position: absolute left)
+        var modules = new string[] { "HeaderModule", "InputModule_User", "InputModule_Pass", "ActionModule" };
+        foreach (var name in modules)
+        {
+            var el = _panel?.Q(name);
+            el?.RemoveFromClassList("slide-in");
+        }
+
+        // 2. Initial state: Black overlay is visible
+        var overlay = _loginRoot?.Q("BlackOverlay");
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.Flex;
+            overlay.RemoveFromClassList("fade-out");
+        }
+
+        // Wait a frame for layout parsing
+        yield return null;
+
+        // 3. Start black screen transition fade out (3s in CSS)
+        if (overlay != null)
+        {
+            overlay.AddToClassList("fade-out");
+        }
+
+        // Wait 3.0 seconds for black overlay fade out to complete
+        yield return new WaitForSeconds(3.0f);
+
+        // Turn off overlay rendering completely to save CPU/GPU overhead
+        if (overlay != null) overlay.style.display = DisplayStyle.None;
+
+        // 4. Wait another 3.0 seconds (total 6.0 seconds delay) before trundling the nodes in
+        yield return new WaitForSeconds(3.0f);
+
+        // 5. Trigger slide-in transitions with staggered delays defined in USS
+        foreach (var name in modules)
+        {
+            var el = _panel?.Q(name);
+            el?.AddToClassList("slide-in");
+        }
     }
 
     private void ToggleMode()
     {
         _isRegisterMode = !_isRegisterMode;
+        
+        // Trigger Pop animation (swell/bounce)
+        TriggerPopAnimation();
+
         UpdateUI();
+    }
+
+    private void TriggerPopAnimation()
+    {
+        var modules = new string[] { "HeaderModule", "InputModule_User", "InputModule_Pass", "ActionModule" };
+        foreach (var name in modules)
+        {
+            var el = _panel?.Q(name);
+            if (el != null)
+            {
+                el.AddToClassList("module-pop");
+                el.schedule.Execute(() => {
+                    el.RemoveFromClassList("module-pop");
+                }).StartingIn(150);
+            }
+        }
     }
 
     private void UpdateUI()
@@ -359,17 +457,19 @@ public class PlayFabLoginUI : MonoBehaviour
         element.style.borderTopWidth = 0;
         element.style.borderBottomWidth = 0;
 
+        _transitionFactors[element] = 0f;
+        _hoverStates[element] = false;
+        _focusStates[element] = false;
+
         // All drawing is done directly on the element's own generateVisualContent callback
 
-        bool isHovered = false;
-
         element.RegisterCallback<MouseEnterEvent>(_ => {
-            isHovered = true;
+            _hoverStates[element] = true;
             element.MarkDirtyRepaint();
         });
 
         element.RegisterCallback<MouseLeaveEvent>(_ => {
-            isHovered = false;
+            _hoverStates[element] = false;
             element.MarkDirtyRepaint();
         });
 
@@ -380,13 +480,20 @@ public class PlayFabLoginUI : MonoBehaviour
 
             var painter = mgc.painter2D;
 
+            // Retrieve current transition factor (0.5s smooth transition)
+            float t = 0f;
+            if (_transitionFactors.ContainsKey(element)) t = _transitionFactors[element];
+
             // 1. Draw solid background shape for all elements
             Color fillCol;
             if (isButton)
             {
-                fillCol = isHovered 
-                    ? new Color(250f / 255f, 100f / 255f, 60f / 255f, 1f)
-                    : new Color(230f / 255f, 80f / 255f, 40f / 255f, 1f);
+                // Lerp button background on hover
+                fillCol = Color.Lerp(
+                    new Color(230f / 255f, 80f / 255f, 40f / 255f, 1f),
+                    new Color(250f / 255f, 100f / 255f, 60f / 255f, 1f),
+                    t
+                );
             }
             else if (drawScanline)
             {
@@ -437,25 +544,39 @@ public class PlayFabLoginUI : MonoBehaviour
                 }
             }
 
-            // 3. Determine outer stroke color (Breathing pulse for modules, static for inputs/buttons)
+            // 3. Determine outer stroke color and width (with smooth 0.5s transition)
             Color strokeCol;
+            float lineWidth;
             if (isButton)
             {
                 strokeCol = new Color(255f / 255f, 255f / 255f, 255f / 255f, 0.3f);
+                lineWidth = 1.0f;
             }
             else if (drawScanline) // Pulsing modules
             {
                 float pulse = 0.35f + Mathf.PingPong(Time.realtimeSinceStartup * 1.5f, 0.45f);
-                strokeCol = new Color(230f / 255f, 80f / 255f, 40f / 255f, isHovered ? 0.9f : pulse);
+                // Lerp stroke color from pulse to bright orange, and width from 1.5f to 3.5f
+                strokeCol = Color.Lerp(
+                    new Color(230f / 255f, 80f / 255f, 40f / 255f, pulse),
+                    new Color(230f / 255f, 80f / 255f, 40f / 255f, 1.0f),
+                    t
+                );
+                lineWidth = Mathf.Lerp(1.5f, 3.5f, t);
             }
             else // Input containers
             {
-                strokeCol = new Color(230f / 255f, 80f / 255f, 40f / 255f, isHovered ? 0.8f : 0.25f);
+                // Lerp stroke color from 0.25f to 0.8f, and width from 1.5f to 3.5f
+                strokeCol = Color.Lerp(
+                    new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.25f),
+                    new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.8f),
+                    t
+                );
+                lineWidth = Mathf.Lerp(1.5f, 3.5f, t);
             }
 
             // Draw outer border
             painter.strokeColor = strokeCol;
-            painter.lineWidth = 1.5f;
+            painter.lineWidth = lineWidth;
             painter.BeginPath();
             painter.MoveTo(new Vector2(chamferSize, 0));
             painter.LineTo(new Vector2(rect.width, 0));
@@ -472,9 +593,12 @@ public class PlayFabLoginUI : MonoBehaviour
                 float d = 3.5f;
                 if (rect.width > d * 2 && rect.height > d * 2)
                 {
-                    Color innerCol = isHovered 
-                        ? new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.45f)
-                        : new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.15f);
+                    // Lerp inner border color opacity on hover/focus
+                    Color innerCol = Color.Lerp(
+                        new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.15f),
+                        new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.45f),
+                        t
+                    );
                     
                     painter.strokeColor = innerCol;
                     painter.lineWidth = 1.0f;
