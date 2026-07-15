@@ -53,7 +53,7 @@
     height: 56px;
     color: var(--color-text-gold, rgb(217, 199, 115));
     font-size: var(--fs-xxl, 36px);
-    -unity-font: var(--font-display, resource("Fonts/Anton"));
+    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
     -unity-text-align: middle-center;
 }
 
@@ -67,7 +67,7 @@
     height: 36px;
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     -unity-text-align: middle-center;
 }
 
@@ -87,7 +87,7 @@
     height: 32px;
     color: var(--color-text-gold, rgb(217, 199, 115));
     font-size: var(--fs-l, 22px);
-    -unity-font: var(--font-display, resource("Fonts/Anton"));
+    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
     -unity-text-align: middle-center;
 }
 
@@ -95,7 +95,7 @@
     height: 24px;
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     font-size: var(--fs-s, 16px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     -unity-text-align: middle-center;
 }
 
@@ -139,7 +139,7 @@
     -unity-text-align: middle-center;
     font-size: var(--fs-l, 22px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
-    -unity-font: var(--font-display, resource("Fonts/Anton"));
+    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
 }
 
 /* Connection lines */
@@ -157,7 +157,7 @@
     width: 260px;
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     font-size: var(--fs-s, 16px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     -unity-text-align: middle-center;
 }
 
@@ -166,7 +166,7 @@
     height: 24px;
     width: 220px;
     font-size: var(--fs-m, 18px);
-    -unity-font: var(--font-display, resource("Fonts/Anton"));
+    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
     -unity-text-align: middle-center;
 }
 .cost-label.ready {
@@ -189,6 +189,6 @@
     height: 28px;
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     font-size: var(--fs-m, 18px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     -unity-text-align: middle-center;
 }

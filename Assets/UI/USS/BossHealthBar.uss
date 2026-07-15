@@ -55,5 +55,5 @@
     font-size: var(--fs-l, 22px);
     -unity-text-align: middle-center;
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
 }

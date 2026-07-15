@@ -25,7 +25,7 @@
     right: var(--space-l, 16px);
     bottom: var(--space-s, 8px);
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     -unity-text-align: middle-center;
     color: var(--color-text-primary);
     white-space: normal;

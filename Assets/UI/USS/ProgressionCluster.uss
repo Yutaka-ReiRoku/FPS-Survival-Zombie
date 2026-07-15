@@ -13,7 +13,7 @@
 
 #ProgressionLabel {
     font-size: var(--fs-m, 18px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-text-gold, rgba(204, 191, 153, 0.85));
     height: 24px;
     flex-shrink: 0;
@@ -55,7 +55,7 @@
 
 #LevelValue {
     font-size: var(--fs-value-xl, 44px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-ammo-normal, rgb(235, 224, 199));
     width: var(--value-width, 104px);
     height: var(--value-height, 56px);

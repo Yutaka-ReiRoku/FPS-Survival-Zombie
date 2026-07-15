@@ -21,7 +21,7 @@
 }
 
 .wave-title {
-    -unity-font: var(--font-display);
+    -unity-font-definition: resource("Fonts/Anton SDF");
     font-size: var(--fs-hero, 64px);
     -unity-text-align: middle-center;
     color: var(--color-text-gold);
@@ -31,7 +31,7 @@
 }
 
 .wave-sub {
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     font-size: var(--fs-xxl, 36px);
     -unity-text-align: middle-center;
     color: var(--color-text-muted);

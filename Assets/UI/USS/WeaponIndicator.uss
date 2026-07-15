@@ -18,7 +18,7 @@
 }
 
 #WeaponName {
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     font-size: var(--fs-xl, 28px);
     color: var(--color-ammo-normal, rgb(235, 224, 199));
     -unity-text-align: middle-right;

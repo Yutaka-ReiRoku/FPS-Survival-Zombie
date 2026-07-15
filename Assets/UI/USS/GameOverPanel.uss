@@ -41,7 +41,8 @@
 
 #Title {
     font-size: var(--fs-display);
-    -unity-font: var(--font-display);
+    -unity-font-definition: resource("Fonts/Anton SDF");
+    -unity-font-definition: resource("Fonts/Anton SDF");
     -unity-text-align: middle-center;
     letter-spacing: 6px;
     width: 720px;
@@ -75,7 +76,7 @@
 
 .stat-text {
     font-size: var(--fs-xl);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
     width: 100%;

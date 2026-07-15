@@ -14,7 +14,7 @@
 
 .credits-header {
     font-size: var(--fs-xxl, 36px);
-    -unity-font: var(--font-display);
+    -unity-font-definition: resource("Fonts/Anton SDF");
     color: var(--color-text-gold);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
@@ -23,7 +23,7 @@
 
 .credits-line {
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
     width: 900px;

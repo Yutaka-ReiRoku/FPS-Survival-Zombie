@@ -11,6 +11,7 @@
     top: 0;
     right: 0;
     bottom: 0;
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
 }
 
 /* Full-screen overlay */
@@ -134,7 +135,7 @@
     flex-shrink: 0;
     margin: var(--space-xs, 4px) 0;
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     -unity-text-align: middle-center;
     background-image: resource("Images/ui_button");
@@ -153,7 +154,8 @@
 
 .text-display {
     font-size: var(--fs-display, 92px);
-    -unity-font: var(--font-display, resource("Fonts/Anton"));
+    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
+    -unity-font-definition: resource("Fonts/Anton SDF");
     -unity-text-align: middle-center;
     letter-spacing: 6px;
     width: 720px;
@@ -166,34 +168,35 @@
 
 .text-hero {
     font-size: var(--fs-hero, 64px);
-    -unity-font: var(--font-display, resource("Fonts/Anton"));
+    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
+    -unity-font-definition: resource("Fonts/Anton SDF");
     -unity-text-align: middle-center;
     letter-spacing: 4px;
 }
 
 .text-xl {
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
 }
 
 .text-l {
     font-size: var(--fs-l, 22px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
 }
 
 .text-m {
     font-size: var(--fs-m, 18px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
 }
 
 .text-s {
     font-size: var(--fs-s, 16px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
 }
 
 .text-xs {
     font-size: var(--fs-xs, 14px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
 }
 
 .text-center {
@@ -267,7 +270,7 @@
 .chip-label,
 .hud-chip-label {
     font-size: var(--fs-s, 16px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     -unity-text-align: middle-left;
     flex-grow: 1;
@@ -291,7 +294,7 @@
 .stats-label {
     flex-grow: 1;
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     -unity-text-align: middle-left;
     padding-left: var(--space-s, 8px);
@@ -304,7 +307,7 @@
 .stats-value {
     width: 220px;
     font-size: var(--fs-l, 22px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-accent-gold-dark, rgb(217, 199, 115));
     -unity-text-align: middle-right;
     padding-right: var(--space-s, 8px);

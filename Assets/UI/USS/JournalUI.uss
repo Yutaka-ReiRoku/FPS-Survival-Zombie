@@ -45,7 +45,7 @@
     top: var(--space-xxl, 24px);
     height: 72px;
     font-size: var(--fs-xxl, 36px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-text-gold, rgb(217, 199, 115));
     -unity-text-align: middle-left;
     -unity-font-style: bold;
@@ -72,7 +72,7 @@
     top: 300px;
     bottom: 80px;
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     -unity-text-align: upper-left;
     white-space: normal;
@@ -96,7 +96,7 @@
     border-bottom-width: 0;
     background-color: rgba(0, 0, 0, 0);
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-scrim-bottom, #05080DFF);
     -unity-text-align: middle-center;
     -unity-font-style: bold;

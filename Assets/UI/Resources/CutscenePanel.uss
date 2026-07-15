@@ -24,7 +24,7 @@
 
 .cutscene-title {
     font-size: var(--fs-hero, 64px);
-    -unity-font: var(--font-display);
+    -unity-font-definition: resource("Fonts/Anton SDF");
     color: var(--color-text-gold);
     -unity-text-align: middle-center;
     width: 90%;
@@ -36,7 +36,7 @@
 
 .cutscene-body {
     font-size: var(--fs-xxl, 36px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
     width: 90%;

@@ -24,7 +24,7 @@
 
 #LoginPanel .login-title {
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
     margin-bottom: var(--space-l, 16px);
@@ -65,7 +65,7 @@
     border-bottom-width: 0;
     color: var(--color-text-primary, white);
     font-size: var(--fs-s, 16px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     padding-left: var(--space-m, 12px);
     border-radius: var(--radius-s, 8px);
 }
@@ -93,7 +93,7 @@
 
 .login-action-btn .btn-label {
     font-size: var(--fs-s, 16px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
 }
@@ -160,7 +160,7 @@
 
 .login-logout-btn .btn-label {
     font-size: var(--fs-s, 16px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
 }

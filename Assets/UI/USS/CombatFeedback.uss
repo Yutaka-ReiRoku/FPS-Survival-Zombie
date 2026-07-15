@@ -58,7 +58,7 @@
     width: 140px;
     height: 44px;
     margin-left: -70px;
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     -unity-text-align: middle-center;
     font-size: var(--fs-xl);
     color: var(--color-text-primary);
@@ -106,7 +106,7 @@
 }
 
 .killfeed-entry-label {
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     -unity-text-align: middle-right;
     font-size: var(--fs-l);
     color: var(--color-text-primary);

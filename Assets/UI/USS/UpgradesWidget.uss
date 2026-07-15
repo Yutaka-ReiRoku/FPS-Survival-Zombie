@@ -8,7 +8,7 @@
     height: 28px;
     color: var(--color-text-gold, rgb(217, 199, 115));
     font-size: var(--fs-l, 22px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     -unity-text-align: middle-right;
     white-space: nowrap;
     opacity: 0;

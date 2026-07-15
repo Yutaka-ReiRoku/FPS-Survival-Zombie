@@ -48,7 +48,7 @@
     left: 92px;
     top: 14px;
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-accent-gold, rgb(217, 199, 115));
 }
 
@@ -85,7 +85,7 @@
 
 #AchievementListPanel .list-header {
     font-size: var(--fs-xxl, 36px);
-    -unity-font: var(--font-display);
+    -unity-font-definition: resource("Fonts/Anton SDF");
     -unity-text-align: middle-center;
     color: var(--color-accent-gold, rgb(217, 199, 115));
     margin-bottom: var(--space-s, 8px);
@@ -127,7 +127,7 @@
 
 .ach-row .ach-title {
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
 }
 
 .ach-row .ach-desc {

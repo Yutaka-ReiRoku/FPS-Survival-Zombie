@@ -26,7 +26,7 @@
     top: 2px;
     font-size: var(--fs-m, 18px);
     -unity-text-align: middle-center;
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-text-primary, rgba(245, 245, 245, 1));
     white-space: nowrap;
     overflow: visible;
@@ -58,7 +58,7 @@
     top: 36px;
     font-size: var(--fs-xl, 28px);
     -unity-text-align: middle-center;
-    -unity-font: var(--font-body, resource("Fonts/Outfit-SemiBold"));
+    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
     color: var(--color-danger-top, rgb(242, 82, 69));
     opacity: 0;
     white-space: nowrap;

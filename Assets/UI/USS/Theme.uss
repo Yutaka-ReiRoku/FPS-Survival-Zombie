@@ -74,9 +74,11 @@
 
 /* ===================== TYPOGRAPHY ===================== */
 
-/* --- Font Families --- */
---font-display:              resource("Fonts/Anton");
---font-body:                 resource("Fonts/Outfit-SemiBold");
+--font-display:              resource("Fonts/Anton SDF");
+--font-body:                 resource("Fonts/Outfit-SemiBold SDF");
+
+--font-display-sdf:          resource("Fonts/Anton SDF");
+--font-body-sdf:             resource("Fonts/Outfit-SemiBold SDF");
 
 /* --- Font Sizes (Purpose-based naming) --- */
 --fs-display:                92px;   /* GAME OVER, PAUSED */

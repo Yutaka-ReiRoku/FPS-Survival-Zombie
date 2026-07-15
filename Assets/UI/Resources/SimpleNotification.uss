@@ -26,7 +26,7 @@
 
 .notification-label {
     font-size: var(--fs-xl, 28px);
-    -unity-font: var(--font-body);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
     width: 100%;
