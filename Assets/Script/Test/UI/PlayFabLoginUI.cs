@@ -44,6 +44,12 @@ public class PlayFabLoginUI : MonoBehaviour
         if (_doc == null) { enabled = false; return; }
 
         var root = _doc.rootVisualElement;
+
+        // Ensure all TemplateContainer wrappers ignore picking so clicks pass through to inner panels
+        foreach (var tc in root.Query<TemplateContainer>().ToList())
+        {
+            tc.pickingMode = PickingMode.Ignore;
+        }
         
         // Find elements within the single shared document
         _loginRoot = root.Q("PlayFabLoginRoot");

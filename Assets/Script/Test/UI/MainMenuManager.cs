@@ -25,6 +25,13 @@ public class MainMenuManager : MonoBehaviour
         if (_doc != null)
         {
             var root = _doc.rootVisualElement;
+
+            // Set all TemplateContainers to ignore picking so clicks can pass through to inner panels
+            foreach (var tc in root.Query<TemplateContainer>().ToList())
+            {
+                tc.pickingMode = PickingMode.Ignore;
+            }
+
             var playBtn = root.Q("PlayButton");
             var quitBtn = root.Q("QuitButton");
             _bestLabel = root.Q<Label>("BestText");
