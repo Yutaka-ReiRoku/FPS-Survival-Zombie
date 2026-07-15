@@ -33,7 +33,6 @@
     bottom: 0;
     background-color: var(--mm-overlay);
     background-image: resource("Images/ui_vignette");
-    center;
     
     -unity-background-scale-mode: scale-and-crop;
 }
@@ -46,7 +45,6 @@
     bottom: 0;
     opacity: 0.08;
     background-image: resource("Icons/icon_skull");
-    center;
     
     -unity-background-scale-mode: scale-to-fit;
 }
@@ -103,7 +101,6 @@
     bottom: -2px;
     background-color: var(--mm-shadow);
     background-image: resource("Images/ui_shadow");
-    center;
     
     -unity-background-scale-mode: scale-and-crop;
     border-radius: var(--radius-s, 8px);
@@ -117,7 +114,6 @@
     bottom: 0;
     background-color: var(--mm-button-fill);
     background-image: resource("Images/ui_button");
-    center;
     
     -unity-background-scale-mode: scale-and-crop;
     border-radius: var(--radius-s);
@@ -141,7 +137,6 @@
     width: 28px;
     height: 28px;
     translate: 0 -50%;
-    center;
     
     -unity-background-scale-mode: scale-to-fit;
 }
@@ -174,7 +169,6 @@
     padding: 10px 20px;
     background-color: var(--color-surface-mid);
     background-image: resource("Images/ui_panel");
-    center;
     
     -unity-background-scale-mode: scale-and-crop;
     border-radius: var(--radius-s);
@@ -189,7 +183,6 @@
 .chip-icon {
     width: 24px;
     height: 24px;
-    center;
     
     -unity-background-scale-mode: scale-to-fit;
 }

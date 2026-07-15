@@ -13,7 +13,7 @@
     background-color: var(--color-bg-root);
 }
 
-#Vignette {
+#GameOverPanel #Vignette {
     position: absolute;
     left: 0;
     right: 0;
@@ -23,11 +23,11 @@
     -unity-background-scale-mode: scale-and-crop;
 }
 
-#TopAccent {
+#GameOverPanel #TopAccent {
     background-color: var(--color-accent-red);
 }
 
-#SkullIcon {
+#GameOverPanel #SkullIcon {
     width: 72px;
     height: 72px;
     margin-top: var(--space-xxl);
@@ -35,14 +35,12 @@
     background-image: resource("Icons/icon_skull");
     -unity-background-image-tint-color: var(--color-accent-red);
     -unity-background-scale-mode: scale-to-fit;
-    
-    
 }
 
-#Title {
+#GameOverPanel #Title {
     font-size: var(--fs-display);
-    -unity-font-definition: resource("Fonts/Anton SDF");
-    -unity-font-definition: resource("Fonts/Anton SDF");
+    -unity-font: var(--font-display);
+    -unity-font-definition: var(--font-display-sdf);
     -unity-text-align: middle-center;
     letter-spacing: 6px;
     width: 720px;
@@ -54,7 +52,7 @@
     -unity-text-outline-width: var(--shadow-text-md);
 }
 
-#Divider {
+#GameOverPanel #Divider {
     width: 620px;
     height: 2px;
     flex-shrink: 0;
@@ -62,7 +60,7 @@
     background-color: var(--color-divider);
 }
 
-#StatWell {
+#GameOverPanel #StatWell {
     width: var(--stat-well-width);
     height: var(--stat-well-height);
     flex-direction: column;
