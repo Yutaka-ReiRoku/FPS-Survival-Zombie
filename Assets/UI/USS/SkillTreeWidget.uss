@@ -30,6 +30,8 @@
     translate: -50% -50%;
     width: 920px;
     height: 720px;
+    max-width: 95%;
+    max-height: 95%;
     background-color: var(--color-card-face, rgb(25, 30, 37));
     border-radius: var(--radius-m, 16px);
     opacity: 0;

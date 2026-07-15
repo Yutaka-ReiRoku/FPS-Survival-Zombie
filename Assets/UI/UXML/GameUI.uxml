@@ -30,41 +30,6 @@
     <ui:Style src="project://database/Assets/UI/USS/HUDChips.uss" />
     <ui:VisualElement name="GameUIRoot">
 
-        <!-- ==================== GameOverPanel (inlined) ==================== -->
-        <ui:VisualElement name="GameOverPanel" style="display: none;">
-            <ui:VisualElement name="Vignette" />
-            <ui:VisualElement name="CardShadow" />
-            <ui:VisualElement name="Card" view-data-key="CardPivot">
-                <ui:VisualElement name="TopAccent" />
-                <ui:VisualElement name="SkullIcon" />
-                <ui:Label name="Title" text="GAME OVER" />
-                <ui:VisualElement name="Divider" />
-                <ui:VisualElement name="StatWell">
-                    <ui:Label name="FinalScoreText" text="" class="stat-text gold" />
-                    <ui:Label name="WaveReachedText" text="" class="stat-text" />
-                    <ui:Label name="KillsText" text="" class="stat-text" />
-                    <ui:Label name="BestScoreText" text="" class="stat-text gold" />
-                </ui:VisualElement>
-                <ui:Button name="RestartButton" text="RESTART" class="gameover-button" />
-                <ui:Button name="MainMenuButton" text="MAIN MENU" class="gameover-button" />
-                <ui:Button name="QuitButton" text="QUIT" class="gameover-button" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-
-        <!-- ==================== PausePanel (inlined) ==================== -->
-        <ui:VisualElement name="PausePanel" style="display: none;">
-            <ui:VisualElement name="PauseVignette" />
-            <ui:VisualElement name="PauseCardShadow" />
-            <ui:VisualElement name="PauseCard" view-data-key="PauseCardPivot">
-                <ui:VisualElement name="PauseTopAccent" />
-                <ui:VisualElement name="PauseIcon" />
-                <ui:Label name="PauseTitle" text="PAUSED" />
-                <ui:VisualElement name="PauseDivider" />
-                <ui:Button name="ResumeButton" text="RESUME" class="pause-button" />
-                <ui:Button name="PauseMainMenuButton" text="MAIN MENU" class="pause-button" />
-                <ui:Button name="PauseQuitButton" text="QUIT" class="pause-button" />
-            </ui:VisualElement>
-        </ui:VisualElement>
 
         <!-- ==================== HUDCluster (inlined) ==================== -->
         <!-- Health -->
@@ -137,17 +102,17 @@
         <!-- Interact -->
         <ui:VisualElement name="InteractPrompt" class="interact-prompt" />
         <!-- Wave -->
-        <ui:VisualElement name="WaveAnnouncer">
+        <ui:VisualElement name="WaveAnnouncer" picking-mode="Ignore">
             <ui:Label name="WaveTitle" class="wave-title" text="WAVE 1" />
             <ui:Label name="WaveSub" class="wave-sub" text="SURVIVE" />
         </ui:VisualElement>
         <!-- Combat -->
-        <ui:VisualElement name="CombatFeedbackHUD">
+        <ui:VisualElement name="CombatFeedbackHUD" picking-mode="Ignore">
             <ui:VisualElement name="Hitmarker" />
             <ui:VisualElement name="DamageNumbers" />
             <ui:VisualElement name="Killfeed" />
         </ui:VisualElement>
-        <ui:VisualElement name="DamageDirection" />
+        <ui:VisualElement name="DamageDirection" picking-mode="Ignore" />
         <!-- Boss -->
         <ui:VisualElement name="BossHealthBar" class="boss-root">
             <ui:VisualElement name="BossBg" class="boss-bg" />
@@ -167,8 +132,8 @@
         <!-- Upgrades -->
         <ui:VisualElement name="UpgradesWidget" />
         <!-- Health Flash + Low Health Vignette -->
-        <ui:VisualElement name="HealthFlash" />
-        <ui:VisualElement name="LowHealthVignette" />
+        <ui:VisualElement name="HealthFlash" picking-mode="Ignore" />
+        <ui:VisualElement name="LowHealthVignette" picking-mode="Ignore" />
         <!-- Quest + Journal -->
         <ui:VisualElement name="QuestTracker">
             <ui:VisualElement name="MainPanel">
@@ -262,6 +227,42 @@
                 <ui:Label name="StatsTitle" class="stats-title" text="STATISTICS" />
                 <ui:VisualElement name="StatsDivider" class="stats-divider" />
                 <ui:VisualElement name="StatsGrid" class="stats-grid" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ==================== GameOverPanel (inlined) ==================== -->
+        <ui:VisualElement name="GameOverPanel" style="display: none;">
+            <ui:VisualElement name="Vignette" />
+            <ui:VisualElement name="CardShadow" />
+            <ui:VisualElement name="Card" view-data-key="CardPivot">
+                <ui:VisualElement name="TopAccent" />
+                <ui:VisualElement name="SkullIcon" />
+                <ui:Label name="Title" text="GAME OVER" />
+                <ui:VisualElement name="Divider" />
+                <ui:VisualElement name="StatWell">
+                    <ui:Label name="FinalScoreText" text="" class="stat-text gold" />
+                    <ui:Label name="WaveReachedText" text="" class="stat-text" />
+                    <ui:Label name="KillsText" text="" class="stat-text" />
+                    <ui:Label name="BestScoreText" text="" class="stat-text gold" />
+                </ui:VisualElement>
+                <ui:Button name="RestartButton" text="RESTART" class="gameover-button" />
+                <ui:Button name="MainMenuButton" text="MAIN MENU" class="gameover-button" />
+                <ui:Button name="QuitButton" text="QUIT" class="gameover-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ==================== PausePanel (inlined) ==================== -->
+        <ui:VisualElement name="PausePanel" style="display: none;">
+            <ui:VisualElement name="PauseVignette" />
+            <ui:VisualElement name="PauseCardShadow" />
+            <ui:VisualElement name="PauseCard" view-data-key="PauseCardPivot">
+                <ui:VisualElement name="PauseTopAccent" />
+                <ui:VisualElement name="PauseIcon" />
+                <ui:Label name="PauseTitle" text="PAUSED" />
+                <ui:VisualElement name="PauseDivider" />
+                <ui:Button name="ResumeButton" text="RESUME" class="pause-button" />
+                <ui:Button name="PauseMainMenuButton" text="MAIN MENU" class="pause-button" />
+                <ui:Button name="PauseQuitButton" text="QUIT" class="pause-button" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

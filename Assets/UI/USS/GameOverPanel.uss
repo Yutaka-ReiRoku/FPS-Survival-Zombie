@@ -88,4 +88,16 @@
     color: var(--color-text-gold);
 }
 
+/* Override dimensions for GameOver panel specifically to fit 759px height content */
+#GameOverPanel #Card {
+    height: 800px;
+    max-height: 95%;
+    max-width: 95%;
+}
 
+#GameOverPanel #CardShadow {
+    height: 840px;
+    margin-top: -420px; /* Center offset (half of 840) */
+    max-height: 95%;
+    max-width: 95%;
+}

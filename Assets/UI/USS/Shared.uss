@@ -62,6 +62,8 @@
 #PauseCard {
     width: var(--panel-card-width, 760px);
     height: var(--panel-card-height, 720px);
+    max-width: 95%;
+    max-height: 95%;
     flex-direction: column;
     align-items: center;
     background-color: var(--color-card-face, rgb(25, 30, 37));
