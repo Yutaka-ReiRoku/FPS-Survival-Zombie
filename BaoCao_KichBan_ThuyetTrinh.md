@@ -1,498 +1,487 @@
 # 🎬 KỊCH BẢN THUYẾT TRÌNH DỰ ÁN — FPS SURVIVAL ZOMBIE
+## Trình bày theo cốt truyện — 5 chương — 20 phút
 
-> **Hướng dẫn sử dụng:**
-> - Phần `[NGƯỜI A]` / `[NGƯỜI B]` — có thể phân chia theo số lượng thành viên
-> - `[CLICK]` — nhấp chuột chuyển màn hình
-> - `[DEMO]` — thao tác trực tiếp trên game
-> - `[CHỈ MÀN HÌNH]` — chỉ tay / trỏ vào thành phần trên màn chiếu
-> - Phần trong `“...”` là lời nói trực tiếp
-
----
-
-## 🎯 PHẦN MỞ ĐẦU — GIỚI THIỆU (2 phút)
-
-**Màn hình chiếu: Main Menu — dừng lại**
+> **Cách dùng:**
+> - `[A]/[B]` — người nói. Có thể chia cho người chơi game riêng
+> - `[DEMO]` — thao tác trên game, màn hình chiếu focus vào game
+> - `[NGẮT]` — điểm dừng gợi ý để chuyển người nói hoặc hỏi nhanh
+> - ⏱ Đồng hồ chạy — **bám sát** để không quá giờ
+> - **Nguyên tắc**: Chơi game từ đầu → cuối. Tính năng nào xuất hiện tới đâu thì giới thiệu tới đó
 
 ---
 
-**[NGƯỜI A]:**
+## ⏱ TỔNG QUAN THỜI GIAN
 
-"Kính thưa quý thầy cô và các bạn,
-
-Nhóm em xin được trình bày đồ án môn học: **FPS Survival Zombie** — một tựa game bắn súng góc nhìn thứ nhất kết hợp sinh tồn, lấy bối cảnh ngày tận thế zombie."
-
-**[NGƯỜI B]:**
-
-"Trò chơi kể về hành trình của một người sống sót duy nhất, từ lúc dịch bệnh bùng phát, vượt qua 5 chương với 5 mốc thời gian khác nhau — từ bình minh cho đến đêm khuya. Người chơi sẽ đối mặt với nhiều loại zombie, tích lũy kỹ năng, thu thập nhật ký để khám phá sự thật đằng sau đại dịch."
-
-**[NGƯỜI A]:**
-
-"Dự án được phát triển trên nền tảng **Unity**, sử dụng **Cowsins FPS Engine** làm hệ thống vũ khí và di chuyển nền tảng, kết hợp với **PlayFab** — dịch vụ đám mây của Microsoft — để lưu dữ liệu và bảng xếp hạng."
-
-**[NGƯỜI B]:**
-
-"Sau đây, nhóm em xin phép demo luồng chơi từ đầu đến cuối để quý thầy cô và các bạn có cái nhìn tổng quan nhất về dự án."
-
-[CLICK vào Play]
+| Mốc | Phần | TG | Người nói |
+|---|---|---|---|
+| 0:00 | **Mở đầu** | 1' | A |
+| 1:00 | **Main Menu → vào game** | 1' | A |
+| 2:00 | **Chương 1 — Bình Minh** | 6' | A+B |
+| 8:00 | **Chương 2 — Buổi Trưa** | 3' | A+B |
+| 11:00 | **Chương 3 — Hoàng Hôn** | 3.5' | A+B |
+| 14:30 | **Chương 4 — Màn Đêm** | 3' | A+B |
+| 17:30 | **Chương 5 — Đêm Khuya + Kết thúc** | 2.5' | A+B |
+| 20:00 | **Kết luận** | 1' | B |
 
 ---
 
-## 🎮 PHẦN 1 — MAIN MENU & ĐĂNG NHẬP (1 phút)
+## 🎬 MỞ ĐẦU (1 phút) ⏱ 0:00
 
-**Màn hình chiếu: Main Menu**
-
----
-
-**[NGƯỜI A]:**
-
-"Đây là màn hình **Main Menu** của game."
-
-`[CHỈ MÀN HÌNH]` "Chúng ta có nút **Play** — bắt đầu game, nút **Quit** — thoát, và hiển thị **Best Score** — điểm cao nhất đã đạt được."
-
-"Ngoài ra, ở góc màn hình có **PlayFab Login** — người chơi có thể đăng ký tài khoản và đăng nhập. Dữ liệu sẽ được đồng bộ lên đám mây, cho phép chơi trên nhiều máy khác nhau mà không mất thành tích."
-
-[CLICK vào Play — game bắt đầu load]
-
-"Bây giờ, nhấn Play để vào game."
+**Màn hình: Main Menu**
 
 ---
 
-## 🌅 PHẦN 2 — CHƯƠNG 1: BÌNH MINH (4 phút)
+**[A]:** "Kính thưa thầy cô và các bạn. Nhóm em xin trình bày đồ án **FPS Survival Zombie** — game bắn súng góc nhìn thứ nhất, kể về hành trình của một người sống sót qua ngày tận thế zombie.
 
-**Màn hình chiếu: Game bắt đầu — Chapter 1 — Dawn**
+Trò chơi có **cốt truyện 5 chương**, mỗi chương gắn với một mốc thời gian — từ bình minh đến đêm khuya. Người chơi sẽ chiến đấu, tích lũy kỹ năng, thu thập nhật ký, và khám phá sự thật đằng sau đại dịch.
 
----
+Dự án phát triển trên **Unity**, sử dụng **Cowsins FPS Engine** nền tảng và **PlayFab** cho dữ liệu đám mây.
 
-### 2.1 — KHỞI ĐẦU & MÔI TRƯỜNG
-
-**[NGƯỜI B]:**
-
-"Người chơi bắt đầu tại **Chương 1 — Bình Minh**. Chúng ta hãy quan sát một số hệ thống nền tảng ngay từ đầu."
-
-`[CHỈ MÀN HÌNH]`
-
-"Đầu tiên là **DayNight Cycle** — chu kỳ ngày đêm. Lúc này đang là 6 giờ sáng, ánh sáng bình minh. Hệ thống này kiểm soát toàn bộ: màu sắc bầu trời, ánh sáng mặt trời, sương mù, ambient, và PostProcess — tạo không khí cho từng chương."
-
-"Tiếp theo là **Checkpoint / SaveRoom** — vùng an toàn, người chơi đứng trong đó sẽ được hồi máu dần và tự động lưu checkpoint. Nếu chết, người chơi sẽ respawn tại checkpoint gần nhất."
-
-"Trên góc phải màn hình là **Quest Tracker** — chỉ dẫn mục tiêu hiện tại. Hệ thống **StoryManager** đang quản lý toàn bộ cốt truyện, kích hoạt quest đầu tiên."
+Sau đây nhóm em xin demo — chúng ta sẽ chơi từ đầu đến cuối, gặp gì giới thiệu nấy."
 
 ---
 
-### 2.2 — DI CHUYỂN
+## 🎮 MAIN MENU (1 phút) ⏱ 1:00
 
-**[NGƯỜI A]:**
+**[A]:** `[CHỈ màn hình]`
 
-"Về hệ thống di chuyển — ngoài đi bộ và chạy cơ bản, người chơi có thể:"
+"Đây là **Main Menu**. Có nút **Play** bắt đầu game, **Quit** thoát, và hiển thị **Best Score**.
 
-`[DEMO — vừa nói vừa chơi]`
+Ở đây có **PlayFab Login** — đăng ký tài khoản, đăng nhập. Nhờ đó dữ liệu điểm số, achievement được đồng bộ lên cloud, chơi trên nhiều máy vẫn giữ thành tích.
 
-"**Crouch và Slide** — ngồi và trượt để né đạn.
-**Dash** — lướt nhanh về phía trước, có cooldown.
-**Wall Run và Wall Bounce** — chạy trên tường và bật ra.
-**Grappling Hook** — móc câu, bắn vào bề mặt để kéo người lại.
-**Double Jump** — nhảy đôi.
-Và **Climb Ladder** — leo thang."
+Có **Leaderboard** — bảng xếp hạng toàn cầu, và **Auto-save** — tự động lưu mỗi 60 giây."
 
-"Tất cả các kỹ năng này đều dùng chung thanh **Stamina** — thể lực. Hết stamina thì không thể chạy, dash hay wall run được — người chơi phải quản lý stamina một cách chiến thuật."
-
-[DEMO — chạy, dash, wall run, grappling hook trong 30 giây]
+[CLICK Play — vào game]
 
 ---
 
-### 2.3 — VŨ KHÍ & CHIẾN ĐẤU
-
-**[NGƯỜI B]:**
-
-"Về vũ khí — game hỗ trợ đa dạng:"
-
-`[CHỈ MÀN HÌNH — bấm chuyển vũ khí]`
-
-"**Pistol, Rifle, SMG, Shotgun, Rocket Launcher, Revolver, Katana, Burst Rifle** — mỗi loại có chỉ số riêng về sát thương, tốc độ bắn, độ giật, dung lượng băng đạn."
-
-"Vũ khí có cơ chế **nạp đạn**, **độ giật**, **độ xoáy đạn**, và **ngắm bắn ADS** — giống các tựa game bắn súng chuyên nghiệp."
-
-[DEMO — bắn vài phát, nạp đạn, ngắm bắn]
-
-"Khi bắn, chúng ta thấy **Muzzle Flash** — lửa nòng súng, và **Hitmarker** — dấu X báo hiệu trúng đích. Nếu bắn vào các bề mặt khác nhau, **lỗ đạn** cũng khác nhau — gỗ, kim loại, bùn, cỏ đều có hiệu ứng riêng."
+## 🌅 CHƯƠNG 1 — BÌNH MINH (6 phút) ⏱ 2:00
+### Khu vực đầu — Dawn (6h sáng)
 
 ---
 
-### 2.4 — ZOMBIE CROOK & AI
+### 2.1 — Vào game (1 phút) ⏱ 2:00
 
-**[NGƯỜI A]:**
+**[B]:** (nhân vật vừa spawn)
 
-"Bây giờ chúng ta gặp kẻ địch đầu tiên."
+"Người chơi thức dậy tại một trại tạm — **Chương 1 — Bình Minh**. Trời vừa sáng."
 
-[DEMO — zombie xuất hiện, bắn]
+`[CHỈ]`
 
-"Đây là **Crook** — zombie thường, có hơn **28 biến thể ngoại hình**: Biker, Clown, Cop, Businessman, Bride, Cheerleader... Mỗi con có chiều cao ngẫu nhiên từ 1.5 đến 2 mét — tạo sự đa dạng."
+"**DayNight Cycle** — chu kỳ ngày đêm đang ở mốc 6h sáng. Hệ thống này điều khiển mặt trời, bầu trời, sương mù, ánh sáng — mỗi chương một không khí khác nhau.
 
-"Về **AI**: Zombie di chuyển bằng **NavMesh**, phát hiện người chơi qua tầm nhìn và khoảng cách. Có hành vi **lung lay** — giả vờ tấn công, lao bất ngờ — tạo cảm giác tự nhiên. Nếu mất dấu người chơi, chúng sẽ **wander** — đi lang thang tìm kiếm."
+**SaveRoom** — vùng sáng này vừa hồi máu vừa là **checkpoint**. Chết sẽ respawn tại đây.
 
-"Hệ thống **AIDirector** theo dõi mức đe dọa từ 0 đến 100 với 4 trạng thái:
-- **Calm**: yên tĩnh
-- **BuildUp**: căng thẳng tăng
-- **Attack**: tấn công dồn dập
-- **Recovery**: hạ nhiệt
-
-Nếu người chơi đứng yên quá 10 giây — cắm trại — zombie sẽ spawn ngay sau lưng để chống camp."
-
-"Spawner sử dụng **Object Pooling** — pool tối đa 60 zombie, tái sử dụng thay vì tạo mới — tối ưu hiệu năng. Mỗi spawner có kiểm tra NavMesh hợp lệ, tránh spawn trong tường."
+**StoryManager** đã kích hoạt quest đầu tiên — **Quest Tracker** ở góc phải hướng dẫn mục tiêu. Hệ thống **ChapterBoundary** quản lý ranh giới từng chương."
 
 ---
 
-### 2.5 — HUD & GIAO DIỆN
+### 2.2 — Di chuyển (1 phút) ⏱ 3:00
 
-**[NGƯỜI B]:**
+**[A]:** `[DEMO — vừa chạy vừa nói]`
 
-"Bây giờ chúng ta nhìn vào giao diện HUD — đây là thành phần hiển thị xuyên suốt game."
+"Người chơi bắt đầu di chuyển — game có hệ thống di chuyển phong phú:
 
-`[CHỈ TỪNG WIDGET TRÊN MÀN HÌNH]`
+**Đi bộ, chạy, ngồi, trượt** — cơ bản.
+**Nhảy, Double Jump** — sau khi nâng cấp.
+**Dash** — lướt nhanh.
+**Wall Run + Wall Bounce** — chạy trên tường và bật ra.
+**Grappling Hook** — bắn móc kéo người.
+**Climb Ladder** — leo thang.
 
-"**Health Bar** — thanh máu, khi máu thấp sẽ xuất hiện viền đỏ Low Health Vignette.
-**Stamina Bar** — thể lực.
-**Ammo** — số đạn còn lại.
-**Dash Cooldown** — hồi chiêu dash.
-**Crosshair** — tâm ngắm, giãn ra khi bắn.
-**Compass** — la bàn, hiển thị hướng mục tiêu quest.
-**Damage Direction** — chỉ thị hướng bị tấn công.
-**Combat Feedback** — số sát thương hiện ra khi bắn trúng và kill feed.
-**FPS Counter** — chỉ số khung hình.
-**Threat Level** — mức đe dọa.
-**Interact Prompt** — 'Nhấn E để tương tác'."
+Tất cả dùng chung thanh **Stamina** — quản lý thể lực là yếu tố chiến thuật quan trọng.
 
----
+**Camera** có **FOV thay đổi** khi chạy nhanh, hiệu ứng **Speed Lines**, **Camera Shake** khi bị đòn."
 
-### 2.6 — QUEST & CHUYỂN CHƯƠNG
-
-**[NGƯỜI A]:**
-
-"Hệ thống nhiệm vụ — toàn bộ cốt truyện có hơn **12 quest chính** xuyên suốt 5 chương. Người chơi hoàn thành quest bằng cách: đến một vị trí, tiêu diệt đủ số zombie, thu thập đủ vật phẩm, hoặc tương tác với một vật thể."
-
-"Mỗi quest hoàn thành được thưởng **EXP** để lên cấp và **Journal** — nhật ký để ghép câu chuyện."
-
-[DEMO — hoàn thành quest, cutscene chuyển chương]
-
-"Khi hoàn thành Chương 1, **Cutscene** chuyển cảnh xuất hiện với dòng chữ: 'Chương 2 — Bệnh Viện'. Lúc này DayNight Cycle snap chuyển từ Dawn sang Noon."
+[DEMO 20s: chạy → dash → wall run → grapple → leo thang]
 
 ---
 
-## ☀️ PHẦN 3 — CHƯƠNG 2: BUỔI TRƯA (2 phút)
+### 2.3 — Vũ khí đầu tay (1 phút) ⏱ 4:00
 
-**Màn hình chiếu: Chapter 2 — Noon — Hospital**
+**[B]:** "Người chơi nhặt vũ khí đầu tiên."
 
----
+`[DEMO — bấm chuyển súng, bắn]`
 
-**[NGƯỜI B]:**
+"Game có **9 loại vũ khí**: Pistol, Rifle, SMG, Shotgun, Rocket Launcher, Revolver, Katana, Burst Rifle, và Turret.
 
-"Chương 2 — **Buổi Trưa tại Bệnh Viện**. Thời gian chuyển sang 12 giờ trưa — ánh sáng thay đổi rõ rệt nhờ DayNight Cycle."
-
-"Độ khó tăng dần: zombie đông hơn, cứng hơn. Người chơi sẽ khám phá khu vực bệnh viện với các quest mới."
-
-**[NGƯỜI A]:**
-
-"Điểm đặc biệt ở chương này: sau khi hoàn thành main quest, **Side Quest** bắt đầu được mở khóa. Side Quest là hệ thống nhiệm vụ phụ song song, độc lập với cốt truyện chính."
-
-"Có tổng cộng **8 Side Quest**:"
-- Church — Nhà thờ
-- Auto Repair — Tiệm sửa xe
-- Motel — Nhà nghỉ
-- Quarantine — Khu cách ly
-- HighRise Base — Căn cứ cao tầng
-- Mother's Story — Câu chuyện người mẹ
-- Lighthouse — Hải đăng
-
-"Mỗi side quest có mục tiêu riêng: tiêu diệt, thu thập, hoặc tương tác. Phần thưởng thường là EXP và journal hiếm."
+Các cơ chế:
+- **ADS** — ngắm bắn
+- **Reload** — nạp đạn
+- **Recoil + Spread** — độ giật và độ xoáy
+- **Muzzle Flash** — lửa nòng
+- **Bullet Holes** — lỗ đạn trên gỗ, kim loại, bùn, cỏ
+- **Hitmarker** — dấu X xác nhận trúng đích
+- **Có Attachments** — Barrel, Grip, Scope, Stock, Laser, Flashlight, Magazine"
 
 ---
 
-## 🏗️ PHẦN 4 — CHƯƠNG 3: HOÀNG HÔN (2.5 phút)
+### 2.4 — Zombie Crook đầu tiên (1.5 phút) ⏱ 5:00
 
-**Màn hình chiếu: Chapter 3 — Dusk — Construction Site**
+**[A]:** `[DEMO — zombie xuất hiện, bắn]`
 
----
+"Đây là **Crook** — zombie thường. Có **28+ biến thể** ngoại hình: Biker, Clown, Cop, Bride, Cheerleader, Businessman... Mỗi con chiều cao 1.5-2m ngẫu nhiên."
 
-### 4.1 — WAVE SYSTEM
+`[Bắn chết 1 con]`
 
-**[NGƯỜI B]:**
+"**AI** của Crook:
+- Di chuyển bằng **NavMesh**
+- Phát hiện qua tầm nhìn + khoảng cách
+- Hành vi **lunge/feint** — giả vờ rồi lao
+- Mất dấu thì **wander** tìm
+- Có **headshot** — crit headshot riêng
 
-"Chương 3 — **Hoàng Hôn tại Công Trường**. Tại đây, game giới thiệu hệ thống **Wave**."
+**AIDirector** — hệ thống độ khó động: 4 trạng thái **Calm → BuildUp → Attack → Recovery**, theo dõi tỉ lệ kill, thời gian sống, phát hiện camper. Đứng yên 10s → bị spawn sau lưng.
 
-"Hệ thống này do **WaveManager** quản lý. Số zombie mỗi wave tăng dần: wave đầu 10 con, wave sau tăng thêm 5 con — wave thứ 10 sẽ có 55 zombie."
-
-"Đặc biệt có dạng quest **Wave Quest** — người chơi bị khóa trong một khu vực, cổng đóng lại, phải sống sót qua nhiều đợt sóng. Nếu cố gắng ra ngoài, sẽ bị teleport trở lại."
-
-"Ví dụ: quest generator ở công trường — người chơi phải sống sót 3 wave bao gồm cả Boomer."
-
----
-
-### 4.2 — BOOMER
-
-**[NGƯỜI A]:**
-
-"Và đây là **Boomer** — zombie đặc biệt đầu tiên."
-
-[DEMO — Boomer xuất hiện]
-
-"Boomer có 100 máu. Khi phát hiện người chơi, nó kêu rít lên cảnh báo, sau đó lao vào và **phát nổ** — gây sát thương vùng lớn và để lại **vũng acid** trên mặt đất. Dẫm vào vũng acid sẽ bị sát thương liên tục."
-
-"Người chơi có thể bắn chết Boomer từ xa trước khi nó kịp đến gần. Nếu tiêu diệt thành công, Boomer rơi ra loot."
-
-"Boomer được spawn bởi **SpecialEnemyDirector** — hệ thống spawn quái đặc biệt, kích hoạt từ wave 3 trở đi."
+**Spawner**: **Object Pooling** — pool 60 con, kiểm tra NavMesh hợp lệ. Camper punishment: spawn gần."
 
 ---
 
-## 🌃 PHẦN 5 — CHƯƠNG 4: MÀN ĐÊM (2.5 phút)
+### 2.5 — HUD (30 giây) ⏱ 6:30
 
-**Màn hình chiếu: Chapter 4 — Night — Residential Area**
+**[B]:** `[CHỈ nhanh từng widget]`
 
----
-
-### 5.1 — SKILL TREE
-
-**[NGƯỜI B]:**
-
-"Chương 4 — **Màn Đêm tại Khu Dân Cư**. Lúc này, người chơi đã tích lũy đủ điểm kỹ năng, và đây là lúc giới thiệu **Skill Tree**."
-
-[DEMO — mở skill tree panel]
-
-"Skill Tree có 3 nhánh, mỗi nhánh 5 node, tổng cộng 15 node:"
-
-`[CHỈ VÀO TỪNG NHÁNH]`
-
-"**Nhánh 1 — Movement**: tăng tốc đi bộ → tốc độ chạy → điều khiển trên không + dash mới → wall run / wall bounce → double jump + grappling hook. Cộng dồn Stamina mỗi node."
-
-"**Nhánh 2 — Aim**: giảm độ giật → tỉ lệ crit 10% → tỉ lệ crit 20% → sát thương crit x1.5 → one-shot Crook + bonus sát thương special. Cộng dồn Damage mỗi node."
-
-"**Nhánh 3 — Intelligence**: bán kính hút EXP → hệ số nhân EXP 1.1x → bán kính rộng hơn → hệ số 1.15x → bán kính tối đa + highlight vật phẩm. Cộng dồn HP mỗi node."
-
-"Mỗi node có chi phí tăng dần: node 1 tốn 2 điểm, node cuối tốn 12 điểm. Người chơi phải cân nhắc lựa chọn chiến thuật."
+"Toàn bộ giao diện HUD:
+- **Health Bar** — máu, viền đỏ khi yếu
+- **Stamina + Ammo + Dash Cooldown**
+- **Crosshair** — giãn theo độ xoáy
+- **Compass + Quest Beacon** — la bàn + điểm mục tiêu
+- **Damage Direction** — chỉ hướng trúng đòn
+- **Combat Feedback** — số DMG + kill feed
+- **FPS Counter + Threat Level**
+- **Interact Prompt** — Nhấn E
+- **Boss Health Bar**, **Wave Announcer** — tự động xuất hiện khi cần"
 
 ---
 
-### 5.2 — TANK
+### 2.6 — Quest đầu & Cutscene chuyển chương (1 phút) ⏱ 7:00
 
-**[NGƯỜI A]:**
+**[A]:** "Hệ thống **Quest**: hơn **12 main quest** xuyên 5 chương. Hoàn thành bằng: di chuyển đến vị trí, tiêu diệt đủ zombie, thu thập vật phẩm, tương tác."
 
-"Khi wave đạt đến mức 5 trở lên, **Tank** bắt đầu xuất hiện."
+[DEMO — QuestTrigger, hoàn thành quest]
 
-[DEMO — Tank gầm, xuất hiện]
+"Mỗi quest thưởng **EXP + Journal**.
 
-"Tank là **boss chính** của game — 500 máu cơ bản, tỉ lệ theo wave. Nó có 3 đòn tấn công:
-- **Punch** — đấm gần
-- **Swipe** — vả diện rộng
-- **Jump Attack** — nhảy từ xa đến chỗ người chơi"
+Hết chương 1 — **SaveRoom** kích hoạt **Cutscene**:"
 
-"Khi Tank xuất hiện, nó gầm một tiếng rất to — âm thanh 2D vang toàn bộ map — cảnh báo người chơi. Thanh **Boss Health Bar** xuất hiện trên HUD hiển thị máu của Tank."
+[DEMO — Cutscene: "CHƯƠNG 2 — BỆNH VIỆN"]
 
----
+"DayNight Cycle snap sang **Noon (12h)**."
 
-## 🌆 PHẦN 6 — CHƯƠNG 5: ĐÊM KHUYA & KẾT THÚC (3 phút)
-
-**Màn hình chiếu: Chapter 5 — Deep Night — Apartment Building**
+**[NGẮT] — Hỏi nhanh: "Thầy cô có câu hỏi gì về phần này không?"**
 
 ---
 
-### 6.1 — WITCH & BIG GUY
-
-**[NGƯỜI B]:**
-
-"Chương 5 — **Đêm Khuya tại Chung Cư**. Đây là chương cuối, thời gian 2 giờ sáng — tối nhất trong game. Đèn pin là thiết yếu."
-
-"Tại đây xuất hiện 2 mini-boss đặc biệt:"
-
-[DEMO — Witch đang khóc]
-
-"**Witch** — mô phỏng theo game Left 4 Dead. Witch ngồi khóc ở một vị trí cố định. Nếu người chơi đến gần hoặc bắn trúng, nó sẽ đứng dậy, gào thét và lao với tốc độ cực nhanh — **6.5 m/giây**. Tuy chỉ có 60 máu nhưng sát thương rất cao. Nếu người chơi chạy ra xa và mất dấu, Witch sẽ quay lại vị trí cũ và tiếp tục khóc."
-
-[DEMO — Big Guy đứng choáng]
-
-"**Big Guy** — một người đàn ông mặc váy công chúa, đứng choáng váng tại chỗ. 80 máu. Nếu người chơi đến gần hoặc tấn công, nó gầm lên và bắt đầu rượt đuổi — chậm nhưng rất trâu, mỗi đòn punch gây sát thương nặng."
+## ☀️ CHƯƠNG 2 — BUỔI TRƯA (3 phút) ⏱ 8:00
+### Bệnh viện — Noon (12h)
 
 ---
 
-### 6.2 — JOURNAL & VOICE LOG
+### 3.1 — Môi trường & Side Quest (2 phút) ⏱ 8:00
 
-**[NGƯỜI A]:**
+**[B]:** "**Chương 2 — Buổi Trưa tại Bệnh Viện**. DayNight Cycle chuyển sang 12h — ánh sáng gay gắt hơn, sương mù tan.
 
-"Xuyên suốt game, người chơi thu thập **39 mẩu nhật ký** — chia thành 7 nhóm:"
+Sau main quest, **8 Side Quest** mở khóa: Church, Auto Repair, Motel, Quarantine, HighRise Base, Mother's Story, Lighthouse.
 
-`[CHỈ VÀO DANH SÁCH]`
+**SideQuestManager** quản lý các nhiệm vụ phụ này — độc lập với cốt truyện chính."
 
-"Nhật ký của Người Lính — 3 cái
-Nhật ký của Người Hàng Xóm — 21 cái
-Hồ sơ Quân Đội — 8 cái
-Báo cáo Thí Nghiệm — 3 cái
-Nhật ký Bác Sĩ — 3 cái
-Hồ sơ Thuốc Chữa — 4 cái
-Nhật ký Người Anh — 5 cái"
+### 3.2 — Journal đầu tiên (1 phút) ⏱ 10:00
 
-[DEMO — nhặt journal, popup hiện ra]
+**[A]:** `[DEMO — nhặt journal]`
 
-"Mỗi nhật ký gồm: **tiêu đề, hình ảnh, nội dung văn bản**, và **voice log** — giọng đọc. Âm thanh voice log sẽ phát khi người chơi nhặt journal. Thu thập càng nhiều, người chơi càng hiểu rõ câu chuyện đằng sau đại dịch."
+"Đây là **Journal** — nhật ký. Xuyên suốt game có **39 journal** thuộc 7 nhóm:"
 
----
+`[CHỈ]`
 
-### 6.3 — TRẬN CUỐI
+- Soldier Journal (3)
+- Neighbor Journal (21) — nhiều nhất
+- Military Record (8)
+- Experiment Report (3)
+- Doctor Journal (3)
+- Cure Record (4)
+- Brother Journal (5)
 
-**[NGƯỜI B]:**
+[DEMO — popup journal: text + hình + voice log]
 
-"Kết thúc game: người chơi phải hoàn thành **Quest 12 — Escape Town**, nhiệm vụ cuối cùng."
+"Mỗi journal có **hình ảnh, nội dung văn bản, và voice log**. Ghép chúng lại để hiểu toàn bộ câu chuyện đằng sau đại dịch."
 
-[DEMO — WaveQuestInteractable cuối]
-
-"Đây là **Wave Quest** đặc biệt — người chơi bị khóa trong khu vực, phải sống sót qua nhiều đợt sóng. Ở wave cuối, **Tank** xuất hiện — người chơi phải đánh bại nó."
-
-"Sau khi Tank bị tiêu diệt, **WaveQuestInteractable** cho phép tương tác lần 2 — kích hoạt bom."
+**[NGẮT]**
 
 ---
 
-### 6.4 — ENDING SEQUENCE
-
-**[NGƯỜI A]:**
-
-"Sau khi kích hoạt bom, **EndingSequenceManager** điều phối toàn bộ kết thúc:"
-
-[DEMO — để game chạy cutscene]
-
-"**Bước 1 — Bomb Explosion Cutscene**"
-"Camera chuyển sang một camera tạm thời, quay cảnh nổ bom — hiệu ứng VFX hạt nhân, âm thanh nổ lớn. Màn hình fade to black."
-
-"**Bước 2 — Epilogue Slide**"
-"Hiển thị dòng chữ: 'Dịch bệnh đã được kiểm soát, nhưng ai là người mang đến phương thuốc chữa — vẫn còn là một bí ẩn.'"
-
-"**Bước 3 — Credits Sequence**"
-"Credit cuộn lên với: Tên các thành viên nhóm phát triển, tên trường, các tài nguyên sử dụng, Cowsins Engine, lời cảm ơn."
-
-"**Bước 4 — Return to Main Menu**"
-"Tự động quay lại Main Menu."
+## 🏗️ CHƯƠNG 3 — HOÀNG HÔN (3.5 phút) ⏱ 11:00
+### Công trường — Dusk (18h)
 
 ---
 
-## 🏆 PHẦN 7 — GAME OVER, ACHIEVEMENT & PLAYFAB (1.5 phút)
+### 4.1 — Wave System (1.5 phút) ⏱ 11:00
 
-**Màn hình chiếu: Game Over panel**
+**[B]:** "**Chương 3 — Hoàng Hôn tại Công Trường**. Thời gian 18h, trời tối dần.
 
----
+Đây là chương giới thiệu **Wave System**:
 
-### 7.1 — GAME OVER
+- **WaveManager**: wave đầu 10 kill, mỗi wave +5
+- **Wave Announcer** — thông báo wave bắt đầu/kết thúc
 
-**[NGƯỜI B]:**
+Đặc biệt có **WaveQuestInteractable** — một dạng quest đặc biệt: người chơi bị **khóa trong khu vực**, cổng đóng, phải sống sót qua N wave liên tiếp. Cố gắng ra ngoài sẽ bị **teleport về**."
 
-"Nếu người chơi chết, **Game Over Manager** hiển thị bảng thống kê."
-
-`[CHỈ MÀN HÌNH]`
-
-"**Chế độ Story**: chapter đang chơi, số quest đã hoàn thành, số journal thu thập được, điểm số.
-**Chế độ Wave**: điểm, wave đạt được, số kill, best score."
-
-"Có 3 lựa chọn: **Restart** — respawn tại checkpoint gần nhất, **Main Menu** — về menu, **Quit** — thoát game."
+[DEMO — Wave đang chạy, chỉ boundary lock]
 
 ---
 
-### 7.2 — ACHIEVEMENTS
+### 4.2 — Boomer (1 phút) ⏱ 12:30
 
-**[NGƯỜI A]:**
+**[A]:** `[DEMO — Boomer]`
 
-"Hệ thống **Achievement** gồm 5 thành tựu:"
+"**Boomer** — zombie đặc biệt đầu tiên, xuất hiện từ wave 3.
 
-"1. **Speedrunner** — Hoàn thành 5 chương trong vòng chưa đầy 11 phút.
-2. **Hell Slayer** — Tiêu diệt 130 Crook.
-3. **At Ease, Cooper** — Tiêu diệt 20 zombie khi đang wall run.
-4. **Tank Slayer** — Lần đầu tiên hạ Tank.
-5. **Close Call** — Ở trong bán kính 5 mét khi Boomer phát nổ."
+- 100 HP
+- Kêu rít cảnh báo → lao vào → **phát nổ**
+- Gây sát thương vùng + để lại **vũng acid**
+- Có thể bắn chết từ xa
 
-"Achievement được persistent — lưu lại dù có thoát game, và đồng bộ lên PlayFab."
+Boomer được spawn bởi **SpecialEnemyDirector** — hệ thống spawn quái đặc biệt, có kiểm tra NavMesh, scale stat theo wave."
 
----
+### 4.3 — Loot System (30 giây) ⏱ 13:30
 
-### 7.3 — PLAYFAB CLOUD
+**[B]:** `[DEMO — zombie chết rơi đồ]`
 
-**[NGƯỜI B]:**
+"Khi zombie chết — **Loot System**:
 
-"**PlayFab** là dịch vụ đám mây của Microsoft được tích hợp vào game với các tính năng:"
+- **LootDropHelper** — roll loot từ bảng
+- **LootPop** — hiệu ứng nảy
+- **LootTrail** — vệt sáng
+- Rơi ra: **Coin, EXP, Healthpack, Ammo, PowerUp**"
 
-"**Đăng ký / Đăng nhập** bằng Username và Password.
-**Cloud Save** — lưu best score, best wave, trạng thái achievement.
-**Auto-save** — tự động lưu mỗi 60 giây và khi pause/quit game.
-**Leaderboard** — bảng xếp hạng toàn cầu dựa trên Best Score.
-**Merge dữ liệu** — nếu chơi trên nhiều máy, hệ thống tự động hợp nhất và lấy giá trị cao nhất."
+### 4.4 — Enemies phụ (30 giây) ⏱ 14:00
 
----
+**[A]:** "Thêm 2 loại enemy:
+- **Ceiling Zombie** — ẩn trên trần, rơi xuống khi người chơi đi qua
+- **Snatcher + Hooker** — enemy đặc biệt khác"
 
-## 🎬 PHẦN 8 — KẾT LUẬN (1 phút)
-
-**Màn hình chiếu: Slide tổng kết**
+**[NGẮT]**
 
 ---
 
-**[NGƯỜI A]:**
+## 🌃 CHƯƠNG 4 — MÀN ĐÊM (3 phút) ⏱ 14:30
+### Khu dân cư — Night (22h)
 
-"Xin phép tổng kết dự án bằng một số con số:"
+---
 
-`[CHỈ VÀO SLIDE]`
+### 5.1 — Skill Tree (1.5 phút) ⏱ 14:30
+
+**[B]:** "**Chương 4 — Màn Đêm tại Khu Dân Cư**. DayNight Cycle snap sang **22h** — trời tối.
+
+Đến chương này người chơi đã đủ điểm để mở **Skill Tree**."
+
+[DEMO — mở Skill Tree panel]
+
+"**3 nhánh — 15 node**:"
+
+`[CHỈ từng nhánh]`
+
+"**① Movement** (5 node): Walk Speed → Run Speed → Air Control + Dash → Wall Run/Bounce → Double Jump + Grapple. Mỗi node: **+Stamina**.
+
+**② Aim** (5 node): Recoil → Crit 10% → Crit 20% → Crit x1.5 → One-shot Crook + Bonus Specials. Mỗi node: **+Damage**.
+
+**③ Intelligence** (5 node): XP Radius → XP x1.1 → Radius +10 → XP x1.15 → Radius +15 + Highlight. Mỗi node: **+HP**.
+
+Chi phí: node 1 (2SP) → node 5 (12SP). **PlayerUpgradeManager** áp dụng các chỉ số này vào nhân vật."
+
+---
+
+### 5.2 — Tank Boss (1 phút) ⏱ 16:00
+
+**[A]:** `[DEMO — Tank gầm, xuất hiện, Boss Health Bar hiện]`
+
+"Từ wave 5, **Tank** bắt đầu xuất hiện.
+
+**Tank** — boss chính:
+- **500+ HP** (scale theo wave)
+- 3 đòn: Punch (gần), Swipe (diện rộng), Jump Attack (từ xa)
+- Gầm toàn map cảnh báo
+- **Boss Health Bar** trên HUD hiển thị máu
+
+**Flashlight** (phím F) — đèn pin độc lập, không gắn vũ khí."
+
+### 5.3 — Collectible Highlight (30 giây) ⏱ 17:00
+
+**[B]:** "Khi nâng cấp Intelligence đủ, **Outline Effect** — viền phát sáng — sẽ highlight journal và vật phẩm tương tác trong bán kính, giúp người chơi dễ tìm."
+
+**[NGẮT]**
+
+---
+
+## 🌆 CHƯƠNG 5 — ĐÊM KHUYA + KẾT THÚC (3 phút) ⏱ 17:30
+### Chung cư — Deep Night (2h sáng)
+
+---
+
+### 6.1 — Witch & Big Guy (1 phút) ⏱ 17:30
+
+**[A]:** "**Chương 5 — Đêm Khuya tại Chung Cư**. 2 giờ sáng — tối nhất game. Flashlight thiết yếu."
+
+`[DEMO — Witch khóc]`
+
+"**Witch** (60 HP): ngồi khóc tại chỗ. Lại gần hoặc bắn trúng → gào thét → **lao thẳng vào người chơi với tốc độ 6.5 m/s**. Mất dấu thì quay lại khóc.
+
+`[DEMO — Big Guy]`
+
+**Big Guy** (80 HP): đứng choáng, mặc váy công chúa. Kích động → gầm → rượt chậm nhưng đòn đấm rất mạnh."
+
+---
+
+### 6.2 — Trận cuối (1 phút) ⏱ 18:30
+
+**[B]:** "**Quest 12 — Escape Town**: quest cuối."
+
+[DEMO — WaveQuestInteractable kích hoạt]
+
+"Dạng **Wave Quest**: khóa khu vực, sống sót qua nhiều wave. Wave cuối là **Tank boss**. Đánh bại Tank → tương tạo lần 2 → **kích hoạt bom hủy diệt**."
+
+---
+
+### 6.3 — Ending Sequence (1.5 phút) ⏱ 19:00
+
+**[A]:** "**EndingSequenceManager** điều phối:"
+
+[DEMO — để cutscene chạy]
+
+"1. **BombExplosionCutscene**: Camera tạm thời → VFX nổ hạt nhân → SFX nổ → Fade to Black
+2. **EpilogueSlide**: 'Dịch bệnh đã được kiểm soát, nhưng ai mang đến phương thuốc vẫn còn là bí ẩn.'
+3. **CreditsSequence**: Credit cuộn — thành viên nhóm, trường, tài nguyên, Cowsins Engine, thanks
+4. Tự động quay về **Main Menu**"
+
+---
+
+### 6.4 — Game Over & Achievement (30 giây) ⏱ 20:00
+
+**[B]:** (khi chết / khi xem lại)
+
+"**Game Over** — thống kê đầy đủ: chapter, quest, journal, score (Story) hoặc wave, kills, best score (Wave). 3 lựa chọn: Restart (checkpoint), Main Menu, Quit.
+
+**5 Achievement**:
+1. Speedrunner — 5 chương <11 phút
+2. Hell Slayer — 130 Crook kill
+3. At Ease, Cooper — 20 kill khi wall run
+4. Tank Slayer — hạ Tank đầu tiên
+5. Close Call — trong 5m khi Boomer nổ"
+
+---
+
+## 🎯 KẾT LUẬN (1 phút) ⏱ 20:00
+
+**Màn hình: Slide tổng kết**
+
+---
+
+**[A]:** "Tổng kết dự án:"
 
 | Hạng mục | Con số |
 |---|---|
 | Engine | Unity — C# |
-| Tổng số Scene | 3 |
-| Tổng số Script | Hơn 80 |
-| Số chương | 5 |
-| Số main quest | Hơn 12 |
-| Số side quest | 8 |
-| Số journal | 39 |
-| Số loại zombie | 7 |
-| Số loại vũ khí | 9 |
-| Số achievement | 5 |
-| Skill tree nodes | 15 |
-| Dịch vụ Cloud | PlayFab |
+| Tổng Scene | 3 |
+| Tổng Script | 80+ |
+| Số chương | 5 (Bình Minh → Đêm Khuya) |
+| Main quest | 12+ |
+| Side quest | 8 |
+| Journal | 39 (7 nhóm) |
+| Loại zombie | 7 (Crook, Boomer, Tank, Witch, BigGuy, Snatcher, Hooker) |
+| Loại vũ khí | 9 |
+| Skill tree | 3 nhánh / 15 node |
+| Achievement | 5 |
+| Cloud | PlayFab (Login, Save, Leaderboard) |
 
-**[NGƯỜI B]:**
+**[B]:** "Một tựa game FPS Survival hoàn chỉnh: **cốt truyện 5 chương, 7 loại kẻ địch AI, 9 vũ khí, skill tree, wave, 39 journal, kết thúc cutscene, cloud save**."
 
-"Như vậy, dự án đã hoàn thiện một tựa game **FPS Survival hoàn chỉnh** với:
-- Cốt truyện xuyên suốt 5 chương
-- Hệ thống chiến đấu và di chuyển phong phú
-- 7 loại kẻ địch với AI thông minh
-- Hệ thống skill tree, wave, checkpoint
-- 39 mẩu nhật ký kể chuyện
-- Kết thúc hoàn chỉnh với cutscene và credits
-- Và tích hợp PlayFab cho dữ liệu đám mây"
-
-**[NGƯỜI A]:**
-
-"Cuối cùng, nhóm em xin chân thành cảm ơn quý thầy cô và các bạn đã dành thời gian lắng nghe. Đây là sản phẩm của cả quá trình học tập và làm việc nhóm, chắc chắn còn nhiều thiếu sót. Nhóm em rất mong nhận được những góp ý từ thầy cô và các bạn để có thể hoàn thiện hơn nữa."
+**[A]:** "Nhóm em cảm ơn thầy cô và các bạn đã theo dõi. Rất mong nhận được góp ý!"
 
 **[CẢ NHÓM CÚI CHÀO]**
 
-"Xin cảm ơn!"
-
 ---
 
-## ⏱ TỔNG THỜI GIAN DỰ KIẾN
+## 📋 CHECKLIST TẤT CẢ TÍNH NĂNG — SOÁT TRƯỚC NGÀY THUYẾT TRÌNH
 
-| Phần | Thời gian | Người nói |
-|---|---|---|
-| Mở đầu — Giới thiệu | 2 phút | A + B |
-| Main Menu & Đăng nhập | 1 phút | A |
-| Chương 1 — Bình Minh (6 mục) | 4 phút | A + B |
-| Chương 2 — Buổi Trưa + Side Quest | 2 phút | B + A |
-| Chương 3 — Hoàng Hôn + Wave + Boomer | 2.5 phút | B + A |
-| Chương 4 — Màn Đêm + Skill Tree + Tank | 2.5 phút | B + A |
-| Chương 5 — Đêm Khuya + Ending | 3 phút | B + A |
-| Game Over + Achievement + PlayFab | 1.5 phút | B + A |
-| Kết luận | 1 phút | A + B |
-| **Tổng cộng** | **~20 phút** | |
+### ▢ Chuẩn bị kỹ thuật
+- [ ] Unity mở sẵn scene Main Menu
+- [ ] Chế độ Play sẵn sàng
+- [ ] Âm thanh loa hoạt động
+- [ ] Đồng hồ bấm giờ
+- [ ] Script in ra / mở trên màn hình phụ
 
----
+### ▢ Chương 1 — Bình Minh
+- [ ] Main Menu — Play, Quit, Best Score
+- [ ] PlayFab Login — form, leaderboard
+- [ ] DayNight Cycle — chỉ góc nhìn 6h sáng
+- [ ] SaveRoom / Checkpoint — vùng sáng, hồi máu
+- [ ] StoryManager + QuestTracker — quest đầu
+- [ ] Walk / Run / Crouch / Slide
+- [ ] Jump / Double Jump
+- [ ] Dash (có cooldown)
+- [ ] Wall Run + Wall Bounce
+- [ ] Grappling Hook
+- [ ] Climb Ladder
+- [ ] Stamina System (chạy đến khi hết)
+- [ ] Camera FOV + Speed Lines
+- [ ] Camera Shake (bị đòn)
+- [ ] 9 vũ khí — chuyển đổi + bắn thử
+- [ ] ADS — ngắm bắn
+- [ ] Reload — nạp đạn
+- [ ] Recoil + Spread
+- [ ] Muzzle Flash
+- [ ] Bullet Holes (bắn xuống nền)
+- [ ] Hitmarker
+- [ ] Attachments — chỉ menu
+- [ ] Crook zombie — 28 variants, AI, NavMesh
+- [ ] AIDirector — 4 trạng thái, camper punish
+- [ ] Object Pooling — spawner
+- [ ] HUD — chỉ đủ 12 widget
+- [ ] Quest hoàn thành + cutscene chuyển
 
-## 📋 CHECKLIST CHUẨN BỊ TRƯỚC KHI THUYẾT TRÌNH
+### ▢ Chương 2 — Buổi Trưa
+- [ ] DayNight → Noon (ánh sáng thay đổi)
+- [ ] 8 Side Quest — mở bảng
+- [ ] Journal đầu tiên — popup text + hình
+- [ ] Voice Log — âm thanh
+- [ ] CollectibleManager — 39 journal
 
-- [ ] Mở Unity — load scene Main Menu
-- [ ] Đảm bảo game ở chế độ Play sẵn sàng
-- [ ] Kiểm tra âm thanh (loa / tai nghe)
-- [ ] Chuẩn bị slide tổng kết (nếu có)
-- [ ] Mở file kịch bản này trên màn hình phụ (nếu cần)
-- [ ] Test trước luồng chơi để tránh bug
-- [ ] Đảm bảo checkpoint được set đúng chapter cần demo
-- [ ] Chuẩn bị cheats / developer mode để skip nếu cần
+### ▢ Chương 3 — Hoàng Hôn
+- [ ] DayNight → Dusk
+- [ ] WaveManager — wave đang chạy
+- [ ] WaveQuestInteractable — khóa vùng, teleport
+- [ ] Wave Announcer
+- [ ] Boomer — xuất hiện, nổ, acid pool
+- [ ] SpecialEnemyDirector
+- [ ] Loot — Coin, EXP, Healthpack, Pop, Trail
+- [ ] Ceiling Zombie — từ trần rơi
+- [ ] Snatcher / Hooker
+
+### ▢ Chương 4 — Màn Đêm
+- [ ] DayNight → Night (22h)
+- [ ] Flashlight (phím F)
+- [ ] Skill Tree — mở panel, 3 nhánh
+- [ ] PlayerUpgradeManager — áp dụng
+- [ ] Tank — gầm, xuất hiện, punch/swipe/jump
+- [ ] Boss Health Bar
+- [ ] Outline — highlight journal
+
+### ▢ Chương 5 — Đêm Khuya + Kết thúc
+- [ ] DayNight → Deep Night (2h)
+- [ ] Witch — khóc, kích động, lao nhanh
+- [ ] Big Guy — choáng, gầm, rượt
+- [ ] Quest 12 — Escape Town
+- [ ] Wave Quest cuối + Tank boss
+- [ ] Bomb Explosion Cutscene
+- [ ] Epilogue Slide
+- [ ] Credits Sequence
+- [ ] Game Over — stats + 3 options
+- [ ] 5 Achievement
+- [ ] PlayFab — cloud save, auto-save
+
+### ▸ Bonus (nếu còn thời gian)
+- [ ] PlayerStatsTracker — stats panel
+- [ ] PauseManager — menu tạm dừng
+- [ ] Achievement toast notification
+- [ ] Outline Effect chi tiết
+- [ ] Low Health Vignette + Health Flash
+- [ ] Compass — quay hướng, beacon
