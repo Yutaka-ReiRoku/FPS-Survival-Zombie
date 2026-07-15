@@ -32,7 +32,7 @@
     height: 58px;
     margin-top: var(--space-xxl);
     flex-shrink: 0;
-    background-image: resource("Icons/icon_pause");
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_pause.svg");
     -unity-background-image-tint-color: var(--color-accent-blue-light);
     -unity-background-scale-mode: scale-to-fit;
     

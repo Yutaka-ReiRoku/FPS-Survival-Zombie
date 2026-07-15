@@ -76,7 +76,7 @@ public class PauseManager : MonoBehaviour
             timeout -= 0.1f;
         }
         if (!found)
-            Debug.LogWarning("[PauseManager] Could not find PlayerUI (UIController) to disable legacy Canvas");
+            Debug.Log("[PauseManager] Legacy PlayerUI (UIController) not found in scene; running in UI Toolkit HUD mode.");
 
         if (_canvasRoot != null)
         {

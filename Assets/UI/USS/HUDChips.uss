@@ -30,5 +30,5 @@
 .hud-chip-score-icon { background-image: resource("Icons/icon_star"); }
 .hud-chip-coins-icon { background-image: resource("Icons/icon_coin"); }
 .hud-chip-headshots-icon { background-image: resource("Icons/icon_target"); }
-.hud-chip-timer-icon { background-image: resource("Icons/icon_timer"); }
+.hud-chip-timer-icon { background-image: url("project://database/Assets/UI/Resources/Icons/icon_timer.svg"); }
 .hud-chip-collectibles-icon { background-image: resource("Icons/icon_trophy"); }
