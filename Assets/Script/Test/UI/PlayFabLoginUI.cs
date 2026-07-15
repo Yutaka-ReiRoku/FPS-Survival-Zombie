@@ -78,6 +78,13 @@ public class PlayFabLoginUI : MonoBehaviour
             _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
             _logoutButton.style.display = DisplayStyle.None;
         }
+
+        // Apply custom vector API chamfer drawing to make modules look like true 45-degree cut plaques
+        SetupChamferedPlaque(root.Q("HeaderModule"), 18f);
+        SetupChamferedPlaque(root.Q("InputModule_User"), 16f);
+        SetupChamferedPlaque(root.Q("InputModule_Pass"), 16f);
+        SetupChamferedPlaque(root.Q("ActionModule"), 18f);
+        SetupChamferedPlaque(root.Q("FooterModule"), 14f);
     }
 
     private void OnEnable()
@@ -305,6 +312,65 @@ public class PlayFabLoginUI : MonoBehaviour
     {
         _isBusy = busy;
         _actionButton?.SetEnabled(!busy);
+    }
+
+    private void SetupChamferedPlaque(VisualElement element, float chamferSize)
+    {
+        if (element == null) return;
+        
+        // Remove default USS backgrounds/borders to avoid double rendering
+        element.style.backgroundColor = Color.clear;
+        element.style.borderLeftWidth = 0;
+        element.style.borderRightWidth = 0;
+        element.style.borderTopWidth = 0;
+        element.style.borderBottomWidth = 0;
+
+        bool isHovered = false;
+
+        element.RegisterCallback<MouseEnterEvent>(_ => {
+            isHovered = true;
+            element.MarkDirtyRepaint();
+        });
+
+        element.RegisterCallback<MouseLeaveEvent>(_ => {
+            isHovered = false;
+            element.MarkDirtyRepaint();
+        });
+
+        element.generateVisualContent += mgc =>
+        {
+            var rect = element.layout;
+            if (rect.width <= 0 || rect.height <= 0) return;
+
+            var painter = mgc.painter2D;
+
+            // Fill asymmetric chamfered shape
+            painter.fillColor = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.94f);
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(chamferSize, 0));
+            painter.LineTo(new Vector2(rect.width, 0));
+            painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+            painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+            painter.LineTo(new Vector2(0, rect.height));
+            painter.LineTo(new Vector2(0, chamferSize));
+            painter.ClosePath();
+            painter.Fill();
+
+            // Draw border
+            painter.strokeColor = isHovered 
+                ? new Color(217f / 255f, 199f / 255f, 115f / 255f, 0.55f)
+                : new Color(217f / 255f, 199f / 255f, 115f / 255f, 0.22f);
+            painter.lineWidth = 1.5f;
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(chamferSize, 0));
+            painter.LineTo(new Vector2(rect.width, 0));
+            painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+            painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+            painter.LineTo(new Vector2(0, rect.height));
+            painter.LineTo(new Vector2(0, chamferSize));
+            painter.ClosePath();
+            painter.Stroke();
+        };
     }
 
     private void OnDestroy()
