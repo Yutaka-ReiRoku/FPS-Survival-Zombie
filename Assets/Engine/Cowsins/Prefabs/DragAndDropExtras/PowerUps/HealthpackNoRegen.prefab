@@ -61,7 +61,6 @@ MonoBehaviour:
   rememberTriggerState: 0
   reappears: 0
   reappearTime: 5
-  Timer: {fileID: 0}
   used: 0
   healAmount: 50
 --- !u!65 &6866079498763795903
