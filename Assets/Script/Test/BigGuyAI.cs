@@ -3,18 +3,19 @@ using UnityEngine.AI;
 using cowsins;
 
 /// <summary>
-/// The Witch — a mini-boss inspired by the L4D2 Witch. A mother who lost
-/// her child, normally sits alone crying (Cry state) at a fixed point.
+/// Big Guy — a mini-boss inspired by a loving father who wore a princess dress
+/// to make his daughter happy before the infection. A hulking, slow, tanky
+/// zombie that stands dazed (Dazed state) at a fixed point until provoked.
 /// When disturbed (player approaches within provokeRadius, or gets shot),
-/// she screams briefly then charges at the player at high speed
-/// (Scream → Chase). If she loses sight of the player, she returns to
-/// Cry state. At close range she attacks dealing high damage.
+/// he roars briefly then walks toward the player slowly but relentlessly.
+/// Unlike the Witch, once provoked he NEVER returns to Dazed — he chases
+/// until he or the player is dead.
 ///
-/// Mini-boss stats: health 60, speed 6.5 m/s, damage 30, scream 1.2s.
+/// Mini-boss stats: health 80, speed 2 m/s, damage 30, scream 2.0s.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(AudioSource))]
-public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthReadout
+public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthReadout
 {
     // ---- IEnemyHealthReadout (read-only; for EnemyHealthBar) ----
     public float HealthFraction
@@ -28,21 +29,19 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     public Transform target;
 
     [Header("Health")]
-    public int maxHealth = 60;
+    public int maxHealth = 80;
     public int currentHealth;
 
     [Header("Movement")]
-    public float runSpeed = 6.5f;
-    public float rotationSpeed = 10f;
+    public float walkSpeed = 3.5f;
+    public float rotationSpeed = 8f;
 
     [Header("Detection")]
-    [Tooltip("Distance the player must approach to provoke the Witch (transitions from Cry to Scream).")]
-    public float provokeRadius = 8f;
-    [Tooltip("Distance at which the Witch loses sight of the player. Larger than provokeRadius to prevent flip-flop.")]
-    public float loseSightDistance = 20f;
+    [Tooltip("Distance the player must approach to provoke the Big Guy (transitions from Dazed to Scream).")]
+    public float provokeRadius = 10f;
 
     [Header("Line of Sight")]
-    [Tooltip("If true, the Witch requires clear LOS to the player before proximity-based provoke.")]
+    [Tooltip("If true, the Big Guy requires clear LOS to the player before proximity-based provoke.")]
     public bool requireLineOfSight = true;
     [Tooltip("Layer mask for sight obstruction objects (walls, furniture). Defaults to everything.")]
     public LayerMask sightObstructionMask = ~0;
@@ -50,15 +49,17 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     public float sightEyeHeight = 1.5f;
 
     [Header("Attack")]
-    public float attackRange = 1.5f;
+    public float attackRange = 2f;
     public float attackCooldown = 2.5f;
     public float attackDamage = 30f;
-    [Tooltip("Delay after triggering Attack before applying damage. Now driven by AnimationEvent 'WitchAttackHit' on the Punching clip; this is a fallback if the event is missing.")]
+    [Tooltip("Delay after triggering Attack before applying damage. Now driven by AnimationEvent 'BigGuyAttackHit' on the Mutant Punch clip; this is a fallback if the event is missing.")]
     public float damageApplyDelay = 1.0f;
+    [Tooltip("How long the attack animation plays before returning to Walk (seconds). Should match the Mutant Punch clip length (~1.1s) plus a small buffer. If this is shorter than attackCooldown, the Big Guy walks between attacks.")]
+    public float attackAnimDuration = 1.2f;
 
     [Header("Scream")]
-    [Tooltip("Duration of the scream before starting to charge at the player (seconds). Includes StandUp animation time + Scream time.")]
-    public float screamDuration = 3.0f;
+    [Tooltip("Duration of the roar before starting to walk toward the player (seconds). Matches the Zombie Scream clip length (2.27s).")]
+    public float screamDuration = 2.27f;
 
     [Header("Stuck Recovery")]
     public float stuckTimeThreshold = 3f;
@@ -66,27 +67,25 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     public float stuckRepathRadius = 5f;
 
     [Header("Chase Re-path (Responsiveness)")]
-    [Tooltip("Minimum distance (m) the player must move relative to the last destination before the Witch immediately re-paths.")]
+    [Tooltip("Minimum distance (m) the player must move relative to the last destination before the Big Guy immediately re-paths.")]
     public float playerMovedRepathThreshold = 1f;
     [Tooltip("Maximum interval (seconds) between re-paths when the player is standing still.")]
     public float maxRepathInterval = 0.1f;
 
     [Header("Animation Smoothing")]
     [Tooltip("Damping time for the Speed animator parameter (lower = snappier, higher = smoother).")]
-    public float animSpeedDamping = 0.08f;
-    [Tooltip("Scales Run animation playback speed by actual agent speed. Requires Speed parameter active on Run state.")]
+    public float animSpeedDamping = 0.12f;
+    [Tooltip("Scales Walk animation playback speed by actual agent speed. Requires Speed parameter active on Walk state.")]
     public bool scaleAnimBySpeed = true;
-    [Tooltip("Multiplier applied to animator.speed when chasing (gives a more frenetic, L4D2-like motion).")]
-    public float chaseAnimSpeedMultiplier = 1.15f;
-    [Tooltip("Grace period (s) after entering Cry/ReturnToCrying before the agent fully stops, for smoother deceleration.")]
-    public float stopDecelTime = 0.25f;
+    [Tooltip("Multiplier applied to animator.speed when chasing (below 1 = heavy, sluggish walk; above 1 = frantic).")]
+    public float chaseAnimSpeedMultiplier = 0.9f;
+    [Tooltip("Grace period (s) after entering Dazed before the agent fully stops, for smoother deceleration.")]
+    public float stopDecelTime = 0.3f;
 
     [Header("Audio")]
-    [Tooltip("Looping crying sound while in Cry state (loop).")]
-    public AudioClip cryClip;
-    [Tooltip("Screaming sound when provoked.")]
+    [Tooltip("Roaring sound when provoked.")]
     public AudioClip screamClip;
-    [Tooltip("Sound when attacking.")]
+    [Tooltip("Sound when attacking (punching).")]
     public AudioClip attackClip;
     [Tooltip("Sound when dying.")]
     public AudioClip deathClip;
@@ -98,9 +97,9 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     public GameObject dropPrefab;
     [Range(0, 100)]
     public float dropChance = 100f;
-    [Tooltip("Height offset to raise loot relative to the Witch's position when dropped.")]
+    [Tooltip("Height offset to raise loot relative to the Big Guy's position when dropped.")]
     public float dropHeightOffset = 1.5f;
-    [Tooltip("Enable loot pop effect bouncing away from the Witch on death.")]
+    [Tooltip("Enable loot pop effect bouncing away from the Big Guy on death.")]
     public bool popLootOnDeath = true;
     [Tooltip("Upward velocity (up) when loot is popped out (m/s).")]
     public float lootPopUpwardSpeed = 5f;
@@ -111,13 +110,9 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     [Tooltip("Configuration for trail + glow particle effect when loot flies.")]
     public LootTrailSettings lootTrailSettings = new LootTrailSettings();
 
-    [Header("Quest")]
-    [Tooltip("QuestTrigger (Manual mode) will be completed when the Witch dies. Leave null if not using quests.")]
-    public QuestTrigger questTriggerOnDeath;
-
     [Header("Rewards")]
-    public float experienceReward = 100f;
-    public int coinReward = 40;
+    public float experienceReward = 120f;
+    public int coinReward = 50;
 
     [Header("Cleanup")]
     [Tooltip("Time after death before destroying the GameObject (seconds).")]
@@ -135,8 +130,8 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     private PlayerStats _targetStats;
 
     // --- State ---
-    private enum WitchState { Crying, StandingUp, Screaming, Chasing, Attacking, Dead }
-    private WitchState state = WitchState.Crying;
+    private enum BigGuyState { Dazed, Screaming, Chasing, Attacking, Dead }
+    private BigGuyState state = BigGuyState.Dazed;
     private bool isDead;
     private bool hasScreamed;
     private bool isAttacking;
@@ -152,9 +147,6 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     private float attackResetTimer;
     private bool attackResetTimerActive;
 
-    // --- Cry audio loop ---
-    private bool cryAudioPlaying;
-
     // --- Smooth stop (gradual deceleration instead of agent.isStopped = true) ---
     private bool _wantsToStop;
     private float _stopTimer;
@@ -165,11 +157,8 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     private static readonly int ScreamHash = Animator.StringToHash("Scream");
     private static readonly int AttackHash = Animator.StringToHash("Attack");
     private static readonly int IsChasingHash = Animator.StringToHash("isChasing");
-    private static readonly int IsCryingHash = Animator.StringToHash("isCrying");
     private static readonly int IsDeathHash = Animator.StringToHash("isDeath");
-    private static readonly int StandUpHash = Animator.StringToHash("StandUp");
     private static readonly int DeathHash = Animator.StringToHash("Death");
-    private static readonly int HitHash = Animator.StringToHash("Hit");
     private static readonly int AttackResetHash = Animator.StringToHash("attackReset");
 
     // --- Cached player references ---
@@ -196,15 +185,17 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
         if (agent != null)
         {
-            agent.speed = runSpeed;
-            agent.acceleration = 30f; // higher accel for snappier L4D2-like charge
-            agent.angularSpeed = 360f;
+            agent.speed = walkSpeed;
+            agent.acceleration = 15f; // lower accel for a heavy, sluggish feel
+            agent.angularSpeed = 180f; // slower turning for a big guy
             agent.stoppingDistance = attackRange * 0.5f;
             agent.updateRotation = false;
-            agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
-            agent.avoidancePriority = 8; // Mini-boss — high priority, regular zombies yield.
+            agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+            agent.avoidancePriority = 10; // Boss gets high priority so regular zombies yield
         }
 
+        // Keep the Rigidbody KINEMATIC while alive so the NavMeshAgent fully
+        // controls movement (same fix as Tank/Witch).
         if (rb != null)
         {
             rb.isKinematic = true;
@@ -213,8 +204,6 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
         if (animator != null)
         {
-            animator.SetBool(IsCryingHash, true);
-            animator.SetBool(IsChasingHash, false);
             _baseAnimSpeed = Random.Range(0.95f, 1.05f);
             animator.speed = _baseAnimSpeed;
         }
@@ -233,12 +222,12 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
             locomotion.Initialize();
         }
 
-        state = WitchState.Crying;
+        state = BigGuyState.Dazed;
         hasScreamed = false;
         _lastSetDestination = transform.position;
         _pathTimer = maxRepathInterval;
 
-        // Witch starts crying at a fixed point — stop the agent immediately
+        // Big Guy starts dazed at a fixed point — stop the agent immediately
         if (agent != null && agent.isOnNavMesh)
             agent.isStopped = true;
     }
@@ -266,12 +255,16 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
         float distance = Vector3.Distance(transform.position, target.position);
 
-        // Check if player is dead
+        // Check if player is dead — Big Guy stops chasing but does NOT return to Dazed
         if (_targetStats != null && _targetStats.IsDead)
         {
-            if (state == WitchState.Chasing || state == WitchState.Attacking)
+            if (state == BigGuyState.Chasing || state == BigGuyState.Attacking)
             {
-                ReturnToCrying();
+                // Player is dead — stop and stand still
+                RequestStop();
+                state = BigGuyState.Dazed;
+                if (animator != null)
+                    animator.SetBool(IsChasingHash, false);
             }
             return;
         }
@@ -281,23 +274,17 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
         switch (state)
         {
-            case WitchState.Crying:
-                UpdateCrying(distance);
+            case BigGuyState.Dazed:
+                UpdateDazed(distance);
                 break;
-            case WitchState.StandingUp:
-                // StandingUp: Witch is getting up from crying pose.
-                // AnimatorController handles Cry→StandUp→Scream transition.
-                // Face the player while standing up.
-                FaceTarget();
-                break;
-            case WitchState.Screaming:
+            case BigGuyState.Screaming:
                 // Screaming state is handled by screamTimer in TickTimers.
                 FaceTarget();
                 break;
-            case WitchState.Chasing:
+            case BigGuyState.Chasing:
                 UpdateChasing(distance);
                 break;
-            case WitchState.Attacking:
+            case BigGuyState.Attacking:
                 // Attacking is handled by attackDamageTimer/attackResetTimer in TickTimers.
                 FaceTarget();
                 break;
@@ -309,16 +296,17 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         // Update animator speed parameter (smoother damping for natural motion)
         if (animator != null)
         {
-            float targetAnimSpeed = agent != null && agent.isOnNavMesh ? agent.velocity.magnitude / runSpeed : 0f;
+            float targetAnimSpeed = agent != null && agent.isOnNavMesh ? agent.velocity.magnitude / walkSpeed : 0f;
             animator.SetFloat(SpeedHash, targetAnimSpeed, animSpeedDamping, Time.deltaTime);
 
-            // Frenetic chase animation: scale playback speed slightly faster when chasing
-            if (scaleAnimBySpeed && state == WitchState.Chasing && !isAttacking)
+            // Heavy chase animation: scale playback speed slightly slower when
+            // chasing for a heavy, menacing walk (below 1 = sluggish/heavy).
+            if (scaleAnimBySpeed && state == BigGuyState.Chasing && !isAttacking)
             {
                 float speedFraction = Mathf.Clamp01(targetAnimSpeed);
                 animator.speed = _baseAnimSpeed * Mathf.Lerp(1f, chaseAnimSpeedMultiplier, speedFraction);
             }
-            else if (state != WitchState.Dead)
+            else if (state != BigGuyState.Dead)
             {
                 animator.speed = _baseAnimSpeed;
             }
@@ -389,7 +377,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         if (attackResetTimerActive)
         {
             attackResetTimer += Time.deltaTime;
-            if (attackResetTimer >= attackCooldown)
+            if (attackResetTimer >= attackAnimDuration)
             {
                 attackResetTimerActive = false;
                 ResetAttack();
@@ -398,20 +386,11 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     }
 
     //==================================================
-    // CRYING STATE
+    // DAZED STATE
     //==================================================
 
-    private void UpdateCrying(float distance)
+    private void UpdateDazed(float distance)
     {
-        // Play cry audio as a looping clip so audioSource.Stop() can cut it
-        if (!cryAudioPlaying && cryClip != null)
-        {
-            audioSource.clip = cryClip;
-            audioSource.loop = true;
-            audioSource.Play();
-            cryAudioPlaying = true;
-        }
-
         // Provoke by proximity
         if (distance <= provokeRadius)
         {
@@ -437,12 +416,8 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
     private void UpdateChasing(float distance)
     {
-        // Lost sight — return to crying
-        if (distance > loseSightDistance)
-        {
-            ReturnToCrying();
-            return;
-        }
+        // Big Guy NEVER returns to Dazed — he chases until dead.
+        // No loseSightDistance check here.
 
         // In attack range and cooldown ready
         if (!isAttacking && distance <= attackRange && attackTimer >= attackCooldown)
@@ -463,7 +438,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
             // Dynamic re-path interval based on distance and LOS
             bool hasLOS = HasLineOfSight();
-            float dynamicInterval = Mathf.Lerp(0.15f, 1.0f, Mathf.Clamp01((distance - 5f) / 15f));
+            float dynamicInterval = Mathf.Lerp(0.2f, 1.5f, Mathf.Clamp01((distance - 5f) / 15f));
             float dynamicThreshold = Mathf.Lerp(1.0f, 5.0f, Mathf.Clamp01((distance - 5f) / 15f));
             if (!hasLOS)
             {
@@ -498,44 +473,28 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
             return;
 
         hasScreamed = true;
-        state = WitchState.StandingUp;
-
-        // Stop looping cry audio so it doesn't overlap with the scream
-        if (cryAudioPlaying)
-        {
-            audioSource.Stop();
-            audioSource.clip = null;
-            audioSource.loop = false;
-            cryAudioPlaying = false;
-        }
+        state = BigGuyState.Screaming;
 
         if (agent != null)
             RequestStop();
 
-        // Trigger StandUp animation first — Witch stands up from crying pose
-        // before screaming. The AnimatorController transitions:
-        //   Cry → StandUp (trigger) → Scream (exit time) → Run (isChasing)
         if (animator != null)
         {
-            animator.SetBool(IsCryingHash, false);
-            animator.SetTrigger(StandUpHash);
-            // Pre-set the Scream trigger so when StandUp→Scream transition fires
-            // (via exit time), the Scream state plays. Then EndScream() will set
-            // isChasing=true to transition Scream→Run.
+            animator.SetBool(IsChasingHash, false);
             animator.SetTrigger(ScreamHash);
         }
 
         if (screamClip != null)
             audioSource.PlayOneShot(screamClip);
 
-        // Start scream timer — will count during StandUp + Scream
+        // Start scream timer
         screamTimer = 0f;
         screamTimerActive = true;
     }
 
     private void EndScream()
     {
-        state = WitchState.Chasing;
+        state = BigGuyState.Chasing;
 
         if (animator != null)
             animator.SetBool(IsChasingHash, true);
@@ -552,7 +511,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     private void StartAttack()
     {
         isAttacking = true;
-        state = WitchState.Attacking;
+        state = BigGuyState.Attacking;
         attackTimer = 0;
 
         RequestStop();
@@ -563,8 +522,8 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         if (attackClip != null)
             audioSource.PlayOneShot(attackClip);
 
-        // Damage is applied via AnimationEvent "WitchAttackHit" on the
-        // Punching clip (synced to the actual hit frame). The fallback
+        // Damage is applied via AnimationEvent "BigGuyAttackHit" on the
+        // Mutant Punch clip (synced to the actual hit frame). The fallback
         // timer runs in parallel in case the event is missing.
         attackDamageTimer = 0f;
         attackDamageTimerActive = true;
@@ -573,11 +532,11 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     }
 
     /// <summary>
-    /// Called by an AnimationEvent on the Punching clip at the hit frame.
+    /// Called by an AnimationEvent on the Mutant Punch clip at the hit frame.
     /// This ensures damage is applied exactly when the animation connects,
     /// not at a fixed delay after the attack starts.
     /// </summary>
-    public void WitchAttackHit()
+    public void BigGuyAttackHit()
     {
         // Cancel the fallback timer since the event fired
         attackDamageTimerActive = false;
@@ -600,41 +559,15 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     private void ResetAttack()
     {
         isAttacking = false;
-        state = WitchState.Chasing;
+        state = BigGuyState.Chasing;
 
-        // Trigger animator transition Attack → Run immediately
+        // Trigger animator transition Attack → Walk immediately
         if (animator != null)
             animator.SetTrigger(AttackResetHash);
 
         CancelStop();
 
         _pathTimer = maxRepathInterval;
-    }
-
-    //==================================================
-    // RETURN TO CRYING
-    //==================================================
-
-    private void ReturnToCrying()
-    {
-        state = WitchState.Crying;
-        hasScreamed = false;
-        isAttacking = false;
-
-        // Cancel any pending attack timers
-        attackDamageTimerActive = false;
-        attackResetTimerActive = false;
-
-        if (agent != null)
-            RequestStop();
-
-        if (animator != null)
-        {
-            animator.SetBool(IsChasingHash, false);
-            animator.SetBool(IsCryingHash, true);
-        }
-
-        cryAudioPlaying = false; // cry will restart on next UpdateCrying
     }
 
     //==================================================
@@ -659,14 +592,11 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         if (PlayerStatsTracker.Instance != null)
             PlayerStatsTracker.Instance.RegisterDamageDealt(damage);
 
-        if (animator != null)
-            animator.SetTrigger(HitHash);
-
         if (OnHealthChanged != null)
             OnHealthChanged(HealthFraction);
 
-        // Provoke on hit: if still crying, scream immediately and chase
-        if (state == WitchState.Crying && !hasScreamed)
+        // Provoke on hit: if still dazed, scream immediately and chase
+        if (state == BigGuyState.Dazed && !hasScreamed)
         {
             StartScream();
         }
@@ -687,7 +617,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
             return;
 
         isDead = true;
-        state = WitchState.Dead;
+        state = BigGuyState.Dead;
 
         // Cancel all timers (replacing CancelInvoke)
         screamTimerActive = false;
@@ -695,12 +625,12 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         attackResetTimerActive = false;
 
         if (CombatFeedbackHUD.Instance != null)
-            CombatFeedbackHUD.Instance.ShowKill("Witch");
+            CombatFeedbackHUD.Instance.ShowKill("Big Guy");
 
         if (AIDirector.Instance != null)
             AIDirector.Instance.RegisterKill();
 
-        // Witch is a mini-boss, not a Tank — use generic kill registration.
+        // Big Guy is a mini-boss — use generic kill registration.
         if (PlayerStatsTracker.Instance != null)
             PlayerStatsTracker.Instance.RegisterKill(500);
 
@@ -720,10 +650,8 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
         if (animator != null)
         {
-            // Force-clear other state bools so no Cry/Run transition can
-            // override the Death transition (the AnyState→Death trigger can
-            // lose to an in-progress Scream→Run exit-time transition).
-            animator.SetBool(IsCryingHash, false);
+            // Force-clear other state bools so no Dazed/Walk transition can
+            // override the Death transition.
             animator.SetBool(IsChasingHash, false);
             animator.SetBool(IsDeathHash, true);
             animator.SetTrigger(DeathHash);
@@ -732,18 +660,8 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
             animator.Play("Death", 0, 0f);
         }
 
-        // Stop any ongoing cry/scream before playing death sound
-        if (cryAudioPlaying)
-        {
-            audioSource.Stop();
-            audioSource.clip = null;
-            audioSource.loop = false;
-            cryAudioPlaying = false;
-        }
-        else
-        {
-            audioSource.Stop();
-        }
+        // Stop any ongoing audio before playing death sound
+        audioSource.Stop();
         if (deathClip != null)
             audioSource.PlayOneShot(deathClip);
 
@@ -766,12 +684,6 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
             lootPopUpwardSpeed,
             lootPopHorizontalSpeed,
             lootTrailSettings);
-
-        // Complete the quest (if a QuestTrigger is assigned) — Manual mode.
-        if (questTriggerOnDeath != null)
-        {
-            questTriggerOnDeath.Complete();
-        }
 
         Destroy(gameObject, cleanupDelay);
     }
@@ -837,9 +749,6 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, provokeRadius);
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, loseSightDistance);
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
