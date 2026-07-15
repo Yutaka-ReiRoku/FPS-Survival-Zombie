@@ -1,5 +1,5 @@
-@import url("../USS/Theme.uss");
-@import url("../USS/Shared.uss");
+@import url("project://database/Assets/UI/USS/Theme.uss");
+@import url("project://database/Assets/UI/USS/Shared.uss");
 
 /* CutscenePanel.uss — Runtime-loaded styles for CutscenePlayer (Phase B) */
 .cutscene-panel {
@@ -27,11 +27,11 @@
     -unity-font: var(--font-display);
     color: var(--color-text-gold);
     -unity-text-align: middle-center;
-    width: 1400px;
+    width: 90%;
     height: 100px;
     position: absolute;
-    top: calc(50% - 60px);
-    left: calc(50% - 700px);
+    top: 35%;
+    left: 5%;
 }
 
 .cutscene-body {
@@ -39,9 +39,9 @@
     -unity-font: var(--font-body);
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
-    width: 1400px;
-    height: 80px;
+    width: 90%;
+    height: 120px;
     position: absolute;
-    top: calc(50% + 40px);
-    left: calc(50% - 700px);
+    top: 55%;
+    left: 5%;
 }
