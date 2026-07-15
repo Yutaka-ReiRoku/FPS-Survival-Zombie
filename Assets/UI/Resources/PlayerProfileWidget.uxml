@@ -3,7 +3,7 @@
     <ui:Style src="project://database/Assets/UI/USS/Shared.uss" />
     <ui:Style src="project://database/Assets/UI/Resources/PlayerProfileWidget.uss" />
 
-    <ui:VisualElement name="ProfileRoot" class="overlay" picking-mode="Ignore">
+    <ui:VisualElement name="ProfileRoot" picking-mode="Ignore">
         <ui:VisualElement name="PlayerChip" class="player-chip">
             <ui:VisualElement name="Avatar" class="player-avatar" />
             <ui:VisualElement name="TextCol" class="player-textcol">

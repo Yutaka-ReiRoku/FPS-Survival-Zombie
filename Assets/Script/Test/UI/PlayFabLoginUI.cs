@@ -30,6 +30,7 @@ public class PlayFabLoginUI : MonoBehaviour
     private static readonly Color ErrorColor = new Color(0.85f, 0.35f, 0.15f, 1f);
     private static readonly Color SuccessColor = new Color(0.31f, 0.878f, 0.541f, 1f);
 
+    private VisualElement _loginRoot;
     private VisualElement _centerGroup;
     private VisualElement _profileRoot;
 
@@ -41,6 +42,7 @@ public class PlayFabLoginUI : MonoBehaviour
         var root = _doc.rootVisualElement;
         
         // Find elements within the single shared document
+        _loginRoot = root.Q("PlayFabLoginRoot");
         _panel = root.Q("LoginPanel");
         if (_panel != null) _panel.style.width = panelWidth;
 
@@ -141,6 +143,7 @@ public class PlayFabLoginUI : MonoBehaviour
         {
             Debug.LogWarning("[PlayFabLoginUI] PlayFabManager not found.");
             ShowStatus("PlayFabManager not found.", ErrorColor);
+            if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
             _panel.style.display = DisplayStyle.Flex;
             yield break;
         }
@@ -151,12 +154,14 @@ public class PlayFabLoginUI : MonoBehaviour
 
         if (pm.IsLoggedIn)
         {
+            if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.None;
             _panel.style.display = DisplayStyle.None;
             ShowMainMenu();
             yield break;
         }
 
         HideMainMenu();
+        if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
         _panel.style.display = DisplayStyle.Flex;
         UpdateUI();
     }
@@ -242,6 +247,7 @@ public class PlayFabLoginUI : MonoBehaviour
     private void OnLogoutClicked()
     {
         PlayFabManager.Instance?.Logout();
+        if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
         _panel.style.display = DisplayStyle.Flex;
         _logoutButton.style.display = DisplayStyle.None;
         HideMainMenu();
@@ -257,6 +263,7 @@ public class PlayFabLoginUI : MonoBehaviour
         _actionButton?.SetEnabled(true);
         _logoutButton.style.display = DisplayStyle.None;
         HideMainMenu();
+        if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
         _panel.style.display = DisplayStyle.Flex;
         UpdateUI();
         ShowStatus("Logged out. Please log in again.", new Color(0.62f, 0.66f, 0.72f, 1f));
@@ -280,6 +287,7 @@ public class PlayFabLoginUI : MonoBehaviour
     private IEnumerator HideAfterDelay(float delay)
     {
         yield return new WaitForSecondsRealtime(delay);
+        if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.None;
         _panel.style.display = DisplayStyle.None;
         ShowMainMenu();
     }

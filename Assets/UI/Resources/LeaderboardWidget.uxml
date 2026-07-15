@@ -3,7 +3,7 @@
     <ui:Style src="project://database/Assets/UI/USS/Shared.uss" />
     <ui:Style src="project://database/Assets/UI/Resources/LeaderboardWidget.uss" />
 
-    <ui:VisualElement name="LeaderboardRoot" class="overlay" picking-mode="Ignore">
+    <ui:VisualElement name="LeaderboardRoot" picking-mode="Ignore">
         <ui:VisualElement name="LeaderboardChip" class="leaderboard-chip" />
         <ui:VisualElement name="LeaderboardScrim" class="overlay" />
         <ui:VisualElement name="LeaderboardPanel" class="leaderboard-panel">
