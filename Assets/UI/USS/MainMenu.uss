@@ -78,7 +78,7 @@
     height: 60px;
     position: relative;
     cursor: link;
-    transition: opacity var(--transition-normal, 0.2s);
+    transition: opacity var(--transition-normal, 0.2s), scale var(--transition-fast, 0.08s) var(--panel-easing, ease-out);
 }
 
 #PlayButton {
@@ -87,10 +87,12 @@
 
 .menu-button:hover {
     opacity: var(--hover-opacity, 0.9);
+    scale: 1.05;
 }
 
 .menu-button:active {
     opacity: var(--active-opacity, 0.8);
+    scale: 0.95;
 }
 
 .button-shadow {

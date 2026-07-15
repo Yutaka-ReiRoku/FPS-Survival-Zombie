@@ -112,18 +112,41 @@
 
 /* ===================== BUTTON COMPONENTS ===================== */
 
-/* Shared button base — all game buttons should use this + modifier */
-.game-button {
+Button,
+.game-button,
+.gameover-button,
+.pause-button,
+.journal-button,
+.menu-button,
+.leaderboard-btn {
     cursor: link;
-    transition: scale var(--transition-fast, 0.08s) var(--panel-easing, ease-out);
+    transition: scale var(--transition-fast, 0.1s) var(--panel-easing, ease-out),
+                opacity var(--transition-fast, 0.1s) ease-out,
+                -unity-background-image-tint-color var(--transition-fast, 0.1s) ease-out;
 }
 
-.game-button:hover {
-    scale: var(--hover-scale, 1.06);
+Button:hover,
+.game-button:hover,
+.gameover-button:hover,
+.pause-button:hover,
+.journal-button:hover,
+.menu-button:hover,
+.leaderboard-btn:hover {
+    scale: 1.05;
+    -unity-background-image-tint-color: var(--color-accent-gold-light, rgb(255, 230, 150));
+    opacity: 0.95;
 }
 
-.game-button:active {
-    scale: var(--press-scale, 0.95);
+Button:active,
+.game-button:active,
+.gameover-button:active,
+.pause-button:active,
+.journal-button:active,
+.menu-button:active,
+.leaderboard-btn:active {
+    scale: 0.95;
+    -unity-background-image-tint-color: var(--color-accent-gold-dark, rgb(176, 156, 70));
+    opacity: 0.85;
 }
 
 /* Sliced button background (reused by gameover-button, pause-button, menu-button, etc.) */
