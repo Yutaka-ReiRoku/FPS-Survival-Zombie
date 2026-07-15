@@ -53,9 +53,11 @@ namespace cowsins
         public override void Awake()
         {
             base.Awake();
-            image.sprite = bulletsIcon;
-            Destroy(graphics.transform.GetChild(0).gameObject);
-            Instantiate(bulletsGraphics, graphics);
+            if (image != null) image.sprite = bulletsIcon;
+            if (graphics != null && graphics.childCount > 0)
+                Destroy(graphics.GetChild(0).gameObject);
+            if (bulletsGraphics != null && graphics != null)
+                Instantiate(bulletsGraphics, graphics);
         }
 
         private void Start()
