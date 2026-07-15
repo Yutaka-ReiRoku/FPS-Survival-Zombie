@@ -39,7 +39,6 @@ public class PlayFabLoginUI : MonoBehaviour
     private static readonly Color SuccessColor = new Color(0.31f, 0.878f, 0.541f, 1f);
 
     private VisualElement _loginRoot;
-    private VisualElement _centerGroup;
     private VisualElement _profileRoot;
 
     private void Awake()
@@ -60,7 +59,6 @@ public class PlayFabLoginUI : MonoBehaviour
         _panel = root.Q("LoginPanel");
         if (_panel != null) _panel.style.width = panelWidth;
 
-        _centerGroup = root.Q("CenterGroup");
         _profileRoot = root.Q("ProfileRoot");
 
         _titleText = root.Q<Label>("LoginTitle");
@@ -85,12 +83,11 @@ public class PlayFabLoginUI : MonoBehaviour
             _toggleButtonLabel = _toggleButton.Q<Label>("ToggleBtnLabel");
         }
 
-        _logoutButton = root.Q("LogoutButton");
+        _logoutButton = root.Q("TacticalLogoutButton");
         if (_logoutButton != null)
         {
             _logoutButton.focusable = true;
             _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
-            _logoutButton.style.display = DisplayStyle.None;
         }
 
         // Apply custom vector API chamfer drawing with large prominent cuts for rusted steel aesthetic
@@ -98,6 +95,10 @@ public class PlayFabLoginUI : MonoBehaviour
         SetupChamferedPlaque(root.Q("InputModule_User"), 30f, true, false, null);
         SetupChamferedPlaque(root.Q("InputModule_Pass"), 30f, true, false, null);
         SetupChamferedPlaque(root.Q("ActionModule"), 34f, true, false, null);
+
+        SetupChamferedPlaque(root.Q("MainMenuModule_Play"), 30f, true, false, null);
+        SetupChamferedPlaque(root.Q("MainMenuModule_Profile"), 30f, true, false, null);
+        SetupChamferedPlaque(root.Q("MainMenuModule_Rankings"), 34f, true, false, null);
 
         // Find child input fields and button sections to apply matching chamfered cuts
         _usernameInputContainer = root.Q("InputModule_User")?.Q(className: "input-container-inner");
@@ -107,6 +108,15 @@ public class PlayFabLoginUI : MonoBehaviour
         SetupChamferedPlaque(_usernameInputContainer, 12f, false, false, null);
         SetupChamferedPlaque(_passwordInputContainer, 12f, false, false, null);
         SetupChamferedPlaque(_btnMainSec, 10f, false, true, null);
+
+        // Set up plaques for the 3 menu module button triggers
+        var playBtnTrigger = root.Q("MainMenuModule_Play")?.Q(className: "button-trigger");
+        var profileBtnTrigger = root.Q("MainMenuModule_Profile")?.Q(className: "button-trigger");
+        var rankingsBtnTrigger = root.Q("MainMenuModule_Rankings")?.Q(className: "button-trigger");
+
+        SetupChamferedPlaque(playBtnTrigger, 12f, false, false, null);
+        SetupChamferedPlaque(profileBtnTrigger, 12f, false, false, null);
+        SetupChamferedPlaque(rankingsBtnTrigger, 12f, false, false, null);
 
         // Hook up focus/blur listeners to trigger smooth transition border glows
         if (_usernameInput != null)
@@ -132,13 +142,12 @@ public class PlayFabLoginUI : MonoBehaviour
     private void OnEnable()
     {
         AutoDetectMainMenu();
-        HideMainMenu();
+        HideMainMenu(false);
         StartCoroutine(BindAndShow());
     }
 
     private void Update()
     {
-        // Repaint all modules to drive glowing breathing pulse animations
         var root = _doc?.rootVisualElement;
         if (root == null || _loginRoot == null || _loginRoot.style.display == DisplayStyle.None) return;
 
@@ -163,6 +172,9 @@ public class PlayFabLoginUI : MonoBehaviour
         root.Q("InputModule_User")?.MarkDirtyRepaint();
         root.Q("InputModule_Pass")?.MarkDirtyRepaint();
         root.Q("ActionModule")?.MarkDirtyRepaint();
+        root.Q("MainMenuModule_Play")?.MarkDirtyRepaint();
+        root.Q("MainMenuModule_Profile")?.MarkDirtyRepaint();
+        root.Q("MainMenuModule_Rankings")?.MarkDirtyRepaint();
     }
 
     private void AutoDetectMainMenu()
@@ -180,20 +192,125 @@ public class PlayFabLoginUI : MonoBehaviour
         }
     }
 
-    private void HideMainMenu()
+    private void HideMainMenu(bool animate = true)
     {
-        if (_centerGroup != null) _centerGroup.style.display = DisplayStyle.None;
-        if (_profileRoot != null) _profileRoot.style.display = DisplayStyle.None;
-        if (mainMenuContent != null) mainMenuContent.SetActive(false);
         if (profileWidget != null) profileWidget.SetActive(false);
+        if (animate)
+        {
+            StartCoroutine(TransitionToLoginState());
+        }
+        else
+        {
+            var rootElement = _doc?.rootVisualElement;
+            if (rootElement != null)
+            {
+                var loginModules = rootElement.Query(className: "login-only").ToList();
+                var menuModules = rootElement.Query(className: "menu-only").ToList();
+                foreach (var el in menuModules)
+                {
+                    el.style.display = DisplayStyle.None;
+                    el.RemoveFromClassList("slide-in");
+                }
+                foreach (var el in loginModules)
+                {
+                    el.style.display = DisplayStyle.Flex;
+                    el.RemoveFromClassList("slide-in");
+                    el.RemoveFromClassList("slide-out-right");
+                }
+            }
+        }
     }
 
     private void ShowMainMenu()
     {
-        if (_centerGroup != null) _centerGroup.style.display = DisplayStyle.Flex;
-        if (_profileRoot != null) _profileRoot.style.display = DisplayStyle.Flex;
-        if (mainMenuContent != null) mainMenuContent.SetActive(true);
         if (profileWidget != null) profileWidget.SetActive(true);
+        StartCoroutine(TransitionToMenuState());
+    }
+
+    private IEnumerator TransitionToLoginState()
+    {
+        var root = _doc?.rootVisualElement;
+        if (root == null) yield break;
+
+        var loginModules = root.Query(className: "login-only").ToList();
+        var menuModules = root.Query(className: "menu-only").ToList();
+
+        // 1. Slide out menu modules to the left sequentially (bottom first)
+        for (int i = menuModules.Count - 1; i >= 0; i--)
+        {
+            if (menuModules[i] != null)
+            {
+                menuModules[i].RemoveFromClassList("slide-in");
+                yield return new WaitForSeconds(0.15f);
+            }
+        }
+
+        // Wait 1.5s for exit transition (translate 1.5s ease-out-back)
+        yield return new WaitForSeconds(1.5f);
+
+        // 2. Hide menu modules and show login modules in layout
+        foreach (var el in menuModules)
+        {
+            el.style.display = DisplayStyle.None;
+        }
+        foreach (var el in loginModules)
+        {
+            el.style.display = DisplayStyle.Flex;
+            el.RemoveFromClassList("slide-out-right");
+            el.RemoveFromClassList("slide-in");
+        }
+
+        yield return null;
+
+        // 3. Stagger slide-in of login modules from the left
+        foreach (var el in loginModules)
+        {
+            el.AddToClassList("slide-in");
+            yield return new WaitForSeconds(0.15f);
+        }
+    }
+
+    private IEnumerator TransitionToMenuState()
+    {
+        var root = _doc?.rootVisualElement;
+        if (root == null) yield break;
+
+        var loginModules = root.Query(className: "login-only").ToList();
+        var menuModules = root.Query(className: "menu-only").ToList();
+
+        // 1. Slide out login modules to the left sequentially (bottom first)
+        for (int i = loginModules.Count - 1; i >= 0; i--)
+        {
+            if (loginModules[i] != null)
+            {
+                loginModules[i].RemoveFromClassList("slide-in");
+                yield return new WaitForSeconds(0.15f);
+            }
+        }
+
+        // Wait 1.5s for exit transition (translate 1.5s ease-out-back)
+        yield return new WaitForSeconds(1.5f);
+
+        // 2. Hide login modules and show menu modules in layout
+        foreach (var el in loginModules)
+        {
+            el.style.display = DisplayStyle.None;
+        }
+        foreach (var el in menuModules)
+        {
+            el.style.display = DisplayStyle.Flex;
+            el.RemoveFromClassList("slide-out-right");
+            el.RemoveFromClassList("slide-in");
+        }
+
+        yield return null;
+
+        // 3. Stagger slide-in of menu modules from the left
+        foreach (var el in menuModules)
+        {
+            el.AddToClassList("slide-in");
+            yield return new WaitForSeconds(0.15f);
+        }
     }
 
     private void OnDisable()
@@ -232,23 +349,33 @@ public class PlayFabLoginUI : MonoBehaviour
 
         if (pm.IsLoggedIn)
         {
-            if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.None;
-            _panel.style.display = DisplayStyle.None;
             ShowMainMenu();
             yield break;
         }
 
-        HideMainMenu();
-        if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
-        _panel.style.display = DisplayStyle.Flex;
+        HideMainMenu(false);
         UpdateUI();
 
         // 1. Reset all modules to slide out of screen at start (CSS handles position: absolute left)
-        var modules = new string[] { "HeaderModule", "InputModule_User", "InputModule_Pass", "ActionModule" };
+        var modules = new string[] { 
+            "HeaderModule", "InputModule_User", "InputModule_Pass", "ActionModule",
+            "MainMenuModule_Play", "MainMenuModule_Profile", "MainMenuModule_Rankings"
+        };
         foreach (var name in modules)
         {
             var el = _panel?.Q(name);
             el?.RemoveFromClassList("slide-in");
+            el?.RemoveFromClassList("slide-out-right");
+        }
+
+        // Hide menu modules initially at layout level
+        var rootElement = _doc?.rootVisualElement;
+        if (rootElement != null)
+        {
+            var loginOnlyList = rootElement.Query(className: "login-only").ToList();
+            foreach (var el in loginOnlyList) el.style.display = DisplayStyle.Flex;
+            var menuOnlyList = rootElement.Query(className: "menu-only").ToList();
+            foreach (var el in menuOnlyList) el.style.display = DisplayStyle.None;
         }
 
         // 2. Initial state: Black overlay is visible
@@ -278,7 +405,8 @@ public class PlayFabLoginUI : MonoBehaviour
         yield return new WaitForSeconds(3.0f);
 
         // 5. Trigger slide-in transitions with staggered delays defined in C# (circumventing UI Toolkit CSS parser bugs)
-        foreach (var name in modules)
+        var startModules = new string[] { "HeaderModule", "InputModule_User", "InputModule_Pass", "ActionModule" };
+        foreach (var name in startModules)
         {
             var el = _panel?.Q(name);
             el?.AddToClassList("slide-in");
@@ -298,7 +426,10 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void TriggerPopAnimation()
     {
-        var modules = new string[] { "HeaderModule", "InputModule_User", "InputModule_Pass", "ActionModule" };
+        var modules = new string[] { 
+            "HeaderModule", "InputModule_User", "InputModule_Pass", "ActionModule",
+            "MainMenuModule_Play", "MainMenuModule_Profile", "MainMenuModule_Rankings"
+        };
         foreach (var name in modules)
         {
             var el = _panel?.Q(name);
@@ -343,10 +474,33 @@ public class PlayFabLoginUI : MonoBehaviour
             return;
         }
 
-        if (_isRegisterMode && password.Length < 6)
+        // Validate Username requirements (PlayFab constraints: 3-20 chars, alphanumeric/underscore/hyphen)
+        if (username.Length < 3 || username.Length > 20)
         {
-            ShowStatus("Password must be at least 6 characters.", ErrorColor);
+            ShowStatus("Username must be between 3 and 20 characters.", ErrorColor);
             return;
+        }
+
+        if (!System.Text.RegularExpressions.Regex.IsMatch(username, "^[a-zA-Z0-9_-]+$"))
+        {
+            ShowStatus("Username can only contain letters, numbers, _ and -", ErrorColor);
+            return;
+        }
+
+        // Validate Password requirements (Registration only: 6-100 chars, no spaces)
+        if (_isRegisterMode)
+        {
+            if (password.Length < 6 || password.Length > 100)
+            {
+                ShowStatus("Password must be between 6 and 100 characters.", ErrorColor);
+                return;
+            }
+
+            if (password.Contains(" "))
+            {
+                ShowStatus("Password cannot contain spaces.", ErrorColor);
+                return;
+            }
         }
 
         SetBusy(true);
@@ -389,7 +543,6 @@ public class PlayFabLoginUI : MonoBehaviour
         PlayFabManager.Instance?.Logout();
         if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
         _panel.style.display = DisplayStyle.Flex;
-        _logoutButton.style.display = DisplayStyle.None;
         HideMainMenu();
         ShowStatus("Logged out.", new Color(0.62f, 0.66f, 0.72f, 1f));
     }
@@ -401,7 +554,6 @@ public class PlayFabLoginUI : MonoBehaviour
         if (_usernameInput != null) _usernameInput.value = "";
         if (_passwordInput != null) _passwordInput.value = "";
         _actionButton?.SetEnabled(true);
-        _logoutButton.style.display = DisplayStyle.None;
         HideMainMenu();
         if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
         _panel.style.display = DisplayStyle.Flex;
@@ -414,8 +566,7 @@ public class PlayFabLoginUI : MonoBehaviour
     private void HandleLoginSuccess(string username)
     {
         ShowStatus($"Welcome, {username}!", SuccessColor);
-        StartCoroutine(HideAfterDelay(0.8f));
-        _logoutButton.style.display = DisplayStyle.Flex;
+        StartCoroutine(HideAfterDelay(3.0f));
     }
 
     private void HandleLoginError(string error)
@@ -427,8 +578,6 @@ public class PlayFabLoginUI : MonoBehaviour
     private IEnumerator HideAfterDelay(float delay)
     {
         yield return new WaitForSecondsRealtime(delay);
-        if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.None;
-        _panel.style.display = DisplayStyle.None;
         ShowMainMenu();
     }
 

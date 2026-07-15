@@ -22,8 +22,8 @@ namespace cowsins
         [Tooltip("How fast you want the text to display the new distance"), SerializeField]
         private float updatePeriod;
 
-        [Tooltip("When enabled, the checkpoint icon and distance text render on top of everything (visible through walls). No longer uses shader tricks — screen-space UIDocument is always on top.")]
-        [SerializeField] private bool seeThrough = true;
+        // [Tooltip("When enabled, the checkpoint icon and distance text render on top of everything (visible through walls). No longer uses shader tricks — screen-space UIDocument is always on top.")]
+        // [SerializeField] private bool seeThrough = true;
 
         [Tooltip("Maximum distance at which the checkpoint view is visible. Set to 0 or less to always show.")]
         [SerializeField] private float maxViewDistance = 50f;

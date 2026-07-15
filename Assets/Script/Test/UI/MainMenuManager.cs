@@ -32,8 +32,8 @@ public class MainMenuManager : MonoBehaviour
                 tc.pickingMode = PickingMode.Ignore;
             }
 
-            var playBtn = root.Q("PlayButton");
-            var quitBtn = root.Q("QuitButton");
+            var playBtn = root.Q("MainMenuModule_Play");
+            var quitBtn = root.Q("TacticalQuitButton");
             _bestLabel = root.Q<Label>("BestText");
 
             if (playBtn != null)

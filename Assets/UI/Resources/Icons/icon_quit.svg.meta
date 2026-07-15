@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 466da5e499a3a8844ba4e0d587e5181d
+guid: 21797ae5510bfcf438f438cd104d6769
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -39,7 +39,7 @@ ScriptedImporter:
   useSVGPixelsPerUnit: 0
   spriteData:
     TessellationDetail: 0
-    SpriteName: icon_wave
+    SpriteName: icon_quit
     SpritePivot: {x: 0.5, y: 0.5}
     SpriteAlignment: 0
     SpriteBorder: {x: 0, y: 0, z: 0, w: 0}
@@ -47,7 +47,7 @@ ScriptedImporter:
       serializedVersion: 2
       x: 0
       y: 0
-      width: 223
+      width: 256
       height: 256
-    SpriteID: 114154a03db49cc4e821176186e10e8c
+    SpriteID: e76affc654c19f94ea5656a8e233f888
     PhysicsOutlines: []

@@ -43,9 +43,10 @@
     right: 0;
     bottom: 0;
     opacity: 0.08;
-    background-image: resource("Icons/icon_skull");
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_skull.svg");
     
     -unity-background-scale-mode: scale-to-fit;
+    display: none;
 }
 
 /* ===== CENTER GROUP ===== */
@@ -156,11 +157,11 @@
 }
 
 #PlayButton_Icon {
-    background-image: resource("Icons/icon_play");
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_play.svg");
 }
 
 #QuitButton_Icon {
-    background-image: resource("Icons/icon_exit");
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_exit.svg");
 }
 
 /* ===== CHIP (Best Score) ===== */
@@ -177,7 +178,7 @@
 }
 
 #BestChip_Icon {
-    background-image: resource("Icons/icon_trophy");
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_trophy.svg");
     margin-right: var(--space-s);
 }
 

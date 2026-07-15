@@ -25,7 +25,6 @@
     background-color: black;
     opacity: 1;
     transition: opacity 3s ease-in-out;
-    picking-mode: ignore;
 }
 
 .black-overlay.fade-out {
@@ -77,7 +76,6 @@
 
 .hud-module:hover {
     border-color: rgba(230, 80, 40, 0.5);
-    box-shadow: 0 0 10px rgba(230, 80, 40, 0.08);
 }
 
 .module-connector {
@@ -194,7 +192,6 @@
 
 .led-orange {
     background-color: rgb(235, 140, 40);
-    box-shadow: 0 0 6px rgba(235, 140, 40, 0.8);
 }
 
 .led-label {
@@ -413,7 +410,6 @@
     border-radius: 3px;
     background-color: rgb(79, 224, 138);
     margin-right: 8px;
-    box-shadow: 0 0 6px rgba(79, 224, 138, 0.8);
 }
 
 .status-text {
@@ -427,5 +423,115 @@
     font-size: 8px;
     color: rgba(158, 168, 184, 0.22);
     letter-spacing: 0.5px;
+}
+
+/* --- Slide Out Right & Visibility Classes --- */
+.slide-out-right {
+    translate: 800px 0px;
+    opacity: 0;
+}
+
+.login-only {
+    /* visible by default during login */
+}
+
+.menu-only {
+    /* hidden off-screen to the left by default in Editor/Start */
+    display: none;
+}
+
+/* --- Main Menu Plaque Button Text --- */
+.menu-btn-main-text {
+    font-size: 26px;
+    color: var(--color-accent-gold, rgb(217, 199, 115));
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
+    -unity-text-align: middle-center;
+    margin-top: 6px;
+    letter-spacing: 1px;
+}
+
+.button-trigger {
+    cursor: link;
+    transition: background-color 0.15s ease-out;
+}
+
+.button-trigger:hover {
+    background-color: rgba(230, 80, 40, 0.15);
+}
+
+/* --- Bottom-Right Corner Control Group --- */
+.corner-control-group {
+    position: absolute;
+    right: 36px;
+    bottom: 36px;
+    flex-direction: row;
+    align-items: center;
+    display: none; /* hidden until logged in */
+}
+
+/* --- Circular Tactical HUD Buttons --- */
+.hud-circle-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background-color: rgba(36, 22, 22, 0.94);
+    border-width: 1.5px;
+    justify-content: center;
+    align-items: center;
+    cursor: link;
+    margin-left: 16px;
+    transition: background-color 0.15s ease-out, border-color 0.15s ease-out, scale 0.1s ease-out, box-shadow 0.15s ease-out;
+}
+
+.hud-circle-btn:hover {
+    scale: 1.08;
+}
+
+.hud-circle-btn:active {
+    scale: 0.95;
+}
+
+/* --- Quit Button Custom Colors (Red Warning) --- */
+.hud-circle-btn.quit-btn {
+    border-color: rgba(230, 80, 40, 0.45);
+}
+
+.hud-circle-btn.quit-btn:hover {
+    background-color: rgba(230, 80, 40, 0.22);
+    border-color: rgba(230, 80, 40, 0.95);
+}
+
+.hud-circle-btn.quit-btn .btn-icon {
+    -unity-background-image-tint-color: rgb(230, 80, 40);
+}
+
+/* --- Logout Button Custom Colors (Gold Warning) --- */
+.hud-circle-btn.logout-btn {
+    border-color: rgba(235, 140, 40, 0.45);
+}
+
+.hud-circle-btn.logout-btn:hover {
+    background-color: rgba(235, 140, 40, 0.22);
+    border-color: rgba(235, 140, 40, 0.95);
+}
+
+.hud-circle-btn.logout-btn .btn-icon {
+    -unity-background-image-tint-color: rgb(235, 140, 40);
+}
+
+/* --- Inner Icon --- */
+.hud-circle-btn .btn-icon {
+    width: 24px;
+    height: 24px;
+    -unity-background-scale-mode: scale-to-fit;
+    transition: -unity-background-image-tint-color 0.15s ease-out;
+}
+
+.hud-circle-btn.logout-btn .btn-icon {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_exit.svg");
+}
+
+.hud-circle-btn.quit-btn .btn-icon {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_quit.svg");
 }
 

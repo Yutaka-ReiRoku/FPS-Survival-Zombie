@@ -26,6 +26,7 @@
     transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
     padding-left: 14px;
     padding-right: 14px;
+    display: none;
 }
 
 #LeaderboardChip:hover {
@@ -59,6 +60,7 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.8);
     transition: opacity var(--transition-medium, 0.2s) ease-out;
+    display: none;
 }
 
 /* --- Panel --- */
@@ -74,6 +76,7 @@
     padding-top: var(--space-xxl, 24px);
     padding-bottom: var(--space-xxl, 24px);
     transition: opacity var(--transition-medium, 0.2s) ease-out;
+    display: none;
 }
 
 #LeaderboardPanel .panel-header {

@@ -34,7 +34,7 @@ public class PlayerProfileWidget : MonoBehaviour
         if (_doc == null) { enabled = false; return; }
 
         var root = _doc.rootVisualElement;
-        _chip = root.Q("PlayerChip");
+        _chip = root.Q("MainMenuModule_Profile");
         _chipUsername = root.Q<Label>("Username");
         _chipStatus = root.Q<Label>("Status");
         _chipAvatar = root.Q("Avatar");
@@ -49,8 +49,6 @@ public class PlayerProfileWidget : MonoBehaviour
 
         if (_chip != null)
         {
-            _chip.style.width = chipWidth;
-            _chip.style.height = chipHeight;
             _chip.focusable = true;
             _chip.RegisterCallback<ClickEvent>(_ => TogglePanel());
         }
@@ -58,7 +56,7 @@ public class PlayerProfileWidget : MonoBehaviour
         if (closeBtn != null) closeBtn.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
         if (_logoutButton != null) _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
 
-        _panel.style.display = DisplayStyle.None;
+        if (_panel != null) _panel.style.display = DisplayStyle.None;
         if (_chip != null) _chip.style.display = DisplayStyle.None;
     }
 
@@ -165,14 +163,12 @@ public class PlayerProfileWidget : MonoBehaviour
             if (_chipUsername != null) _chipUsername.text = pm.Username ?? "Player";
             if (_chipStatus != null) { _chipStatus.text = "Online"; _chipStatus.style.color = ButtonColor; }
             if (_chipAvatar != null) _chipAvatar.style.backgroundColor = ButtonColor;
-            if (_chip != null) _chip.style.display = DisplayStyle.Flex;
         }
         else
         {
             if (_chipUsername != null) _chipUsername.text = "Not logged in";
             if (_chipStatus != null) { _chipStatus.text = "Click to login"; _chipStatus.style.color = TextMuted; }
             if (_chipAvatar != null) _chipAvatar.style.backgroundColor = TextMuted;
-            if (_chip != null) _chip.style.display = DisplayStyle.None;
         }
     }
 

@@ -30,7 +30,7 @@ public class ProgressionHUDWidget : MonoBehaviour
         if (doc == null) { enabled = false; return; }
         var root = doc.rootVisualElement;
         _root = root.Q<VisualElement>("ProgressionCluster");
-        _coinsLabel = _root?.Q<Label>("CoinsValue");
+        _coinsLabel = _root?.Q<Label>("CoinsLabel");
         _levelValue = _root?.Q<Label>("LevelValue");
         _xpFill = _root?.Q<VisualElement>("XpFill");
         _xpGhost = _root?.Q<VisualElement>("XpGhost");

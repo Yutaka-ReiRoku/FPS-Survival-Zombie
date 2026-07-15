@@ -13,33 +13,7 @@
         <ui:VisualElement name="Vignette" />
         <ui:VisualElement name="SkullWatermark" />
 
-        <!-- Center content group -->
-        <ui:VisualElement name="CenterGroup">
-            <ui:Label name="Title" text="FPS SURVIVAL" />
-            <ui:Label name="Subtitle" text="ZOMBIE OUTBREAK" />
 
-            <!-- Play Button -->
-            <ui:VisualElement name="PlayButton" class="menu-button">
-                <ui:VisualElement name="PlayButton_Shadow" class="button-shadow" />
-                <ui:VisualElement name="PlayButton_Fill" class="button-fill" />
-                <ui:VisualElement name="PlayButton_Icon" class="button-icon" />
-                <ui:Label name="PlayButton_Label" class="button-label" text="PLAY" />
-            </ui:VisualElement>
-
-            <!-- Quit Button -->
-            <ui:VisualElement name="QuitButton" class="menu-button">
-                <ui:VisualElement name="QuitButton_Shadow" class="button-shadow" />
-                <ui:VisualElement name="QuitButton_Fill" class="button-fill" />
-                <ui:VisualElement name="QuitButton_Icon" class="button-icon" />
-                <ui:Label name="QuitButton_Label" class="button-label" text="QUIT" />
-            </ui:VisualElement>
-
-            <!-- Best Score Chip -->
-            <ui:VisualElement name="BestChip" class="chip">
-                <ui:VisualElement name="BestChip_Icon" class="chip-icon" />
-                <ui:Label name="BestText" class="chip-label" text="No record yet" />
-            </ui:VisualElement>
-        </ui:VisualElement>
 
         <!-- Bottom bar -->
         <ui:Label name="Version" text="v1.0" />

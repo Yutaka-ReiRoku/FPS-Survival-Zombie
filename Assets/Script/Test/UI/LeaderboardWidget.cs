@@ -35,7 +35,7 @@ public class LeaderboardWidget : MonoBehaviour
         _initialized = true;
 
         var root = _doc.rootVisualElement;
-        _chip = root.Q("LeaderboardChip");
+        _chip = root.Q("MainMenuModule_Rankings");
         _scrim = root.Q("LeaderboardScrim");
         _panel = root.Q("LeaderboardPanel");
         _listContainer = _panel?.Q("ListContent");
@@ -43,8 +43,6 @@ public class LeaderboardWidget : MonoBehaviour
 
         if (_chip != null)
         {
-            _chip.style.width = chipWidth;
-            _chip.style.height = chipHeight;
             _chip.RegisterCallback<ClickEvent>(_ => TogglePanel());
         }
         if (_scrim != null) _scrim.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
@@ -55,9 +53,9 @@ public class LeaderboardWidget : MonoBehaviour
         var refreshBtn = root.Q("RefreshButton");
         if (refreshBtn != null) refreshBtn.RegisterCallback<ClickEvent>(_ => RefreshLeaderboard());
 
-        _panel.style.display = DisplayStyle.None;
-        _scrim.style.display = DisplayStyle.None;
-        _chip.style.display = DisplayStyle.None;
+        if (_panel != null) _panel.style.display = DisplayStyle.None;
+        if (_scrim != null) _scrim.style.display = DisplayStyle.None;
+        if (_chip != null) _chip.style.display = DisplayStyle.None;
     }
 
     private void OnEnable()
@@ -109,9 +107,6 @@ public class LeaderboardWidget : MonoBehaviour
 
     private void UpdateChipVisibility()
     {
-        var pm = PlayFabManager.Instance;
-        bool loggedIn = pm != null && pm.IsLoggedIn;
-        if (_chip != null) _chip.style.display = loggedIn ? DisplayStyle.Flex : DisplayStyle.None;
     }
 
     private void TogglePanel() => SetPanelVisible(!_panelVisible);

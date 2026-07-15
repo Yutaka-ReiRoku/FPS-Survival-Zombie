@@ -32,7 +32,7 @@
     height: 72px;
     margin-top: var(--space-xxl);
     flex-shrink: 0;
-    background-image: resource("Icons/icon_skull");
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_skull.svg");
     -unity-background-image-tint-color: var(--color-accent-red);
     -unity-background-scale-mode: scale-to-fit;
 }
