@@ -23,10 +23,12 @@ public class PlayFabLoginUI : MonoBehaviour
     private VisualElement _toggleButton;
     private Label _toggleButtonLabel;
     private VisualElement _logoutButton;
-    
     private VisualElement _usernameInputContainer;
     private VisualElement _passwordInputContainer;
     private VisualElement _btnMainSec;
+
+    private RenderTexture _rt;
+    private Material _crtMaterial;
 
     private bool _isRegisterMode;
     private bool _isBusy;
@@ -98,6 +100,21 @@ public class PlayFabLoginUI : MonoBehaviour
         SetupChamferedPlaque(_usernameInputContainer, 10f, false, false);
         SetupChamferedPlaque(_passwordInputContainer, 10f, false, false);
         SetupChamferedPlaque(_btnMainSec, 8f, false, true);
+
+        // Load custom CRT glitch shader and build RenderTexture
+        var shader = Shader.Find("Custom/CRTGlitchShader");
+        if (shader != null)
+        {
+            _crtMaterial = new Material(shader);
+        }
+        else
+        {
+            Debug.LogWarning("[PlayFabLoginUI] Custom/CRTGlitchShader not found. Falling back to solid color rendering.");
+        }
+
+        _rt = new RenderTexture(256, 256, 0, RenderTextureFormat.ARGB32);
+        _rt.filterMode = FilterMode.Bilinear;
+        _rt.Create();
     }
 
     private void OnEnable()
@@ -109,6 +126,13 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void Update()
     {
+        // Drive CRT glitch shader rendering onto RenderTexture
+        if (_crtMaterial != null && _rt != null)
+        {
+            _crtMaterial.SetFloat("_GlitchTime", Time.realtimeSinceStartup);
+            Graphics.Blit(Texture2D.whiteTexture, _rt, _crtMaterial);
+        }
+
         // Repaint all modules to drive vector laser scanlines and glowing breathing pulse animations
         var root = _doc?.rootVisualElement;
         if (root == null || _loginRoot == null || _loginRoot.style.display == DisplayStyle.None) return;
@@ -374,34 +398,56 @@ public class PlayFabLoginUI : MonoBehaviour
 
             var painter = mgc.painter2D;
 
-            // 1. Determine fill color
-            Color fillCol;
-            if (isButton)
+            // 1. Draw background shape
+            if (drawScanline && _rt != null) // Draw via Mesh API mapping RenderTexture shader
             {
-                fillCol = isHovered 
-                    ? new Color(250f / 255f, 100f / 255f, 60f / 255f, 1f)
-                    : new Color(230f / 255f, 80f / 255f, 40f / 255f, 1f);
-            }
-            else if (drawScanline) // Main module
-            {
-                fillCol = new Color(55f / 255f, 40f / 255f, 40f / 255f, 0.92f);
-            }
-            else // Input field container
-            {
-                fillCol = new Color(30f / 255f, 20f / 255f, 20f / 255f, 0.75f);
-            }
+                var mesh = mgc.Allocate(6, 12, _rt);
 
-            // Fill asymmetric chamfered shape
-            painter.fillColor = fillCol;
-            painter.BeginPath();
-            painter.MoveTo(new Vector2(chamferSize, 0));
-            painter.LineTo(new Vector2(rect.width, 0));
-            painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
-            painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
-            painter.LineTo(new Vector2(0, rect.height));
-            painter.LineTo(new Vector2(0, chamferSize));
-            painter.ClosePath();
-            painter.Fill();
+                var p0 = new Vector2(chamferSize, 0);
+                var p1 = new Vector2(rect.width, 0);
+                var p2 = new Vector2(rect.width, rect.height - chamferSize);
+                var p3 = new Vector2(rect.width - chamferSize, rect.height);
+                var p4 = new Vector2(0, rect.height);
+                var p5 = new Vector2(0, chamferSize);
+
+                mesh.SetNextVertex(new Vertex() { position = new Vector3(p0.x, p0.y, Vertex.nearZ), uv = new Vector2(chamferSize / rect.width, 1f), tint = Color.white });
+                mesh.SetNextVertex(new Vertex() { position = new Vector3(p1.x, p1.y, Vertex.nearZ), uv = new Vector2(1f, 1f), tint = Color.white });
+                mesh.SetNextVertex(new Vertex() { position = new Vector3(p2.x, p2.y, Vertex.nearZ), uv = new Vector2(1f, chamferSize / rect.height), tint = Color.white });
+                mesh.SetNextVertex(new Vertex() { position = new Vector3(p3.x, p3.y, Vertex.nearZ), uv = new Vector2(1f - chamferSize / rect.width, 0f), tint = Color.white });
+                mesh.SetNextVertex(new Vertex() { position = new Vector3(p4.x, p4.y, Vertex.nearZ), uv = new Vector2(0f, 0f), tint = Color.white });
+                mesh.SetNextVertex(new Vertex() { position = new Vector3(p5.x, p5.y, Vertex.nearZ), uv = new Vector2(0f, 1f - chamferSize / rect.height), tint = Color.white });
+
+                // Triangulation: 4 triangles covering the 6-sided polygon clockwise
+                mesh.SetNextIndex(0); mesh.SetNextIndex(1); mesh.SetNextIndex(5);
+                mesh.SetNextIndex(1); mesh.SetNextIndex(2); mesh.SetNextIndex(5);
+                mesh.SetNextIndex(2); mesh.SetNextIndex(3); mesh.SetNextIndex(5);
+                mesh.SetNextIndex(3); mesh.SetNextIndex(4); mesh.SetNextIndex(5);
+            }
+            else // Draw via Painter2D fallback solid/transparent fill
+            {
+                Color fillCol;
+                if (isButton)
+                {
+                    fillCol = isHovered 
+                        ? new Color(250f / 255f, 100f / 255f, 60f / 255f, 1f)
+                        : new Color(230f / 255f, 80f / 255f, 40f / 255f, 1f);
+                }
+                else
+                {
+                    fillCol = new Color(30f / 255f, 20f / 255f, 20f / 255f, 0.75f);
+                }
+
+                painter.fillColor = fillCol;
+                painter.BeginPath();
+                painter.MoveTo(new Vector2(chamferSize, 0));
+                painter.LineTo(new Vector2(rect.width, 0));
+                painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+                painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+                painter.LineTo(new Vector2(0, rect.height));
+                painter.LineTo(new Vector2(0, chamferSize));
+                painter.ClosePath();
+                painter.Fill();
+            }
 
             // 2. Draw Vector scanline sweep (subtle cybermatic effect)
             if (drawScanline)
