@@ -84,20 +84,19 @@ public class PlayFabLoginUI : MonoBehaviour
         }
 
         // Apply custom vector API chamfer drawing with large prominent cuts for rusted steel aesthetic
-        SetupChamferedPlaque(root.Q("HeaderModule"), 28f, true, false, null);
-        SetupChamferedPlaque(root.Q("InputModule_User"), 24f, true, false, null);
-        SetupChamferedPlaque(root.Q("InputModule_Pass"), 24f, true, false, null);
-        SetupChamferedPlaque(root.Q("ActionModule"), 28f, true, false, null);
-        SetupChamferedPlaque(root.Q("FooterModule"), 20f, true, false, null);
+        SetupChamferedPlaque(root.Q("HeaderModule"), 34f, true, false, null);
+        SetupChamferedPlaque(root.Q("InputModule_User"), 30f, true, false, null);
+        SetupChamferedPlaque(root.Q("InputModule_Pass"), 30f, true, false, null);
+        SetupChamferedPlaque(root.Q("ActionModule"), 34f, true, false, null);
 
         // Find child input fields and button sections to apply matching chamfered cuts
         _usernameInputContainer = root.Q("InputModule_User")?.Q(className: "input-container-inner");
         _passwordInputContainer = root.Q("InputModule_Pass")?.Q(className: "input-container-inner");
         _btnMainSec = root.Q("ActionButton")?.Q(className: "btn-main-section");
 
-        SetupChamferedPlaque(_usernameInputContainer, 10f, false, false, null);
-        SetupChamferedPlaque(_passwordInputContainer, 10f, false, false, null);
-        SetupChamferedPlaque(_btnMainSec, 8f, false, true, null);
+        SetupChamferedPlaque(_usernameInputContainer, 12f, false, false, null);
+        SetupChamferedPlaque(_passwordInputContainer, 12f, false, false, null);
+        SetupChamferedPlaque(_btnMainSec, 10f, false, true, null);
     }
 
     private void OnEnable()
