@@ -148,7 +148,7 @@
 
 /* --- Modules 2 & 3: Input Scanner Terminals --- */
 .input-module {
-    padding: 16px;
+    padding: 28px 24px 34px 24px;
     flex-direction: column;
 }
 
@@ -219,8 +219,8 @@
 
 .module-decals {
     position: absolute;
-    bottom: 4px;
-    right: 8px;
+    bottom: 8px;
+    right: 16px;
     font-size: 13px;
     color: rgba(158, 168, 184, 0.6);
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
