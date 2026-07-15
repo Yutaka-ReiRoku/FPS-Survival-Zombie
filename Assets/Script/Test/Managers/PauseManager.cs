@@ -31,7 +31,6 @@ public class PauseManager : MonoBehaviour
     {
         Instance = this;
         _hudActiveState.Clear();
-        StartCoroutine(DisableLegacyUIRoutine());
     }
 
     private void OnEnable()
@@ -54,39 +53,6 @@ public class PauseManager : MonoBehaviour
         }
     }
 
-    private System.Collections.IEnumerator DisableLegacyUIRoutine()
-    {
-        float timeout = 8f;
-        bool found = false;
-        while (timeout > 0f)
-        {
-            var controller = FindAnyObjectByType<UIController>();
-            if (controller != null)
-            {
-                var canvasGO = controller.gameObject;
-                var canvas = canvasGO.GetComponent<Canvas>();
-                if (canvas != null) canvas.enabled = false;
-                var raycaster = canvasGO.GetComponent("GraphicRaycaster") as Behaviour;
-                if (raycaster != null) raycaster.enabled = false;
-                Debug.Log("[PauseManager] Disabled legacy PlayerUI Canvas+GraphicRaycaster");
-                found = true;
-                break;
-            }
-            yield return new WaitForSeconds(0.1f);
-            timeout -= 0.1f;
-        }
-        if (!found)
-            Debug.Log("[PauseManager] Legacy PlayerUI (UIController) not found in scene; running in UI Toolkit HUD mode.");
-
-        if (_canvasRoot != null)
-        {
-            var gameCanvas = _canvasRoot.GetComponent<Canvas>();
-            if (gameCanvas != null) gameCanvas.enabled = false;
-            var gameRaycaster = _canvasRoot.GetComponent("GraphicRaycaster") as Behaviour;
-            if (gameRaycaster != null) gameRaycaster.enabled = false;
-            Debug.Log("[PauseManager] Disabled GameUICanvas legacy Canvas+GraphicRaycaster");
-        }
-    }
 
     private void OnDisable()
     {
