@@ -7,9 +7,6 @@
         _GlitchIntensity ("Glitch Intensity", Float) = 0.05
         _BaseColor ("Base Color", Color) = (0.21, 0.16, 0.16, 0.92)
         _ScanlineSpeed ("Scanline Speed", Float) = 4.0
-        _Width ("Width", Float) = 256.0
-        _Height ("Height", Float) = 256.0
-        _ChamferSize ("Chamfer Size", Float) = 28.0
     }
     SubShader
     {
@@ -43,9 +40,6 @@
             float _GlitchIntensity;
             float4 _BaseColor;
             float _ScanlineSpeed;
-            float _Width;
-            float _Height;
-            float _ChamferSize;
 
             v2f vert (appdata v)
             {
@@ -63,27 +57,9 @@
             fixed4 frag (v2f i) : SV_Target
             {
                 float2 uv = i.uv;
-
-                // 1. Math corner chamfer clipping
-                float pixelX = uv.x * _Width;
-                float pixelY = (1.0 - uv.y) * _Height;
-
-                // Top-left chamfer cut
-                if (pixelX + pixelY < _ChamferSize)
-                {
-                    discard;
-                }
-
-                // Bottom-right chamfer cut
-                float distX = _Width - pixelX;
-                float distY = _Height - pixelY;
-                if (distX + distY < _ChamferSize)
-                {
-                    discard;
-                }
-
-                // 2. Glitch line jump
                 float timeVal = _GlitchTime;
+                
+                // Glitch line jump
                 float glitchLine = step(0.97, rand(float2(floor(uv.y * 25.0), frac(timeVal * 0.7))));
                 float shift = glitchLine * _GlitchIntensity * sin(timeVal * 40.0);
                 uv.x += shift;
@@ -102,7 +78,7 @@
                 float pulse = 0.5 + 0.5 * sin(timeVal * 2.0);
                 col.rgb += float3(0.05, 0.015, 0.0) * pulse;
 
-                // Force alpha
+                // Set alpha
                 col.a = _BaseColor.a;
 
                 return col;

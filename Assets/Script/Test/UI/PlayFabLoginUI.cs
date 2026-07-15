@@ -139,16 +139,25 @@ public class PlayFabLoginUI : MonoBehaviour
         UpdateMaterial(_actionMaterial, root.Q("ActionModule"), 28f);
         UpdateMaterial(_footerMaterial, root.Q("FooterModule"), 20f);
 
-        // Repaint all modules to drive vector laser scanlines and glowing breathing pulse animations
-        root.Q("HeaderModule")?.MarkDirtyRepaint();
-        root.Q("InputModule_User")?.MarkDirtyRepaint();
-        root.Q("InputModule_Pass")?.MarkDirtyRepaint();
-        root.Q("ActionModule")?.MarkDirtyRepaint();
-        root.Q("FooterModule")?.MarkDirtyRepaint();
+        // Repaint all modules and their background plaques to drive shader updates and laser scanlines
+        RepaintModule(root.Q("HeaderModule"));
+        RepaintModule(root.Q("InputModule_User"));
+        RepaintModule(root.Q("InputModule_Pass"));
+        RepaintModule(root.Q("ActionModule"));
+        RepaintModule(root.Q("FooterModule"));
 
         _usernameInputContainer?.MarkDirtyRepaint();
         _passwordInputContainer?.MarkDirtyRepaint();
         _btnMainSec?.MarkDirtyRepaint();
+    }
+
+    private void RepaintModule(VisualElement module)
+    {
+        if (module != null)
+        {
+            module.MarkDirtyRepaint();
+            module.Q("BackgroundPlaque")?.MarkDirtyRepaint();
+        }
     }
 
     private void UpdateMaterial(Material mat, VisualElement element, float chamfer)
@@ -406,8 +415,36 @@ public class PlayFabLoginUI : MonoBehaviour
                 bgPlaque.style.top = 0;
                 bgPlaque.style.right = 0;
                 bgPlaque.style.bottom = 0;
-                bgPlaque.style.backgroundColor = Color.white; // Triggers UI Toolkit layout engine to draw the background mesh
+                bgPlaque.style.backgroundColor = Color.white; // Triggers UI Toolkit to draw the background mesh
                 bgPlaque.style.unityMaterial = new StyleMaterialDefinition(customMat);
+                
+                // Draw 6-sided chamfered plaque using Mesh API *inside* the child background element
+                bgPlaque.generateVisualContent += mgc =>
+                {
+                    var rect = bgPlaque.layout;
+                    if (rect.width <= 0 || rect.height <= 0) return;
+                    var mesh = mgc.Allocate(6, 12, Texture2D.whiteTexture);
+
+                    var p0 = new Vector2(chamferSize, 0);
+                    var p1 = new Vector2(rect.width, 0);
+                    var p2 = new Vector2(rect.width, rect.height - chamferSize);
+                    var p3 = new Vector2(rect.width - chamferSize, rect.height);
+                    var p4 = new Vector2(0, rect.height);
+                    var p5 = new Vector2(0, chamferSize);
+
+                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p0.x, p0.y, Vertex.nearZ), uv = new Vector2(chamferSize / rect.width, 1f), tint = Color.white });
+                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p1.x, p1.y, Vertex.nearZ), uv = new Vector2(1f, 1f), tint = Color.white });
+                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p2.x, p2.y, Vertex.nearZ), uv = new Vector2(1f, chamferSize / rect.height), tint = Color.white });
+                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p3.x, p3.y, Vertex.nearZ), uv = new Vector2(1f - chamferSize / rect.width, 0f), tint = Color.white });
+                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p4.x, p4.y, Vertex.nearZ), uv = new Vector2(0f, 0f), tint = Color.white });
+                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p5.x, p5.y, Vertex.nearZ), uv = new Vector2(0f, 1f - chamferSize / rect.height), tint = Color.white });
+
+                    mesh.SetNextIndex(0); mesh.SetNextIndex(1); mesh.SetNextIndex(5);
+                    mesh.SetNextIndex(1); mesh.SetNextIndex(2); mesh.SetNextIndex(5);
+                    mesh.SetNextIndex(2); mesh.SetNextIndex(3); mesh.SetNextIndex(5);
+                    mesh.SetNextIndex(3); mesh.SetNextIndex(4); mesh.SetNextIndex(5);
+                };
+
                 element.Insert(0, bgPlaque);
             }
         }
@@ -431,7 +468,7 @@ public class PlayFabLoginUI : MonoBehaviour
 
             var painter = mgc.painter2D;
 
-            // 1. Draw background shape only for elements NOT using the shader material background plaque
+            // 1. Draw background shape only for elements NOT using the custom shader material
             if (customMat == null)
             {
                 Color fillCol;
