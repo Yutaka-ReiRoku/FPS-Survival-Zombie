@@ -38,8 +38,22 @@ public class CutscenePlayer : MonoBehaviour
         go.transform.SetParent(transform, false);
         _doc = go.GetComponent<UIDocument>();
 
-        var hudDoc = FindFirstObjectByType<UIDocument>();
-        if (hudDoc != null) _doc.panelSettings = hudDoc.panelSettings;
+        UIDocument hudDoc = null;
+        var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+        foreach (var d in allDocs)
+        {
+            if (d != _doc && d.panelSettings != null)
+            {
+                hudDoc = d;
+                break;
+            }
+        }
+
+        if (hudDoc != null)
+        {
+            _doc.panelSettings = hudDoc.panelSettings;
+            _doc.sortingOrder = 100;
+        }
 
         _root = new VisualElement();
         _root.name = "CutscenePanel";

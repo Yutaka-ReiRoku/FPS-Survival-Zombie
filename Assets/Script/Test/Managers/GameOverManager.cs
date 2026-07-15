@@ -63,7 +63,10 @@ public class GameOverManager : MonoBehaviour
         if (uiDocument == null)
             uiDocument = GetComponent<UIDocument>();
         if (uiDocument == null)
-            uiDocument = FindAnyObjectByType<UIDocument>();
+        {
+            var canvasGo = GameObject.Find("GameUICanvas");
+            if (canvasGo != null) uiDocument = canvasGo.GetComponent<UIDocument>();
+        }
         if (uiDocument == null || uiDocument.rootVisualElement == null)
         {
             Debug.LogError("[GameOverManager] No UIDocument found! GameOverPanel will not function.");
