@@ -5770,6 +5770,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 455936965}
     - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
+      propertyPath: playerSettings.stepHeight
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4612824603642630891, guid: fa4cc848e07107e459dce4ea99d04302, type: 3}
       propertyPath: playerSettings.useGravity
       value: 0
       objectReference: {fileID: 0}
