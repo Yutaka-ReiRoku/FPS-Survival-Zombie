@@ -278,7 +278,7 @@ MonoBehaviour:
   target: {fileID: 0}
   maxHealth: 80
   currentHealth: 0
-  walkSpeed: 3.5
+  walkSpeed: 3
   rotationSpeed: 8
   provokeRadius: 10
   requireLineOfSight: 1
@@ -315,7 +315,7 @@ MonoBehaviour:
     maxQuantity: 5
   dropPrefab: {fileID: 0}
   dropChance: 100
-  dropHeightOffset: 1.5
+  dropHeightOffset: 1.7
   popLootOnDeath: 1
   lootPopUpwardSpeed: 5
   lootPopHorizontalSpeed: 3
