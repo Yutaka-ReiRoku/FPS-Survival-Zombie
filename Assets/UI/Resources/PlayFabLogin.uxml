@@ -4,7 +4,44 @@
     <ui:Style src="project://database/Assets/UI/Resources/PlayFabLogin.uss" />
 
     <ui:VisualElement name="PlayFabLoginRoot" class="overlay">
-        <ui:VisualElement name="LoginPanel" class="login-panel">
+        <!-- Main Floating Tactical HUD Panel -->
+        <ui:VisualElement name="LoginPanel" class="login-panel floating-card">
+            <!-- HUD Corner Brackets for Sci-Fi look -->
+            <ui:VisualElement class="hud-bracket bracket-tl" />
+            <ui:VisualElement class="hud-bracket bracket-tr" />
+            <ui:VisualElement class="hud-bracket bracket-bl" />
+            <ui:VisualElement class="hud-bracket bracket-br" />
+
+            <!-- Technical Coordinates & Diagnostic Text Stamps -->
+            <ui:Label class="hud-stamp stamp-top-left" text="[SEC_AUTH_SYSTEM_09]" />
+            <ui:Label class="hud-stamp stamp-top-right" text="SYS.VER_4.12" />
+            <ui:Label class="hud-stamp stamp-bottom-left" text="LAT: 45.32 // LON: -12.08" />
+
+            <!-- Barcode Decal -->
+            <ui:VisualElement name="BarcodeDecal" class="barcode-decal">
+                <ui:VisualElement class="barcode-bar bar-w1" />
+                <ui:VisualElement class="barcode-bar bar-w2" />
+                <ui:VisualElement class="barcode-bar bar-w1" />
+                <ui:VisualElement class="barcode-bar bar-w3" />
+                <ui:VisualElement class="barcode-bar bar-w1" />
+                <ui:VisualElement class="barcode-bar bar-w2" />
+            </ui:VisualElement>
+
+            <!-- Segmented Vertical Diagnostic Bar on the Right Edge -->
+            <ui:VisualElement name="DiagnosticBar" class="diagnostic-bar">
+                <ui:VisualElement class="diag-segment segment-on" />
+                <ui:VisualElement class="diag-segment segment-on" />
+                <ui:VisualElement class="diag-segment segment-on" />
+                <ui:VisualElement class="diag-segment segment-off" />
+                <ui:VisualElement class="diag-segment segment-on" />
+                <ui:VisualElement class="diag-segment segment-off" />
+                <ui:VisualElement class="diag-segment segment-on" />
+                <ui:VisualElement class="diag-segment segment-on" />
+            </ui:VisualElement>
+
+            <!-- Top Accent Bar -->
+            <ui:VisualElement name="TopAccentBar" class="top-accent-bar" />
+
             <!-- Header section -->
             <ui:VisualElement name="LoginHeader" class="login-header">
                 <ui:Label name="GameLogo_Zombie" class="game-logo-zombie" text="ZOMBIE" />
@@ -17,14 +54,40 @@
                 <ui:Label name="LoginTitle" class="login-title" text="LOGIN" />
                 <ui:Label name="LoginStatus" class="login-status" text="" />
                 
-                <ui:Label name="UsernameLabel" class="field-label" text="USERNAME" />
-                <ui:TextField name="UsernameInput" class="login-input" />
+                <!-- Username Field Group -->
+                <ui:VisualElement class="input-group">
+                    <ui:VisualElement class="label-row">
+                        <ui:Label name="UsernameLabel" class="field-label" text="USERNAME" />
+                        <ui:Label class="field-sub-label" text="[ENTER REGISTRATION ID]" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="scanner-box">
+                        <ui:VisualElement class="input-bracket input-bracket-left" />
+                        <ui:VisualElement class="input-bracket input-bracket-right" />
+                        <ui:TextField name="UsernameInput" class="login-input" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 
-                <ui:Label name="PasswordLabel" class="field-label" text="PASSWORD" />
-                <ui:TextField name="PasswordInput" class="login-input" password="true" />
+                <!-- Password Field Group -->
+                <ui:VisualElement class="input-group">
+                    <ui:VisualElement class="label-row">
+                        <ui:Label name="PasswordLabel" class="field-label" text="PASSWORD" />
+                        <ui:Label class="field-sub-label" text="[SECURE KEY DECRYPT]" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="scanner-box">
+                        <ui:VisualElement class="input-bracket input-bracket-left" />
+                        <ui:VisualElement class="input-bracket input-bracket-right" />
+                        <ui:TextField name="PasswordInput" class="login-input" password="true" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 
-                <ui:VisualElement name="ActionButton" class="login-action-btn">
-                    <ui:Label name="ActionLabel" class="btn-label" text="LOGIN" />
+                <!-- Split Action Button -->
+                <ui:VisualElement name="ActionButton" class="login-action-btn split-btn">
+                    <ui:VisualElement class="btn-main-section">
+                        <ui:Label name="ActionLabel" class="btn-label" text="PROCEED TO SECTOR" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="btn-side-section">
+                        <ui:Label class="btn-arrow" text="[ >> ]" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 
                 <ui:VisualElement name="ToggleRow" class="toggle-row">
@@ -47,6 +110,9 @@
                 </ui:VisualElement>
                 <ui:Label name="CopyrightText" class="copyright-text" text="© 2026 ANTIGRAVITY GAMES" />
             </ui:VisualElement>
+
+            <!-- Hazard Strip at the bottom edge -->
+            <ui:VisualElement name="HazardStrip" class="hazard-strip" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

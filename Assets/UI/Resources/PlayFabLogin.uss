@@ -1,7 +1,7 @@
 @import url("../USS/Theme.uss");
 @import url("../USS/Shared.uss");
 
-/* ===== PlayFabLogin.uss (Runtime-loaded) ===== */
+/* ===== PlayFabLogin.uss (Tactical HUD Redesign) ===== */
 
 /* --- Root --- */
 #PlayFabLoginRoot {
@@ -15,33 +15,161 @@
     background-color: rgba(0, 0, 0, 0);
 }
 
-/* --- Login Panel (Sidebar) --- */
+/* --- Login Panel (Floating Tactical Card) --- */
 #LoginPanel {
     flex-direction: column;
-    background-color: rgba(9, 12, 17, 0.95);
-    width: 450px;
-    height: 100%;
-    border-radius: 0;
-    padding: 60px 48px 48px 48px;
-    border-right-width: 1.5px;
-    border-right-color: rgba(217, 199, 115, 0.35);
+    background-color: rgba(10, 14, 20, 0.9);
+    width: 440px;
+    height: 680px;
+    position: absolute;
+    left: 80px;
+    top: 100px;
+    border-radius: 12px;
+    padding: 50px 36px 36px 36px;
+    border-width: 1px;
+    border-color: rgba(217, 199, 115, 0.25);
     justify-content: space-between;
+}
+
+/* --- HUD Corner Brackets --- */
+.hud-bracket {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: rgb(217, 199, 115);
+}
+
+.bracket-tl {
+    top: -2px;
+    left: -2px;
+    border-top-width: 2.5px;
+    border-left-width: 2.5px;
+}
+
+.bracket-tr {
+    top: -2px;
+    right: -2px;
+    border-top-width: 2.5px;
+    border-right-width: 2.5px;
+}
+
+.bracket-bl {
+    bottom: -2px;
+    left: -2px;
+    border-bottom-width: 2.5px;
+    border-left-width: 2.5px;
+}
+
+.bracket-br {
+    bottom: -2px;
+    right: -2px;
+    border-bottom-width: 2.5px;
+    border-right-width: 2.5px;
+}
+
+/* --- HUD Stamp Indicators --- */
+.hud-stamp {
+    position: absolute;
+    font-size: 9px;
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    letter-spacing: 1px;
+}
+
+.stamp-top-left {
+    top: 14px;
+    left: 24px;
+    color: rgba(217, 199, 115, 0.45);
+}
+
+.stamp-top-right {
+    top: 14px;
+    right: 24px;
+    color: rgba(217, 199, 115, 0.45);
+}
+
+.stamp-bottom-left {
+    bottom: 16px;
+    left: 24px;
+    color: rgba(158, 168, 184, 0.35);
+}
+
+/* --- Barcode Decal --- */
+.barcode-decal {
+    position: absolute;
+    bottom: 14px;
+    right: 24px;
+    flex-direction: row;
+    height: 14px;
+    align-items: stretch;
+    opacity: 0.25;
+}
+
+.barcode-bar {
+    background-color: white;
+    margin-right: 1.5px;
+}
+
+.bar-w1 {
+    width: 1.5px;
+}
+
+.bar-w2 {
+    width: 3px;
+}
+
+.bar-w3 {
+    width: 5px;
+}
+
+/* --- Segmented Vertical Diagnostic Bar on the Right Edge --- */
+.diagnostic-bar {
+    position: absolute;
+    right: -10px;
+    top: 120px;
+    bottom: 120px;
+    width: 4px;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.diag-segment {
+    width: 3px;
+    height: 16px;
+    border-radius: 1px;
+}
+
+.segment-on {
+    background-color: rgba(217, 199, 115, 0.6);
+}
+
+.segment-off {
+    background-color: rgba(158, 168, 184, 0.15);
+}
+
+/* --- Top Accent Bar --- */
+.top-accent-bar {
+    position: absolute;
+    top: 0;
+    left: 48px;
+    right: 48px;
+    height: 3px;
+    background-color: rgb(217, 199, 115);
 }
 
 /* --- Header section --- */
 .login-header {
     flex-direction: column;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .game-logo-zombie {
-    font-size: 56px;
+    font-size: 54px;
     -unity-font-definition: resource("Fonts/Anton SDF");
     color: rgb(184, 38, 48);
     -unity-text-align: middle-center;
     margin-bottom: -15px;
-    letter-spacing: 6px;
+    letter-spacing: 5px;
 }
 
 .game-logo-survival {
@@ -50,11 +178,11 @@
     color: rgb(217, 199, 115);
     -unity-text-align: middle-center;
     letter-spacing: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .game-logo-sub {
-    font-size: 11px;
+    font-size: 10px;
     color: rgba(158, 168, 184, 0.45);
     -unity-text-align: middle-center;
 }
@@ -65,7 +193,7 @@
     justify-content: center;
     flex-grow: 1;
     margin-top: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 #LoginPanel .login-title {
@@ -73,84 +201,154 @@
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
-    margin-bottom: var(--space-s, 8px);
-    height: 30px;
+    margin-bottom: var(--space-xs, 4px);
+    height: 28px;
     letter-spacing: 2px;
 }
 
 #LoginPanel .login-status {
-    font-size: var(--fs-xs, 13px);
+    font-size: var(--fs-xs, 12px);
     color: var(--color-text-muted, rgba(158, 168, 184, 1));
     -unity-text-align: middle-center;
-    height: 24px;
-    margin-bottom: 16px;
+    height: 20px;
+    margin-bottom: 12px;
 }
 
-/* --- Field Labels --- */
+/* --- Input Groups & Scanner Box --- */
+.input-group {
+    flex-direction: column;
+    margin-bottom: 14px;
+}
+
+.label-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 4px;
+}
+
 #LoginPanel .field-label {
     font-size: 11px;
     color: rgba(158, 168, 184, 0.55);
-    -unity-text-align: middle-left;
-    margin-bottom: var(--space-xs, 4px);
     letter-spacing: 1.5px;
+    margin: 0;
 }
 
-#UsernameInput {
-    margin-bottom: 16px;
+.field-sub-label {
+    font-size: 9px;
+    color: rgba(217, 199, 115, 0.4);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    letter-spacing: 0.5px;
 }
 
-#PasswordInput {
-    margin-bottom: 24px;
-}
-
-/* --- Text Input (Gold Underlined) --- */
-#LoginPanel .login-input {
+.scanner-box {
+    position: relative;
     height: 40px;
     background-color: rgba(18, 22, 28, 0.45);
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
     border-bottom-width: 2px;
     border-bottom-color: rgba(158, 168, 184, 0.15);
+}
+
+.input-bracket {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-color: rgba(217, 199, 115, 0.35);
+}
+
+.input-bracket-left {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 1.5px;
+    border-left-width: 1.5px;
+}
+
+.input-bracket-right {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 1.5px;
+    border-right-width: 1.5px;
+}
+
+#LoginPanel .login-input {
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
     color: var(--color-text-primary, white);
     font-size: var(--fs-s, 15px);
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
-    padding-left: var(--space-s, 8px);
+    padding-left: 10px;
     border-radius: 0;
-    transition: border-bottom-color var(--transition-fast, 0.08s);
 }
 
-#LoginPanel .login-input:focus {
+.scanner-box:focus-within {
     border-bottom-color: rgb(217, 199, 115);
 }
 
-/* --- Action Button (Gold Metallic) --- */
+.scanner-box:focus-within .input-bracket {
+    border-color: rgb(217, 199, 115);
+}
+
+/* --- Split Action Button --- */
 .login-action-btn {
     height: 44px;
-    margin-bottom: 16px;
-    align-items: center;
-    justify-content: center;
-    background-color: rgb(217, 199, 115);
-    border-radius: var(--radius-s, 6px);
+    margin-top: 10px;
+    margin-bottom: 14px;
+    flex-direction: row;
+    align-items: stretch;
     cursor: link;
-    transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
+    transition: scale var(--transition-fast, 0.08s);
+}
+
+.btn-main-section {
+    flex-grow: 1;
+    background-color: rgb(217, 199, 115);
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    transition: background-color var(--transition-fast, 0.08s);
+}
+
+.btn-side-section {
+    width: 54px;
+    background-color: rgb(184, 38, 48);
+    justify-content: center;
+    align-items: center;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    transition: background-color var(--transition-fast, 0.08s);
 }
 
 .login-action-btn:hover {
+    scale: var(--hover-scale, 1.03);
+}
+
+.login-action-btn:hover .btn-main-section {
     background-color: rgba(217, 199, 115, 0.85);
-    scale: var(--hover-scale, 1.04);
+}
+
+.login-action-btn:hover .btn-side-section {
+    background-color: rgb(210, 45, 56);
 }
 
 .login-action-btn:active {
-    scale: var(--press-scale, 0.96);
+    scale: var(--press-scale, 0.97);
 }
 
 .login-action-btn .btn-label {
-    font-size: var(--fs-s, 15px);
+    font-size: 13px;
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: rgb(9, 12, 17);
     -unity-text-align: middle-center;
     letter-spacing: 2px;
+}
+
+.login-action-btn .btn-arrow {
+    font-size: 12px;
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    color: white;
+    -unity-text-align: middle-center;
 }
 
 /* --- Toggle Row --- */
@@ -158,7 +356,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 .toggle-row .toggle-label {
@@ -218,13 +416,13 @@
 .login-footer {
     flex-direction: column;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .status-row {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .status-dot-online {
@@ -245,4 +443,14 @@
     font-size: 9px;
     color: rgba(158, 168, 184, 0.25);
     letter-spacing: 0.5px;
+}
+
+/* --- Hazard / Accent Strip at Bottom --- */
+.hazard-strip {
+    position: absolute;
+    bottom: 0;
+    left: 48px;
+    right: 48px;
+    height: 3px;
+    background-color: rgba(217, 199, 115, 0.45);
 }
