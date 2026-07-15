@@ -19,14 +19,14 @@
 .login-panel-container {
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0);
-    width: 440px;
+    width: 540px;
     height: auto;
     position: absolute;
-    left: 80px;
+    left: 100px;
     top: 10%;
     bottom: 10%;
     justify-content: space-between;
-    padding: 0 0 0 24px;
+    padding: 0 0 0 28px;
     border-left-width: 2px;
     border-left-color: rgba(230, 80, 40, 0.22);
 }
@@ -41,8 +41,8 @@
     border-top-right-radius: 0;
     border-bottom-left-radius: 0;
     position: relative;
-    padding: 20px;
-    margin-bottom: 12px;
+    padding: 28px;
+    margin-bottom: 18px;
     transition: border-color 0.12s ease-in-out, box-shadow 0.12s ease-in-out;
 }
 
@@ -53,9 +53,9 @@
 
 .module-connector {
     position: absolute;
-    left: -26px;
+    left: -30px;
     top: 50%;
-    width: 24px;
+    width: 28px;
     height: 1.5px;
     background-color: rgba(230, 80, 40, 0.25);
 }
@@ -99,7 +99,7 @@
 /* --- HUD Stamp Indicators --- */
 .hud-stamp {
     position: absolute;
-    font-size: 8px;
+    font-size: 11px;
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     letter-spacing: 1px;
 }
@@ -118,7 +118,7 @@
 
 /* --- Module 1: Header Terminal --- */
 .header-module {
-    padding: 24px 16px 16px 16px;
+    padding: 28px 16px 16px 16px;
     align-items: center;
 }
 
@@ -128,7 +128,7 @@
 }
 
 .game-logo-zombie {
-    font-size: 44px;
+    font-size: 54px;
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: rgb(184, 38, 48);
     -unity-text-align: middle-center;
@@ -137,7 +137,7 @@
 }
 
 .game-logo-survival {
-    font-size: 14px;
+    font-size: 20px;
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: rgb(230, 80, 40);
     -unity-text-align: middle-center;
@@ -169,7 +169,7 @@
 }
 
 .led-label {
-    font-size: 8px;
+    font-size: 11px;
     color: rgba(235, 140, 40, 0.7);
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     letter-spacing: 1px;
@@ -180,7 +180,7 @@
     background-color: rgba(6, 8, 12, 0.5);
     border-bottom-width: 1.5px;
     border-bottom-color: rgba(230, 80, 40, 0.15);
-    padding: 4px 8px;
+    padding: 6px 12px;
     transition: border-bottom-color 0.12s ease-in-out;
 }
 
@@ -189,18 +189,18 @@
 }
 
 .field-label {
-    font-size: 10px;
+    font-size: 13px;
     color: rgba(158, 168, 184, 0.5);
     letter-spacing: 1.5px;
     margin-bottom: 2px;
 }
 
 .login-input {
-    height: 28px;
+    height: 38px;
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
     color: white;
-    font-size: 14px;
+    font-size: 18px;
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     padding: 0;
 }
@@ -211,6 +211,7 @@
     border-width: 0 !important;
     color: white !important;
     padding: 0 !important;
+    font-size: 18px !important;
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
 }
 
@@ -218,19 +219,19 @@
     position: absolute;
     bottom: 4px;
     right: 8px;
-    font-size: 7px;
+    font-size: 10px;
     color: rgba(158, 168, 184, 0.6);
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
 }
 
 /* --- Module 4: Action & Diagnostics Terminal --- */
 .action-module {
-    padding: 20px;
+    padding: 28px;
     flex-direction: column;
 }
 
 .login-title {
-    font-size: 10px;
+    font-size: 13px;
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: rgba(230, 80, 40, 0.7);
     letter-spacing: 1.5px;
@@ -238,7 +239,7 @@
 }
 
 .login-status {
-    font-size: 12px;
+    font-size: 14px;
     color: rgba(158, 168, 184, 0.85);
     margin-bottom: 16px;
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
@@ -246,7 +247,7 @@
 
 /* --- Split Action Button (Proceed) --- */
 .login-action-btn {
-    height: 44px;
+    height: 54px;
     margin-bottom: 16px;
     flex-direction: row;
     align-items: stretch;
@@ -265,7 +266,7 @@
 }
 
 .btn-side-section {
-    width: 50px;
+    width: 60px;
     background-color: rgb(184, 38, 48);
     justify-content: center;
     align-items: center;
@@ -291,7 +292,7 @@
 }
 
 .btn-label {
-    font-size: 10px;
+    font-size: 14px;
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: rgb(9, 12, 17);
     -unity-text-align: middle-center;
@@ -299,7 +300,7 @@
 }
 
 .btn-arrow {
-    font-size: 11px;
+    font-size: 14px;
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: white;
     -unity-text-align: middle-center;
@@ -313,7 +314,7 @@
 }
 
 .toggle-label {
-    font-size: 11px;
+    font-size: 13px;
     color: rgba(158, 168, 184, 0.55);
 }
 
@@ -324,7 +325,7 @@
 }
 
 .login-toggle-btn .btn-label {
-    font-size: 11px;
+    font-size: 13px;
     color: rgb(230, 80, 40);
     transition: color 0.08s ease-in-out;
 }
@@ -335,7 +336,7 @@
 
 /* --- Logout Button --- */
 .login-logout-btn {
-    height: 36px;
+    height: 46px;
     align-items: center;
     justify-content: center;
     background-color: rgb(168, 23, 33);
@@ -354,7 +355,7 @@
 }
 
 .login-logout-btn .btn-label {
-    font-size: 14px;
+    font-size: 16px;
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: white;
     letter-spacing: 1px;
