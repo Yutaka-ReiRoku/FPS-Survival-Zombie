@@ -12,13 +12,15 @@ public class UpgradesWidget : MonoBehaviour
     {
         var doc = GetComponent<UIDocument>();
         if (doc == null) { enabled = false; return; }
-        _label = doc.rootVisualElement.Q<Label>("UpgradesWidget");
-        PlayerUpgradeManager.Instance.OnUpgradesChanged += Refresh;
+        _label = doc.rootVisualElement != null ? doc.rootVisualElement.Q<Label>("UpgradesWidget") : null;
+        if (PlayerUpgradeManager.Instance != null)
+            PlayerUpgradeManager.Instance.OnUpgradesChanged += Refresh;
     }
 
     private void OnDisable()
     {
-        PlayerUpgradeManager.Instance.OnUpgradesChanged -= Refresh;
+        if (PlayerUpgradeManager.Instance != null)
+            PlayerUpgradeManager.Instance.OnUpgradesChanged -= Refresh;
         _label = null;
     }
 
