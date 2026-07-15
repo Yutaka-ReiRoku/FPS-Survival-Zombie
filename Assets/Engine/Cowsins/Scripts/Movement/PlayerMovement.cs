@@ -185,7 +185,10 @@ namespace cowsins
             if (playerSettings.useSpeedLines && playerSettings.speedLines == null) 
                 CowsinsUtilities.LogWarning("SpeedLines Particle Effect is null in Player > PlayerMovement > Assignables.", this);
             if (playerSettings.usesStamina && playerSettings.staminaSlider == null)
-                CowsinsUtilities.LogWarning("Stamina Slider is null in Player > PlayerMovement > Stamina. Skipping Stamina UI", this);
+            {
+                if (FindAnyObjectByType<StaminaWidget>() == null)
+                    CowsinsUtilities.LogWarning("Stamina Slider is null in Player > PlayerMovement > Stamina. Skipping Stamina UI", this);
+            }
         }
 
         private void ConfigureRigidbody()
