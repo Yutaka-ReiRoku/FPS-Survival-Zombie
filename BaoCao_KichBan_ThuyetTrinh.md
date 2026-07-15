@@ -44,9 +44,9 @@ Sau đây nhóm em xin demo toàn bộ luồng chơi."
 
 **[A]:** `[CHỈ]`
 
-"**Main Menu**: nút **Play**, **Quit**, **Best Score**.
-
 **PlayFab Login** — đăng ký, đăng nhập, đồng bộ dữ liệu cloud. **Leaderboard** — bảng xếp hạng. **Auto-save** 60 giây."
+
+"**Main Menu**: nút **Play**, **Quit**, **Best Score**.
 
 [CLICK Play — vào game]
 
@@ -102,18 +102,15 @@ Mỗi node cộng dồn **+Stamina** (Move), **+Damage** (Aim), **+HP** (Intel).
 
 **[A]:** `[DEMO — nhặt súng đầu game]`
 
-"**Chương 1**, người chơi tìm thấy **Pistol và Rifle** — hai vũ khí cơ bản."
+"**Chương 1**, người chơi tìm thấy **Pistol** — vũ khí cơ bản."
 
-[DEMO — bắn, chuyển đổi giữa 2 súng]
-
-"Giới thiệu cơ chế vũ khí qua 2 súng này:
+"Giới thiệu cơ chế vũ khí:
 - **ADS** — ngắm bắn
 - **Reload** — nạp đạn
 - **Recoil + Spread** — độ giật, độ xoáy
 - **Muzzle Flash** — lửa nòng
 - **Bullet Holes** — khác nhau trên gỗ, kim loại, bùn, cỏ
 - **Hitmarker** — dấu X trúng đích
-- **Attachments**: Barrel, Grip, Scope, Stock..."
 
 [Các vũ khí còn lại — SMG, Shotgun, Rocket, Revolver, Katana, Burst Rifle — sẽ được nhặt ở các chương sau]
 
@@ -189,7 +186,7 @@ Người chơi tự chọn hướng build — không có lối đi đúng sai."
 
 [DEMO — bắn SMG (tốc độ cao), Shotgun (sát thương gần)]
 
-"Lúc này người chơi đã có 4 vũ khí: Pistol, Rifle, SMG, Shotgun."
+"Lúc này người chơi đã có 3 vũ khí: Pistol, SMG, Shotgun."
 
 ---
 
@@ -240,7 +237,7 @@ Người chơi tự chọn hướng build — không có lối đi đúng sai."
 
 [DEMO — bắn rocket (nổ diện rộng), burst (3 phát)]
 
-"Tổng cộng đã có 6 vũ khí."
+"Tổng cộng đã có 5 vũ khí."
 
 ---
 
@@ -305,16 +302,6 @@ Người chơi tự chọn hướng build — không có lối đi đúng sai."
 
 ## 🌆 CHƯƠNG 5 — ĐÊM KHUYA + KẾT THÚC (2.5 phút) ⏱ 17:30
 ### Chung cư — Deep Night (2h) — Full vũ khí + trận cuối
-
----
-
-### 5.1 — Turret & Full arsenal (30 giây) ⏱ 17:30
-
-**[B]:** `[DEMO — Turret]`
-
-"**Chương 5** tìm thấy **Turret** — vũ khí thứ 9, cuối cùng. Lúc này người chơi đã có **đầy đủ 9 vũ khí**."
-
-[DEMO — chuyển nhanh qua các súng: Pistol → Rifle → SMG → Shotgun → Rocket → Revolver → Katana → Burst Rifle → Turret]
 
 ---
 

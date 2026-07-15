@@ -11,102 +11,178 @@
 - [ ] MainMenuManager — Quản lý nút Play / Quit
 - [ ] Best Score Display — Hiển thị điểm cao nhất
 - [ ] PlayFab Login UI — Giao diện đăng nhập (Username/Password)
-- [ ] Menu Camera Orbit — Animation camera nền
 
 ---
 
 ## 2. HỆ THỐNG NỀN TẢNG (KHỞI TẠO CÙNG GAME)
 
-### Scripts Core (khởi tạo khi vào game)
+### Core Managers
 
-- [ ] StoryManager — Điều phối toàn bộ cốt truyện 5 chương
-- [ ] AIDirector — Hệ thống độ khó động (Calm/Buildup/Attack/Recovery)
+- [ ] StoryManager — Điều phối cốt truyện 5 chương
+- [ ] AIDirector — Độ khó động (Calm/Buildup/Attack/Recovery)
 - [ ] WaveManager — Quản lý wave (base 10 + wave × 5)
 - [ ] ScoreManager — Tính điểm
 - [ ] CollectibleManager — Quản lý 39 journal
 - [ ] SideQuestManager — Quản lý 8 side quest
 - [ ] AchievementManager — 5 achievements
-- [ ] PlayerStatsTracker — Thống kê toàn bộ chỉ số người chơi
+- [ ] PlayerStatsTracker — Thống kê chỉ số người chơi
 - [ ] PauseManager — Menu tạm dừng
 - [ ] PlayFabManager — Kết nối PlayFab cloud
 - [ ] DayNightCycle — Chu kỳ ngày/đêm
-- [ ] SkillTreeManager — Cây kỹ năng 3 nhánh
+- [ ] SkillTreeManager — Cây kỹ năng 3 nhánh, 15 node
 - [ ] PlayerUpgradeManager — Áp dụng nâng cấp vào player
 
 ---
 
-## 3. PLAYER & ĐIỀU KHIỂN
+## 3. SKILL TREE (MỞ TỪ ĐẦU GAME)
 
-### Hệ thống di chuyển (Cowsins Engine)
+### 3 nhánh — 15 node — mở khóa dần bằng điểm kỹ năng
 
-- [ ] Basic Movement — Đi bộ / chạy
-- [ ] Camera Look — Xoay camera chuột
-- [ ] Jump — Nhảy
-- [ ] Crouch & Slide — Ngồi / Trượt
-- [ ] Dash — Lướt nhanh
-- [ ] Wall Run — Chạy tường
-- [ ] Wall Bounce — Bật tường
-- [ ] Double Jump — Nhảy đôi (skill tree)
-- [ ] Grappling Hook — Móc câu
-- [ ] Climb Ladder — Leo thang
-- [ ] Stamina — Hệ thống thể lực
-- [ ] Footsteps — Âm thanh bước chân
-- [ ] Ground Detection — Phát hiện mặt đất
-- [ ] Speed Lines — Hiệu ứng vạch tốc độ
-- [ ] Camera FOV Manager — Quản lý góc nhìn
-- [ ] Camera Animations — Hiệu ứng camera
-- [ ] Camera Shake — Rung camera
-- [ ] Player Flashlight — Đèn pin (phím F)
+#### Nhánh Movement (5 node)
+- [ ] Node 1: Walk Speed (2 SP) — +Stamina
+- [ ] Node 2: Run Speed (3 SP) — +Stamina
+- [ ] Node 3: Air Control + **Dash** (5 SP) — +Stamina
+- [ ] Node 4: **Wall Run / Wall Bounce** (8 SP) — +Stamina
+- [ ] Node 5: **Double Jump + Grappling Hook** (12 SP) — +Stamina
 
-### Hệ thống vũ khí (Cowsins Engine)
+#### Nhánh Aim (5 node)
+- [ ] Node 1: Recoil Reduction (2 SP) — +Damage
+- [ ] Node 2: Crit Chance 10% (3 SP) — +Damage
+- [ ] Node 3: Crit Chance 20% (5 SP) — +Damage
+- [ ] Node 4: Crit Damage x1.5 (8 SP) — +Damage
+- [ ] Node 5: **One-shot Crook + Bonus vs Specials** (12 SP) — +Damage
 
-- [ ] WeaponController — Điều khiển vũ khí
-- [ ] Weapon ScriptableObject — Định nghĩa từng loại vũ khí
-
-#### Danh sách vũ khí
-
-- [ ] Pistol — Súng lục
-- [ ] Rifle — Súng trường
-- [ ] SMG — Súng tiểu liên
-- [ ] Shotgun — Súng ngắn
-- [ ] Rocket Launcher — Súng rocket
-- [ ] Revolver — Súng ổ quay
-- [ ] Katana — Kiếm cận chiến
-- [ ] Burst Rifle — Súng bắn 3 phát
-- [ ] Turret — Tháp súng
-
-#### Cơ chế vũ khí
-
-- [ ] Shoot Styles: Hitscan / Projectile / Melee / Custom
-- [ ] Reload — Nạp đạn (magazine-based)
-- [ ] Recoil — Độ giật
-- [ ] Spread — Độ xoáy đạn
-- [ ] Aim Down Sights (ADS) — Ngắm bắn
-- [ ] Weapon Weight — Trọng lượng vũ khí
-- [ ] Weapon Inventory — Túi đồ vũ khí
-- [ ] Weapon Effects — Hiệu ứng vũ khí
-- [ ] Muzzle Flash VFX — Hiệu ứng lửa nòng
-- [ ] Bullet Holes — Lỗ đạn (Wood/Metal/Mud/Grass)
-- [ ] Hitmarker — Dấu hit
-
-#### Attachments (Phụ kiện)
-
-- [ ] Barrel — Nòng súng
-- [ ] Grip — Tay cầm
-- [ ] Scope — Ống ngắm
-- [ ] Stock — Báng súng
-- [ ] Laser — Laser
-- [ ] Flashlight — Đèn gắn súng
-- [ ] Magazine — Băng đạn
+#### Nhánh Intelligence (5 node)
+- [ ] Node 1: XP Pickup Radius (2 SP) — +HP
+- [ ] Node 2: XP x1.1 (3 SP) — +HP
+- [ ] Node 3: Radius +10 (5 SP) — +HP
+- [ ] Node 4: XP x1.15 (8 SP) — +HP
+- [ ] Node 5: Radius +15 + **Highlight journal** (12 SP) — +HP
 
 ---
 
-## 4. HUD & GIAO DIỆN NGƯỜI CHƠI
+## 4. PLAYER & ĐIỀU KHIỂN
+
+### Di chuyển cơ bản (có sẵn từ đầu)
+- [ ] Walk / Run — Đi bộ / Chạy
+- [ ] Crouch / Slide — Ngồi / Trượt
+- [ ] Jump — Nhảy
+- [ ] Climb Ladder — Leo thang
+- [ ] Stamina — Hệ thống thể lực
+
+### Kỹ năng mở khóa qua Skill Tree
+- [ ] **Dash** — Node 3 Movement
+- [ ] **Wall Run / Wall Bounce** — Node 4 Movement
+- [ ] **Double Jump** — Node 5 Movement
+- [ ] **Grappling Hook** — Node 5 Movement
+
+### Camera
+- [ ] Camera FOV Manager — Góc nhìn thay đổi
+- [ ] Camera Shake — Rung camera khi bị đòn
+- [ ] Speed Lines — Vạch tốc độ khi chạy nhanh
+- [ ] Camera Animations — Hiệu ứng camera
+
+### Khác
+- [ ] Player Flashlight — Đèn pin (phím F)
+
+---
+
+## 5. VŨ KHÍ (THU THẬP DẦN QUA 5 CHƯƠNG)
+
+### Danh sách 8 vũ khí
+
+| # | Vũ khí | Chương tìm thấy | Đặc điểm |
+|---|---|---|---|
+| 1 | **Pistol** | Chương 1 | Súng lục cơ bản |
+| 2 | **Rifle** | Chương 2 | Súng trường, ổn định |
+| 3 | **SMG** | Chương 3 | Tốc độ bắn cao |
+| 4 | **Shotgun** | Chương 3 | Sát thương gần |
+| 5 | **Rocket Launcher** | Chương 4 | Nổ diện rộng |
+| 6 | **Revolver** | Chương 4 | Sát thương cao, đạn ít |
+| 7 | **Katana** | Chương 4 | Cận chiến |
+| 8 | **Burst Rifle** | Chương 4 | Bắn 3 phát |
+
+### Cơ chế vũ khí (chung)
+- [ ] WeaponController — Điều khiển vũ khí
+- [ ] Weapon ScriptableObject — Định nghĩa từng loại
+- [ ] ADS — Ngắm bắn
+- [ ] Reload — Nạp đạn (magazine-based)
+- [ ] Recoil — Độ giật
+- [ ] Spread — Độ xoáy đạn
+- [ ] Muzzle Flash — Lửa nòng (Rifle/Rocket)
+- [ ] Bullet Holes — Lỗ đạn (Wood/Metal/Mud/Grass)
+- [ ] Hitmarker — Dấu trúng đích
+
+---
+
+## 6. ENEMY & AI
+
+### Crook — Zombie thường (từ Chương 1)
+- [ ] 28+ biến thể ngoại hình (Biker, Clown, Cop, Bride, Cheerleader...)
+- [ ] Chiều cao ngẫu nhiên 1.5-2m
+- [ ] NavMesh pathfinding
+- [ ] Phát hiện qua tầm nhìn + khoảng cách (LOS)
+- [ ] Lunge/feint — hành vi giả vờ tấn công
+- [ ] Wander — đi lang thang khi mất dấu
+- [ ] Headshot / Critical hit riêng
+- [ ] Stuck detection — tự thoát khi kẹt
+
+### Boomer (từ Chương 3, wave 3+)
+- [ ] 100 HP
+- [ ] Kêu rít cảnh báo → lao → phát nổ
+- [ ] Sát thương vùng
+- [ ] Để lại vũng acid sát thương liên tục
+- [ ] Có thể bắn chết từ xa
+
+### Tank (từ Chương 4, wave 5+)
+- [ ] 500+ HP (scale theo wave)
+- [ ] 3 đòn: Punch, Swipe, Jump Attack
+- [ ] Gầm toàn map cảnh báo
+- [ ] Boss Health Bar trên HUD
+
+### Witch (Chương 5)
+- [ ] 60 HP
+- [ ] Ngồi khóc tại chỗ
+- [ ] Kích động → lao 6.5 m/s
+- [ ] Mất dấu → quay lại khóc
+
+### Big Guy (Chương 5)
+- [ ] 80 HP
+- [ ] Đứng choáng tại chỗ
+- [ ] Kích động → gầm → rượt chậm
+- [ ] Đòn đấm sát thương cao
+
+### Enemies phụ
+- [ ] Ceiling Zombie — Rơi từ trần nhà
+- [ ] Snatcher — Enemy đặc biệt
+- [ ] Hooker — Enemy đặc biệt
+
+### Hệ thống AI chung
+- [ ] EnemyLocomotion — NavMesh + LOS + stuck recovery
+- [ ] EnemyHealthBar — Thanh máu thế giới
+- [ ] AIDirector — 4 trạng thái, camper punish
+- [ ] Spawm.cs — Spawner: Object Pooling (60 con), NavMesh validated
+
+---
+
+## 7. LOOT SYSTEM (HOẠT ĐỘNG TỪ ĐẦU GAME)
+
+- [ ] LootDropHelper — Roll loot từ bảng
+- [ ] LootPop — Hiệu ứng nảy
+- [ ] LootTrail — Vệt sáng
+- [ ] Coin — Xu
+- [ ] Experience — EXP
+- [ ] Healthpack — Máu
+- [ ] Ammo pickups — Đạn
+- [ ] PowerUp — Nâng cấp tạm thời
+
+---
+
+## 8. HUD & GIAO DIỆN NGƯỜI CHƠI
 
 ### Scene: `Assets/Scenes/Play Scene (Story).unity`
 
-### Widgets hiển thị
-
+### Widgets
 - [ ] Health Widget — Thanh máu
 - [ ] Low Health Vignette — Viền đỏ khi máu thấp
 - [ ] Health Flash — Hiệu ứng nhấp nháy khi bị đòn
@@ -116,15 +192,15 @@
 - [ ] Reload Indicator — Chỉ báo đang nạp đạn
 - [ ] Crosshair Widget — Tâm ngắm (độ xoáy động)
 - [ ] Compass Widget — La bàn
-- [ ] Compass Marker — Điểm đánh dấu trên la bàn
-- [ ] Damage Direction HUD — Chỉ thị hướng bị tấn công
-- [ ] Combat Feedback HUD — Số sát thương + kill feed
+- [ ] Compass Marker — Điểm đánh dấu
+- [ ] Damage Direction HUD — Chỉ hướng bị tấn công
+- [ ] Combat Feedback HUD — Số DMG + kill feed
 - [ ] FPS Widget — Chỉ số FPS
-- [ ] Threat Widget — Mức đe dọa (AIDirector)
+- [ ] Threat Widget — Mức đe dọa
 - [ ] Progression HUD — Thanh kinh nghiệm
 - [ ] Quest Tracker Widget — Theo dõi nhiệm vụ
 - [ ] Quest Beacon — Điểm đánh dấu mục tiêu
-- [ ] Interact Prompt Widget — "Nhấn E để tương tác"
+- [ ] Interact Prompt Widget — "Nhấn E"
 - [ ] Wave Announcer — Thông báo wave
 - [ ] Boss Health Bar — Thanh máu boss
 - [ ] Weapon Inventory Widget — Túi vũ khí
@@ -141,334 +217,251 @@
 
 ---
 
-## 5. CHƯƠNG 1 — BÌNH MINH (DAWN)
+## 9. CHƯƠNG 1 — BÌNH MINH (DAWN)
 
 ### Thời gian: 6h — DayNightCycle: Dawn keyframe
 
-### Khu vực: Trại/Căn cứ ban đầu
-
 ### Thành phần
-
-- [ ] ChapterBoundary — Ranh giới chương, kích hoạt spawner
-- [ ] SaveRoom (Checkpoint 1) — Checkpoint đầu + hồi máu
-- [ ] Spawner (Spawm.cs) — Spawn zombie trong chương
-- [ ] QuestTrigger — Các trigger volume kích hoạt quest
+- [ ] ChapterBoundary — Ranh giới chương
+- [ ] SaveRoom (Checkpoint 1) — Checkpoint + hồi máu
+- [ ] Spawner (Spawm.cs) — Spawn zombie
+- [ ] QuestTrigger — Trigger volume
 - [ ] KillCountObjective — Mục tiêu tiêu diệt
 - [ ] CollectibleQuestObjective — Mục tiêu thu thập
-- [ ] QuestInteractable — Vật phẩm tương tác hoàn thành quest
+- [ ] QuestInteractable — Vật phẩm tương tác
 - [ ] CutscenePlayer — Cutscene chuyển chương
+- [ ] Pistol — Vũ khí duy nhất
 
-### Side Quest khả dụng sau main quest
-
-- [ ] Side Quest: Church
-- [ ] Side Quest: Auto Repair
-
-### Journal thu thập được
-
-- [ ] Soldier Journal #1-3 (3 cái)
-- [ ] Neighbor Journal #1-21 (một phần)
+### Loot System hoạt động
+- [ ] Zombie chết rơi Coin, EXP, Healthpack
+- [ ] LootPop, LootTrail
 
 ### Kết thúc chương
-
 - [ ] SaveRoom trigger → Cutscene "CHƯƠNG 2 — BỆNH VIỆN"
-- [ ] DayNightCycle chuyển snap → Noon (12h)
+- [ ] DayNightCycle → Noon (12h)
 
 ---
 
-## 6. CHƯƠNG 2 — BUỔI TRƯA (NOON)
+## 10. CHƯƠNG 2 — BUỔI TRƯA (NOON)
 
 ### Thời gian: 12h — DayNightCycle: Noon keyframe
 
-### Khu vực: Bệnh viện
-
 ### Thành phần
-
 - [ ] ChapterBoundary mới
 - [ ] SaveRoom (Checkpoint 2)
 - [ ] Spawner bệnh viện
 - [ ] Quest mới (cốt truyện bệnh viện)
-- [ ] Side Quest mở khóa thêm
+- [ ] **Nâng Skill Tree lần đầu** — đủ EXP để upgrade
 
-### Side Quest bổ sung
+### Vũ khí
+- [ ] **Rifle** — vũ khí thứ 2
 
-- [ ] Side Quest: Motel
-- [ ] Side Quest: Quarantine
-- [ ] Side Quest: HighRise Base
+### Side Quest
+- [ ] Church
+- [ ] Auto Repair
+- [ ] Motel
+- [ ] Quarantine
+- [ ] HighRise Base
+- [ ] Mother's Story
+- [ ] Lighthouse
 
-### Journal thu thập
-
+### Journal
+- [ ] Soldier Journal #1-3
+- [ ] Neighbor Journal #1-21 (một phần)
 - [ ] Military Record #1-8
 - [ ] Doctor Journal #1-3
 
 ### Kết thúc chương
-
-- [ ] SaveRoom trigger → Cutscene "CHƯƠNG 3 — CÔNG TRƯỜNG"
-- [ ] DayNightCycle chuyển → Dusk (18h)
+- [ ] SaveRoom → Cutscene "CHƯƠNG 3 — CÔNG TRƯỜNG"
+- [ ] DayNightCycle → Dusk (18h)
 
 ---
 
-## 7. CHƯƠNG 3 — HOÀNG HÔN (DUSK)
+## 11. CHƯƠNG 3 — HOÀNG HÔN (DUSK)
 
 ### Thời gian: 18h — DayNightCycle: Dusk keyframe
 
-### Khu vực: Công trường xây dựng
+### Kỹ năng đã mở khóa (nếu nâng Movement)
+- [ ] Air Control
+- [ ] **Dash**
 
-### Thành phần
+### Vũ khí mới
+- [ ] **SMG**
+- [ ] **Shotgun**
 
-- [ ] ChapterBoundary mới
-- [ ] SaveRoom (Checkpoint 3)
-- [ ] Spawner công trường
-- [ ] WaveQuestInteractable — Quest generator (sống sót 3 wave + Boomer)
-- [ ] Kill boundary lock trong wave
-- [ ] Teleport-back khi ra ngoài trong wave
-- [ ] SpecialEnemyDirector — Bắt đầu spawn Boomer từ wave 3+
+### Wave System
+- [ ] WaveManager — Wave đầu 10 kill, +5 mỗi wave
+- [ ] WaveQuestInteractable — Khóa vùng, sống sót N wave
+- [ ] Boundary lock + teleport-back
+- [ ] Wave Announcer
 
-### Quái đặc biệt xuất hiện lần đầu
+### SpecialEnemyDirector
+- [ ] Boomer từ wave 3+
 
-- [ ] Boomer — Zombie phát nổ, để lại vũng acid
+### Enemies phụ
+- [ ] Ceiling Zombie
+- [ ] Snatcher
+- [ ] Hooker
 
-### Loot System
-
-- [ ] LootDropHelper — Rơi loot khi chết
-- [ ] LootPop — Hiệu ứng nảy
-- [ ] LootTrail — Hiệu ứng vệt sáng
-- [ ] Coin — Xu
-- [ ] Experience — EXP
-- [ ] Healthpack — Máu
-- [ ] PowerUp — Nâng cấp tạm thời
-- [ ] Ammo pickups — Đạn
-
-### Kết thúc chương
-
-- [ ] Hoàn thành wave quest → SaveRoom
-- [ ] Cutscene "CHƯƠNG 4 — KHU DÂN CƯ"
-- [ ] DayNightCycle chuyển → Night (22h)
-
----
-
-## 8. CHƯƠNG 4 — MÀN ĐÊM (NIGHT)
-
-### Thời gian: 22h — DayNightCycle: Night keyframe
-
-### Khu vực: Khu dân cư
-
-### Thành phần
-
-- [ ] ChapterBoundary mới
-- [ ] SaveRoom (Checkpoint 4)
-- [ ] Spawner khu dân cư
-- [ ] Quest mới (cốt truyện khu dân cư)
-
-### Skill Tree khả dụng (khi đủ điểm)
-
-- [ ] Movement Branch — 5 nodes
-  - [ ] Node 1: Walk Speed (2 SP)
-  - [ ] Node 2: Run Speed (3 SP)
-  - [ ] Node 3: Air Control + Dash (5 SP)
-  - [ ] Node 4: Wall Run / Wall Bounce (8 SP)
-  - [ ] Node 5: Double Jump + Grapple (12 SP)
-- [ ] Aim Branch — 5 nodes
-  - [ ] Node 1: Recoil Reduction (2 SP)
-  - [ ] Node 2: Crit Chance 10% (3 SP)
-  - [ ] Node 3: Crit Chance 20% (5 SP)
-  - [ ] Node 4: Crit Damage x1.5 (8 SP)
-  - [ ] Node 5: One-shot Crook + Bonus vs Specials (12 SP)
-- [ ] Intelligence Branch — 5 nodes
-  - [ ] Node 1: XP Pickup Radius (2 SP)
-  - [ ] Node 2: XP x1.1 (3 SP)
-  - [ ] Node 3: Radius +10 (5 SP)
-  - [ ] Node 4: XP x1.15 (8 SP)
-  - [ ] Node 5: Radius +15 + Highlight (12 SP)
-
-### Survival Bonuses
-
-- [ ] Mỗi node Movement: +Stamina
-- [ ] Mỗi node Aim: +Damage
-- [ ] Mỗi node Intelligence: +HP
-
-### SpecialEnemyDirector mở rộng
-
-- [ ] Tank bắt đầu spawn từ wave 5+
-- [ ] Tank stat scale theo wave
-
-### Side Quest bổ sung
-
-- [ ] Side Quest: Mother's Story
-- [ ] Side Quest: Lighthouse
-
-### Journal thu thập
-
+### Journal
 - [ ] Experiment Report #1-3
 - [ ] Cure Record #1-4
 
-### Đặc điểm môi trường
-
-- [ ] PostProcess Volume: bầu không khí tối hơn
-- [ ] Fog dày hơn
-- [ ] Ambient tối
-- [ ] Flashlight thiết yếu
-
 ### Kết thúc chương
-
-- [ ] SaveRoom trigger → Cutscene "CHƯƠNG 5 — CHUNG CƯ"
-- [ ] DayNightCycle chuyển → Deep Night (24h/2h sáng)
+- [ ] SaveRoom → Cutscene "CHƯƠNG 4 — KHU DÂN CƯ"
+- [ ] DayNightCycle → Night (22h)
 
 ---
 
-## 9. CHƯƠNG 5 — ĐÊM KHUYA (DEEP NIGHT)
+## 12. CHƯƠNG 4 — MÀN ĐÊM (NIGHT)
+
+### Thời gian: 22h — DayNightCycle: Night keyframe
+
+### Kỹ năng cao cấp (nếu nâng đủ)
+- [ ] **Wall Run + Wall Bounce**
+- [ ] **Double Jump + Grappling Hook**
+- [ ] Aim cuối: One-shot Crook + Bonus Specials
+- [ ] Intel cuối: Highlight journal (Outline shader)
+- [ ] Outline — viền phát sáng vật phẩm
+
+### Vũ khí mới
+- [ ] **Rocket Launcher**
+- [ ] **Revolver**
+- [ ] **Katana**
+- [ ] **Burst Rifle**
+
+### Tank Boss
+- [ ] 500+ HP (scale wave)
+- [ ] Punch / Swipe / Jump Attack
+- [ ] Gầm toàn map
+- [ ] Boss Health Bar
+
+### Journal
+- [ ] Brother Journal #1-5
+
+### Kết thúc chương
+- [ ] SaveRoom → Cutscene "CHƯƠNG 5 — CHUNG CƯ"
+- [ ] DayNightCycle → Deep Night (2h)
+
+---
+
+## 13. CHƯƠNG 5 — ĐÊM KHUYA (DEEP NIGHT)
 
 ### Thời gian: 2h sáng — DayNightCycle: Deep Night keyframe
 
-### Khu vực: Chung cư (Apartment Building)
+### Full arsenal
+- [ ] Đầy đủ 8 vũ khí: Pistol, Rifle, SMG, Shotgun, Rocket, Revolver, Katana, Burst Rifle
+- [ ] Flashlight thiết yếu
 
-### Thành phần
+### Mini-boss
+- [ ] Witch — 60 HP, khóc → lao 6.5 m/s
+- [ ] Big Guy — 80 HP, choáng → gầm → rượt
 
-- [ ] ChapterBoundary cuối cùng
-- [ ] SaveRoom (Checkpoint 5) — cuối cùng
-- [ ] Spawner chung cư
-
-### Mini-boss xuất hiện lần đầu
-
-- [ ] Witch — Ngồi khóc, kích động → lao nhanh 6.5m/s
-- [ ] Big Guy — Choáng, kích động → rượt chậm, trâu bò
-
-### Quest cuối cùng
-
-- [ ] Quest 12: "Escape Town" — Nhiệm vụ thoát khỏi thị trấn
-- [ ] WaveQuestInteractable — Trận cuối:
-  - [ ] Sequential waves (3-5 wave)
+### Quest cuối
+- [ ] Quest 12: "Escape Town"
+- [ ] WaveQuestInteractable cuối:
+  - [ ] Sequential waves
   - [ ] Tank boss trong wave cuối
   - [ ] Boundary lock
-  - [ ] Boss health tracking
-
-### Các enemy khác
-
-- [ ] Snatcher — Enemy đặc biệt (có controller)
-- [ ] Hooker — Enemy đặc biệt (có controller)
-- [ ] Ceiling Zombie — Zombie từ trần nhà rơi xuống
-
-### Journal cuối cùng
-
-- [ ] Brother Journal #1-5
-
-### Outline System (kích hoạt)
-
-- [ ] Outline.cs — Hiệu ứng viền
-- [ ] OutlineMask.shader — Shader mặt nạ
-- [ ] OutlineFill.shader — Shader tô viền
+  - [ ] Kích hoạt bom
 
 ---
 
-## 10. KẾT THÚC GAME (ENDING SEQUENCE)
+## 14. KẾT THÚC GAME (ENDING SEQUENCE)
 
 ### Điều phối
+- [ ] EndingSequenceManager
 
-- [ ] EndingSequenceManager — Điều phối toàn bộ kết thúc
-
-### Các bước tuần tự
-
-1. [ ] Quest 12 hoàn thành → Journal popup cuối cùng xuất hiện
-2. [ ] Chờ journal đóng
-3. [ ] BombExplosionCutscene — Cảnh nổ bom:
-   - [ ] Temporary Camera (camera tạm thời)
-   - [ ] Nuke VFX (hiệu ứng nổ hạt nhân)
-   - [ ] Explosion SFX (âm thanh nổ)
+### Các bước
+1. [ ] Quest 12 hoàn thành → journal popup cuối
+2. [ ] BombExplosionCutscene
+   - [ ] Temporary Camera
+   - [ ] Nuke VFX
+   - [ ] Explosion SFX
    - [ ] Fade to Black → Fade from Black
-4. [ ] EpilogueSlide — Slide kết:
-   - [ ] Text: "Dịch bệnh đã được kiểm soát..."
-5. [ ] CreditsSequence — Credit cuộn:
-   - [ ] Dev Team (thành viên nhóm)
-   - [ ] School (trường)
-   - [ ] Members
-   - [ ] Resources (tài nguyên sử dụng)
-   - [ ] Engine (Cowsins Engine)
+3. [ ] EpilogueSlide: "Dịch bệnh đã được kiểm soát..."
+4. [ ] CreditsSequence
+   - [ ] Dev Team
+   - [ ] School
+   - [ ] Resources
+   - [ ] Engine (Cowsins)
    - [ ] Thanks
-   - [ ] Logo trường
-6. [ ] Load Main Menu
+5. [ ] Load Main Menu
 
 ---
 
-## 11. GAME OVER / DEATH
+## 15. GAME OVER / DEATH
 
-### Màn hình Game Over
-
-- [ ] GameOverManager — Quản lý màn hình Game Over
-- [ ] Stats Display:
-  - [ ] Story mode: Chapter, quests completed, journals, score
-  - [ ] Wave mode: Score, wave, kills, best score
-- [ ] Tùy chọn:
-  - [ ] Restart from Checkpoint (respawn tại SaveRoom gần nhất)
-  - [ ] Main Menu
-  - [ ] Quit
+- [ ] GameOverManager
+- [ ] Stats: Story (chapter, quest, journal, score) / Wave (score, wave, kills, best score)
+- [ ] Restart from Checkpoint
+- [ ] Main Menu
+- [ ] Quit
 
 ---
 
-## 12. ACHIEVEMENTS (5)
+## 16. ACHIEVEMENTS (5)
 
 | # | ID | Tên | Điều kiện |
 |---|---|---|---|
-| [ ] | 1 | Speedrunner | Hoàn thành 5 chương trong <11 phút |
+| [ ] | 1 | Speedrunner | 5 chương <11 phút |
 | [ ] | 2 | Hell Slayer | 130 Crook kills |
 | [ ] | 3 | At Ease, Cooper | 20 kills khi wall run |
-| [ ] | 4 | Tank Slayer | Kill Tank đầu tiên |
-| [ ] | 5 | Close Call | Trong bán kính 5m khi Boomer nổ |
+| [ ] | 4 | Tank Slayer | Hạ Tank đầu tiên |
+| [ ] | 5 | Close Call | Trong 5m Boomer nổ |
 
 ---
 
-## 13. PLAYFAB CLOUD INTEGRATION
+## 17. PLAYFAB CLOUD INTEGRATION
 
-- [ ] PlayFabManager — Quản lý kết nối
-- [ ] Register / Login — Đăng ký / Đăng nhập
-- [ ] Cloud Save:
-  - [ ] Best Score
-  - [ ] Best Wave
-  - [ ] Achievement unlock state
+- [ ] PlayFabManager
+- [ ] Register / Login
+- [ ] Cloud Save: Best Score, Best Wave, Achievement state
 - [ ] Auto-save — 60 giây + khi quit/pause
 - [ ] Leaderboard — BestScore statistic
-- [ ] Cloud Data Merge — Hợp nhất dữ liệu đa thiết bị
+- [ ] Cloud Data Merge
 
 ---
 
-## 14. HIỆU ỨNG & VFX
+## 18. HIỆU ỨNG & VFX
 
-- [ ] Muzzle Flash — Lửa nòng súng (Rifle/Rocket/Turret)
-- [ ] Bullet Holes — Lỗ đạn (Wood/Metal/Mud/Grass/Slash)
-- [ ] Speed Lines — Vạch tốc độ khi chạy nhanh
+- [ ] Muzzle Flash — Lửa nòng súng
+- [ ] Bullet Holes — Lỗ đạn (Wood/Metal/Mud/Grass)
+- [ ] Speed Lines — Vạch tốc độ
 - [ ] Loot Trail — Vệt sáng loot
-- [ ] Loot Pop — Hiệu ứng nảy vật phẩm
+- [ ] Loot Pop — Hiệu ứng nảy
 - [ ] Acid Pool — Vũng acid Boomer
 - [ ] Boomer Explosion — Vụ nổ Boomer
-- [ ] Tank Jump Attack — Hiệu ứng nhảy của Tank
+- [ ] Tank Jump Attack — Hiệu ứng nhảy
 - [ ] Camera Shake — Rung camera
-- [ ] Low Health Vignette — Viền đỏ máu thấp
+- [ ] Low Health Vignette — Viền đỏ
+- [ ] Health Flash — Nhấp nháy khi bị đòn
 - [ ] Damage Direction — Chỉ thị hướng đòn
 - [ ] Hitmarker — Dấu trúng đạn
 - [ ] Nuke VFX — Hiệu ứng nổ hạt nhân (ending)
-- [ ] Outline — Viền vật phẩm tương tác
-- [ ] Collectible Highlight — Highlight nhật ký
+- [ ] Outline — Viền highlight journal
 
 ---
 
-## 15. ÂM THANH (AUDIO)
+## 19. ÂM THANH (AUDIO)
 
-- [ ] Footsteps — Bước chân (theo bề mặt)
-- [ ] Weapon Sounds — Âm vũ khí (bắn, nạp, trang bị)
-- [ ] Zombie Sounds — Âm zombie (gầm, tấn công, hit, chết)
-- [ ] Boss Sounds — Âm boss (gầm, rít, tấn công, nhảy, chết)
-- [ ] Boomer Scream — Tiếng kêu Boomer sắp nổ
-- [ ] Tank Spawn Roar — Gầm Tank toàn map (2D)
-- [ ] UI Sounds — Âm giao diện (nút bấm)
+- [ ] Footsteps — Bước chân theo bề mặt
+- [ ] Weapon Sounds — Bắn, nạp, trang bị
+- [ ] Zombie Sounds — Gầm, tấn công, hit, chết
+- [ ] Boss Sounds — Tank, Boomer, Witch, Big Guy
+- [ ] Boomer Scream — Tiếng kêu sắp nổ
+- [ ] Tank Spawn Roar — Gầm toàn map (2D)
+- [ ] UI Sounds — Nút bấm
 - [ ] Journal Voice Logs — Giọng đọc nhật ký
-- [ ] Flashlight Toggle — Âm bật/tắt đèn
+- [ ] Flashlight Toggle — Bật/tắt đèn
 - [ ] Explosion SFX — Âm nổ
-- [ ] Audio Mixer — Mixer groups cho volume
+- [ ] Audio Mixer — Groups cho volume
 
 ---
 
-## 16. THÀNH PHẦN KỸ THUẬT NỀN
+## 20. THÀNH PHẦN KỸ THUẬT
 
-### Scenes (Game)
-
+### Scenes
 | Scene | Đường dẫn |
 |---|---|
 | Main Menu | `Assets/Scenes/MainMenu.unity` |
@@ -478,7 +471,6 @@
 ### Script tổng cộng: 80+
 
 #### Enemy Scripts
-
 | Script | File |
 |---|---|
 | ZombieAI | `Assets/Script/Test/ZombieAI.cs` |
@@ -492,7 +484,6 @@
 | SetLayerWeightBehaviour | `Assets/Script/Test/SetLayerWeightBehaviour.cs` |
 
 #### Manager Scripts
-
 | Script | File |
 |---|---|
 | StoryManager | `Assets/Script/Test/Managers/StoryManager.cs` |
@@ -525,8 +516,7 @@
 | WaveQuestInteractable | `Assets/Script/Test/Managers/WaveQuestInteractable.cs` |
 | QuestInteractable | `Assets/Script/Test/Managers/QuestInteractable.cs` |
 
-#### ScriptableObjects (Quests, SideQuests, Journals, Achievements)
-
+#### ScriptableObjects
 | Loại | Số lượng |
 |---|---|
 | QuestData | 12+ |
@@ -534,8 +524,7 @@
 | JournalData | 39 |
 | AchievementData | 5 |
 
-### Cowsins Engine Scripts (kế thừa)
-
+#### Cowsins Engine Scripts (kế thừa)
 | Nhóm | Chức năng |
 |---|---|
 | WeaponController | Điều khiển vũ khí |
@@ -543,16 +532,10 @@
 | WeaponAnimator | Animation vũ khí |
 | Bullet | Đạn |
 | ShootStyles | Hitscan/Projectile/Melee/Custom |
-| Attachments | Barrel/Grip/Scope/Stock/Laser/Flashlight/Magazine |
 | BasicMovement | Di chuyển cơ bản |
 | CameraLook | Xoay camera |
 | Jump | Nhảy |
-| Dash | Lướt |
 | CrouchSlide | Ngồi/trượt |
-| WallRun | Chạy tường |
-| WallBounce | Bật tường |
-| GrapplingHook | Móc câu |
-| ClimbLadder | Leo thang |
 | Stamina | Thể lực |
 | CameraFOVManager | Góc nhìn camera |
 | UIController | Giao diện Cowsins |
@@ -567,14 +550,9 @@
 | PowerUp | Nâng cấp |
 
 ### Editor Scripts
-
 | Script | File |
 |---|---|
-| StoryChapter1Builder | `Assets/Editor/StoryChapter1Builder.cs` |
-| StoryChapter2Builder | `Assets/Editor/StoryChapter2Builder.cs` |
-| StoryChapter3Builder | `Assets/Editor/StoryChapter3Builder.cs` |
-| StoryChapter4Builder | `Assets/Editor/StoryChapter4Builder.cs` |
-| StoryChapter5Builder | `Assets/Editor/StoryChapter5Builder.cs` |
+| StoryChapter1-5Builder | `Assets/Editor/StoryChapter{1-5}Builder.cs` |
 | StoryMapDecorator | `Assets/Editor/StoryMapDecorator.cs` |
 | StoryChapter4Decorator | `Assets/Editor/StoryChapter4Decorator.cs` |
 | StoryChapter5Decorator | `Assets/Editor/StoryChapter5Decorator.cs` |
@@ -586,7 +564,6 @@
 | ProceduralUISpriteGenerator | `Assets/Editor/ProceduralUISpriteGenerator.cs` |
 
 ### Animations
-
 | Controller | File |
 |---|---|
 | Zombie.controller | `Assets/Animation/Zombie/` |
@@ -597,57 +574,47 @@
 | Witch.controller | Boss Witch |
 | Hooker.controller | Boss Hooker |
 | Snatcher.controller | Boss Snatcher |
-| Rifle / SMG / Shotgun / Rocket / Pistol / Revolver / Katana / BurstRifle / Turret | Weapon controllers |
-
-### Models (FBX)
-
-| Nhóm | Vị trí |
-|---|---|
-| Zombie Mixamo | `Assets/Animation/Zombie/` |
-| Tank Boss | `Assets/Animation/Zombie/Boss/Tank/` |
-| Boomer | `Assets/Animation/Zombie/Boss/Boomer/` |
-| Synty Rigs | `Assets/Animation/Synty model for Mixamo/` |
-| Environment Models | `Assets/Map/PolygonApocalypse/Models/` |
+| Rifle / SMG / Shotgun / Rocket / Pistol / Revolver / Katana / BurstRifle | Weapon controllers |
 
 ### Prefabs
-
 | Loại | Số lượng |
 |---|---|
 | Crook Zombie variants | 28+ |
 | Bosses | 6 (Tank, Boomer, Witch, BigGuy, Snatcher, Hooker) |
-| Props | Nhiều (từ Polygon Apocalypse) |
 | Journal | 1 (spawn nhiều bản) |
 | AcidPool | 2 (normal + bigger) |
 | MuzzleFlashes | 3+ |
 
 ### Shaders
-
 | Shader | File |
 |---|---|
 | OutlineMask | `Assets/Resources/Shaders/OutlineMask.shader` |
 | OutlineFill | `Assets/Resources/Shaders/OutlineFill.shader` |
-| SkyGradient | `Assets/Map/.../SkyGradient.shader` |
+| SkyGradient | Environment shader |
 | POLYGON_Triplanar | Environment shader |
 | POLYGON_Zombies | Zombie shader |
 | POLYGON_ZombieBoss | Boss shader |
 | WorldSpace / UIBlur | Cowsins shaders |
 | TMP Shaders | 19 variants |
 
-### Tổng kết số liệu dự án
+---
+
+## TỔNG KẾT SỐ LIỆU DỰ ÁN
 
 | Hạng mục | Số lượng |
 |---|---|
-| **Scene game** | 3 |
+| **Scene** | 3 |
 | **Script C#** | 80+ |
 | **Chương** | 5 |
 | **Main Quest** | 12+ |
 | **Side Quest** | 8 |
-| **Journal** | 39 |
-| **Loại zombie** | 7 |
-| **Loại vũ khí** | 9+ |
+| **Journal** | 39 (7 nhóm) |
+| **Loại zombie** | 7 (Crook, Boomer, Tank, Witch, BigGuy, Snatcher, Hooker) |
+| **Loại vũ khí** | 8 (thu thập dần) |
+| **Skill tree node** | 15 (3 nhánh) |
+| **Kỹ năng mở khóa** | Dash, Wall Run, Double Jump, Grapple, One-shot, Highlight |
 | **Achievement** | 5 |
-| **Node skill tree** | 15 |
-| **Prefab zombie** | 28+ |
 | **Editor script** | 14 |
 | **PlayFab service** | 5 tính năng |
 | **Animation controller** | 15+ |
+| **Prefab zombie** | 28+ |

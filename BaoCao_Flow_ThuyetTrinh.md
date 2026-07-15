@@ -1,4 +1,4 @@
-# 📋 FLOW TRÌNH BÀY & SCRIPT THUYẾT TRÌNH — DỰ ÁN FPS SURVIVAL ZOMBIE
+# 📋 FLOW TRÌNH BÀY & CHECKLIST THUYẾT TRÌNH — DỰ ÁN FPS SURVIVAL ZOMBIE
 
 ---
 
@@ -7,17 +7,17 @@
 **Màn hình: Main Menu**
 
 **Script:**
-> "Xin chào thầy cô và các bạn. Nhóm em xin trình bày đồ án: **FPS Survival Zombie** – tựa game bắn súng góc nhìn thứ nhất kết hợp sinh tồn, lấy bối cảnh ngày tận thế zombie.
+> "Xin chào thầy cô và các bạn. Nhóm em xin trình bày đồ án: **FPS Survival Zombie** – game bắn súng góc nhìn thứ nhất kết hợp sinh tồn, bối cảnh ngày tận thế zombie.
 >
-> Trò chơi kể về hành trình của một người sống sót từ lúc bùng phát dịch bệnh, vượt qua 5 chương, đối mặt với nhiều loại zombie, tích lũy kỹ năng, thu thập nhật ký và khám phá sự thật đằng sau đại dịch.
+> Game có cốt truyện 5 chương từ bình minh đến đêm khuya. Người chơi chiến đấu, thu thập vũ khí qua từng chương, nâng cấp kỹ năng qua Skill Tree, tìm nhật ký và khám phá sự thật đằng sau đại dịch.
 >
-> Dự án được phát triển trên Unity, sử dụng Cowsins FPS Engine làm nền tảng, kết hợp với PlayFab cho lưu đám mây và bảng xếp hạng.
+> Dự án phát triển trên Unity, Cowsins FPS Engine nền tảng, PlayFab cho dữ liệu đám mây.
 >
-> Sau đây, nhóm em xin demo luồng chơi từ đầu đến cuối."
+> Sau đây nhóm em xin demo luồng chơi từ đầu đến cuối."
 
 ---
 
-## 🎮 PHẦN 2: MAIN MENU & HỆ THỐNG ĐĂNG NHẬP (1 phút)
+## 🎮 PHẦN 2: MAIN MENU (1 phút)
 
 **Màn hình: Main Menu → click Play**
 
@@ -26,311 +26,233 @@
 | Nút Play | Bắt đầu game |
 | Nút Quit | Thoát |
 | Best Score | Điểm cao nhất |
-| Đăng nhập PlayFab | Username/Password |
+| PlayFab Login | Đăng ký/đăng nhập |
+| Leaderboard | Bảng xếp hạng |
+| Auto-save | Tự động 60s |
 
 **Script:**
-> "Đầu tiên là màn hình Main Menu. Tại đây người chơi có thể xem điểm cao nhất, đăng nhập PlayFab để lưu dữ liệu lên đám mây. Nhấn Play để bắt đầu."
+> "Main Menu với các nút Play, Quit, Best Score. PlayFab Login để đăng nhập, đồng bộ dữ liệu lên cloud. Leaderboard và auto-save 60 giây."
 
 ---
 
-## 🧟 PHẦN 3: CHƯƠNG 1 — BÌNH MINH (3 phút)
+## 🌅 PHẦN 3: CHƯƠNG 1 — BÌNH MINH (6 phút)
 
-### 3.1 Spawn & Bắt Đầu
-
-**Màn hình: Player spawn tại khu vực Chapter 1 (dawn)**
+### 3.1 — Môi trường & hệ thống
 
 | Thành phần | Chi tiết |
 |---|---|
-| ChapterBoundary | Ranh giới chương, kích hoạt spawner |
-| SaveRoom (Checkpoint) | Hồi máu, lưu checkpoint |
-| DayNightCycle | Thời gian: Dawn (6h) |
-| StoryManager | Kích hoạt Quest đầu tiên |
+| DayNight Cycle | Dawn (6h): mặt trời, bầu trời, sương mù, PostProcess |
+| SaveRoom | Vùng an toàn, hồi máu, checkpoint |
+| StoryManager | Kích hoạt quest đầu |
 | QuestTracker HUD | Hiển thị mục tiêu |
+| ChapterBoundary | Ranh giới chương |
 
 **Script:**
-> "Người chơi bắt đầu ở Chương 1 — Bình Minh. Chúng ta thấy:
-> - **DayNightCycle** với ánh sáng bình minh
-> - **SaveRoom** đầu tiên: vùng an toàn hồi máu và lưu checkpoint
-> - **Quest Tracker** trên HUD chỉ dẫn mục tiêu
-> - Hệ thống **StoryManager** quản lý cốt truyện"
+> "Chương 1 — Bình Minh (6h). DayNight Cycle kiểm soát thời gian. SaveRoom là checkpoint và hồi máu. StoryManager + QuestTracker quản lý cốt truyện."
 
-### 3.2 Chiến Đấu với Zombie Cơ Bản
+### 3.2 — Di chuyển cơ bản + Skill Tree giới thiệu
 
-**Màn hình: Player di chuyển, gặp zombie → bắn**
+| Kỹ năng cơ bản | Walk, Run, Crouch, Slide, Jump, Climb Ladder |
+|---|---|
+| Stamina | Thanh thể lực dùng chung |
 
-| Loại Zombie | HP | Đặc điểm |
-|---|---|---|
-| **Crook (Zombie thường)** | 100 | 28+ biến thể (Biker, Clown, Cop,...), cao ngẫu nhiên 1.5-2m |
-| Hành vi | — | Phát hiện bằng tầm nhìn + khoảng cách, di chuyển NavMesh, lunge/feint ngẫu nhiên |
+| Skill Tree | Chi tiết |
+|---|---|
+| Nhánh Movement | 5 node: Speed → Air Control → **Dash → Wall Run → Double Jump + Grapple** |
+| Nhánh Aim | 5 node: Recoil → Crit 10% → 20% → x1.5 → **One-shot + Bonus Special** |
+| Nhánh Intelligence | 5 node: XP Radius → x1.1 → Radius → x1.15 → **Highlight** |
+| Chi phí | 2 → 3 → 5 → 8 → 12 SP mỗi nhánh |
+| Bonus | +Stamina (Move), +Damage (Aim), +HP (Intel) |
 
 **Script:**
-> "Zombie thường — gọi là Crook — có hơn 28 biến thể ngoại hình. Chúng di chuyển bằng **NavMesh**, phát hiện người chơi qua tầm nhìn và khoảng cách. Hành vi có độ trễ: giả vờ tấn công, lao lên bất ngờ, tạo cảm giác tự nhiên.
+> "Di chuyển cơ bản: walk, run, crouch, slide, jump, leo thang. Dùng chung Stamina.
 >
-> Hệ thống **AIDirector** theo dõi mức đe dọa của người chơi (0-100) với 4 trạng thái: Calm → BuildUp → Attack → Recovery. Nếu người chơi đứng yên quá 10 giây, zombie sẽ spawn sau lưng — chống camp."
+> **Skill Tree có sẵn từ đầu game** — 3 nhánh, 15 node. Các kỹ năng như Dash, Wall Run, Double Jump, Grapple bị khóa, phải nâng cấp mới dùng được."
 
-### 3.3 Vũ Khí & Bắn Súng
+### 3.3 — Vũ khí: Pistol
 
-**Màn hình: Chuyển đổi vũ khí, bắn, nạp đạn**
+| Vũ khí | Pistol (khẩu duy nhất) |
+|---|---|
+| Cơ chế | ADS, Reload, Recoil, Spread, Muzzle Flash, Bullet Holes, Hitmarker |
+
+**Script:**
+> "Đầu game chỉ có Pistol. Các vũ khí khác tìm thấy ở chương sau."
+
+### 3.4 — Zombie Crook + Loot
+
+| Loại zombie | HP | Đặc điểm |
+|---|---|---|
+| Crook | 100 | 28+ biến thể, cao 1.5-2m |
 
 | Hệ thống | Chi tiết |
 |---|---|
-| WeaponController | Pistol, Rifle, SMG, Shotgun, Rocket, Revolver, Katana, BurstRifle |
-| Shoot Styles | Hitscan, Projectile, Melee, Custom |
-| Reload | Magazine-based |
-| Recoil & Spread | Có độ giật và độ xoáy |
-| ADS (Aim Down Sights) | Ngắm bắn |
-| Attachments | Barrel, Grip, Scope, Stock, Laser, Flashlight, Magazine |
-| Bullet Holes | Wood, Metal, Mud, Grass — mỗi loại khác nhau |
-| Muzzle Flash | VFX khi bắn |
-| Hitmarker | Dấu hiệu trúng đạn |
+| AI | NavMesh, LOS detection, lunge/feint, wander, headshot |
+| AIDirector | 4 trạng thái (Calm → BuildUp → Attack → Recovery), camper punishment |
+| Spawner | Object Pooling (60 con), NavMesh validation |
+| Loot System | Coin, EXP, Healthpack, LootPop, LootTrail — từ đầu game |
 
 **Script:**
-> "Hệ thống vũ khí được kế thừa từ Cowsins Engine, hỗ trợ đa dạng: súng lục, rifle, shotgun, rocket, và cả katana cận chiến. Có cơ chế nạp đạn, độ giật, ngắm bắn ADS, và hiệu ứng nòng sáng khi bắn.
+> "Crook — 28+ biến thể. AI dùng NavMesh, phát hiện qua tầm nhìn. AIDirector quản lý độ khó. Spawner dùng Object Pooling.
 >
-> Đạn bắn vào các bề mặt khác nhau — gỗ, kim loại, bùn, cỏ — cho hiệu ứng lỗ đạn khác nhau."
+> **Loot System hoạt động từ đầu**: zombie chết rơi Coin, EXP, Healthpack — có hiệu ứng LootPop và LootTrail."
 
-### 3.4 Kỹ Năng Di Chuyển
-
-**Màn hình: Player chạy, dash, wall run, grappling hook**
-
-| Kỹ năng | Mô tả |
-|---|---|
-| Walk / Run | Cơ bản |
-| Crouch / Slide | Ngồi / Trượt |
-| Jump + Double Jump | Nhảy đơn / kép (skill tree) |
-| Dash | Lao nhanh |
-| Wall Run / Wall Bounce | Chạy tường / Bật tường |
-| Grappling Hook | Móc câu |
-| Climb Ladder | Leo thang |
-| Stamina System | Thanh thể lực |
-
-**Script:**
-> "Về di chuyển, ngoài chạy nhảy cơ bản, người chơi có thể:
-> - **Dash** (lướt nhanh)
-> - **Wall Run & Wall Bounce** (chạy và bật tường)
-> - **Grappling Hook** (móc câu di chuyển)
-> - **Double Jump** (nhảy đôi)
->
-> Tất cả đều dùng chung thanh Stamina — quản lý thể lực là yếu tố chiến thuật quan trọng."
-
-### 3.5 HUD & Giao Diện
-
-**Màn hình: Chỉ vào từng widget trên HUD**
+### 3.5 — HUD
 
 | Widget | Chức năng |
 |---|---|
-| Health + Low Health Vignette | Máu + viền đỏ khi yếu |
-| Stamina | Thể lực |
-| Ammo | Đạn |
-| Dash Cooldown | Hồi dash |
-| Crosshair | Độ chính xác |
-| Compass + Quest Beacon | La bàn + điểm đánh dấu |
-| Damage Direction | Hướng bị tấn công |
-| Combat Feedback | Số sát thương + kill feed |
-| FPS Counter | Chỉ số FPS |
-| Threat Indicator | Mức đe dọa |
-| Interact Prompt | "Nhấn E" |
-| Boss Health Bar | Thanh máu boss |
-| Wave Announcer | Thông báo wave |
+| Health + Vignette | Máu + viền đỏ khi yếu |
+| Stamina + Ammo + Dash Cooldown | Thể lực, đạn, hồi dash |
+| Crosshair | Giãn theo spread |
+| Compass + Quest Beacon | La bàn, điểm mục tiêu |
+| Damage Direction + Combat Feedback | Hướng đòn, số DMG, kill feed |
+| FPS + Threat Level + Interact Prompt | Chỉ số, mức đe dọa, tương tác |
+| Boss Health Bar + Wave Announcer | Tự động xuất hiện |
 
-**Script:**
-> "Giao diện HUD được thiết kế đầy đủ với: thanh máu, thể lực, đạn, crosshair, la bàn, điểm đánh dấu nhiệm vụ, chỉ thị hướng bị tấn công, phản hồi chiến đấu và chỉ số FPS."
-
-### 3.6 Quest & Cốt Truyện Chương 1
-
-**Màn hình: Quest trigger → hoàn thành quest → chuyến cảnh**
+### 3.6 — Quest & Cutscene
 
 | Thành phần | Mô tả |
 |---|---|
-| QuestData (ScriptableObject) | 12+ quest chính |
-| QuestTrigger | Trigger volume hoặc manual |
-| QuestReward | EXP + Journal |
-| CutscenePlayer | Cutscene chuyển chương |
-| Collectible (Journal) | Nhật ký đầu tiên |
-
-**Script:**
-> "Hệ thống nhiệm vụ chính gồm hơn 12 quest xuyên suốt 5 chương. Người chơi hoàn thành quest bằng cách đến điểm, tiêu diệt đủ zombie, hoặc tương tác vật phẩm. Mỗi quest thưởng EXP và nhật ký.
->
-> Khi hoàn thành Chương 1, một **Cutscene** chuyển cảnh xuất hiện: 'Chương 2 — Bệnh Viện'."
+| 12+ main quest | Đến điểm / tiêu diệt / thu thập / tương tác |
+| CutscenePlayer | Chuyển chương: "Chương 2 — Bệnh Viện" |
 
 ---
 
-## 🌙 PHẦN 4: CHƯƠNG 2 — BUỔI TRƯA (2 phút)
+## ☀️ PHẦN 4: CHƯƠNG 2 — BUỔI TRƯA (3 phút)
 
-**Màn hình: Chapter 2 — Noon (Hospital)**
+### 4.1 — Nâng cấp Skill Tree lần đầu
 
-| Đặc điểm | Mô tả |
+| Hành động | Mô tả |
 |---|---|
-| Time | Noon (12h) — DayNightCycle chuyển |
-| Khu vực | Bệnh viện |
-| Độ khó | Tăng dần |
-| Side Quests | Mở khóa sau main quest |
+| Mở Skill Tree | Click upgrade node đầu tiên |
+| PlayerUpgradeManager | Tự động áp dụng chỉ số |
 
 **Script:**
-> "Chương 2 — Buổi Trưa tại Bệnh Viện. Thời gian chuyển từ bình minh sang giữa trưa, ánh sáng thay đổi rõ rệt nhờ DayNightCycle. Zombie đông hơn và cứng hơn.
->
-> Sau khi hoàn thành cốt truyện chính của chương, **Side Quest** bắt đầu mở khóa — các nhiệm vụ phụ với phần thưởng đặc biệt."
+> "Chương 2 — Buổi Trưa (12h). Đã đủ EXP, nâng skill tree lần đầu: tăng speed, giảm recoil, hoặc tăng XP radius."
 
-### 4.1 Side Quest System
+### 4.2 — Vũ khí mới: Rifle
 
-**Màn hình: Nhặt side quest → hoàn thành**
-
-| Side Quest | Mô tả |
+| Vũ khí thêm | Rifle |
 |---|---|
-| Church | Nhiệm vụ nhà thờ |
-| Auto Repair | Tiệm sửa xe |
-| Motel | Nhà nghỉ |
-| Quarantine | Khu cách ly |
-| HighRise Base | Căn cứ cao tầng |
-| Mother's Story | Câu chuyện người mẹ |
-| Lighthouse | Hải đăng |
-| (8 tổng cộng) | Mỗi quest có mục tiêu riêng |
+| Tổng hiện có | Pistol + Rifle = 2 |
+
+### 4.3 — Side Quest
+
+| 8 Side Quest | Church, Auto Repair, Motel, Quarantine, HighRise Base, Mother's Story, Lighthouse |
+
+### 4.4 — Journal
+
+| Nhóm | Số lượng |
+|---|---|
+| Soldier / Neighbor / Military Record / Experiment Report / Doctor Journal / Cure Record / Brother Journal | 39 tổng cộng |
 
 **Script:**
-> "Side Quest là hệ thống song song, độc lập với cốt truyện chính. Có 8 side quest với các mục tiêu đa dạng: tiêu diệt, thu thập, tương tác."
+> "8 Side Quest mở khóa. 39 journal thu thập xuyên suốt — mỗi cái có hình, nội dung, voice log."
 
 ---
 
-## 🏗️ PHẦN 5: CHƯƠNG 3 — HOÀNG HÔN (2 phút)
+## 🏗️ PHẦN 5: CHƯƠNG 3 — HOÀNG HÔN (3 phút)
 
-### 5.1 Wave System
-
-**Màn hình: Chapter 3 — Construction Site, wave đang diễn ra**
+### 5.1 — Wave System
 
 | Thành phần | Chi tiết |
 |---|---|
-| WaveManager | Vô hạn wave, base kill = 10 + wave × 5 |
-| WaveQuestInteractable | Quest sóng: khóa ranh giới, spawn từng wave |
-| SpecialEnemyDirector | Boomer từ wave 3+, Tank từ wave 5+ |
-| Wave Announcer | UI thông báo wave start/end |
+| WaveManager | Wave đầu 10 kill, +5 mỗi wave |
+| WaveQuestInteractable | Khóa vùng, sống sót N wave, teleport về |
+| Wave Announcer | Thông báo HUD |
 
-**Script:**
-> "Chương 3 — Hoàng Hôn tại Công Trường, giới thiệu hệ thống **Wave**. Spawner có cơ chế **Object Pooling** với tối đa 60 zombie, spawn có kiểm tra NavMesh hợp lệ.
->
-> Có dạng quest đặc biệt: **Wave Quest** — người chơi bị khóa trong khu vực, phải sống sót qua nhiều đợt sóng, bao gồm cả Boomer."
+### 5.2 — Kỹ năng đã mở khóa
 
-### 5.2 Boomer
+| Kỹ năng | Dash + Air Control (nếu nâng Movement) |
 
-**Màn hình: Boomer xuất hiện → kêu to → phát nổ**
+### 5.3 — Vũ khí mới: SMG + Shotgun
 
-| Zombie | HP | Đặc điểm |
-|---|---|---|
-| **Boomer** | 100 | Kêu rít → phát nổ → vũng acid, sát thương vùng |
+| Vũ khí thêm | SMG, Shotgun |
+|---|---|
+| Tổng hiện có | Pistol + Rifle + SMG + Shotgun = 4 |
 
-**Script:**
-> "Boomer là zombie đặc biệt: khi bị kích động, nó kêu to một hồi rồi phát nổ, để lại vũng acid sát thương. Người chơi có thể bắn chết từ xa để an toàn."
+### 5.4 — Boomer + SpecialEnemyDirector
 
----
+| Zombie | Đặc điểm |
+|---|---|
+| Boomer | 100 HP, kêu rít → phát nổ → vũng acid |
+| SpecialEnemyDirector | Spawn từ wave 3+, NavMesh check, scale stat |
 
-## 🌃 PHẦN 6: CHƯƠNG 4 — MÀN ĐÊM (2 phút)
+### 5.5 — Enemies phụ
 
-### 6.1 Skill Tree
-
-**Màn hình: Mở skill tree panel → nâng cấp**
-
-| Nhánh | Node | Hiệu ứng |
-|---|---|---|
-| **Movement** (5 nodes) | Walk Speed → Run Speed → Air Control + Dash → Wall Run/Bounce → Double Jump + Grapple | +Stamina mỗi node |
-| **Aim** (5 nodes) | Recoil → Crit 10% → Crit 20% → Crit x1.5 → One-shot Crook + Bonus Special | +Damage mỗi node |
-| **Intelligence** (5 nodes) | XP Radius → XP x1.1 → Radius 10 → XP x1.15 → Radius 15 + Highlight | +HP mỗi node |
-
-**Script:**
-> "Chương 4 — Màn Đêm, và cũng là lúc người chơi đã tích lũy đủ điểm kỹ năng. **Skill Tree** có 3 nhánh:
-> - **Movement**: Tốc độ, dash, wall run, double jump, grappling hook
-> - **Aim**: Giảm recoil, tăng crit, one-shot zombie thường
-> - **Intelligence**: Bán kính hút EXP, nhân EXP, highlight vật phẩm
->
-> Mỗi node có chi phí điểm kỹ năng tăng dần và cộng dồn chỉ số sinh tồn."
-
-### 6.2 Tank
-
-**Màn hình: Tank xuất hiện, gầm rú, chiến đấu**
-
-| Boss | HP | Đặc điểm |
-|---|---|---|
-| **Tank** | 500+ (scale theo wave) | Đấm, vả, nhảy tấn công, gầm toàn map |
-
-**Script:**
-> "Tank là boss chính — 500 máu cơ bản, tỉ lệ theo wave. Nó có 3 đòn tấn công: đấm, tát, và nhảy từ xa. Tiếng gầm của Tank vang toàn map cảnh báo người chơi."
+| Ceiling Zombie | Rơi từ trần |
+|---|---|
+| Snatcher, Hooker | Enemy đặc biệt |
 
 ---
 
-## 🌆 PHẦN 7: CHƯƠNG 5 — ĐÊM KHUYA & KẾT THÚC (2 phút)
+## 🌃 PHẦN 6: CHƯƠNG 4 — MÀN ĐÊM (3 phút)
 
-### 7.1 Witch & Big Guy
+### 6.1 — Kỹ năng cao cấp
 
-**Màn hình: Witch ngồi khóc → kích động → lao nhanh**
+| Kỹ năng | Wall Run + Bounce → Double Jump + Grapple |
+|---|---|
+| Aim cuối | One-shot Crook + Bonus Specials |
+| Intel cuối | Highlight journal (Outline) |
+
+### 6.2 — Vũ khí mới: Rocket, Revolver, Katana, Burst Rifle
+
+| Vũ khí thêm | Rocket Launcher, Revolver, Katana, Burst Rifle |
+|---|---|
+| Tổng hiện có | 8 (full arsenal) |
+
+### 6.3 — Tank Boss
+
+| Boss | Chi tiết |
+|---|---|
+| Tank | 500+ HP (scale wave). Punch / Swipe / Jump Attack. Gầm toàn map. Boss Health Bar |
+
+---
+
+## 🌆 PHẦN 7: CHƯƠNG 5 — ĐÊM KHUYA + KẾT THÚC (3 phút)
+
+### 7.1 — Full 8 vũ khí
+
+| Hiện trạng | Đầy đủ 8 vũ khí: Pistol, Rifle, SMG, Shotgun, Rocket, Revolver, Katana, Burst Rifle |
+
+### 7.2 — Witch & Big Guy
 
 | Mini-boss | HP | Đặc điểm |
 |---|---|---|
-| **Witch** | 60 | Ngồi khóc, bị động → lao nhanh 6.5m/s |
-| **Big Guy** | 80 | Choáng tại chỗ, kích động → rượt chậm nhưng trâu |
+| Witch | 60 | Ngồi khóc → lao 6.5 m/s |
+| Big Guy | 80 | Choáng → gầm → rượt chậm, đấm mạnh |
 
-**Script:**
-> "Chương 5 — Đêm Khuya tại Chung Cư. Xuất hiện 2 mini-boss đặc biệt:
-> - **Witch**: ngồi khóc, nếu lại gần hoặc bắn trúng, nó gào thét lao cực nhanh vào người chơi
-> - **Big Guy**: đứng choáng váng, khi bị kích động nó gầm lên và rượt chậm nhưng rất trâu"
+### 7.3 — Quest cuối & Ending
 
-### 7.2 Journal & Voice Log
-
-**Màn hình: Nhặt journal → popup với text + voice**
-
-| Nhóm Journal | Số lượng |
+| Bước | Mô tả |
 |---|---|
-| Soldier Journal | 3 |
-| Neighbor Journal | 21 |
-| Military Record | 8 |
-| Experiment Report | 3 |
-| Doctor Journal | 3 |
-| Cure Record | 4 |
-| Brother Journal | 5 |
-| **Tổng cộng** | **39 nhật ký** |
-
-**Script:**
-> "Xuyên suốt game, người chơi thu thập **39 mẩu nhật ký** kể về câu chuyện đằng sau đại dịch — từ góc nhìn người lính, hàng xóm, bác sĩ, quân đội, và những thí nghiệm bí mật. Mỗi nhật ký có hình ảnh, nội dung, và voice log."
-
-### 7.3 Trận Cuối & Bomb Explosion
-
-**Màn hình: WaveQuest cuối → đánh Tank → kích hoạt bom → explosion**
-
-| Thành phần | Mô tả |
-|---|---|
-| WaveQuestInteractable | Quest cuối: sống sót wave + đánh Tank |
-| BombExplosionCutscene | Camera tạm, VFX nuke, SFX nổ |
+| Quest 12 — Escape Town | Wave Quest cuối: khóa vùng → nhiều wave → Tank boss → kích hoạt bom |
+| BombExplosionCutscene | Camera tạm, VFX nuke, SFX, Fade to Black |
 | EpilogueSlide | "Dịch bệnh đã được kiểm soát..." |
-| CreditsSequence | Credit cuộn với logo trường |
-| EndingSequenceManager | Điều phối toàn bộ kết thúc |
-
-**Script:**
-> "Kết thúc game: người chơi phải sống sót qua trận cuối, đánh bại Tank, sau đó kích hoạt bom hủy diệt khu vực.
->
-> **Bomb Explosion Cutscene** — camera chuyển cảnh, hiệu ứng nổ hạt nhân. Tiếp theo là **Epilogue** và **Credits** với tên các thành viên nhóm, trường, và sự tri ân."
+| CreditsSequence | Credit cuộn → Main Menu |
 
 ---
 
-## 🏆 PHẦN 8: GAME OVER, ACHIEVEMENT & PLAYFAB (1 phút)
+## 🏆 PHẦN 8: GAME OVER + ACHIEVEMENT + PLAYFAB (1 phút)
 
-### 8.1 Game Over
-
-**Màn hình: Game Over panel**
+### 8.1 — Game Over
 
 | Thông tin | Chi tiết |
 |---|---|
-| Chế độ Story | Chapter, quest, journals, score |
-| Chế độ Wave | Score, wave, kills, best score |
-| Restart / Main Menu / Quit | 3 tùy chọn |
+| Story mode | Chapter, quest, journal, score |
+| Wave mode | Score, wave, kills, best score |
+| 3 tùy chọn | Restart (checkpoint), Main Menu, Quit |
 
-### 8.2 Achievement
+### 8.2 — Achievement (5)
 
-| Achievement | Điều kiện |
-|---|---|
-| Speedrunner | 5 chương dưới 11 phút |
-| Hell Slayer | 130 Crook kills |
-| At Ease, Cooper | 20 kill khi wall run |
-| Tank Slayer | Kill Tank đầu tiên |
-| Close Call | Trong 5m khi Boomer nổ |
+| # | Tên | Điều kiện |
+|---|---|---|
+| 1 | Speedrunner | 5 chương <11 phút |
+| 2 | Hell Slayer | 130 Crook kills |
+| 3 | At Ease, Cooper | 20 kills wall run |
+| 4 | Tank Slayer | Hạ Tank đầu |
+| 5 | Close Call | Trong 5m Boomer nổ |
 
-### 8.3 PlayFab
+### 8.3 — PlayFab
 
 | Tính năng | Mô tả |
 |---|---|
@@ -339,55 +261,41 @@
 | Auto-save | 60 giây/lần |
 | Leaderboard | Xếp hạng toàn cầu |
 
-**Script:**
-> "Cuối cùng, hệ thống **Game Over** thống kê toàn bộ thành tích. **Achievement** gồm 5 thành tựu. Và **PlayFab** đồng bộ dữ liệu lên đám mây — đăng ký, đăng nhập, auto-save, và bảng xếp hạng toàn cầu."
-
 ---
 
 ## 🎬 PHẦN 9: KẾT LUẬN (1 phút)
 
-**Màn hình: Tổng kết**
-
-| Hạng mục | Số lượng / Chi tiết |
+| Hạng mục | Số lượng |
 |---|---|
-| Ngôn ngữ | C# — Unity |
-| Số scene | 3 (MainMenu, Sample, Story) |
-| Số script | 80+ |
-| Số chương | 5 |
-| Số quest chính | 12+ |
-| Số side quest | 8 |
-| Số journal | 39 |
-| Số loại zombie | 7 (Crook, Boomer, Tank, Witch, BigGuy, Snatcher, Hooker) |
-| Số vũ khí | 9+ (Pistol, Rifle, SMG, Shotgun, Rocket, Revolver, Katana, Burst Rifle, Turret) |
-| Số achievement | 5 |
-| Backend | PlayFab |
-| Asset Store | Cowsins Engine, Polygon Apocalypse, Polygon Zombies, Polygon Boss Zombies |
+| Engine | Unity — C# |
+| Chương | 5 |
+| Main quest | 12+ |
+| Side quest | 8 |
+| Journal | 39 (7 nhóm) |
+| Loại zombie | 7 |
+| Vũ khí | 8 (thu thập dần) |
+| Skill tree | 3 nhánh / 15 node |
+| Achievement | 5 |
+| Cloud | PlayFab |
 
 **Script:**
-> "Tóm lại, dự án đã hoàn thiện một tựa game FPS Survival hoàn chỉnh với:
-> - **5 chương** với cốt truyện xuyên suốt
-> - **12+ nhiệm vụ chính**, **8 nhiệm vụ phụ**
-> - **7 loại kẻ địch** với AI phức tạp
-> - **Hệ thống skill tree 3 nhánh**
-> - **39 nhật ký** kể chuyện
-> - **Hệ thống wave, checkpoint, day/night cycle**
-> - **Tích hợp PlayFab** lưu dữ liệu đám mây
-> - **Kết thúc hoàn chỉnh** với cutscene, epilogue, credits
+> "Tóm lại: game FPS Survival hoàn chỉnh với cốt truyện 5 chương, 8 loại vũ khí thu thập dần, 7 loại zombie, skill tree 3 nhánh, 39 journal, kết thúc cutscene, tích hợp PlayFab.
 >
-> Nhóm em xin cảm ơn thầy cô và các bạn đã lắng nghe. Rất mong nhận được góp ý để hoàn thiện sản phẩm hơn nữa!"
+> Xin cảm ơn thầy cô và các bạn!"
 
 ---
 
-## ⏱ TỔNG THỜI GIAN DỰ KIẾN: 15-17 PHÚT
+## ⏱ TỔNG THỜI GIAN DỰ KIẾN
 
 | Phần | Thời gian |
 |---|---|
-| 1. Giới thiệu | 2 phút |
+| 1. Giới thiệu | 1.5 phút |
 | 2. Main Menu | 1 phút |
-| 3. Chương 1 (Bình Minh) | 3 phút |
-| 4. Chương 2 (Buổi Trưa) | 2 phút |
-| 5. Chương 3 (Hoàng Hôn) | 2 phút |
-| 6. Chương 4 (Màn Đêm) | 2 phút |
-| 7. Chương 5 (Đêm Khuya + Kết thúc) | 2 phút |
-| 8. Game Over & PlayFab | 1 phút |
+| 3. Chương 1 (Bình Minh) | 6 phút |
+| 4. Chương 2 (Buổi Trưa) | 3 phút |
+| 5. Chương 3 (Hoàng Hôn) | 3 phút |
+| 6. Chương 4 (Màn Đêm) | 3 phút |
+| 7. Chương 5 (Đêm Khuya + Kết thúc) | 3 phút |
+| 8. Game Over + Achievement + PlayFab | 1 phút |
 | 9. Kết luận | 1 phút |
+| **Tổng cộng** | **~20 phút** |
