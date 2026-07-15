@@ -289,7 +289,7 @@ MonoBehaviour:
   sightEyeHeight: 1.5
   attackRange: 1.5
   attackCooldown: 2.5
-  attackDamage: 30
+  attackDamage: 40
   damageApplyDelay: 1
   screamDuration: 3
   stuckTimeThreshold: 3
