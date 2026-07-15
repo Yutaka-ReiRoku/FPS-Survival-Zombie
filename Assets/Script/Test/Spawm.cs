@@ -114,6 +114,52 @@ public class Spawm : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Called when the spawner is disabled (e.g. player leaves the chapter
+    /// and ChapterBoundary.SetSpawnersActive(false) runs). Despawns all
+    /// zombies owned by this spawner so they don't follow the player into
+    /// the next chapter and accumulate across chapters.
+    /// </summary>
+    private void OnDisable()
+    {
+        DespawnAllLocalZombies();
+    }
+
+    /// <summary>
+    /// Returns every zombie spawned by this spawner to the pool and clears
+    /// local tracking. Safe to call multiple times. Deactivates both tracked
+    /// active zombies AND all pooled instances (in case tracking was lost).
+    /// </summary>
+    private void DespawnAllLocalZombies()
+    {
+        // Despawn tracked active zombies.
+        foreach (var ai in _localActiveZombies)
+        {
+            if (ai != null && ai.gameObject != null && ai.gameObject.activeInHierarchy)
+            {
+                ai.gameObject.SetActive(false);
+            }
+        }
+        _localActiveZombies.Clear();
+        _wanderTimers.Clear();
+        timer = 0f;
+
+        // Also sweep the entire pool and deactivate any active instances.
+        // This catches zombies that were somehow lost from local tracking
+        // (e.g. re-parented, re-activated by another system, etc.).
+        foreach (var kvp in poolDictionary)
+        {
+            if (kvp.Value == null) continue;
+            foreach (var zombie in kvp.Value)
+            {
+                if (zombie != null && zombie.activeInHierarchy)
+                {
+                    zombie.SetActive(false);
+                }
+            }
+        }
+    }
+
     private void Update()
     {
         UpdateDirectorSettings();
