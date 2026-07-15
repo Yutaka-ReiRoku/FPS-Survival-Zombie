@@ -10,10 +10,10 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
         LOD 100
-        Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite Off
+        Blend Off
+        ZWrite On
 
         Pass
         {
@@ -64,8 +64,8 @@
                 float shift = glitchLine * _GlitchIntensity * sin(timeVal * 40.0);
                 uv.x += shift;
 
-                // Base color
-                fixed4 col = _BaseColor;
+                // Sample texture (forces bindings to remain active) and multiply by base color
+                fixed4 col = tex2D(_MainTex, uv) * _BaseColor;
                 
                 // Add color noise/flicker
                 float flicker = 0.94 + 0.06 * rand(float2(timeVal, timeVal * 1.3));
@@ -78,6 +78,9 @@
                 // Subtle red warning pulse
                 float pulse = 0.5 + 0.5 * sin(timeVal * 2.0);
                 col.rgb += float3(0.05, 0.015, 0.0) * pulse;
+
+                // Force alpha to be _BaseColor.a
+                col.a = _BaseColor.a;
 
                 return col;
             }

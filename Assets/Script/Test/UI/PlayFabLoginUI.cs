@@ -28,6 +28,7 @@ public class PlayFabLoginUI : MonoBehaviour
     private VisualElement _btnMainSec;
 
     private RenderTexture _rt;
+    private Texture2D _tex2D;
     private Material _crtMaterial;
 
     private bool _isRegisterMode;
@@ -115,6 +116,9 @@ public class PlayFabLoginUI : MonoBehaviour
         _rt = new RenderTexture(256, 256, 0, RenderTextureFormat.ARGB32);
         _rt.filterMode = FilterMode.Bilinear;
         _rt.Create();
+
+        _tex2D = new Texture2D(256, 256, TextureFormat.ARGB32, false);
+        _tex2D.filterMode = FilterMode.Bilinear;
     }
 
     private void OnEnable()
@@ -126,11 +130,13 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void Update()
     {
-        // Drive CRT glitch shader rendering onto RenderTexture
-        if (_crtMaterial != null && _rt != null)
+        // Drive CRT glitch shader rendering onto RenderTexture, then copy to Texture2D via GPU
+        if (_crtMaterial != null && _rt != null && _tex2D != null)
         {
             _crtMaterial.SetFloat("_GlitchTime", Time.realtimeSinceStartup);
             Graphics.Blit(Texture2D.whiteTexture, _rt, _crtMaterial);
+            Graphics.CopyTexture(_rt, _tex2D);
+            _tex2D.IncrementUpdateCount();
         }
 
         // Repaint all modules to drive vector laser scanlines and glowing breathing pulse animations
@@ -399,9 +405,9 @@ public class PlayFabLoginUI : MonoBehaviour
             var painter = mgc.painter2D;
 
             // 1. Draw background shape
-            if (drawScanline && _rt != null) // Draw via Mesh API mapping RenderTexture shader
+            if (drawScanline && _tex2D != null) // Draw via Mesh API mapping Texture2D copy of shader
             {
-                var mesh = mgc.Allocate(6, 12, _rt);
+                var mesh = mgc.Allocate(6, 12, _tex2D);
 
                 var p0 = new Vector2(chamferSize, 0);
                 var p1 = new Vector2(rect.width, 0);
@@ -518,6 +524,19 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Shared UIDocument is managed by the MainMenu scene GameObject, do not destroy it.
+        // Clean up created textures and materials to avoid memory leaks
+        if (_rt != null)
+        {
+            _rt.Release();
+            Destroy(_rt);
+        }
+        if (_tex2D != null)
+        {
+            Destroy(_tex2D);
+        }
+        if (_crtMaterial != null)
+        {
+            Destroy(_crtMaterial);
+        }
     }
 }
