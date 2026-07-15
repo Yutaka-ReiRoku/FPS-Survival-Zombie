@@ -23,6 +23,10 @@ public class PlayFabLoginUI : MonoBehaviour
     private VisualElement _toggleButton;
     private Label _toggleButtonLabel;
     private VisualElement _logoutButton;
+    
+    private VisualElement _usernameInputContainer;
+    private VisualElement _passwordInputContainer;
+    private VisualElement _btnMainSec;
 
     private bool _isRegisterMode;
     private bool _isBusy;
@@ -80,11 +84,20 @@ public class PlayFabLoginUI : MonoBehaviour
         }
 
         // Apply custom vector API chamfer drawing with large prominent cuts for rusted steel aesthetic
-        SetupChamferedPlaque(root.Q("HeaderModule"), 28f);
-        SetupChamferedPlaque(root.Q("InputModule_User"), 24f);
-        SetupChamferedPlaque(root.Q("InputModule_Pass"), 24f);
-        SetupChamferedPlaque(root.Q("ActionModule"), 28f);
-        SetupChamferedPlaque(root.Q("FooterModule"), 20f);
+        SetupChamferedPlaque(root.Q("HeaderModule"), 28f, true, false);
+        SetupChamferedPlaque(root.Q("InputModule_User"), 24f, true, false);
+        SetupChamferedPlaque(root.Q("InputModule_Pass"), 24f, true, false);
+        SetupChamferedPlaque(root.Q("ActionModule"), 28f, true, false);
+        SetupChamferedPlaque(root.Q("FooterModule"), 20f, true, false);
+
+        // Find child input fields and button sections to apply matching chamfered cuts
+        _usernameInputContainer = root.Q("InputModule_User")?.Q(className: "input-container-inner");
+        _passwordInputContainer = root.Q("InputModule_Pass")?.Q(className: "input-container-inner");
+        _btnMainSec = root.Q("ActionButton")?.Q(className: "btn-main-section");
+
+        SetupChamferedPlaque(_usernameInputContainer, 10f, false, false);
+        SetupChamferedPlaque(_passwordInputContainer, 10f, false, false);
+        SetupChamferedPlaque(_btnMainSec, 8f, false, true);
     }
 
     private void OnEnable()
@@ -92,6 +105,23 @@ public class PlayFabLoginUI : MonoBehaviour
         AutoDetectMainMenu();
         HideMainMenu();
         StartCoroutine(BindAndShow());
+    }
+
+    private void Update()
+    {
+        // Repaint all modules to drive vector laser scanlines and glowing breathing pulse animations
+        var root = _doc?.rootVisualElement;
+        if (root == null || _loginRoot == null || _loginRoot.style.display == DisplayStyle.None) return;
+
+        root.Q("HeaderModule")?.MarkDirtyRepaint();
+        root.Q("InputModule_User")?.MarkDirtyRepaint();
+        root.Q("InputModule_Pass")?.MarkDirtyRepaint();
+        root.Q("ActionModule")?.MarkDirtyRepaint();
+        root.Q("FooterModule")?.MarkDirtyRepaint();
+
+        _usernameInputContainer?.MarkDirtyRepaint();
+        _passwordInputContainer?.MarkDirtyRepaint();
+        _btnMainSec?.MarkDirtyRepaint();
     }
 
     private void AutoDetectMainMenu()
@@ -314,7 +344,7 @@ public class PlayFabLoginUI : MonoBehaviour
         _actionButton?.SetEnabled(!busy);
     }
 
-    private void SetupChamferedPlaque(VisualElement element, float chamferSize)
+    private void SetupChamferedPlaque(VisualElement element, float chamferSize, bool drawScanline, bool isButton)
     {
         if (element == null) return;
         
@@ -344,8 +374,25 @@ public class PlayFabLoginUI : MonoBehaviour
 
             var painter = mgc.painter2D;
 
-            // Fill warm rusted steel slate backing
-            painter.fillColor = new Color(55f / 255f, 40f / 255f, 40f / 255f, 0.92f);
+            // 1. Determine fill color
+            Color fillCol;
+            if (isButton)
+            {
+                fillCol = isHovered 
+                    ? new Color(250f / 255f, 100f / 255f, 60f / 255f, 1f)
+                    : new Color(230f / 255f, 80f / 255f, 40f / 255f, 1f);
+            }
+            else if (drawScanline) // Main module
+            {
+                fillCol = new Color(55f / 255f, 40f / 255f, 40f / 255f, 0.92f);
+            }
+            else // Input field container
+            {
+                fillCol = new Color(30f / 255f, 20f / 255f, 20f / 255f, 0.75f);
+            }
+
+            // Fill asymmetric chamfered shape
+            painter.fillColor = fillCol;
             painter.BeginPath();
             painter.MoveTo(new Vector2(chamferSize, 0));
             painter.LineTo(new Vector2(rect.width, 0));
@@ -356,10 +403,36 @@ public class PlayFabLoginUI : MonoBehaviour
             painter.ClosePath();
             painter.Fill();
 
-            // Draw outer border (Rusted warning orange-red)
-            painter.strokeColor = isHovered 
-                ? new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.85f)
-                : new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.35f);
+            // 2. Draw Vector scanline sweep (subtle cybermatic effect)
+            if (drawScanline)
+            {
+                float scanY = (Time.realtimeSinceStartup * 45f) % rect.height;
+                painter.strokeColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.07f);
+                painter.lineWidth = 1.0f;
+                painter.BeginPath();
+                painter.MoveTo(new Vector2(16f, scanY));
+                painter.LineTo(new Vector2(rect.width - 16f, scanY));
+                painter.Stroke();
+            }
+
+            // 3. Determine outer stroke color (Breathing pulse for modules, static for inputs/buttons)
+            Color strokeCol;
+            if (isButton)
+            {
+                strokeCol = new Color(255f / 255f, 255f / 255f, 255f / 255f, 0.3f);
+            }
+            else if (drawScanline) // Pulsing modules
+            {
+                float pulse = 0.35f + Mathf.PingPong(Time.realtimeSinceStartup * 1.5f, 0.45f);
+                strokeCol = new Color(230f / 255f, 80f / 255f, 40f / 255f, isHovered ? 0.9f : pulse);
+            }
+            else // Input containers
+            {
+                strokeCol = new Color(230f / 255f, 80f / 255f, 40f / 255f, isHovered ? 0.8f : 0.25f);
+            }
+
+            // Draw outer border
+            painter.strokeColor = strokeCol;
             painter.lineWidth = 1.5f;
             painter.BeginPath();
             painter.MoveTo(new Vector2(chamferSize, 0));
@@ -371,23 +444,28 @@ public class PlayFabLoginUI : MonoBehaviour
             painter.ClosePath();
             painter.Stroke();
 
-            // Draw inner offset double-line border
-            float d = 3.5f;
-            if (rect.width > d * 2 && rect.height > d * 2)
+            // 4. Draw inner offset double-line border (only for main modules)
+            if (drawScanline)
             {
-                painter.strokeColor = isHovered 
-                    ? new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.45f)
-                    : new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.15f);
-                painter.lineWidth = 1.0f;
-                painter.BeginPath();
-                painter.MoveTo(new Vector2(chamferSize, d));
-                painter.LineTo(new Vector2(rect.width - d, d));
-                painter.LineTo(new Vector2(rect.width - d, rect.height - chamferSize));
-                painter.LineTo(new Vector2(rect.width - chamferSize, rect.height - d));
-                painter.LineTo(new Vector2(d, rect.height - d));
-                painter.LineTo(new Vector2(d, chamferSize));
-                painter.ClosePath();
-                painter.Stroke();
+                float d = 3.5f;
+                if (rect.width > d * 2 && rect.height > d * 2)
+                {
+                    Color innerCol = isHovered 
+                        ? new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.45f)
+                        : new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.15f);
+                    
+                    painter.strokeColor = innerCol;
+                    painter.lineWidth = 1.0f;
+                    painter.BeginPath();
+                    painter.MoveTo(new Vector2(chamferSize, d));
+                    painter.LineTo(new Vector2(rect.width - d, d));
+                    painter.LineTo(new Vector2(rect.width - d, rect.height - chamferSize));
+                    painter.LineTo(new Vector2(rect.width - chamferSize, rect.height - d));
+                    painter.LineTo(new Vector2(d, rect.height - d));
+                    painter.LineTo(new Vector2(d, chamferSize));
+                    painter.ClosePath();
+                    painter.Stroke();
+                }
             }
         };
     }
