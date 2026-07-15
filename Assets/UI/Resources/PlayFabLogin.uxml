@@ -90,20 +90,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Module 5: Footer Status Widget -->
-            <ui:VisualElement name="FooterModule" class="hud-module status-module">
-                <ui:VisualElement class="module-connector" />
-                <ui:VisualElement class="hud-bracket bracket-bl" />
-                <ui:VisualElement class="hud-bracket bracket-br" />
-                
-                <ui:VisualElement name="LoginFooter" class="login-footer">
-                    <ui:VisualElement name="ServerStatusRow" class="status-row">
-                        <ui:VisualElement name="StatusIndicator" class="status-dot-online" />
-                        <ui:Label name="StatusText" class="status-text" text="SERVER STATUS: ONLINE" />
-                    </ui:VisualElement>
-                    <ui:Label name="CopyrightText" class="copyright-text" text="© 2026 ANTIGRAVITY GAMES" />
-                </ui:VisualElement>
-            </ui:VisualElement>
+
 
         </ui:VisualElement>
     </ui:VisualElement>

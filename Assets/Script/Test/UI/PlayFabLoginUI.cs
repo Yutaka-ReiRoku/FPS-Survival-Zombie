@@ -117,7 +117,6 @@ public class PlayFabLoginUI : MonoBehaviour
         root.Q("InputModule_User")?.MarkDirtyRepaint();
         root.Q("InputModule_Pass")?.MarkDirtyRepaint();
         root.Q("ActionModule")?.MarkDirtyRepaint();
-        root.Q("FooterModule")?.MarkDirtyRepaint();
 
         _usernameInputContainer?.MarkDirtyRepaint();
         _passwordInputContainer?.MarkDirtyRepaint();
