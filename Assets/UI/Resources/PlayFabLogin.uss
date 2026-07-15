@@ -100,7 +100,7 @@
 .hud-stamp {
     position: absolute;
     font-size: 8px;
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     letter-spacing: 1px;
 }
 
@@ -128,20 +128,20 @@
 }
 
 .game-logo-zombie {
-    font-size: 50px;
-    -unity-font-definition: resource("Fonts/Anton SDF");
+    font-size: 44px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: rgb(184, 38, 48);
     -unity-text-align: middle-center;
-    margin-bottom: -15px;
-    letter-spacing: 5px;
+    margin-bottom: -4px;
+    letter-spacing: 4px;
 }
 
 .game-logo-survival {
-    font-size: 18px;
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    font-size: 14px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: rgb(230, 80, 40);
     -unity-text-align: middle-center;
-    letter-spacing: 12px;
+    letter-spacing: 8px;
 }
 
 /* --- Modules 2 & 3: Input Scanner Terminals --- */
@@ -220,7 +220,7 @@
     right: 8px;
     font-size: 7px;
     color: rgba(158, 168, 184, 0.22);
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
 }
 
 /* --- Module 4: Action & Diagnostics Terminal --- */
@@ -231,7 +231,7 @@
 
 .login-title {
     font-size: 10px;
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: rgba(230, 80, 40, 0.7);
     letter-spacing: 1.5px;
     margin-bottom: 4px;
@@ -291,8 +291,8 @@
 }
 
 .btn-label {
-    font-size: 12px;
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    font-size: 10px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: rgb(9, 12, 17);
     -unity-text-align: middle-center;
     letter-spacing: 2px;

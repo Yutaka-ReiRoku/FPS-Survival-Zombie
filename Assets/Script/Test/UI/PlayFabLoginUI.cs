@@ -27,11 +27,6 @@ public class PlayFabLoginUI : MonoBehaviour
     private VisualElement _passwordInputContainer;
     private VisualElement _btnMainSec;
 
-    private Material _headerMaterial;
-    private Material _userMaterial;
-    private Material _passMaterial;
-    private Material _actionMaterial;
-    private Material _footerMaterial;
 
     private bool _isRegisterMode;
     private bool _isBusy;
@@ -88,27 +83,12 @@ public class PlayFabLoginUI : MonoBehaviour
             _logoutButton.style.display = DisplayStyle.None;
         }
 
-        // Load custom CRT glitch shader and instantiate materials for individual modules
-        var shader = Shader.Find("Custom/CRTGlitchShader");
-        if (shader != null)
-        {
-            _headerMaterial = new Material(shader);
-            _userMaterial = new Material(shader);
-            _passMaterial = new Material(shader);
-            _actionMaterial = new Material(shader);
-            _footerMaterial = new Material(shader);
-        }
-        else
-        {
-            Debug.LogWarning("[PlayFabLoginUI] Custom/CRTGlitchShader not found. Falling back to solid color rendering.");
-        }
-
         // Apply custom vector API chamfer drawing with large prominent cuts for rusted steel aesthetic
-        SetupChamferedPlaque(root.Q("HeaderModule"), 28f, true, false, _headerMaterial);
-        SetupChamferedPlaque(root.Q("InputModule_User"), 24f, true, false, _userMaterial);
-        SetupChamferedPlaque(root.Q("InputModule_Pass"), 24f, true, false, _passMaterial);
-        SetupChamferedPlaque(root.Q("ActionModule"), 28f, true, false, _actionMaterial);
-        SetupChamferedPlaque(root.Q("FooterModule"), 20f, true, false, _footerMaterial);
+        SetupChamferedPlaque(root.Q("HeaderModule"), 28f, true, false, null);
+        SetupChamferedPlaque(root.Q("InputModule_User"), 24f, true, false, null);
+        SetupChamferedPlaque(root.Q("InputModule_Pass"), 24f, true, false, null);
+        SetupChamferedPlaque(root.Q("ActionModule"), 28f, true, false, null);
+        SetupChamferedPlaque(root.Q("FooterModule"), 20f, true, false, null);
 
         // Find child input fields and button sections to apply matching chamfered cuts
         _usernameInputContainer = root.Q("InputModule_User")?.Q(className: "input-container-inner");
@@ -129,47 +109,19 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void Update()
     {
+        // Repaint all modules to drive glowing breathing pulse animations
         var root = _doc?.rootVisualElement;
         if (root == null || _loginRoot == null || _loginRoot.style.display == DisplayStyle.None) return;
 
-        // Feed layout-dependent sizes and real-time parameters to module shaders
-        UpdateMaterial(_headerMaterial, root.Q("HeaderModule"), 28f);
-        UpdateMaterial(_userMaterial, root.Q("InputModule_User"), 24f);
-        UpdateMaterial(_passMaterial, root.Q("InputModule_Pass"), 24f);
-        UpdateMaterial(_actionMaterial, root.Q("ActionModule"), 28f);
-        UpdateMaterial(_footerMaterial, root.Q("FooterModule"), 20f);
-
-        // Repaint all modules and their background plaques to drive shader updates and laser scanlines
-        RepaintModule(root.Q("HeaderModule"));
-        RepaintModule(root.Q("InputModule_User"));
-        RepaintModule(root.Q("InputModule_Pass"));
-        RepaintModule(root.Q("ActionModule"));
-        RepaintModule(root.Q("FooterModule"));
+        root.Q("HeaderModule")?.MarkDirtyRepaint();
+        root.Q("InputModule_User")?.MarkDirtyRepaint();
+        root.Q("InputModule_Pass")?.MarkDirtyRepaint();
+        root.Q("ActionModule")?.MarkDirtyRepaint();
+        root.Q("FooterModule")?.MarkDirtyRepaint();
 
         _usernameInputContainer?.MarkDirtyRepaint();
         _passwordInputContainer?.MarkDirtyRepaint();
         _btnMainSec?.MarkDirtyRepaint();
-    }
-
-    private void RepaintModule(VisualElement module)
-    {
-        if (module != null)
-        {
-            module.MarkDirtyRepaint();
-            module.Q("BackgroundPlaque")?.MarkDirtyRepaint();
-        }
-    }
-
-    private void UpdateMaterial(Material mat, VisualElement element, float chamfer)
-    {
-        if (mat != null && element != null)
-        {
-            var rect = element.layout;
-            mat.SetFloat("_GlitchTime", Time.realtimeSinceStartup);
-            mat.SetFloat("_Width", rect.width);
-            mat.SetFloat("_Height", rect.height);
-            mat.SetFloat("_ChamferSize", chamfer);
-        }
     }
 
     private void AutoDetectMainMenu()
@@ -403,51 +355,7 @@ public class PlayFabLoginUI : MonoBehaviour
         element.style.borderTopWidth = 0;
         element.style.borderBottomWidth = 0;
 
-        // Programmatically inject an absolute positioned background plaque element mapped with the shader material
-        if (customMat != null)
-        {
-            var bgPlaque = element.Q("BackgroundPlaque");
-            if (bgPlaque == null)
-            {
-                bgPlaque = new VisualElement() { name = "BackgroundPlaque" };
-                bgPlaque.style.position = Position.Absolute;
-                bgPlaque.style.left = 0;
-                bgPlaque.style.top = 0;
-                bgPlaque.style.right = 0;
-                bgPlaque.style.bottom = 0;
-                bgPlaque.style.backgroundColor = Color.white; // Triggers UI Toolkit to draw the background mesh
-                bgPlaque.style.unityMaterial = new StyleMaterialDefinition(customMat);
-                
-                // Draw 6-sided chamfered plaque using Mesh API *inside* the child background element
-                bgPlaque.generateVisualContent += mgc =>
-                {
-                    var rect = bgPlaque.layout;
-                    if (rect.width <= 0 || rect.height <= 0) return;
-                    var mesh = mgc.Allocate(6, 12, Texture2D.whiteTexture);
-
-                    var p0 = new Vector2(chamferSize, 0);
-                    var p1 = new Vector2(rect.width, 0);
-                    var p2 = new Vector2(rect.width, rect.height - chamferSize);
-                    var p3 = new Vector2(rect.width - chamferSize, rect.height);
-                    var p4 = new Vector2(0, rect.height);
-                    var p5 = new Vector2(0, chamferSize);
-
-                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p0.x, p0.y, Vertex.nearZ), uv = new Vector2(chamferSize / rect.width, 1f), tint = Color.white });
-                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p1.x, p1.y, Vertex.nearZ), uv = new Vector2(1f, 1f), tint = Color.white });
-                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p2.x, p2.y, Vertex.nearZ), uv = new Vector2(1f, chamferSize / rect.height), tint = Color.white });
-                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p3.x, p3.y, Vertex.nearZ), uv = new Vector2(1f - chamferSize / rect.width, 0f), tint = Color.white });
-                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p4.x, p4.y, Vertex.nearZ), uv = new Vector2(0f, 0f), tint = Color.white });
-                    mesh.SetNextVertex(new Vertex() { position = new Vector3(p5.x, p5.y, Vertex.nearZ), uv = new Vector2(0f, 1f - chamferSize / rect.height), tint = Color.white });
-
-                    mesh.SetNextIndex(0); mesh.SetNextIndex(1); mesh.SetNextIndex(5);
-                    mesh.SetNextIndex(1); mesh.SetNextIndex(2); mesh.SetNextIndex(5);
-                    mesh.SetNextIndex(2); mesh.SetNextIndex(3); mesh.SetNextIndex(5);
-                    mesh.SetNextIndex(3); mesh.SetNextIndex(4); mesh.SetNextIndex(5);
-                };
-
-                element.Insert(0, bgPlaque);
-            }
-        }
+        // All drawing is done directly on the element's own generateVisualContent callback
 
         bool isHovered = false;
 
@@ -468,43 +376,61 @@ public class PlayFabLoginUI : MonoBehaviour
 
             var painter = mgc.painter2D;
 
-            // 1. Draw background shape only for elements NOT using the custom shader material
-            if (customMat == null)
+            // 1. Draw solid background shape for all elements
+            Color fillCol;
+            if (isButton)
             {
-                Color fillCol;
-                if (isButton)
-                {
-                    fillCol = isHovered 
-                        ? new Color(250f / 255f, 100f / 255f, 60f / 255f, 1f)
-                        : new Color(230f / 255f, 80f / 255f, 40f / 255f, 1f);
-                }
-                else
-                {
-                    fillCol = new Color(30f / 255f, 20f / 255f, 20f / 255f, 0.75f);
-                }
-
-                painter.fillColor = fillCol;
-                painter.BeginPath();
-                painter.MoveTo(new Vector2(chamferSize, 0));
-                painter.LineTo(new Vector2(rect.width, 0));
-                painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
-                painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
-                painter.LineTo(new Vector2(0, rect.height));
-                painter.LineTo(new Vector2(0, chamferSize));
-                painter.ClosePath();
-                painter.Fill();
+                fillCol = isHovered 
+                    ? new Color(250f / 255f, 100f / 255f, 60f / 255f, 1f)
+                    : new Color(230f / 255f, 80f / 255f, 40f / 255f, 1f);
+            }
+            else if (drawScanline)
+            {
+                // Dark rusted-iron brown backing for modules
+                fillCol = new Color(36f / 255f, 22f / 255f, 22f / 255f, 0.94f);
+            }
+            else
+            {
+                // Darker backing for input boxes
+                fillCol = new Color(22f / 255f, 15f / 255f, 15f / 255f, 0.85f);
             }
 
-            // 2. Draw Vector scanline sweep (subtle cybermatic effect)
+            painter.fillColor = fillCol;
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(chamferSize, 0));
+            painter.LineTo(new Vector2(rect.width, 0));
+            painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+            painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+            painter.LineTo(new Vector2(0, rect.height));
+            painter.LineTo(new Vector2(0, chamferSize));
+            painter.ClosePath();
+            painter.Fill();
+
+            // 2. Draw yellow-black diagonal warning stripes at the top edge of main modules
             if (drawScanline)
             {
-                float scanY = (Time.realtimeSinceStartup * 45f) % rect.height;
-                painter.strokeColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.07f);
+                float badgeW = 60f;
+                float badgeH = 7f;
+                float startX = rect.width - badgeW - 24f;
+                float startY = 4f;
+
                 painter.lineWidth = 1.0f;
-                painter.BeginPath();
-                painter.MoveTo(new Vector2(16f, scanY));
-                painter.LineTo(new Vector2(rect.width - 16f, scanY));
-                painter.Stroke();
+                for (float offset = 0; offset < badgeW; offset += 6f)
+                {
+                    // Draw a yellow stripe
+                    painter.strokeColor = new Color(230f / 255f, 180f / 255f, 20f / 255f, 0.8f);
+                    painter.BeginPath();
+                    painter.MoveTo(new Vector2(startX + offset, startY));
+                    painter.LineTo(new Vector2(startX + offset - 4f, startY + badgeH));
+                    painter.Stroke();
+
+                    // Draw a black stripe
+                    painter.strokeColor = new Color(16f / 255f, 14f / 255f, 14f / 255f, 0.9f);
+                    painter.BeginPath();
+                    painter.MoveTo(new Vector2(startX + offset + 3f, startY));
+                    painter.LineTo(new Vector2(startX + offset - 1f, startY + badgeH));
+                    painter.Stroke();
+                }
             }
 
             // 3. Determine outer stroke color (Breathing pulse for modules, static for inputs/buttons)
@@ -558,17 +484,36 @@ public class PlayFabLoginUI : MonoBehaviour
                     painter.ClosePath();
                     painter.Stroke();
                 }
+
+                // 5. Draw 4 3D metallic corner rivets (screws) to lock down the plates
+                System.Action<Vector2> drawRivet = center =>
+                {
+                    // Dark outline shadow
+                    painter.fillColor = new Color(10f / 255f, 8f / 255f, 8f / 255f, 0.9f);
+                    painter.BeginPath();
+                    painter.Arc(center, 3.5f, 0f, 360f);
+                    painter.Fill();
+
+                    // Inner metallic copper/steel disc
+                    painter.fillColor = new Color(130f / 255f, 100f / 255f, 90f / 255f, 0.9f);
+                    painter.BeginPath();
+                    painter.Arc(center, 2.2f, 0f, 360f);
+                    painter.Fill();
+
+                    // Tiny shiny specular highlight
+                    painter.fillColor = new Color(255f / 255f, 255f / 255f, 255f / 255f, 0.4f);
+                    painter.BeginPath();
+                    painter.Arc(center + new Vector2(-0.8f, -0.8f), 0.7f, 0f, 360f);
+                    painter.Fill();
+                };
+
+                drawRivet(new Vector2(chamferSize + 12f, 12f));
+                drawRivet(new Vector2(rect.width - 24f, 12f));
+                drawRivet(new Vector2(24f, rect.height - 12f));
+                drawRivet(new Vector2(rect.width - chamferSize - 12f, rect.height - 12f));
             }
         };
     }
 
-    private void OnDestroy()
-    {
-        // Clean up created materials to avoid memory leaks
-        if (_headerMaterial != null) Destroy(_headerMaterial);
-        if (_userMaterial != null) Destroy(_userMaterial);
-        if (_passMaterial != null) Destroy(_passMaterial);
-        if (_actionMaterial != null) Destroy(_actionMaterial);
-        if (_footerMaterial != null) Destroy(_footerMaterial);
-    }
+
 }
