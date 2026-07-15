@@ -30,14 +30,8 @@ public class PlayerProfileWidget : MonoBehaviour
 
     private void Awake()
     {
-        var asset = Resources.Load<VisualTreeAsset>("PlayerProfileWidget");
-        if (asset == null) { enabled = false; return; }
-
-        var go = new GameObject("PlayerProfile_Doc", typeof(UIDocument));
-        go.transform.SetParent(transform, false);
-        _doc = go.GetComponent<UIDocument>();
-        _doc.sortingOrder = 100;
-        asset.CloneTree(_doc.rootVisualElement);
+        _doc = GetComponent<UIDocument>();
+        if (_doc == null) { enabled = false; return; }
 
         var root = _doc.rootVisualElement;
         _chip = root.Q("PlayerChip");
@@ -232,7 +226,6 @@ public class PlayerProfileWidget : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_doc != null && _doc.gameObject != null)
-            Destroy(_doc.gameObject);
+        // Shared UIDocument is managed by the MainMenu scene GameObject, do not destroy it.
     }
 }

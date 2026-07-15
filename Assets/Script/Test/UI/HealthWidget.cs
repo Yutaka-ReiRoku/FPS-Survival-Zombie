@@ -69,6 +69,11 @@ public class HealthWidget : MonoBehaviour
         _healthFill.style.width = Length.Percent(_target * 100f);
         _healthFill.style.backgroundColor = _colorCurrent;
 
+        if (_root != null)
+        {
+            _root.EnableInClassList("low", _target <= lowThreshold);
+        }
+
         if (hp > _lastHp)
             _healthGhost.style.width = Length.Percent(_target * 100f);
         _lastHp = hp;

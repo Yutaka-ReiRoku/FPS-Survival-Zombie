@@ -8,7 +8,6 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--mm-bg-color);
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -22,7 +21,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--mm-bg-color, #0d1117);
+    background-color: rgba(0, 0, 0, 0);
 }
 
 #Vignette {
@@ -31,7 +30,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--mm-overlay);
+    background-color: rgba(0, 0, 0, 0);
     background-image: resource("Images/ui_vignette");
     
     -unity-background-scale-mode: scale-and-crop;

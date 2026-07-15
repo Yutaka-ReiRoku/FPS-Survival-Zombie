@@ -57,6 +57,7 @@ public class SkillTreeWidget : MonoBehaviour
         if (_doc == null) return;
         _root = _doc.rootVisualElement.Q("SkillTreeWidget");
         if (_root == null) return;
+        _root.style.display = DisplayStyle.None;
 
         _card = _root.Q("card");
         _sp = _root.Q<Label>("sp");
@@ -146,6 +147,7 @@ public class SkillTreeWidget : MonoBehaviour
     {
         if (!_initialized) return;
         _open = true;
+        _root.style.display = DisplayStyle.Flex;
         _root.AddToClassList("open");
         Time.timeScale = 0f;
         UnityEngine.Cursor.lockState = CursorLockMode.None;
@@ -161,6 +163,14 @@ public class SkillTreeWidget : MonoBehaviour
         if (!_open) return;
         _open = false;
         _root.RemoveFromClassList("open");
+        if (_card != null)
+        {
+            _card.RegisterCallback<TransitionEndEvent>(OnSkillTreeExitTransitionEnd);
+        }
+        else
+        {
+            _root.style.display = DisplayStyle.None;
+        }
         bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
         bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
         if (!pauseOpen && !gameOver)
@@ -171,6 +181,18 @@ public class SkillTreeWidget : MonoBehaviour
             if (_playerControl != null)
                 _playerControl.GrantControl();
             PauseManager.SetHUDVisible(_canvasRoot != null ? _canvasRoot : transform, true);
+        }
+    }
+
+    private void OnSkillTreeExitTransitionEnd(TransitionEndEvent evt)
+    {
+        if (_card != null)
+        {
+            _card.UnregisterCallback<TransitionEndEvent>(OnSkillTreeExitTransitionEnd);
+        }
+        if (!_open && _root != null)
+        {
+            _root.style.display = DisplayStyle.None;
         }
     }
 

@@ -14,6 +14,14 @@
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
 }
 
+.fullscreen-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
 /* Full-screen overlay */
 .overlay {
     position: absolute;
@@ -25,6 +33,30 @@
     align-items: center;
     flex-direction: column;
     background-color: var(--color-bg-root, rgba(5, 6, 9, 0.92));
+}
+
+#GameOverPanel,
+#PausePanel,
+#SkillTreeWidget,
+#JournalUI {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: var(--color-bg-root, rgba(5, 6, 9, 0.92));
+    opacity: 0;
+    transition: opacity var(--panel-in-duration, 0.22s) ease-out;
+}
+
+#GameOverPanel.visible,
+#PausePanel.visible,
+#SkillTreeWidget.open,
+#JournalUI.visible {
+    opacity: 1;
 }
 
 /* Vignette overlay */
@@ -67,12 +99,14 @@
     max-height: 95%;
     flex-direction: column;
     align-items: center;
-    background-color: var(--color-card-face, rgb(25, 30, 37));
+    background-color: rgba(16, 22, 30, 0.88);
+    border-width: 1px;
+    border-color: rgba(217, 199, 115, 0.25);
     border-radius: var(--radius-m, 16px);
     opacity: 0;
     scale: var(--panel-start-scale, 0.9);
-    transition: opacity var(--panel-in-duration, 0.22s) var(--panel-easing, ease-out),
-                scale var(--panel-in-duration, 0.22s) var(--panel-easing, ease-out);
+    transition: opacity var(--panel-in-duration, 0.22s) ease-out-back,
+                scale var(--panel-in-duration, 0.22s) ease-out-back;
 }
 
 .panel-card.visible,

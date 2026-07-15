@@ -8,7 +8,10 @@
     flex-direction: column;
     width: var(--hud-cluster-width, 470px);
     padding: var(--hud-cluster-padding-v, 10px) var(--hud-cluster-padding-h, 20px) var(--hud-bottom-margin, 16px);
-    background-color: var(--color-panel-bg, rgba(15, 13, 18, 0.62));
+    background-color: rgba(16, 22, 30, 0.8);
+    border-width: 1px;
+    border-color: rgba(217, 199, 115, 0.18);
+    border-radius: var(--radius-s, 8px);
 }
 
 #ProgressionLabel {

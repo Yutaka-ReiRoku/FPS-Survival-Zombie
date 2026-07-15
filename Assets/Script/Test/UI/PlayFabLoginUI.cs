@@ -30,20 +30,22 @@ public class PlayFabLoginUI : MonoBehaviour
     private static readonly Color ErrorColor = new Color(0.85f, 0.35f, 0.15f, 1f);
     private static readonly Color SuccessColor = new Color(0.31f, 0.878f, 0.541f, 1f);
 
+    private VisualElement _centerGroup;
+    private VisualElement _profileRoot;
+
     private void Awake()
     {
-        var asset = Resources.Load<VisualTreeAsset>("PlayFabLogin");
-        if (asset == null) { enabled = false; return; }
-
-        var go = new GameObject("PlayFabLogin_Doc", typeof(UIDocument));
-        go.transform.SetParent(transform, false);
-        _doc = go.GetComponent<UIDocument>();
-        _doc.sortingOrder = 100;
-        asset.CloneTree(_doc.rootVisualElement);
+        _doc = GetComponent<UIDocument>();
+        if (_doc == null) { enabled = false; return; }
 
         var root = _doc.rootVisualElement;
+        
+        // Find elements within the single shared document
         _panel = root.Q("LoginPanel");
-        _panel.style.width = panelWidth;
+        if (_panel != null) _panel.style.width = panelWidth;
+
+        _centerGroup = root.Q("CenterGroup");
+        _profileRoot = root.Q("ProfileRoot");
 
         _titleText = root.Q<Label>("LoginTitle");
         _statusText = root.Q<Label>("LoginStatus");
@@ -51,20 +53,29 @@ public class PlayFabLoginUI : MonoBehaviour
         _passwordInput = root.Q<TextField>("PasswordInput");
 
         _actionButton = root.Q("ActionButton");
-        _actionButton.focusable = true;
-        _actionButton.RegisterCallback<ClickEvent>(_ => OnActionButtonClicked());
-        _actionButtonLabel = _actionButton.Q<Label>("ActionLabel");
+        if (_actionButton != null)
+        {
+            _actionButton.focusable = true;
+            _actionButton.RegisterCallback<ClickEvent>(_ => OnActionButtonClicked());
+            _actionButtonLabel = _actionButton.Q<Label>("ActionLabel");
+        }
 
         _toggleText = root.Q<Label>("ToggleText");
         _toggleButton = root.Q("ToggleButton");
-        _toggleButton.focusable = true;
-        _toggleButton.RegisterCallback<ClickEvent>(_ => ToggleMode());
-        _toggleButtonLabel = _toggleButton.Q<Label>("ToggleBtnLabel");
+        if (_toggleButton != null)
+        {
+            _toggleButton.focusable = true;
+            _toggleButton.RegisterCallback<ClickEvent>(_ => ToggleMode());
+            _toggleButtonLabel = _toggleButton.Q<Label>("ToggleBtnLabel");
+        }
 
         _logoutButton = root.Q("LogoutButton");
-        _logoutButton.focusable = true;
-        _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
-        _logoutButton.style.display = DisplayStyle.None;
+        if (_logoutButton != null)
+        {
+            _logoutButton.focusable = true;
+            _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
+            _logoutButton.style.display = DisplayStyle.None;
+        }
     }
 
     private void OnEnable()
@@ -76,6 +87,7 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void AutoDetectMainMenu()
     {
+        // Keep fallback support for manually assigned GameObjects
         if (mainMenuContent == null)
         {
             var tr = transform.parent?.Find("Content");
@@ -90,12 +102,16 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void HideMainMenu()
     {
+        if (_centerGroup != null) _centerGroup.style.display = DisplayStyle.None;
+        if (_profileRoot != null) _profileRoot.style.display = DisplayStyle.None;
         if (mainMenuContent != null) mainMenuContent.SetActive(false);
         if (profileWidget != null) profileWidget.SetActive(false);
     }
 
     private void ShowMainMenu()
     {
+        if (_centerGroup != null) _centerGroup.style.display = DisplayStyle.Flex;
+        if (_profileRoot != null) _profileRoot.style.display = DisplayStyle.Flex;
         if (mainMenuContent != null) mainMenuContent.SetActive(true);
         if (profileWidget != null) profileWidget.SetActive(true);
     }
@@ -285,7 +301,6 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_doc != null && _doc.gameObject != null)
-            Destroy(_doc.gameObject);
+        // Shared UIDocument is managed by the MainMenu scene GameObject, do not destroy it.
     }
 }

@@ -9,10 +9,8 @@
     right: 0;
     top: 0;
     bottom: 0;
-    display: none;
 }
 #SkillTreeWidget.open {
-    display: flex;
     flex-direction: column;
 }
 
@@ -32,11 +30,13 @@
     height: 720px;
     max-width: 95%;
     max-height: 95%;
-    background-color: var(--color-card-face, rgb(25, 30, 37));
+    background-color: rgba(16, 22, 30, 0.88);
+    border-width: 1px;
+    border-color: rgba(217, 199, 115, 0.25);
     border-radius: var(--radius-m, 16px);
     opacity: 0;
     scale: var(--panel-start-scale, 0.9);
-    transition: opacity var(--panel-in-duration, 0.22s), scale var(--panel-in-duration, 0.22s);
+    transition: opacity var(--panel-in-duration, 0.22s) ease-out-back, scale var(--panel-in-duration, 0.22s) ease-out-back;
 }
 #SkillTreeWidget.open #card {
     opacity: 1;

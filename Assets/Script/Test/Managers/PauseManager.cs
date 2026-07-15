@@ -136,6 +136,7 @@ public class PauseManager : MonoBehaviour
         if (_pausePanel != null)
         {
             _pausePanel.style.display = DisplayStyle.Flex;
+            _pausePanel.AddToClassList("visible");
             if (_pauseCard != null)
                 _pauseCard.AddToClassList("visible");
         }
@@ -152,13 +153,36 @@ public class PauseManager : MonoBehaviour
         if (!_uiReady) return;
         IsPaused = false;
         if (_pausePanel != null)
-            _pausePanel.style.display = DisplayStyle.None;
+        {
+            _pausePanel.RemoveFromClassList("visible");
+            if (_pauseCard != null)
+            {
+                _pauseCard.RemoveFromClassList("visible");
+                _pauseCard.RegisterCallback<TransitionEndEvent>(OnPauseExitTransitionEnd);
+            }
+            else
+            {
+                _pausePanel.style.display = DisplayStyle.None;
+            }
+        }
         SetHUDVisible(_canvasRoot, true);
         Time.timeScale = 1f;
         if (playerControl != null)
             playerControl.GrantControl();
         UnityEngine.Cursor.lockState = CursorLockMode.Locked;
         UnityEngine.Cursor.visible = false;
+    }
+
+    private void OnPauseExitTransitionEnd(TransitionEndEvent evt)
+    {
+        if (_pauseCard != null)
+        {
+            _pauseCard.UnregisterCallback<TransitionEndEvent>(OnPauseExitTransitionEnd);
+        }
+        if (!IsPaused && _pausePanel != null)
+        {
+            _pausePanel.style.display = DisplayStyle.None;
+        }
     }
 
     public static void SetHUDVisible(Transform canvasRoot, bool visible)

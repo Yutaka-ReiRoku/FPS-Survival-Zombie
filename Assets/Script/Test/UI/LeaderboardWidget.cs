@@ -29,20 +29,15 @@ public class LeaderboardWidget : MonoBehaviour
 
     private void Awake()
     {
-        var asset = Resources.Load<VisualTreeAsset>("LeaderboardWidget");
-        if (asset == null) { enabled = false; return; }
+        _doc = GetComponent<UIDocument>();
+        if (_doc == null) { enabled = false; return; }
 
-        var go = new GameObject("Leaderboard_Doc", typeof(UIDocument));
-        go.transform.SetParent(transform, false);
-        _doc = go.GetComponent<UIDocument>();
-        _doc.sortingOrder = 100;
-
-        asset.CloneTree(_doc.rootVisualElement);
         _initialized = true;
 
-        _chip = _doc.rootVisualElement.Q("LeaderboardChip");
-        _scrim = _doc.rootVisualElement.Q("LeaderboardScrim");
-        _panel = _doc.rootVisualElement.Q("LeaderboardPanel");
+        var root = _doc.rootVisualElement;
+        _chip = root.Q("LeaderboardChip");
+        _scrim = root.Q("LeaderboardScrim");
+        _panel = root.Q("LeaderboardPanel");
         _listContainer = _panel?.Q("ListContent");
         _statusText = _panel?.Q<Label>("StatusText");
 
@@ -54,10 +49,10 @@ public class LeaderboardWidget : MonoBehaviour
         }
         if (_scrim != null) _scrim.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
 
-        var closeBtn = _doc.rootVisualElement.Q("CloseButton");
+        var closeBtn = root.Q("CloseButton");
         if (closeBtn != null) closeBtn.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
 
-        var refreshBtn = _doc.rootVisualElement.Q("RefreshButton");
+        var refreshBtn = root.Q("RefreshButton");
         if (refreshBtn != null) refreshBtn.RegisterCallback<ClickEvent>(_ => RefreshLeaderboard());
 
         _panel.style.display = DisplayStyle.None;
@@ -241,7 +236,6 @@ public class LeaderboardWidget : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_doc != null && _doc.gameObject != null)
-            Destroy(_doc.gameObject);
+        // Shared UIDocument is managed by the MainMenu scene GameObject, do not destroy it.
     }
 }

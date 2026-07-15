@@ -9,11 +9,10 @@
     align-items: flex-end;
     width: 360px;
     padding: var(--space-m, 12px) var(--hud-cluster-padding-h, 20px) var(--space-m, 12px);
-    background-image: resource("Images/ui_panel");
-    -unity-slice-top: 16;
-    -unity-slice-bottom: 16;
-    -unity-slice-left: 16;
-    -unity-slice-right: 16;
+    background-color: rgba(16, 22, 30, 0.8);
+    border-width: 1px;
+    border-color: rgba(217, 199, 115, 0.18);
+    border-radius: var(--radius-s, 8px);
 }
 
 #AmmoLabel {

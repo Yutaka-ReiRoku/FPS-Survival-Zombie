@@ -195,6 +195,7 @@ public class GameOverManager : MonoBehaviour
         if (_gameOverPanel != null)
         {
             _gameOverPanel.style.display = DisplayStyle.Flex;
+            _gameOverPanel.AddToClassList("visible");
         }
 
         if (_card != null)

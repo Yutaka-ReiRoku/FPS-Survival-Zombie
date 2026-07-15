@@ -99,8 +99,17 @@ public class JournalUI : MonoBehaviour
     {
         if (!_open) return;
         _open = false;
-        _panel.style.display = DisplayStyle.None;
         _panel.RemoveFromClassList("visible");
+        
+        var card = _panel.Q("Card");
+        if (card != null)
+        {
+            card.RegisterCallback<TransitionEndEvent>(OnJournalExitTransitionEnd);
+        }
+        else
+        {
+            _panel.style.display = DisplayStyle.None;
+        }
 
         _audioSource.Stop();
 
@@ -117,6 +126,19 @@ public class JournalUI : MonoBehaviour
                 _playerControl.GrantControl();
 
             PauseManager.SetHUDVisible(transform, true);
+        }
+    }
+
+    private void OnJournalExitTransitionEnd(TransitionEndEvent evt)
+    {
+        var card = evt.currentTarget as VisualElement;
+        if (card != null)
+        {
+            card.UnregisterCallback<TransitionEndEvent>(OnJournalExitTransitionEnd);
+        }
+        if (!_open && _panel != null)
+        {
+            _panel.style.display = DisplayStyle.None;
         }
     }
 }
