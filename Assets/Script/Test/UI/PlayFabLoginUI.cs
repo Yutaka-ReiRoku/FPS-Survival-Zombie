@@ -277,11 +277,12 @@ public class PlayFabLoginUI : MonoBehaviour
         // 4. Wait another 3.0 seconds (total 6.0 seconds delay) before trundling the nodes in
         yield return new WaitForSeconds(3.0f);
 
-        // 5. Trigger slide-in transitions with staggered delays defined in USS
+        // 5. Trigger slide-in transitions with staggered delays defined in C# (circumventing UI Toolkit CSS parser bugs)
         foreach (var name in modules)
         {
             var el = _panel?.Q(name);
             el?.AddToClassList("slide-in");
+            yield return new WaitForSeconds(0.15f); // 150ms delay between elements
         }
     }
 

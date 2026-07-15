@@ -70,18 +70,6 @@
     translate: 0px 0px;
 }
 
-#HeaderModule {
-    transition-delay: 0s;
-}
-#InputModule_User {
-    transition-delay: 0.15s;
-}
-#InputModule_Pass {
-    transition-delay: 0.3s;
-}
-#ActionModule {
-    transition-delay: 0.45s;
-}
 
 .module-pop {
     scale: 1.05;
