@@ -79,12 +79,12 @@ public class PlayFabLoginUI : MonoBehaviour
             _logoutButton.style.display = DisplayStyle.None;
         }
 
-        // Apply custom vector API chamfer drawing to make modules look like true 45-degree cut plaques
-        SetupChamferedPlaque(root.Q("HeaderModule"), 18f);
-        SetupChamferedPlaque(root.Q("InputModule_User"), 16f);
-        SetupChamferedPlaque(root.Q("InputModule_Pass"), 16f);
-        SetupChamferedPlaque(root.Q("ActionModule"), 18f);
-        SetupChamferedPlaque(root.Q("FooterModule"), 14f);
+        // Apply custom vector API chamfer drawing with large prominent cuts for rusted steel aesthetic
+        SetupChamferedPlaque(root.Q("HeaderModule"), 28f);
+        SetupChamferedPlaque(root.Q("InputModule_User"), 24f);
+        SetupChamferedPlaque(root.Q("InputModule_Pass"), 24f);
+        SetupChamferedPlaque(root.Q("ActionModule"), 28f);
+        SetupChamferedPlaque(root.Q("FooterModule"), 20f);
     }
 
     private void OnEnable()
@@ -344,8 +344,8 @@ public class PlayFabLoginUI : MonoBehaviour
 
             var painter = mgc.painter2D;
 
-            // Fill asymmetric chamfered shape
-            painter.fillColor = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.94f);
+            // Fill warm rusted steel slate backing
+            painter.fillColor = new Color(55f / 255f, 40f / 255f, 40f / 255f, 0.92f);
             painter.BeginPath();
             painter.MoveTo(new Vector2(chamferSize, 0));
             painter.LineTo(new Vector2(rect.width, 0));
@@ -356,10 +356,10 @@ public class PlayFabLoginUI : MonoBehaviour
             painter.ClosePath();
             painter.Fill();
 
-            // Draw border
+            // Draw outer border (Rusted warning orange-red)
             painter.strokeColor = isHovered 
-                ? new Color(217f / 255f, 199f / 255f, 115f / 255f, 0.55f)
-                : new Color(217f / 255f, 199f / 255f, 115f / 255f, 0.22f);
+                ? new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.85f)
+                : new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.35f);
             painter.lineWidth = 1.5f;
             painter.BeginPath();
             painter.MoveTo(new Vector2(chamferSize, 0));
@@ -370,6 +370,25 @@ public class PlayFabLoginUI : MonoBehaviour
             painter.LineTo(new Vector2(0, chamferSize));
             painter.ClosePath();
             painter.Stroke();
+
+            // Draw inner offset double-line border
+            float d = 3.5f;
+            if (rect.width > d * 2 && rect.height > d * 2)
+            {
+                painter.strokeColor = isHovered 
+                    ? new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.45f)
+                    : new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.15f);
+                painter.lineWidth = 1.0f;
+                painter.BeginPath();
+                painter.MoveTo(new Vector2(chamferSize, d));
+                painter.LineTo(new Vector2(rect.width - d, d));
+                painter.LineTo(new Vector2(rect.width - d, rect.height - chamferSize));
+                painter.LineTo(new Vector2(rect.width - chamferSize, rect.height - d));
+                painter.LineTo(new Vector2(d, rect.height - d));
+                painter.LineTo(new Vector2(d, chamferSize));
+                painter.ClosePath();
+                painter.Stroke();
+            }
         };
     }
 
