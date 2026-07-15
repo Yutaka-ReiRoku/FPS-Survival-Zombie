@@ -26,16 +26,20 @@
     top: 10%;
     bottom: 10%;
     justify-content: space-between;
-    padding: 0;
-    border-width: 0;
+    padding: 0 0 0 24px;
+    border-left-width: 2px;
+    border-left-color: rgba(217, 199, 115, 0.22);
 }
 
-/* --- HUD Module Base --- */
+/* --- HUD Module Base (Asymmetric Plaque) --- */
 .hud-module {
     background-color: rgba(9, 13, 19, 0.94);
     border-width: 1.5px;
     border-color: rgba(217, 199, 115, 0.22);
-    border-radius: 8px;
+    border-top-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
     position: relative;
     padding: 20px;
     margin-bottom: 12px;
@@ -45,6 +49,15 @@
 .hud-module:hover {
     border-color: rgba(217, 199, 115, 0.5);
     box-shadow: 0 0 10px rgba(217, 199, 115, 0.08);
+}
+
+.module-connector {
+    position: absolute;
+    left: -26px;
+    top: 50%;
+    width: 24px;
+    height: 1.5px;
+    background-color: rgba(217, 199, 115, 0.25);
 }
 
 /* --- HUD Corner Brackets --- */
@@ -190,6 +203,15 @@
     font-size: 14px;
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     padding: 0;
+}
+
+.login-input .unity-text-field__input,
+.login-input .unity-base-text-field__input {
+    background-color: rgba(0, 0, 0, 0) !important;
+    border-width: 0 !important;
+    color: white !important;
+    padding: 0 !important;
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
 }
 
 .module-decals {

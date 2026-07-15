@@ -9,6 +9,7 @@
 
             <!-- Module 1: Header Terminal -->
             <ui:VisualElement name="HeaderModule" class="hud-module header-module">
+                <ui:VisualElement class="module-connector" />
                 <ui:VisualElement class="hud-bracket bracket-tl" />
                 <ui:VisualElement class="hud-bracket bracket-tr" />
                 <ui:Label class="hud-stamp stamp-top-left" text="[SECTOR: 09_AUTH]" />
@@ -22,6 +23,7 @@
 
             <!-- Module 2: Username Scanner Module -->
             <ui:VisualElement name="InputModule_User" class="hud-module input-module">
+                <ui:VisualElement class="module-connector" />
                 <ui:VisualElement class="hud-bracket bracket-tl" />
                 <ui:VisualElement class="hud-bracket bracket-bl" />
                 
@@ -40,6 +42,7 @@
 
             <!-- Module 3: Password Decryptor Module -->
             <ui:VisualElement name="InputModule_Pass" class="hud-module input-module">
+                <ui:VisualElement class="module-connector" />
                 <ui:VisualElement class="hud-bracket bracket-tl" />
                 <ui:VisualElement class="hud-bracket bracket-bl" />
                 
@@ -58,6 +61,7 @@
 
             <!-- Module 4: Action & Diagnostics Terminal -->
             <ui:VisualElement name="ActionModule" class="hud-module action-module">
+                <ui:VisualElement class="module-connector" />
                 <ui:VisualElement class="hud-bracket bracket-tr" />
                 <ui:VisualElement class="hud-bracket bracket-br" />
                 
@@ -88,6 +92,7 @@
 
             <!-- Module 5: Footer Status Widget -->
             <ui:VisualElement name="FooterModule" class="hud-module status-module">
+                <ui:VisualElement class="module-connector" />
                 <ui:VisualElement class="hud-bracket bracket-bl" />
                 <ui:VisualElement class="hud-bracket bracket-br" />
                 
