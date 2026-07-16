@@ -682,7 +682,22 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
         //--------------------------------
         // ACID POOL
+        // Raycast down from the boomer's position to find the ground so the
+        // pool doesn't float in mid-air when the boomer explodes on top of a
+        // car, roof, staircase, or any elevated surface.
         //--------------------------------
+
+        Vector3 acidPos = transform.position;
+        if (Physics.Raycast(
+                transform.position + Vector3.up * 0.5f,
+                Vector3.down,
+                out RaycastHit acidHit,
+                10f,
+                ~0,
+                QueryTriggerInteraction.Ignore))
+        {
+            acidPos = acidHit.point;
+        }
 
         GameObject acidPool = null;
 
@@ -693,7 +708,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             {
                 acidPool = cowsins.PoolManager.Instance.GetFromPool(
                     acidPoolDeathPrefab,
-                    transform.position,
+                    acidPos,
                     Quaternion.identity,
                     acidPoolLifetime
                 );
@@ -705,7 +720,7 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             {
                 acidPool = cowsins.PoolManager.Instance.GetFromPool(
                     acidPoolSelfExplodePrefab,
-                    transform.position,
+                    acidPos,
                     Quaternion.identity,
                     acidPoolLifetime
                 );

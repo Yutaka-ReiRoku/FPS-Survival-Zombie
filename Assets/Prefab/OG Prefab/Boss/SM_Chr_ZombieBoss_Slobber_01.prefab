@@ -852,16 +852,11 @@ MonoBehaviour:
   screamDuration: 1.5
   playerMovedRepathThreshold: 1.5
   maxRepathInterval: 0.2
-  useDirectSteeringWhenLOS: 1
-  directSteeringWallCheckDistance: 1.5
-  directSteeringLOSCacheInterval: 0.15
-  directSteeringWallCooldown: 1.5
-  wallCheckBodyHeight: 0.5
   explosionDamage: 50
   explosionRadius: 5
   explosionPrefab: {fileID: 5018994898019192216, guid: ab977a440365d1c4092c15552e5ff157, type: 3}
-  acidPoolSelfExplodePrefab: {fileID: 8605726754624049729, guid: cf80a5c29f8ed204a9880fdd242ffc9c, type: 3}
-  acidPoolDeathPrefab: {fileID: 8605726754624049729, guid: 1662b07117d017d4189203a20424de4e, type: 3}
+  acidPoolSelfExplodePrefab: {fileID: 6982981047257621745, guid: 15f432f9d740c6241802c0ee1af1972f, type: 3}
+  acidPoolDeathPrefab: {fileID: 5834988380903050167, guid: 99b2953bb8fe156468cd3c0dc85445c1, type: 3}
   acidPoolLifetime: 10
   prefab: {fileID: 0}
   experienceReward: 60
@@ -903,6 +898,7 @@ MonoBehaviour:
     defaultColor: {r: 1, g: 0.7, b: 0.4, a: 1}
   explodeFxDelay: 0.25
   cleanupDelay: 2.5
+  forceDetectPlayer: 1
 --- !u!195 &7774266083722105626
 NavMeshAgent:
   m_ObjectHideFlags: 0
