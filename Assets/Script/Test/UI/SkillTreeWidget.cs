@@ -7,6 +7,20 @@ public class SkillTreeWidget : MonoBehaviour
 {
     public KeyCode toggleKey = KeyCode.Tab;
 
+    [Header("Audio SFX")]
+    public AudioClip hoverSFX;
+    public AudioClip purchaseSFX;
+    public AudioClip lockedSFX;
+
+#if UNITY_EDITOR
+    private void Reset()
+    {
+        if (hoverSFX == null) hoverSFX = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Engine/Cowsins/SFX/UI/UIHover_SFX.wav");
+        if (purchaseSFX == null) purchaseSFX = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Engine/Cowsins/SFX/Others/Loot_Success_SFX.wav");
+        if (lockedSFX == null) lockedSFX = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Engine/Cowsins/SFX/Others/emptyMag_SFX.wav");
+    }
+#endif
+
     private UIDocument _doc;
     private VisualElement _root;
     private VisualElement _card;
@@ -103,7 +117,9 @@ public class SkillTreeWidget : MonoBehaviour
                 node.Add(icon);
 
                 int ti = t;
-                node.RegisterCallback<ClickEvent>(_ => TryUpgrade(ti));
+                int ni = n;
+                node.RegisterCallback<MouseEnterEvent>(_ => OnNodeHover(ti, ni));
+                node.RegisterCallback<ClickEvent>(_ => TryUpgrade(ti, ni));
 
                 if (n < NodesPerTree - 1)
                 {
@@ -145,6 +161,26 @@ public class SkillTreeWidget : MonoBehaviour
         {
             RefreshIfDirty();
             if (_card != null) _card.MarkDirtyRepaint();
+
+            // Dynamic border and background pulse for available nodes
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 5f);
+            Color borderColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.4f + pulse * 0.6f);
+            Color bgColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.06f + pulse * 0.19f);
+            for (int t = 0; t < Trees; t++)
+            {
+                for (int n = 0; n < NodesPerTree; n++)
+                {
+                    var node = _nodes[t, n];
+                    if (node != null && node.ClassListContains("available"))
+                    {
+                        node.style.borderTopColor = borderColor;
+                        node.style.borderRightColor = borderColor;
+                        node.style.borderBottomColor = borderColor;
+                        node.style.borderLeftColor = borderColor;
+                        node.style.backgroundColor = bgColor;
+                    }
+                }
+            }
         }
     }
 
@@ -201,15 +237,81 @@ public class SkillTreeWidget : MonoBehaviour
         }
     }
 
-    private void TryUpgrade(int tree)
+    private void OnNodeHover(int tree, int nodeIndex)
     {
         if (_mgr == null) return;
-        bool ok = tree == 0 ? _mgr.UpgradeMovement() : tree == 1 ? _mgr.UpgradeAim() : _mgr.UpgradeIntelligence();
-        if (ok)
+        int lvl = tree == 0 ? _mgr.MovementLevel : tree == 1 ? _mgr.AimLevel : _mgr.IntelligenceLevel;
+        int cost = tree == 0 ? _mgr.NextMovementCost : tree == 1 ? _mgr.NextAimCost : _mgr.NextIntelligenceCost;
+        bool maxed = lvl >= SkillTreeManager.MaxLevel;
+        bool canAfford = !maxed && _mgr.CurrentSkillPoints >= cost;
+        bool isNext = nodeIndex == lvl && !maxed;
+
+        if (isNext && canAfford && hoverSFX != null && cowsins.SoundManager.Instance != null)
         {
-            Refresh();
-            _lastSp = _mgr.CurrentSkillPoints;
+            cowsins.SoundManager.Instance.PlaySound(hoverSFX, 0f, 0f, false);
         }
+    }
+
+    private void TryUpgrade(int tree, int nodeIndex)
+    {
+        if (_mgr == null) return;
+        int lvl = tree == 0 ? _mgr.MovementLevel : tree == 1 ? _mgr.AimLevel : _mgr.IntelligenceLevel;
+        int cost = tree == 0 ? _mgr.NextMovementCost : tree == 1 ? _mgr.NextAimCost : _mgr.NextIntelligenceCost;
+        bool maxed = lvl >= SkillTreeManager.MaxLevel;
+        bool canAfford = !maxed && _mgr.CurrentSkillPoints >= cost;
+        bool isNext = nodeIndex == lvl && !maxed;
+
+        var node = _nodes[tree, nodeIndex];
+
+        if (isNext && canAfford)
+        {
+            bool ok = tree == 0 ? _mgr.UpgradeMovement() : tree == 1 ? _mgr.UpgradeAim() : _mgr.UpgradeIntelligence();
+            if (ok)
+            {
+                if (purchaseSFX != null && cowsins.SoundManager.Instance != null)
+                {
+                    cowsins.SoundManager.Instance.PlaySound(purchaseSFX, 0f, 0f, false);
+                }
+                if (node != null)
+                {
+                    node.AddToClassList("pop");
+                    StartCoroutine(RemoveAnimationClassAfterDelay(node, "pop", 0.15f));
+                }
+                Refresh();
+                _lastSp = _mgr.CurrentSkillPoints;
+            }
+        }
+        else
+        {
+            if (lockedSFX != null && cowsins.SoundManager.Instance != null)
+            {
+                cowsins.SoundManager.Instance.PlaySound(lockedSFX, 0f, 0f, false);
+            }
+            if (node != null)
+            {
+                StartCoroutine(ShakeNode(node));
+            }
+        }
+    }
+
+    private IEnumerator ShakeNode(VisualElement node)
+    {
+        if (node == null) yield break;
+        node.AddToClassList("shake-left");
+        yield return new WaitForSecondsRealtime(0.06f);
+        node.RemoveFromClassList("shake-left");
+        node.AddToClassList("shake-right");
+        yield return new WaitForSecondsRealtime(0.06f);
+        node.RemoveFromClassList("shake-right");
+        node.AddToClassList("shake-left");
+        yield return new WaitForSecondsRealtime(0.06f);
+        node.RemoveFromClassList("shake-left");
+    }
+
+    private IEnumerator RemoveAnimationClassAfterDelay(VisualElement element, string className, float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+        element?.RemoveFromClassList(className);
     }
 
     private void RefreshIfDirty()

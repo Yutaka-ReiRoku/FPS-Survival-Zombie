@@ -138,23 +138,34 @@
     border-color: rgba(230, 80, 40, 0.25);
     align-items: center;
     justify-content: center;
-    transition: background-color var(--transition-medium, 0.22s), scale var(--transition-fast, 0.08s), border-color var(--transition-fast, 0.08s);
+    transition: background-color var(--transition-medium, 0.22s), scale var(--transition-fast, 0.08s), border-color var(--transition-fast, 0.08s), translate var(--transition-fast, 0.08s);
 }
-.skill-node:hover {
-    scale: var(--hover-scale, 1.06);
-    border-color: rgb(250, 100, 60);
+
+/* Available node base styles (Pulsing is handled dynamically in C# for compatibility) */
+.skill-node.available {
+    background-color: rgba(230, 80, 40, 0.1);
+    border-color: rgba(230, 80, 40, 0.4);
+    cursor: link;
 }
+
+.skill-node.available:hover {
+    scale: var(--hover-scale, 1.08);
+    border-color: rgb(255, 120, 80);
+    background-color: rgba(230, 80, 40, 0.35);
+}
+
 .skill-node.unlocked {
     background-color: rgb(230, 80, 40);
     border-color: rgb(230, 80, 40);
 }
-.skill-node.available {
-    background-color: rgba(230, 80, 40, 0.15);
-    border-color: rgb(230, 80, 40);
-}
+
 .skill-node.locked {
     background-color: rgba(5, 7, 10, 0.85);
-    border-color: rgba(230, 80, 40, 0.25);
+    border-color: rgba(230, 80, 40, 0.15);
+}
+
+.skill-node.locked:hover {
+    border-color: rgba(230, 80, 40, 0.35);
 }
 
 /* Node vector icon style rules with dynamic color tinting */
@@ -171,6 +182,17 @@
 }
 .skill-node.locked .node-icon {
     -unity-background-image-tint-color: rgba(230, 80, 40, 0.25);
+}
+
+/* Responsive transition states for click feedback */
+.skill-node.pop {
+    scale: 1.25;
+}
+.skill-node.shake-left {
+    translate: -6px 0;
+}
+.skill-node.shake-right {
+    translate: 6px 0;
 }
 
 /* Node connection mappings for 15 SVGs */
