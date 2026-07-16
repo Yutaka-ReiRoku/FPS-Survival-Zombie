@@ -21,7 +21,7 @@ namespace cowsins
         [SerializeField] private Toggle fullScreenToggle, vsyncToggle;
         [SerializeField] private Slider masterVolumeSlider, playerSensXSlider, playerSensYSlider, playerControllerSensXSlider, playerControllerSensYSlider;
         [SerializeField] private TextMeshProUGUI playerSensXDisplay, playerSensYDisplay, playerControllerSensXDisplay, playerControllerSensYDisplay;
-        [SerializeField] private AudioMixer masterMixer;
+        [SerializeField] public AudioMixer masterMixer;
 
         // Stores all the supported resolutions by your monitor
         private Resolution[] availableResolutions;
@@ -88,6 +88,17 @@ namespace cowsins
 
             ApplySettings();
             UpdateUIElements();
+
+            // Load and apply Music & SFX volumes to mixer
+            float musicVol = PlayerPrefs.GetFloat("musicVolume", 1f);
+            float sfxVol = PlayerPrefs.GetFloat("sfxVolume", 1f);
+            if (masterMixer != null)
+            {
+                masterMixer.SetFloat("MusicVolume", Mathf.Log10(musicVol) * 20);
+                masterMixer.SetFloat("Music", Mathf.Log10(musicVol) * 20);
+                masterMixer.SetFloat("SFXVolume", Mathf.Log10(sfxVol) * 20);
+                masterMixer.SetFloat("SFX", Mathf.Log10(sfxVol) * 20);
+            }
         }
 
         public void ResetSettings()

@@ -142,6 +142,13 @@ public class MainMenuManager : MonoBehaviour
             overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
+        // Hide and lock cursor immediately when fade-to-black starts
+        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+        UnityEngine.Cursor.visible = false;
+#if UNITY_EDITOR
+        PauseManager.EditorReallowCursorLock();
+#endif
+
         // 6. Transition: Shrink all camera parameters to 0 over 3 seconds (while USS transition handles fade-to-black)
         float startRadius = cameraOrbit != null ? cameraOrbit.radius : 130f;
         float startHeight = cameraOrbit != null ? cameraOrbit.height : 55f;
@@ -238,6 +245,13 @@ public class MainMenuManager : MonoBehaviour
             overlay.pickingMode = PickingMode.Position; // Block clicks
             overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
+
+        // Hide and lock cursor immediately when fade-to-black starts
+        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+        UnityEngine.Cursor.visible = false;
+#if UNITY_EDITOR
+        PauseManager.EditorReallowCursorLock();
+#endif
 
         yield return new WaitForSecondsRealtime(3.0f);
 

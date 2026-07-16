@@ -270,9 +270,79 @@
                 <ui:VisualElement name="PauseIcon" />
                 <ui:Label name="PauseTitle" text="PAUSED" />
                 <ui:VisualElement name="PauseDivider" />
-                <ui:Button name="ResumeButton" text="RESUME" class="pause-button" />
-                <ui:Button name="PauseMainMenuButton" text="MAIN MENU" class="pause-button" />
-                <ui:Button name="PauseQuitButton" text="QUIT" class="pause-button" />
+                <ui:VisualElement name="PauseButtonsContainer">
+                    <ui:Button name="ResumeButton" text="RESUME" class="pause-button" />
+                    <ui:Button name="SettingsButton" text="SETTINGS" class="pause-button" />
+                    <ui:Button name="PauseMainMenuButton" text="MAIN MENU" class="pause-button" />
+                    <ui:Button name="PauseQuitButton" text="QUIT" class="pause-button" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Settings Card -->
+            <ui:VisualElement name="SettingsCard">
+                <ui:Label name="SettingsTitle" text="SETTINGS" />
+                <ui:VisualElement name="SettingsDivider" />
+                <ui:ScrollView class="settings-scroll" mode="Vertical" show-horizontal-scroller="false">
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label text="MASTER VOLUME" class="settings-label" />
+                        <ui:VisualElement class="settings-slider-container">
+                            <ui:Slider name="VolumeSlider" fill="true" low-value="0.0001" high-value="1" class="settings-slider" />
+                            <ui:Label name="VolumeValueLabel" text="100%" class="settings-value-label" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label text="MUSIC VOLUME" class="settings-label" />
+                        <ui:VisualElement class="settings-slider-container">
+                            <ui:Slider name="MusicVolumeSlider" fill="true" low-value="0.0001" high-value="1" class="settings-slider" />
+                            <ui:Label name="MusicVolumeValueLabel" text="100%" class="settings-value-label" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label text="SFX VOLUME" class="settings-label" />
+                        <ui:VisualElement class="settings-slider-container">
+                            <ui:Slider name="SFXVolumeSlider" fill="true" low-value="0.0001" high-value="1" class="settings-slider" />
+                            <ui:Label name="SFXVolumeValueLabel" text="100%" class="settings-value-label" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label text="MOUSE SENS X" class="settings-label" />
+                        <ui:VisualElement class="settings-slider-container">
+                            <ui:Slider name="MouseSensXSlider" fill="true" low-value="0.1" high-value="10" class="settings-slider" />
+                            <ui:Label name="MouseSensXValueLabel" text="5.0" class="settings-value-label" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label text="MOUSE SENS Y" class="settings-label" />
+                        <ui:VisualElement class="settings-slider-container">
+                            <ui:Slider name="MouseSensYSlider" fill="true" low-value="0.1" high-value="10" class="settings-slider" />
+                            <ui:Label name="MouseSensYValueLabel" text="5.0" class="settings-value-label" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label text="CONTROLLER SENS X" class="settings-label" />
+                        <ui:VisualElement class="settings-slider-container">
+                            <ui:Slider name="ControllerSensXSlider" fill="true" low-value="1" high-value="100" class="settings-slider" />
+                            <ui:Label name="ControllerSensXValueLabel" text="50" class="settings-value-label" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label text="CONTROLLER SENS Y" class="settings-label" />
+                        <ui:VisualElement class="settings-slider-container">
+                            <ui:Slider name="ControllerSensYSlider" fill="true" low-value="1" high-value="100" class="settings-slider" />
+                            <ui:Label name="ControllerSensYValueLabel" text="50" class="settings-value-label" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label text="FULLSCREEN" class="settings-label" />
+                        <ui:Toggle name="FullscreenToggle" class="settings-toggle" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label text="VSYNC" class="settings-label" />
+                        <ui:Toggle name="VsyncToggle" class="settings-toggle" />
+                    </ui:VisualElement>
+                </ui:ScrollView>
+                <ui:Button name="SettingsResetButton" text="RESET TO DEFAULT" class="settings-reset-button" />
+                <ui:Button name="SettingsBackButton" text="BACK" class="settings-back-button" />
             </ui:VisualElement>
         </ui:VisualElement>
         
