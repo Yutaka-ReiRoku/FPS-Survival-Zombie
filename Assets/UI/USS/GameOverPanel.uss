@@ -1,7 +1,7 @@
 /* ===== GameOverPanel.uss — Crimson Death Theme ===== */
 @import url("Shared.uss");
 
-#GameOverPanel {
+#GameUIRoot #GameOverPanel {
     position: absolute;
     left: 0;
     right: 0;
@@ -10,7 +10,14 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: var(--color-bg-root, rgba(12, 6, 6, 0.94));
+    background-color: rgba(0, 0, 0, 0); /* Transparent to allow game scene behind it */
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+}
+
+#GameUIRoot #GameOverPanel.visible {
+    opacity: 1;
+    transition: opacity 1.5s ease-in-out;
 }
 
 #GameOverPanel #Vignette {
@@ -21,24 +28,46 @@
     bottom: 0;
     background-image: resource("Images/ui_vignette");
     -unity-background-scale-mode: scale-and-crop;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
 }
 
-/* High-specificity override for the Game Over Card */
+#GameOverPanel.visible #Vignette {
+    opacity: 1;
+    transition: opacity 1.5s ease-in-out;
+}
+
+/* High-specificity override for the Game Over Card with Pause-matching pop animation */
 #GameOverPanel #Card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
     width: var(--panel-card-width, 760px);
-    height: 800px;
+    height: auto;
     max-height: 95%;
     max-width: 95%;
     flex-direction: column;
     align-items: center;
-    background-color: rgba(18, 9, 9, 0.96); /* Dark blood red tint background */
-    border-width: 2px;
-    border-color: rgba(230, 75, 75, 0.35); /* Blood red outline */
-    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0); /* Drawn by vector painter in C# */
+    border-width: 0;
+    border-radius: 0;
+    padding-top: 40px;
+    padding-bottom: 0;
+    opacity: 0;
+    scale: 0;
+    translate: -50% -50%;
+    transition: opacity 1.5s ease-in, scale 1.5s ease-in, translate 1.5s ease-in-out;
+}
+
+#GameOverPanel.visible #Card {
+    opacity: 1;
+    scale: 1;
+    translate: -50% -50%;
+    transition: opacity 1.5s ease-out-back, scale 1.5s ease-out-back, translate 1.5s ease-in-out;
 }
 
 #GameOverPanel #TopAccent {
-    background-color: var(--color-accent-red, rgb(230, 75, 75));
+    display: none; /* Drawn by vector painter */
 }
 
 #GameOverPanel #SkullIcon {
@@ -69,31 +98,97 @@
     width: 620px;
     height: 2px;
     flex-shrink: 0;
-    margin-top: var(--space-s, 8px);
+    margin-top: 0;
+    margin-bottom: 0;
     background-color: rgba(230, 75, 75, 0.2);
 }
 
+/* StatWell 2x2 Grid Layout */
 #GameOverPanel #StatWell {
     width: var(--stat-well-width, 620px);
-    height: var(--stat-well-height, 160px);
-    flex-direction: column;
-    justify-content: center;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
     margin-top: var(--space-xxl, 24px);
     flex-shrink: 0;
-    background-color: rgba(26, 12, 12, 0.5); /* Semi-transparent inner well */
-    border-radius: var(--radius-s, 8px);
+    background-color: rgba(16, 22, 30, 0.45); /* Semi-transparent inner well matching Pause settings row backing */
+    border-width: 1px;
+    border-color: rgba(229, 72, 60, 0.2);
+    border-radius: 4px;
+    padding: 16px 20px;
+}
+
+/* Stat Rows and Icons in 2x2 Grid */
+.gameover-stat-row {
+    flex-direction: row;
+    align-items: center;
+    width: 46%; /* 2x2 Grid placement */
+    height: 40px;
+    justify-content: flex-start;
+    margin: 6px 2%;
+}
+
+.gameover-stat-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Story Mode Icons */
+.gameover-icon-chapter {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_star.svg");
+    -unity-background-image-tint-color: var(--color-accent-gold, rgb(217, 199, 115));
+}
+
+.gameover-icon-quests {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_target.svg");
+    -unity-background-image-tint-color: var(--color-accent-red, rgb(229, 72, 60));
+}
+
+.gameover-icon-journals {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_journal.svg");
+    -unity-background-image-tint-color: var(--color-accent-blue-light, rgb(179, 217, 255));
+}
+
+.gameover-icon-progress {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_run.svg");
+    -unity-background-image-tint-color: var(--color-accent-gold, rgb(217, 199, 115));
+}
+
+/* Survival Mode Icons */
+.gameover-icon-score {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_star.svg");
+    -unity-background-image-tint-color: var(--color-accent-gold, rgb(217, 199, 115));
+}
+
+.gameover-icon-wave {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_wave.svg");
+    -unity-background-image-tint-color: var(--color-accent-cyan, rgb(0, 229, 255));
+}
+
+.gameover-icon-kills {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_skull.svg");
+    -unity-background-image-tint-color: var(--color-accent-red, rgb(229, 72, 60));
+}
+
+.gameover-icon-best {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_trophy.svg");
+    -unity-background-image-tint-color: var(--color-accent-gold, rgb(217, 199, 115));
 }
 
 .stat-text {
-    font-size: var(--fs-xl, 28px);
+    font-size: 24px;
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
     color: var(--color-text-primary, rgb(245, 245, 245));
-    -unity-text-align: middle-center;
-    width: 100%;
-    height: 36px;
+    -unity-text-align: middle-left;
+    width: auto;
+    height: 100%;
     flex-shrink: 0;
-    margin: var(--space-xs, 4px) 0;
+    margin: 0;
+    padding: 0;
 }
 
 .stat-text.gold {
@@ -101,40 +196,86 @@
 }
 
 #GameOverPanel #CardShadow {
-    height: 840px;
-    margin-top: -420px; /* Center offset (half of 840) */
-    max-height: 95%;
-    max-width: 95%;
+    display: none; /* Drawn by vector painter */
 }
 
-/* === Game Over Buttons === */
-.gameover-button {
-    width: 280px;
-    height: 50px;
-    margin-top: var(--space-m, 12px);
-    background-color: rgba(22, 12, 12, 0.88);
+/* === Game Over Buttons — High Specificity Overrides to completely bypass Shared.uss pill style === */
+#GameOverPanel .gameover-button {
+    width: 540px;
+    height: 84px; /* Matches Pause button height */
+    margin: 0 auto;
+    margin-top: 24px;
+    align-self: center;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(16, 22, 30, 0.9);
+    background-image: none;
     border-width: 1px;
-    border-color: rgba(230, 75, 75, 0.25);
-    border-radius: var(--radius-s, 8px);
-    font-size: var(--fs-l, 22px);
+    border-color: rgba(229, 72, 60, 0.3);
+    border-radius: 4px;
+    transition-property: scale, background-color, border-color, color;
+    transition-duration: 0.15s, 0.15s, 0.15s, 0.15s;
+    transition-timing-function: ease-out, ease-out, ease-out, ease-out;
+}
+
+#GameOverPanel .gameover-button:hover {
+    scale: 1.05;
+    background-color: rgba(229, 72, 60, 0.15);
+    border-color: rgb(229, 72, 60);
+}
+
+#GameOverPanel .gameover-button:active {
+    scale: 0.95;
+    background-color: rgba(229, 72, 60, 0.05);
+}
+
+#GameOverPanel #RestartButton {
+    margin-top: 32px;
+}
+
+#GameOverPanel #QuitButton {
+    margin-bottom: 40px;
+}
+
+/* Button child components */
+#GameOverPanel .gameover-btn-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(229, 72, 60);
+    transition: -unity-background-image-tint-color 0.15s ease-out;
+}
+
+#GameOverPanel .gameover-icon-restart {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_restart.svg");
+}
+
+#GameOverPanel .gameover-icon-menu {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_star.svg");
+}
+
+#GameOverPanel .gameover-icon-quit {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_quit.svg");
+}
+
+#GameOverPanel .gameover-btn-label {
+    font-size: 30px; /* Matches Pause button text size */
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
-    color: var(--color-text-primary, rgb(245, 245, 245));
+    color: rgb(229, 72, 60);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    letter-spacing: 4px;
-    transition-property: scale, background-color, border-color;
-    transition-duration: 0.15s, 0.15s, 0.15s;
-    transition-timing-function: ease-out, ease-out, ease-out;
+    letter-spacing: 8px; /* Matches Pause button letter spacing */
+    margin: 0;
+    padding: 0;
+    transition: color 0.15s ease-out;
 }
 
-.gameover-button:hover {
-    scale: 1.05;
-    background-color: rgba(42, 22, 22, 0.95);
-    border-color: var(--color-accent-red, rgb(230, 75, 75));
-    color: var(--color-accent-red, rgb(230, 75, 75));
+#GameOverPanel .gameover-button:hover .gameover-btn-label {
+    color: rgb(255, 100, 85);
 }
 
-.gameover-button:active {
-    scale: 0.95;
-    background-color: rgba(12, 6, 6, 0.95);
+#GameOverPanel .gameover-button:hover .gameover-btn-icon {
+    -unity-background-image-tint-color: rgb(255, 100, 85);
 }

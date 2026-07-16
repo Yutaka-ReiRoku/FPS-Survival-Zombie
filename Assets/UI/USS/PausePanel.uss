@@ -2,7 +2,7 @@
 @import url("Shared.uss");
 
 /* Override Shared.uss overlay to make it fully transparent */
-#PausePanel {
+#GameUIRoot #PausePanel {
     position: absolute;
     left: 0;
     right: 0;
@@ -16,7 +16,7 @@
     transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s */
 }
 
-#PausePanel.visible {
+#GameUIRoot #PausePanel.visible {
     background-color: rgba(0, 0, 0, 0);
     opacity: 1;
     transition: opacity 1.5s ease-in-out; /* Entry transition: 1.5s */

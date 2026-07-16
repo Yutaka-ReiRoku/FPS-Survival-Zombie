@@ -746,6 +746,15 @@ public class PauseManager : MonoBehaviour
         PauseManager.EditorReallowCursorLock();
 #endif
 
+        if (_pausePanel != null)
+        {
+            _pausePanel.RemoveFromClassList("visible");
+        }
+        if (_pauseCard != null)
+        {
+            _pauseCard.RemoveFromClassList("visible");
+        }
+
         var root = uiDocument.rootVisualElement;
         var overlay = root?.Q("BlackOverlay");
         if (overlay != null)
@@ -754,12 +763,12 @@ public class PauseManager : MonoBehaviour
             overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
+        yield return new WaitForSecondsRealtime(3.0f);
+
         if (_pausePanel != null)
         {
             _pausePanel.style.display = DisplayStyle.None;
         }
-
-        yield return new WaitForSecondsRealtime(3.0f);
 
         Time.timeScale = 1f;
         SceneManager.LoadScene(sceneName);
@@ -773,6 +782,15 @@ public class PauseManager : MonoBehaviour
         PauseManager.EditorReallowCursorLock();
 #endif
 
+        if (_pausePanel != null)
+        {
+            _pausePanel.RemoveFromClassList("visible");
+        }
+        if (_pauseCard != null)
+        {
+            _pauseCard.RemoveFromClassList("visible");
+        }
+
         var root = uiDocument.rootVisualElement;
         var overlay = root?.Q("BlackOverlay");
         if (overlay != null)
@@ -781,12 +799,12 @@ public class PauseManager : MonoBehaviour
             overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
+        yield return new WaitForSecondsRealtime(3.0f);
+
         if (_pausePanel != null)
         {
             _pausePanel.style.display = DisplayStyle.None;
         }
-
-        yield return new WaitForSecondsRealtime(3.0f);
 
         Time.timeScale = 1f;
 #if UNITY_EDITOR

@@ -250,14 +250,35 @@
                 <ui:Label name="Title" text="GAME OVER" />
                 <ui:VisualElement name="Divider" />
                 <ui:VisualElement name="StatWell">
-                    <ui:Label name="FinalScoreText" text="" class="stat-text gold" />
-                    <ui:Label name="WaveReachedText" text="" class="stat-text" />
-                    <ui:Label name="KillsText" text="" class="stat-text" />
-                    <ui:Label name="BestScoreText" text="" class="stat-text gold" />
+                    <ui:VisualElement class="gameover-stat-row">
+                        <ui:VisualElement name="GameOverStatIcon0" class="gameover-stat-icon gameover-icon-chapter" />
+                        <ui:Label name="FinalScoreText" text="" class="stat-text gold" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="gameover-stat-row">
+                        <ui:VisualElement name="GameOverStatIcon1" class="gameover-stat-icon gameover-icon-quests" />
+                        <ui:Label name="WaveReachedText" text="" class="stat-text" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="gameover-stat-row">
+                        <ui:VisualElement name="GameOverStatIcon2" class="gameover-stat-icon gameover-icon-journals" />
+                        <ui:Label name="KillsText" text="" class="stat-text" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="gameover-stat-row">
+                        <ui:VisualElement name="GameOverStatIcon3" class="gameover-stat-icon gameover-icon-progress" />
+                        <ui:Label name="BestScoreText" text="" class="stat-text gold" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="RestartButton" text="RESTART" class="gameover-button" />
-                <ui:Button name="MainMenuButton" text="MAIN MENU" class="gameover-button" />
-                <ui:Button name="QuitButton" text="QUIT" class="gameover-button" />
+                <ui:Button name="RestartButton" class="gameover-button">
+                    <ui:VisualElement class="gameover-btn-icon gameover-icon-restart" />
+                    <ui:Label text="RESTART" class="gameover-btn-label" />
+                </ui:Button>
+                <ui:Button name="MainMenuButton" class="gameover-button">
+                    <ui:VisualElement class="gameover-btn-icon gameover-icon-menu" />
+                    <ui:Label text="MAIN MENU" class="gameover-btn-label" />
+                </ui:Button>
+                <ui:Button name="QuitButton" class="gameover-button">
+                    <ui:VisualElement class="gameover-btn-icon gameover-icon-quit" />
+                    <ui:Label text="QUIT" class="gameover-btn-label" />
+                </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
 

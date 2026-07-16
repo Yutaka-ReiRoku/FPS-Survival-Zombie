@@ -2,14 +2,23 @@
 
 #HUDChips {
     position: absolute;
-    left: var(--hud-cluster-left, 48px);
-    top: var(--hud-cluster-bottom, 48px);
+    left: 0;
+    top: 60px;
     flex-direction: column;
 }
 
 .hud-chip-root {
-    background-color: var(--color-card-face, rgb(25, 30, 37));
-    margin-bottom: var(--space-xs, 4px);
+    flex-direction: row;
+    align-items: center;
+    align-self: flex-start;
+    background-color: rgba(16, 22, 30, 0.85);
+    border-left-width: 4px;
+    border-width: 1px 1px 1px 0px;
+    border-color: rgba(217, 199, 115, 0.2);
+    border-radius: 0px 4px 4px 0px;
+    margin-bottom: 8px;
+    padding: 6px 14px;
+    height: 36px;
     overflow: hidden;
 }
 
@@ -17,13 +26,42 @@
     display: none;
 }
 
-.hud-chip-wave .hud-chip-label { color: var(--color-chip-wave, #9ED9FF); }
-.hud-chip-kills .hud-chip-label { color: var(--color-chip-kills, #FF8578); }
-.hud-chip-score .hud-chip-label { color: var(--color-chip-score, #F2C24E); }
-.hud-chip-coins .hud-chip-label { color: var(--color-chip-coins, #FFD700); }
-.hud-chip-headshots .hud-chip-label { color: var(--color-chip-headshots, #FF6B6B); }
-.hud-chip-timer .hud-chip-label { color: var(--color-chip-timer, #4ECDC4); }
-.hud-chip-collectibles .hud-chip-label { color: var(--color-chip-collectibles, #45B7D1); }
+/* Themed Left Borders */
+.hud-chip-wave { border-left-color: var(--color-accent-cyan, rgb(78, 205, 196)); }
+.hud-chip-kills { border-left-color: var(--color-accent-red, rgb(229, 72, 60)); }
+.hud-chip-score { border-left-color: var(--color-accent-gold, rgb(217, 199, 115)); }
+.hud-chip-coins { border-left-color: var(--color-accent-gold-light, rgb(245, 225, 150)); }
+.hud-chip-headshots { border-left-color: var(--color-accent-red-light, rgb(255, 100, 85)); }
+.hud-chip-timer { border-left-color: var(--color-accent-cyan-light, rgb(120, 230, 220)); }
+.hud-chip-collectibles { border-left-color: var(--color-accent-blue-light, rgb(179, 217, 255)); }
+
+/* Standard Label Styling */
+.hud-chip-label {
+    -unity-font-definition: var(--font-body-sdf);
+    font-size: var(--fs-s, 16px);
+    -unity-font-style: bold;
+    color: var(--color-text-primary, rgb(245, 245, 245));
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+    margin: 0;
+    padding: 0;
+}
+
+/* Icon Styling and Tinting */
+.hud-chip-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.hud-chip-wave .hud-chip-icon { -unity-background-image-tint-color: var(--color-accent-cyan, rgb(78, 205, 196)); }
+.hud-chip-kills .hud-chip-icon { -unity-background-image-tint-color: var(--color-accent-red, rgb(229, 72, 60)); }
+.hud-chip-score .hud-chip-icon { -unity-background-image-tint-color: var(--color-accent-gold, rgb(217, 199, 115)); }
+.hud-chip-coins .hud-chip-icon { -unity-background-image-tint-color: var(--color-accent-gold-light, rgb(245, 225, 150)); }
+.hud-chip-headshots .hud-chip-icon { -unity-background-image-tint-color: var(--color-accent-red-light, rgb(255, 100, 85)); }
+.hud-chip-timer .hud-chip-icon { -unity-background-image-tint-color: var(--color-accent-cyan-light, rgb(120, 230, 220)); }
+.hud-chip-collectibles .hud-chip-icon { -unity-background-image-tint-color: var(--color-accent-blue-light, rgb(179, 217, 255)); }
 
 .hud-chip-wave-icon { background-image: url("project://database/Assets/UI/Resources/Icons/icon_wave.svg"); }
 .hud-chip-kills-icon { background-image: url("project://database/Assets/UI/Resources/Icons/icon_skull.svg"); }
