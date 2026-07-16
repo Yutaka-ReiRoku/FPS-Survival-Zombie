@@ -27,6 +27,7 @@
     <ui:Style src="project://database/Assets/UI/USS/QuestTracker.uss" />
     <ui:Style src="project://database/Assets/UI/USS/JournalUI.uss" />
     <ui:Style src="project://database/Assets/UI/USS/StatsPanel.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/GiftBoxPanel.uss" />
     <ui:Style src="project://database/Assets/UI/USS/HUDChips.uss" />
     <ui:VisualElement name="GameUIRoot">
 
@@ -274,6 +275,32 @@
             </ui:VisualElement>
         </ui:VisualElement>
         
+        <!-- ==================== GiftBoxPanel ==================== -->
+        <ui:VisualElement name="GiftBoxPanel" style="display: none;">
+            <ui:VisualElement name="GiftVignette" />
+            <ui:VisualElement name="GiftCardShadow" view-data-key="GiftShadow" />
+            <ui:VisualElement name="GiftCard" view-data-key="GiftCardPivot">
+                <ui:VisualElement name="GiftTopAccent" />
+                <ui:VisualElement name="GiftIcon" />
+                <ui:Label name="GiftTitle" text="QUÀ TẶNG" />
+                <ui:VisualElement name="GiftDivider" />
+                <ui:VisualElement name="RewardWell">
+                    <ui:VisualElement class="reward-row">
+                        <ui:VisualElement class="reward-icon" style="background-image: url('project://database/Assets/UI/Resources/Icons/icon_coin.svg')" />
+                        <ui:Label class="reward-label" text="Coins" />
+                        <ui:Label name="CoinReward" class="reward-value" text="+0" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="reward-row">
+                        <ui:VisualElement class="reward-icon" style="background-image: url('project://database/Assets/UI/Resources/Icons/icon_health.svg')" />
+                        <ui:Label class="reward-label" text="Health" />
+                        <ui:Label name="HealthReward" class="reward-value" text="+0" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label name="RewardList" text="" />
+                <ui:Button name="CloseButton" text="NHẬN" class="gameover-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <!-- Black cinematic overlay for start transition -->
         <ui:VisualElement name="BlackOverlay" class="black-overlay" />
     </ui:VisualElement>

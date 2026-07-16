@@ -1,0 +1,112 @@
+/* ===== GiftBoxPanel.uss ===== */
+@import url("Shared.uss");
+
+#GiftBoxPanel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: var(--color-bg-root);
+}
+
+#GiftBoxPanel #GiftVignette {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: resource("Images/ui_vignette");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+#GiftBoxPanel #GiftIcon {
+    width: 72px;
+    height: 72px;
+    margin-top: var(--space-xxl);
+    flex-shrink: 0;
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_gift.svg");
+    -unity-background-image-tint-color: var(--color-accent-gold);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+#GiftBoxPanel #GiftTitle {
+    font-size: var(--fs-display);
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
+    -unity-text-align: middle-center;
+    letter-spacing: 6px;
+    width: 720px;
+    height: 130px;
+    margin-top: var(--space-l);
+    flex-shrink: 0;
+    color: var(--color-accent-gold);
+    -unity-text-outline-color: var(--shadow-color-default);
+    -unity-text-outline-width: var(--shadow-text-md);
+}
+
+#GiftBoxPanel #GiftDivider {
+    width: 620px;
+    height: 2px;
+    flex-shrink: 0;
+    margin-top: var(--space-s);
+    background-color: var(--color-divider);
+}
+
+#GiftBoxPanel .reward-row {
+    flex-direction: row;
+    align-items: center;
+    width: 620px;
+    height: 48px;
+    margin: var(--space-xs) 0;
+    padding: 0 var(--space-l);
+}
+
+#GiftBoxPanel .reward-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: var(--space-m);
+}
+
+#GiftBoxPanel .reward-label {
+    font-size: var(--fs-xl);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    color: var(--color-text-primary);
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+}
+
+#GiftBoxPanel .reward-value {
+    font-size: var(--fs-xl);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    color: var(--color-accent-gold);
+    -unity-text-align: middle-right;
+    width: 120px;
+}
+
+#GiftBoxPanel #RewardList {
+    font-size: var(--fs-l);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    color: var(--color-text-muted);
+    -unity-text-align: middle-center;
+    width: 620px;
+    white-space: normal;
+    margin-top: var(--space-m);
+}
+
+#GiftBoxPanel #GiftCard {
+    height: 600px;
+    max-height: 95%;
+    max-width: 95%;
+}
+
+#GiftBoxPanel #GiftCardShadow {
+    height: 640px;
+    margin-top: -320px;
+    max-height: 95%;
+    max-width: 95%;
+}
