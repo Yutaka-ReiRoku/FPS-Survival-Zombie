@@ -34,6 +34,7 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private bool _isRegisterMode;
     private bool _isBusy;
+    private bool _isAutoLoggingIn;
 
     private static readonly Color ErrorColor = new Color(0.85f, 0.35f, 0.15f, 1f);
     private static readonly Color SuccessColor = new Color(0.31f, 0.878f, 0.541f, 1f);
@@ -75,12 +76,12 @@ public class PlayFabLoginUI : MonoBehaviour
         }
 
         _toggleText = root.Q<Label>("ToggleText");
-        _toggleButton = root.Q("ToggleButton");
+        _toggleButton = root.Q<Label>("ToggleButton");
         if (_toggleButton != null)
         {
             _toggleButton.focusable = true;
             _toggleButton.RegisterCallback<ClickEvent>(_ => ToggleMode());
-            _toggleButtonLabel = _toggleButton.Q<Label>("ToggleBtnLabel");
+            _toggleButtonLabel = _toggleButton as Label;
         }
 
         _logoutButton = root.Q("TacticalLogoutButton");
@@ -217,6 +218,21 @@ public class PlayFabLoginUI : MonoBehaviour
                     el.RemoveFromClassList("slide-in");
                     el.RemoveFromClassList("slide-out-right");
                 }
+
+                // Hide logout button initially
+                var logoutBtn = rootElement.Q("TacticalLogoutButton");
+                if (logoutBtn != null)
+                {
+                    logoutBtn.style.display = DisplayStyle.None;
+                    logoutBtn.RemoveFromClassList("slide-in");
+                }
+
+                // Ensure quit button starts at opacity 0
+                var quitBtn = rootElement.Q("TacticalQuitButton");
+                if (quitBtn != null)
+                {
+                    quitBtn.RemoveFromClassList("slide-in");
+                }
             }
         }
     }
@@ -236,6 +252,9 @@ public class PlayFabLoginUI : MonoBehaviour
         var menuModules = root.Query(className: "menu-only").ToList();
 
         // 1. Slide out menu modules to the left sequentially (bottom first)
+        var logoutBtn = root.Q("TacticalLogoutButton");
+        if (logoutBtn != null) logoutBtn.RemoveFromClassList("slide-in");
+
         for (int i = menuModules.Count - 1; i >= 0; i--)
         {
             if (menuModules[i] != null)
@@ -249,6 +268,7 @@ public class PlayFabLoginUI : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
 
         // 2. Hide menu modules and show login modules in layout
+        if (logoutBtn != null) logoutBtn.style.display = DisplayStyle.None;
         foreach (var el in menuModules)
         {
             el.style.display = DisplayStyle.None;
@@ -292,6 +312,12 @@ public class PlayFabLoginUI : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
 
         // 2. Hide login modules and show menu modules in layout
+        var logoutBtn = root.Q("TacticalLogoutButton");
+        if (logoutBtn != null)
+        {
+            logoutBtn.style.display = DisplayStyle.Flex;
+            logoutBtn.RemoveFromClassList("slide-in");
+        }
         foreach (var el in loginModules)
         {
             el.style.display = DisplayStyle.None;
@@ -304,6 +330,8 @@ public class PlayFabLoginUI : MonoBehaviour
         }
 
         yield return null;
+
+        if (logoutBtn != null) logoutBtn.AddToClassList("slide-in");
 
         // 3. Stagger slide-in of menu modules from the left
         foreach (var el in menuModules)
@@ -339,13 +367,35 @@ public class PlayFabLoginUI : MonoBehaviour
             Debug.LogWarning("[PlayFabLoginUI] PlayFabManager not found.");
             ShowStatus("PlayFabManager not found.", ErrorColor);
             if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
-            _panel.style.display = DisplayStyle.Flex;
+            if (_panel != null) _panel.style.display = DisplayStyle.Flex;
             yield break;
         }
 
         pm.OnLoginSuccess += HandleLoginSuccess;
         pm.OnLoginError += HandleLoginError;
         pm.OnLogout += HandleLogout;
+
+        // Check for saved credentials for auto-login
+        string savedUser = PlayerPrefs.GetString("Save_Username", "");
+        string savedPass = PlayerPrefs.GetString("Save_Password", "");
+        bool hasSavedCredentials = !string.IsNullOrEmpty(savedUser) && !string.IsNullOrEmpty(savedPass);
+
+        bool autoLoginCompleted = false;
+        bool autoLoginSuccess = false;
+
+        if (hasSavedCredentials && !pm.IsLoggedIn)
+        {
+            _isAutoLoggingIn = true;
+            ShowStatus("Decrypting saved session...", new Color(0.85f, 0.78f, 0.45f, 1f));
+            pm.Login(savedUser, savedPass, (success, error) => {
+                autoLoginSuccess = success;
+                autoLoginCompleted = true;
+            });
+        }
+        else
+        {
+            autoLoginCompleted = true;
+        }
 
         if (pm.IsLoggedIn)
         {
@@ -401,22 +451,78 @@ public class PlayFabLoginUI : MonoBehaviour
         // Turn off overlay rendering completely to save CPU/GPU overhead
         if (overlay != null) overlay.style.display = DisplayStyle.None;
 
-        // 4. Wait another 3.0 seconds (total 6.0 seconds delay) before trundling the nodes in
-        yield return new WaitForSeconds(3.0f);
-
-        // 5. Trigger slide-in transitions with staggered delays defined in C# (circumventing UI Toolkit CSS parser bugs)
-        var startModules = new string[] { "HeaderModule", "InputModule_User", "InputModule_Pass", "ActionModule" };
-        foreach (var name in startModules)
+        // Wait for auto-login to complete or timeout (max 3.0 seconds additional delay)
+        float autoLoginTimeout = 3.0f;
+        while (!autoLoginCompleted && autoLoginTimeout > 0f)
         {
-            var el = _panel?.Q(name);
-            el?.AddToClassList("slide-in");
-            yield return new WaitForSeconds(0.15f); // 150ms delay between elements
+            autoLoginTimeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // Check if auto-login was successful
+        bool startAsLoggedIn = pm.IsLoggedIn || autoLoginSuccess;
+
+        if (startAsLoggedIn)
+        {
+            // Transition menu modules in
+            if (rootElement != null)
+            {
+                var loginOnlyList = rootElement.Query(className: "login-only").ToList();
+                foreach (var el in loginOnlyList) el.style.display = DisplayStyle.None;
+                var menuOnlyList = rootElement.Query(className: "menu-only").ToList();
+                foreach (var el in menuOnlyList) el.style.display = DisplayStyle.Flex;
+            }
+
+            if (profileWidget != null) profileWidget.SetActive(true);
+
+            // Stagger slide-in of menu modules and fade-in of logout button
+            var logoutBtn = _loginRoot?.Q("TacticalLogoutButton");
+            if (logoutBtn != null)
+            {
+                logoutBtn.style.display = DisplayStyle.Flex;
+                logoutBtn.RemoveFromClassList("slide-in");
+            }
+
+            var quitBtn = _loginRoot?.Q("TacticalQuitButton");
+            if (quitBtn != null)
+            {
+                quitBtn.RemoveFromClassList("slide-in");
+            }
+            
+            yield return null;
+
+            if (logoutBtn != null) logoutBtn.AddToClassList("slide-in");
+            if (quitBtn != null) quitBtn.AddToClassList("slide-in");
+
+            var startModules = new string[] { "HeaderModule", "MainMenuModule_Play", "MainMenuModule_Profile", "MainMenuModule_Rankings" };
+            foreach (var name in startModules)
+            {
+                var el = _panel?.Q(name);
+                el?.AddToClassList("slide-in");
+                yield return new WaitForSeconds(0.15f);
+            }
+        }
+        else
+        {
+            // Transition login modules in
+            var quitBtn = _loginRoot?.Q("TacticalQuitButton");
+            if (quitBtn != null) quitBtn.AddToClassList("slide-in");
+
+            var startModules = new string[] { "HeaderModule", "InputModule_User", "InputModule_Pass", "ActionModule" };
+            foreach (var name in startModules)
+            {
+                var el = _panel?.Q(name);
+                el?.AddToClassList("slide-in");
+                yield return new WaitForSeconds(0.15f);
+            }
         }
     }
 
     private void ToggleMode()
     {
         _isRegisterMode = !_isRegisterMode;
+        if (_usernameInput != null) _usernameInput.value = "";
+        if (_passwordInput != null) _passwordInput.value = "";
         
         // Trigger Pop animation (swell/bounce)
         TriggerPopAnimation();
@@ -487,18 +593,57 @@ public class PlayFabLoginUI : MonoBehaviour
             return;
         }
 
-        // Validate Password requirements (Registration only: 6-100 chars, no spaces)
+        if (!char.IsLetter(username[0]))
+        {
+            ShowStatus("Username must start with a letter.", ErrorColor);
+            return;
+        }
+
+        // Validate Password requirements (Registration only: 6-30 chars, no spaces, complexity checks)
         if (_isRegisterMode)
         {
-            if (password.Length < 6 || password.Length > 100)
+            if (password.Length < 6 || password.Length > 30)
             {
-                ShowStatus("Password must be between 6 and 100 characters.", ErrorColor);
+                ShowStatus("Password must be between 6 and 30 characters.", ErrorColor);
                 return;
             }
 
             if (password.Contains(" "))
             {
                 ShowStatus("Password cannot contain spaces.", ErrorColor);
+                return;
+            }
+
+            bool hasUpper = false;
+            bool hasLower = false;
+            bool hasDigit = false;
+            bool hasSpecial = false;
+            foreach (char c in password)
+            {
+                if (char.IsUpper(c)) hasUpper = true;
+                else if (char.IsLower(c)) hasLower = true;
+                else if (char.IsDigit(c)) hasDigit = true;
+                else if (!char.IsLetterOrDigit(c)) hasSpecial = true;
+            }
+
+            if (!hasUpper)
+            {
+                ShowStatus("Password must contain an uppercase letter.", ErrorColor);
+                return;
+            }
+            if (!hasLower)
+            {
+                ShowStatus("Password must contain a lowercase letter.", ErrorColor);
+                return;
+            }
+            if (!hasDigit)
+            {
+                ShowStatus("Password must contain at least one number.", ErrorColor);
+                return;
+            }
+            if (!hasSpecial)
+            {
+                ShowStatus("Password must contain a special character.", ErrorColor);
                 return;
             }
         }
@@ -540,15 +685,23 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void OnLogoutClicked()
     {
+        PlayerPrefs.DeleteKey("Save_Username");
+        PlayerPrefs.DeleteKey("Save_Password");
+        PlayerPrefs.Save();
+
         PlayFabManager.Instance?.Logout();
         if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
-        _panel.style.display = DisplayStyle.Flex;
+        if (_panel != null) _panel.style.display = DisplayStyle.Flex;
         HideMainMenu();
         ShowStatus("Logged out.", new Color(0.62f, 0.66f, 0.72f, 1f));
     }
 
     private void HandleLogout()
     {
+        PlayerPrefs.DeleteKey("Save_Username");
+        PlayerPrefs.DeleteKey("Save_Password");
+        PlayerPrefs.Save();
+
         _isRegisterMode = false;
         _isBusy = false;
         if (_usernameInput != null) _usernameInput.value = "";
@@ -556,7 +709,7 @@ public class PlayFabLoginUI : MonoBehaviour
         _actionButton?.SetEnabled(true);
         HideMainMenu();
         if (_loginRoot != null) _loginRoot.style.display = DisplayStyle.Flex;
-        _panel.style.display = DisplayStyle.Flex;
+        if (_panel != null) _panel.style.display = DisplayStyle.Flex;
         UpdateUI();
         ShowStatus("Logged out. Please log in again.", new Color(0.62f, 0.66f, 0.72f, 1f));
     }
@@ -565,12 +718,32 @@ public class PlayFabLoginUI : MonoBehaviour
 
     private void HandleLoginSuccess(string username)
     {
+        if (_isAutoLoggingIn)
+        {
+            _isAutoLoggingIn = false;
+            return;
+        }
+
+        if (_usernameInput != null && _passwordInput != null && !string.IsNullOrEmpty(_usernameInput.value))
+        {
+            PlayerPrefs.SetString("Save_Username", _usernameInput.value);
+            PlayerPrefs.SetString("Save_Password", _passwordInput.value);
+            PlayerPrefs.Save();
+        }
+
+        if (_usernameInput != null) _usernameInput.value = "";
+        if (_passwordInput != null) _passwordInput.value = "";
         ShowStatus($"Welcome, {username}!", SuccessColor);
         StartCoroutine(HideAfterDelay(3.0f));
     }
 
     private void HandleLoginError(string error)
     {
+        if (_isAutoLoggingIn)
+        {
+            _isAutoLoggingIn = false;
+            return;
+        }
         ShowStatus(error, ErrorColor);
         SetBusy(false);
     }

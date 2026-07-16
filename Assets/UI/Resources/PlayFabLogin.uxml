@@ -4,8 +4,6 @@
     <ui:Style src="project://database/Assets/UI/Resources/PlayFabLogin.uss" />
 
     <ui:VisualElement name="PlayFabLoginRoot" class="overlay">
-        <!-- Full-screen cinematic black overlay for start fade -->
-        <ui:VisualElement name="BlackOverlay" class="black-overlay" />
 
         <!-- Main Floating Tactical HUD Panel Container (Transparent) -->
         <ui:VisualElement name="LoginPanel" class="login-panel-container">
@@ -80,9 +78,7 @@
                 
                 <ui:VisualElement name="ToggleRow" class="toggle-row">
                     <ui:Label name="ToggleText" class="toggle-label" text="Don't have an account?" />
-                    <ui:VisualElement name="ToggleButton" class="login-toggle-btn">
-                        <ui:Label name="ToggleBtnLabel" class="btn-label" text="Register" />
-                    </ui:VisualElement>
+                    <ui:Label name="ToggleButton" class="login-toggle-btn btn-label" text="Register" />
                 </ui:VisualElement>
                 
             </ui:VisualElement>
@@ -145,17 +141,20 @@
             </ui:VisualElement>
 
         </ui:VisualElement>
-    </ui:VisualElement>
+        
+        <!-- Bottom-Right Corner Control Group (Quit always visible, Logout menu-only) -->
+        <ui:VisualElement name="CornerControlGroup" class="corner-control-group">
+            <!-- Circular Logout Button (Menu Logout Only) -->
+            <ui:VisualElement name="TacticalLogoutButton" class="hud-circle-btn logout-btn menu-logout-only" tooltip="LOGOUT OF SECTOR">
+                <ui:VisualElement class="btn-icon" />
+            </ui:VisualElement>
+            <!-- Circular Quit Button (Always Visible) -->
+            <ui:VisualElement name="TacticalQuitButton" class="hud-circle-btn quit-btn" tooltip="ABORT OPERATION [QUIT]">
+                <ui:VisualElement class="btn-icon" />
+            </ui:VisualElement>
+        </ui:VisualElement>
 
-    <!-- Bottom-Right Corner Control Group (Menu Only) -->
-    <ui:VisualElement name="CornerControlGroup" class="corner-control-group menu-only">
-        <!-- Circular Logout Button -->
-        <ui:VisualElement name="TacticalLogoutButton" class="hud-circle-btn logout-btn" tooltip="LOGOUT OF SECTOR">
-            <ui:VisualElement class="btn-icon" />
-        </ui:VisualElement>
-        <!-- Circular Quit Button -->
-        <ui:VisualElement name="TacticalQuitButton" class="hud-circle-btn quit-btn" tooltip="ABORT OPERATION [QUIT]">
-            <ui:VisualElement class="btn-icon" />
-        </ui:VisualElement>
+        <!-- Full-screen cinematic black overlay for start fade (placed last to cover everything) -->
+        <ui:VisualElement name="BlackOverlay" class="black-overlay" />
     </ui:VisualElement>
 </ui:UXML>

@@ -22,7 +22,6 @@
     justify-content: center;
     background-color: var(--color-panel-bg, rgba(14, 17, 21, 0.92));
     border-radius: var(--radius-l, 22px);
-    cursor: link;
     transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
     padding-left: 14px;
     padding-right: 14px;
@@ -153,7 +152,6 @@
     justify-content: center;
     background-color: var(--color-accent-blue, rgba(51, 89, 128, 1));
     border-radius: var(--radius-s, 8px);
-    cursor: link;
     transition: background-color var(--transition-fast, 0.08s), scale var(--transition-fast, 0.08s);
 }
 

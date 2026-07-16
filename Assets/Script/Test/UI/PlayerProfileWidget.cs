@@ -25,8 +25,8 @@ public class PlayerProfileWidget : MonoBehaviour
     private Label _panelBestWave;
     private Label _panelAchievements;
     private VisualElement _achievementList;
-    private VisualElement _logoutButton;
     private bool _panelVisible;
+    private Coroutine _transitionCoroutine;
 
     private void Awake()
     {
@@ -45,7 +45,6 @@ public class PlayerProfileWidget : MonoBehaviour
         _panelBestWave = root.Q<Label>("PanelBestWave");
         _panelAchievements = root.Q<Label>("PanelAchievements");
         _achievementList = root.Q("AchList");
-        _logoutButton = root.Q("LogoutButton");
 
         if (_chip != null)
         {
@@ -54,9 +53,12 @@ public class PlayerProfileWidget : MonoBehaviour
         }
         var closeBtn = root.Q("CloseButton");
         if (closeBtn != null) closeBtn.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
-        if (_logoutButton != null) _logoutButton.RegisterCallback<ClickEvent>(_ => OnLogoutClicked());
 
-        if (_panel != null) _panel.style.display = DisplayStyle.None;
+        if (_panel != null)
+        {
+            _panel.style.display = DisplayStyle.None;
+            _panel.generateVisualContent += OnGeneratePanelBackground;
+        }
         if (_chip != null) _chip.style.display = DisplayStyle.None;
     }
 
@@ -117,12 +119,34 @@ public class PlayerProfileWidget : MonoBehaviour
 
     private void SetPanelVisible(bool visible)
     {
-        _panelVisible = visible;
-        _panel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-        if (visible) RefreshPanel();
+        if (_transitionCoroutine != null) StopCoroutine(_transitionCoroutine);
+        _transitionCoroutine = StartCoroutine(AnimatePanel(visible));
+    }
 
+    private IEnumerator AnimatePanel(bool visible)
+    {
+        _panelVisible = visible;
         var mainMenu = FindMainMenuContent();
-        if (mainMenu != null) mainMenu.SetActive(!visible);
+
+        if (visible)
+        {
+            if (mainMenu != null) mainMenu.SetActive(false);
+            RefreshPanel();
+            if (_panel != null)
+            {
+                _panel.style.display = DisplayStyle.Flex;
+                _panel.RemoveFromClassList("slide-in");
+            }
+            yield return null;
+            if (_panel != null) _panel.AddToClassList("slide-in");
+        }
+        else
+        {
+            if (_panel != null) _panel.RemoveFromClassList("slide-in");
+            yield return new WaitForSeconds(1.5f);
+            if (_panel != null) _panel.style.display = DisplayStyle.None;
+            if (mainMenu != null) mainMenu.SetActive(true);
+        }
     }
 
     private GameObject FindMainMenuContent()
@@ -189,8 +213,6 @@ public class PlayerProfileWidget : MonoBehaviour
         if (_panelBestScore != null) _panelBestScore.text = bestScore.ToString();
         if (_panelBestWave != null) _panelBestWave.text = bestWave.ToString();
 
-        if (_logoutButton != null) _logoutButton.style.display = loggedIn ? DisplayStyle.Flex : DisplayStyle.None;
-
         int unlocked = 0;
         int total = 0;
         _achievementList?.Clear();
@@ -205,14 +227,47 @@ public class PlayerProfileWidget : MonoBehaviour
                 bool isUnlocked = PlayerPrefs.GetInt(ach.UnlockedKey, 0) == 1;
                 if (isUnlocked) unlocked++;
 
-                string status = isUnlocked ? "[v]" : "[ ]";
-                string progress = ach.isProgression ? $" ({am.GetProgress(ach)}/{ach.targetValue})" : "";
-                Color color = isUnlocked ? ButtonColor : TextMuted;
+                // Container
+                var item = new VisualElement();
+                item.AddToClassList("ach-item");
+                if (isUnlocked) item.AddToClassList("unlocked");
 
-                var lbl = new Label($"{status} {ach.title}{progress}");
-                lbl.style.fontSize = 13;
-                lbl.style.color = color;
-                _achievementList?.Add(lbl);
+                // Left column: Icon + Info
+                var leftCol = new VisualElement();
+                leftCol.style.flexDirection = FlexDirection.Row;
+                leftCol.style.alignItems = Align.Center;
+
+                // Star icon
+                var icon = new VisualElement();
+                icon.AddToClassList("ach-item-icon");
+                if (isUnlocked) icon.AddToClassList("unlocked");
+                leftCol.Add(icon);
+
+                // Text stack
+                var textStack = new VisualElement();
+                textStack.style.flexDirection = FlexDirection.Column;
+
+                var titleLbl = new Label(ach.title);
+                titleLbl.AddToClassList("ach-item-title");
+                textStack.Add(titleLbl);
+
+                if (ach.isProgression)
+                {
+                    int currentProgress = am.GetProgress(ach);
+                    var progressLbl = new Label($"PROGRESS: {currentProgress} / {ach.targetValue}");
+                    progressLbl.AddToClassList("ach-item-progress-text");
+                    textStack.Add(progressLbl);
+                }
+                leftCol.Add(textStack);
+                item.Add(leftCol);
+
+                // Right column: Status stamp
+                var statusLbl = new Label(isUnlocked ? "COMPLETED" : "LOCKED");
+                statusLbl.AddToClassList("ach-item-status");
+                if (isUnlocked) statusLbl.AddToClassList("unlocked");
+                item.Add(statusLbl);
+
+                _achievementList?.Add(item);
             }
         }
 
@@ -223,8 +278,125 @@ public class PlayerProfileWidget : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (_panelVisible && _panel != null)
+        {
+            _panel.MarkDirtyRepaint();
+        }
+    }
+
+    private void OnGeneratePanelBackground(MeshGenerationContext mgc)
+    {
+        var rect = _panel.layout;
+        if (rect.width <= 0 || rect.height <= 0) return;
+
+        var painter = mgc.painter2D;
+        float chamferSize = 16f;
+
+        // 1. Draw solid dark blue-gray translucent background shape to match HUD modules
+        Color fillCol = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.94f);
+        painter.fillColor = fillCol;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Fill();
+
+        // 2. Draw yellow-black diagonal warning stripes at the top edge
+        float badgeW = 60f;
+        float badgeH = 7f;
+        float startX = rect.width - badgeW - 24f;
+        float startY = 4f;
+
+        painter.lineWidth = 1.0f;
+        for (float offset = 0; offset < badgeW; offset += 6f)
+        {
+            // Yellow stripe
+            painter.strokeColor = new Color(230f / 255f, 180f / 255f, 20f / 255f, 0.8f);
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(startX + offset, startY));
+            painter.LineTo(new Vector2(startX + offset - 4f, startY + badgeH));
+            painter.Stroke();
+
+            // Black stripe
+            painter.strokeColor = new Color(16f / 255f, 14f / 255f, 14f / 255f, 0.9f);
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(startX + offset + 3f, startY));
+            painter.LineTo(new Vector2(startX + offset - 1f, startY + badgeH));
+            painter.Stroke();
+        }
+
+        // 3. Draw outer border with breathing glow
+        float pulse = 0.35f + Mathf.PingPong(Time.realtimeSinceStartup * 1.5f, 0.45f);
+        Color strokeCol = new Color(230f / 255f, 80f / 255f, 40f / 255f, pulse);
+        float lineWidth = 1.5f;
+
+        painter.strokeColor = strokeCol;
+        painter.lineWidth = lineWidth;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Stroke();
+
+        // 4. Draw inner offset double-line border
+        float d = 3.5f;
+        if (rect.width > d * 2 && rect.height > d * 2)
+        {
+            Color innerCol = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.15f);
+            painter.strokeColor = innerCol;
+            painter.lineWidth = 1.0f;
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(chamferSize, d));
+            painter.LineTo(new Vector2(rect.width - d, d));
+            painter.LineTo(new Vector2(rect.width - d, rect.height - chamferSize));
+            painter.LineTo(new Vector2(rect.width - chamferSize, rect.height - d));
+            painter.LineTo(new Vector2(d, rect.height - d));
+            painter.LineTo(new Vector2(d, chamferSize));
+            painter.ClosePath();
+            painter.Stroke();
+        }
+
+        // 5. Draw 4 3D metallic corner rivets (screws)
+        System.Action<Vector2> drawRivet = center =>
+        {
+            painter.fillColor = new Color(16f / 255f, 14f / 255f, 14f / 255f, 0.6f);
+            painter.BeginPath();
+            painter.Arc(center + new Vector2(0.5f, 0.5f), 3.5f, 0f, 360f);
+            painter.Fill();
+
+            painter.fillColor = new Color(175f / 255f, 110f / 255f, 75f / 255f, 1.0f);
+            painter.BeginPath();
+            painter.Arc(center, 3.0f, 0f, 360f);
+            painter.Fill();
+
+            painter.fillColor = Color.white;
+            painter.BeginPath();
+            painter.Arc(center - new Vector2(0.8f, 0.8f), 0.6f, 0f, 360f);
+            painter.Fill();
+        };
+
+        float rOffset = 10f;
+        drawRivet(new Vector2(rOffset, rOffset));
+        drawRivet(new Vector2(rect.width - rOffset, rOffset));
+        drawRivet(new Vector2(rect.width - rOffset, rect.height - rOffset));
+        drawRivet(new Vector2(rOffset, rect.height - rOffset));
+    }
+
     private void OnDestroy()
     {
-        // Shared UIDocument is managed by the MainMenu scene GameObject, do not destroy it.
+        if (_panel != null)
+        {
+            _panel.generateVisualContent -= OnGeneratePanelBackground;
+        }
     }
 }

@@ -38,7 +38,6 @@
     width: 33%;
     min-width: 500px;
     max-width: 660px;
-    height: auto;
     position: absolute;
     left: 6%;
     top: 8%;
@@ -277,7 +276,6 @@
     margin-bottom: 16px;
     flex-direction: row;
     align-items: stretch;
-    cursor: link;
     transition: scale 0.08s ease-in-out;
 }
 
@@ -346,17 +344,14 @@
 
 .login-toggle-btn {
     background-color: rgba(0, 0, 0, 0);
-    cursor: link;
     margin-left: 6px;
-}
-
-.login-toggle-btn .btn-label {
+    translate: 0 4.5px;
     font-size: 16px;
     color: rgb(230, 80, 40);
     transition: color 0.08s ease-in-out;
 }
 
-.login-toggle-btn:hover .btn-label {
+.login-toggle-btn:hover {
     color: white;
 }
 
@@ -367,7 +362,6 @@
     justify-content: center;
     background-color: rgb(168, 23, 33);
     border-radius: 6px;
-    cursor: link;
     transition: background-color 0.08s ease-in-out, scale 0.08s ease-in-out;
 }
 
@@ -451,7 +445,6 @@
 }
 
 .button-trigger {
-    cursor: link;
     transition: background-color 0.15s ease-out;
 }
 
@@ -466,7 +459,6 @@
     bottom: 36px;
     flex-direction: row;
     align-items: center;
-    display: none; /* hidden until logged in */
 }
 
 /* --- Circular Tactical HUD Buttons --- */
@@ -478,9 +470,13 @@
     border-width: 1.5px;
     justify-content: center;
     align-items: center;
-    cursor: link;
     margin-left: 16px;
-    transition: background-color 0.15s ease-out, border-color 0.15s ease-out, scale 0.1s ease-out, box-shadow 0.15s ease-out;
+    opacity: 0;
+    transition: opacity 1.5s ease-out, background-color 0.15s ease-out, border-color 0.15s ease-out, scale 0.1s ease-out;
+}
+
+.hud-circle-btn.slide-in {
+    opacity: 1;
 }
 
 .hud-circle-btn:hover {
@@ -528,10 +524,10 @@
 }
 
 .hud-circle-btn.logout-btn .btn-icon {
-    background-image: url("project://database/Assets/UI/Resources/Icons/icon_exit.svg");
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_quit.svg");
 }
 
 .hud-circle-btn.quit-btn .btn-icon {
-    background-image: url("project://database/Assets/UI/Resources/Icons/icon_quit.svg");
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_exit.svg");
 }
 

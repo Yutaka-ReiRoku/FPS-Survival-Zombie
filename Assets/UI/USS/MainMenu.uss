@@ -77,7 +77,6 @@
     width: 280px;
     height: 60px;
     position: relative;
-    cursor: link;
     transition: opacity var(--transition-normal, 0.2s), scale var(--transition-fast, 0.08s) var(--panel-easing, ease-out);
 }
 
