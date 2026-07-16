@@ -475,11 +475,7 @@ public class PlayFabLoginUI : MonoBehaviour
             autoLoginCompleted = true;
         }
 
-        if (pm.IsLoggedIn)
-        {
-            ShowMainMenu();
-            yield break;
-        }
+
 
         HideMainMenu(false);
         UpdateUI();
@@ -510,7 +506,7 @@ public class PlayFabLoginUI : MonoBehaviour
         var overlay = _loginRoot?.Q("BlackOverlay");
         if (overlay != null)
         {
-            overlay.style.display = DisplayStyle.Flex;
+            overlay.pickingMode = PickingMode.Position; // Block clicks while black
             overlay.RemoveFromClassList("fade-out");
         }
 
@@ -526,8 +522,8 @@ public class PlayFabLoginUI : MonoBehaviour
         // Wait 3.0 seconds for black overlay fade out to complete
         yield return new WaitForSeconds(3.0f);
 
-        // Turn off overlay rendering completely to save CPU/GPU overhead
-        if (overlay != null) overlay.style.display = DisplayStyle.None;
+        // Allow clicks to pass through after fade out completes
+        if (overlay != null) overlay.pickingMode = PickingMode.Ignore;
 
         // Wait for auto-login to complete or timeout (max 3.0 seconds additional delay)
         float autoLoginTimeout = 3.0f;

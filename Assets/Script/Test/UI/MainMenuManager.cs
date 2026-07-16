@@ -130,7 +130,7 @@ public class MainMenuManager : MonoBehaviour
             yield return new WaitForSeconds(1.5f);
         }
 
-        // 5. Get the black overlay element, make it visible and transparent initially
+        // 5. Get the black overlay element
         VisualElement overlay = null;
         if (_doc != null)
         {
@@ -138,12 +138,11 @@ public class MainMenuManager : MonoBehaviour
         }
         if (overlay != null)
         {
-            overlay.style.display = DisplayStyle.Flex;
-            overlay.style.opacity = 0f;
-            overlay.RemoveFromClassList("fade-out"); // Make sure css transitions don't fight us
+            overlay.pickingMode = PickingMode.Position; // Block clicks
+            overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        // 6. Transition: Fade black overlay to 1.0 and shrink all camera parameters to 0 over 3 seconds
+        // 6. Transition: Shrink all camera parameters to 0 over 3 seconds (while USS transition handles fade-to-black)
         float startRadius = cameraOrbit != null ? cameraOrbit.radius : 130f;
         float startHeight = cameraOrbit != null ? cameraOrbit.height : 55f;
         float startBob = cameraOrbit != null ? cameraOrbit.bobAmplitude : 2.5f;
@@ -157,7 +156,7 @@ public class MainMenuManager : MonoBehaviour
             elapsed += Time.unscaledDeltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
             
-            // Standard Ease-In-Out for overlay opacity, bob, and sway
+            // Standard Ease-In-Out for camera parameters
             float easeT = t * t * (3f - 2f * t);
 
             // Ease-Out Cubic for horizontal radius: 1 - (1 - t)^3
@@ -166,12 +165,6 @@ public class MainMenuManager : MonoBehaviour
 
             // Ease-In Cubic for vertical height: t^3
             float easeT_height = t * t * t;
-
-            // Lerp opacity of overlay
-            if (overlay != null)
-            {
-                overlay.style.opacity = easeT;
-            }
 
             // Lerp camera orbit parameters to 0
             if (cameraOrbit != null)
@@ -186,7 +179,6 @@ public class MainMenuManager : MonoBehaviour
         }
 
         // Ensure final values
-        if (overlay != null) overlay.style.opacity = 1f;
         if (cameraOrbit != null)
         {
             cameraOrbit.radius = 0f;
@@ -235,6 +227,7 @@ public class MainMenuManager : MonoBehaviour
         }
 
         // 5. Get the black overlay element, make it visible and transparent initially
+        // 5. Get the black overlay element
         VisualElement overlay = null;
         if (_doc != null)
         {
@@ -242,34 +235,11 @@ public class MainMenuManager : MonoBehaviour
         }
         if (overlay != null)
         {
-            overlay.style.display = DisplayStyle.Flex;
-            overlay.style.opacity = 0f;
-            overlay.RemoveFromClassList("fade-out"); // Make sure css transitions don't fight us
+            overlay.pickingMode = PickingMode.Position; // Block clicks
+            overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        // 5. Transition: Fade black overlay to 1.0 over 3 seconds
-        float duration = 3f;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            
-            // Standard Ease-In-Out for overlay opacity
-            float easeT = t * t * (3f - 2f * t);
-
-            // Lerp opacity of overlay
-            if (overlay != null)
-            {
-                overlay.style.opacity = easeT;
-            }
-
-            yield return null;
-        }
-
-        // Ensure final values
-        if (overlay != null) overlay.style.opacity = 1f;
+        yield return new WaitForSecondsRealtime(3.0f);
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;

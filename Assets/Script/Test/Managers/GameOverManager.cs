@@ -230,27 +230,11 @@ public class GameOverManager : MonoBehaviour
         var overlay = root?.Q("BlackOverlay");
         if (overlay != null)
         {
-            overlay.style.display = DisplayStyle.Flex;
-            overlay.style.opacity = 0f;
-            overlay.RemoveFromClassList("fade-out"); // Make sure css transitions don't fight us
+            overlay.pickingMode = PickingMode.Position; // Block clicks
+            overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        float duration = 3f;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            float easeT = t * t * (3f - 2f * t);
-            if (overlay != null)
-            {
-                overlay.style.opacity = easeT;
-            }
-            yield return null;
-        }
-
-        if (overlay != null) overlay.style.opacity = 1f;
+        yield return new WaitForSecondsRealtime(3.0f);
 
         Time.timeScale = 1f;
         SceneManager.LoadScene(sceneName);
@@ -262,27 +246,11 @@ public class GameOverManager : MonoBehaviour
         var overlay = root?.Q("BlackOverlay");
         if (overlay != null)
         {
-            overlay.style.display = DisplayStyle.Flex;
-            overlay.style.opacity = 0f;
-            overlay.RemoveFromClassList("fade-out");
+            overlay.pickingMode = PickingMode.Position; // Block clicks
+            overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        float duration = 3f;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            float easeT = t * t * (3f - 2f * t);
-            if (overlay != null)
-            {
-                overlay.style.opacity = easeT;
-            }
-            yield return null;
-        }
-
-        if (overlay != null) overlay.style.opacity = 1f;
+        yield return new WaitForSecondsRealtime(3.0f);
 
         Time.timeScale = 1f;
 
@@ -312,17 +280,12 @@ public class GameOverManager : MonoBehaviour
             UnityEngine.Cursor.lockState = CursorLockMode.Locked;
             UnityEngine.Cursor.visible = false;
 
-            // Fade back out when respawning!
+            // Fade back out when respawning using pure USS transition
             if (overlay != null)
             {
-                float elapsedOut = 0f;
-                while (elapsedOut < 1f) // Fade out over 1s
-                {
-                    elapsedOut += Time.unscaledDeltaTime;
-                    overlay.style.opacity = 1f - Mathf.Clamp01(elapsedOut / 1f);
-                    yield return null;
-                }
-                overlay.style.display = DisplayStyle.None;
+                overlay.AddToClassList("fade-out"); // Starts 3s fade-out in USS!
+                yield return new WaitForSecondsRealtime(3.0f);
+                overlay.pickingMode = PickingMode.Ignore; // Allow clicks to pass through
             }
 
             var ps = FindAnyObjectByType<PlayerStats>();
@@ -353,27 +316,11 @@ public class GameOverManager : MonoBehaviour
         var overlay = root?.Q("BlackOverlay");
         if (overlay != null)
         {
-            overlay.style.display = DisplayStyle.Flex;
-            overlay.style.opacity = 0f;
-            overlay.RemoveFromClassList("fade-out");
+            overlay.pickingMode = PickingMode.Position; // Block clicks
+            overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        float duration = 3f;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-            float easeT = t * t * (3f - 2f * t);
-            if (overlay != null)
-            {
-                overlay.style.opacity = easeT;
-            }
-            yield return null;
-        }
-
-        if (overlay != null) overlay.style.opacity = 1f;
+        yield return new WaitForSecondsRealtime(3.0f);
 
         Time.timeScale = 1f;
 #if UNITY_EDITOR

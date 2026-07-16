@@ -57,7 +57,7 @@ public class GameplayHUDController : MonoBehaviour
         var overlay = root?.Q("BlackOverlay");
         if (overlay != null)
         {
-            overlay.style.display = DisplayStyle.Flex;
+            overlay.pickingMode = PickingMode.Position; // Block clicks while black
             overlay.RemoveFromClassList("fade-out");
         }
 
@@ -65,7 +65,7 @@ public class GameplayHUDController : MonoBehaviour
 
         if (overlay != null)
         {
-            overlay.AddToClassList("fade-out");
+            overlay.AddToClassList("fade-out"); // Starts 3s fade-out in USS
         }
 
         // Wait 3.0 seconds in REALTIME because Time.timeScale is 0!
@@ -73,7 +73,7 @@ public class GameplayHUDController : MonoBehaviour
 
         if (overlay != null)
         {
-            overlay.style.display = DisplayStyle.None;
+            overlay.pickingMode = PickingMode.Ignore; // Allow clicks to pass through after fade-out completes
         }
 
         // Unfreeze timescale to resume gameplay

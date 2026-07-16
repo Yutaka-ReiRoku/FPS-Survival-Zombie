@@ -24,11 +24,11 @@
     bottom: -200px;
     background-color: black;
     opacity: 1;
+    transition: opacity 3s ease-in-out;
 }
 
 .black-overlay.fade-out {
     opacity: 0;
-    transition: opacity 3s ease-in-out;
 }
 
 /* --- Main Modular Container (Transparent) --- */
