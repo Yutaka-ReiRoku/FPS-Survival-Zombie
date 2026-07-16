@@ -42,6 +42,37 @@ public class GameplayHUDController : MonoBehaviour
             CowsinsHUDAdapter.Instance.OnCoinsChanged += OnCoinsChanged;
     }
 
+    private void Start()
+    {
+        StartCoroutine(StartFadeOut());
+    }
+
+    private IEnumerator StartFadeOut()
+    {
+        if (_doc == null) yield break;
+        var root = _doc.rootVisualElement;
+        var overlay = root?.Q("BlackOverlay");
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.Flex;
+            overlay.RemoveFromClassList("fade-out");
+        }
+
+        yield return null;
+
+        if (overlay != null)
+        {
+            overlay.AddToClassList("fade-out");
+        }
+
+        yield return new WaitForSeconds(3.0f);
+
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.None;
+        }
+    }
+
     private void OnEnable()
     {
         if (ScoreManager.Instance != null)

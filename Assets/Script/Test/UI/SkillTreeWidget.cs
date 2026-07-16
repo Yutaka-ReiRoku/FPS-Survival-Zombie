@@ -62,6 +62,11 @@ public class SkillTreeWidget : MonoBehaviour
         _card = _root.Q("card");
         _sp = _root.Q<Label>("sp");
 
+        if (_card != null)
+        {
+            _card.generateVisualContent += OnGenerateCardBackground;
+        }
+
         for (int t = 0; t < Trees; t++)
         {
             _nodeContainer[t] = _root.Q("nodes" + t);
@@ -75,28 +80,27 @@ public class SkillTreeWidget : MonoBehaviour
 
     private void BuildNodes()
     {
-        const float containerTop = 186f;
-        const float halfCardH = 360f;
-        const float halfNode = 30f;
-        const float halfLine = 10f;
-
         for (int t = 0; t < Trees; t++)
         {
             for (int n = 0; n < NodesPerTree; n++)
             {
+                // Calculate position using simple linear math (10px start, 90px center-to-center offset)
+                float top = 10f + n * 90f;
+
                 var node = new VisualElement();
                 node.AddToClassList("skill-node");
                 node.AddToClassList("locked");
                 node.style.position = Position.Absolute;
                 node.style.left = 0;
-                node.style.top = halfCardH - NodeY[n] - halfNode - containerTop;
-                node.style.width = 60;
-                node.style.height = 60;
+                node.style.top = top;
+                node.style.width = 64;
+                node.style.height = 64;
                 _nodeContainer[t].Add(node);
 
-                var label = new Label((n + 1).ToString());
-                label.AddToClassList("node-label");
-                node.Add(label);
+                var icon = new VisualElement();
+                icon.AddToClassList("node-icon");
+                icon.AddToClassList($"node-icon-{t}-{n}");
+                node.Add(icon);
 
                 int ti = t;
                 node.RegisterCallback<ClickEvent>(_ => TryUpgrade(ti));
@@ -106,10 +110,10 @@ public class SkillTreeWidget : MonoBehaviour
                     var line = new VisualElement();
                     line.AddToClassList("skill-line");
                     line.style.position = Position.Absolute;
-                    line.style.left = 27;
-                    line.style.top = halfCardH - LineY[n] - halfLine - containerTop;
+                    line.style.left = 29; // Centered relative to 64px node width: (64 / 2) - (6 / 2) = 29
+                    line.style.top = top + 64f;
                     line.style.width = 6;
-                    line.style.height = 20;
+                    line.style.height = 26;
                     _nodeContainer[t].Add(line);
                     _lines[t, n] = line;
                 }
@@ -118,9 +122,6 @@ public class SkillTreeWidget : MonoBehaviour
             }
         }
     }
-
-    private static readonly float[] NodeY = { 130f, 50f, -30f, -110f, -190f };
-    private static readonly float[] LineY = { 90f, 10f, -70f, -150f };
 
     private void Start()
     {
@@ -140,7 +141,11 @@ public class SkillTreeWidget : MonoBehaviour
             if (_open) Close();
             else if (!gameOver && !pauseOpen && !journalOpen) Open();
         }
-        if (_open) RefreshIfDirty();
+        if (_open)
+        {
+            RefreshIfDirty();
+            if (_card != null) _card.MarkDirtyRepaint();
+        }
     }
 
     private void Open()
@@ -252,13 +257,13 @@ public class SkillTreeWidget : MonoBehaviour
                 bool upperIsNext = (n + 1) == lvl && !maxed;
 
                 if (upperUnlocked)
-                    line.style.backgroundColor = new StyleColor(new Color(0.85f, 0.78f, 0.45f, 1f));
+                    line.style.backgroundColor = new StyleColor(new Color(230f / 255f, 80f / 255f, 40f / 255f, 1f));
                 else if (upperIsNext && canAfford)
-                    line.style.backgroundColor = new StyleColor(new Color(0.31f, 0.878f, 0.541f, 1f));
+                    line.style.backgroundColor = new StyleColor(new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.6f));
                 else if (upperIsNext)
-                    line.style.backgroundColor = new StyleColor(new Color(0.62f, 0.66f, 0.72f, 1f));
+                    line.style.backgroundColor = new StyleColor(new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.2f));
                 else
-                    line.style.backgroundColor = new StyleColor(new Color(0.62f, 0.66f, 0.72f, 0.3f));
+                    line.style.backgroundColor = new StyleColor(new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.08f));
             }
 
             var costLabel = _cost[t];
@@ -269,8 +274,142 @@ public class SkillTreeWidget : MonoBehaviour
 
             _next[t].text = maxed ? "\u2014" : SkillTreeManager.GetNodeDescription(t, lvl + 1);
             _next[t].style.color = maxed
-                ? new StyleColor(new Color(0.62f, 0.66f, 0.72f, 1f))
-                : (canAfford ? new StyleColor(new Color(0.31f, 0.878f, 0.541f, 1f)) : new StyleColor(new Color(0.62f, 0.66f, 0.72f, 1f)));
+                ? new StyleColor(new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.25f))
+                : (canAfford ? new StyleColor(new Color(230f / 255f, 80f / 255f, 40f / 255f, 1f)) : new StyleColor(new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.5f)));
         }
+    }
+
+    private void OnGenerateCardBackground(MeshGenerationContext mgc)
+    {
+        if (_card == null) return;
+        var rect = _card.layout;
+        if (rect.width <= 0 || rect.height <= 0) return;
+
+        var painter = mgc.painter2D;
+        float chamferSize = 20f;
+
+        // 1. Draw solid dark background shape
+        Color fillCol = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.85f);
+        painter.fillColor = fillCol;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width - chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, chamferSize));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height - chamferSize));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Fill();
+
+        // 1.1 Draw horizontal sci-fi scanlines as filled rectangles using paths for maximum compatibility
+        painter.fillColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.05f);
+        for (float y = 30f; y < rect.height - 30f; y += 14f)
+        {
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(15f, y));
+            painter.LineTo(new Vector2(rect.width - 15f, y));
+            painter.LineTo(new Vector2(rect.width - 15f, y + 1.5f));
+            painter.LineTo(new Vector2(15f, y + 1.5f));
+            painter.ClosePath();
+            painter.Fill();
+        }
+
+        // 1.2 Draw vertical column dividers as filled rectangles
+        painter.fillColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.18f);
+        
+        // Left divider (between column 0 and 1)
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(380f, 140f));
+        painter.LineTo(new Vector2(381.5f, 140f));
+        painter.LineTo(new Vector2(381.5f, rect.height - 120f));
+        painter.LineTo(new Vector2(380f, rect.height - 120f));
+        painter.ClosePath();
+        painter.Fill();
+
+        // Right divider (between column 1 and 2)
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(700f, 140f));
+        painter.LineTo(new Vector2(701.5f, 140f));
+        painter.LineTo(new Vector2(701.5f, rect.height - 120f));
+        painter.LineTo(new Vector2(700f, rect.height - 120f));
+        painter.ClosePath();
+        painter.Fill();
+
+        // 2. Draw warning stripes at the top edge
+        float badgeW = 100f;
+        float badgeH = 8f;
+        float startX = rect.width / 2f - badgeW / 2f;
+        float startY = 4f;
+        
+        painter.lineWidth = 1.0f;
+        for (float offset = 0; offset < badgeW; offset += 6f)
+        {
+            painter.strokeColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.6f);
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(startX + offset, startY));
+            painter.LineTo(new Vector2(startX + offset - 4f, startY + badgeH));
+            painter.Stroke();
+
+            painter.strokeColor = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.9f);
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(startX + offset + 3f, startY));
+            painter.LineTo(new Vector2(startX + offset - 1f, startY + badgeH));
+            painter.Stroke();
+        }
+
+        // 3. Draw pulsing outer border
+        float pulse = 0.25f + Mathf.PingPong(Time.unscaledTime * 1.5f, 0.45f);
+        painter.strokeColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, pulse);
+        painter.lineWidth = 2.0f;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width - chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, chamferSize));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height - chamferSize));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Stroke();
+
+        // 4. Draw crosshair tick marks at 4 corners
+        float tickLen = 12f;
+        painter.strokeColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.8f);
+        painter.lineWidth = 1.5f;
+
+        // Top-Left
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(0, chamferSize + tickLen));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.LineTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(chamferSize + tickLen, 0));
+        painter.Stroke();
+
+        // Top-Right
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(rect.width - chamferSize - tickLen, 0));
+        painter.LineTo(new Vector2(rect.width - chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, chamferSize));
+        painter.LineTo(new Vector2(rect.width, chamferSize + tickLen));
+        painter.Stroke();
+
+        // Bottom-Left
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(0, rect.height - chamferSize - tickLen));
+        painter.LineTo(new Vector2(0, rect.height - chamferSize));
+        painter.LineTo(new Vector2(chamferSize, rect.height));
+        painter.LineTo(new Vector2(chamferSize + tickLen, rect.height));
+        painter.Stroke();
+
+        // Bottom-Right
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(rect.width - chamferSize - tickLen, rect.height));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize - tickLen));
+        painter.Stroke();
     }
 }

@@ -24,7 +24,7 @@
 
 .cutscene-title {
     font-size: var(--fs-hero, 64px);
-    -unity-font-definition: resource("Fonts/Anton SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: var(--color-text-gold);
     -unity-text-align: middle-center;
     width: 90%;

@@ -11,7 +11,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    -unity-font-definition: resource("Fonts/Anton SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
 }
 
 /* ===== BACKGROUND LAYER ===== */

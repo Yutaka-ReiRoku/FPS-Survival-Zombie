@@ -41,8 +41,8 @@
 
 #PauseTitle {
     font-size: var(--fs-display);
-    -unity-font-definition: resource("Fonts/Anton SDF");
-    -unity-font-definition: resource("Fonts/Anton SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
     letter-spacing: 6px;
     width: 720px;

@@ -39,8 +39,7 @@
 
 #GameOverPanel #Title {
     font-size: var(--fs-display);
-    -unity-font: var(--font-display);
-    -unity-font-definition: var(--font-display-sdf);
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
     letter-spacing: 6px;
     width: 720px;

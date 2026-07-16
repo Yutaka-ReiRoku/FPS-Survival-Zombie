@@ -21,7 +21,7 @@
 }
 
 .wave-title {
-    -unity-font-definition: resource("Fonts/Anton SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     font-size: var(--fs-hero, 64px);
     -unity-text-align: middle-center;
     color: var(--color-text-gold);

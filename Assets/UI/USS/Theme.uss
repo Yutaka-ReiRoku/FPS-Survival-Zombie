@@ -74,10 +74,10 @@
 
 /* ===================== TYPOGRAPHY ===================== */
 
---font-display:              resource("Fonts/Anton SDF");
+--font-display:              resource("Fonts/BlackOpsOne-Regular SDF");
 --font-body:                 resource("Fonts/Outfit-SemiBold SDF");
 
---font-display-sdf:          resource("Fonts/Anton SDF");
+--font-display-sdf:          resource("Fonts/BlackOpsOne-Regular SDF");
 --font-body-sdf:             resource("Fonts/Outfit-SemiBold SDF");
 
 /* --- Font Sizes (Purpose-based naming) --- */

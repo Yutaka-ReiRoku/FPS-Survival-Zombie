@@ -18,7 +18,7 @@
 #Chapter {
     color: var(--color-text-gold, rgb(217, 199, 115));
     font-size: var(--fs-l, 22px);
-    -unity-font-definition: resource("Fonts/Anton SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-font-style: bold;
     margin-bottom: var(--space-xs, 4px);
     white-space: normal;

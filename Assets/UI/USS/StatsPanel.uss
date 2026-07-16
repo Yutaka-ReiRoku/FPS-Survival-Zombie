@@ -61,7 +61,7 @@
     top: var(--space-xxl, 24px);
     height: 56px;
     font-size: var(--fs-xxl, 36px);
-    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     color: var(--color-text-primary, white);
     -unity-text-align: middle-center;
 }

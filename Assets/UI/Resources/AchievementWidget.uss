@@ -85,7 +85,7 @@
 
 #AchievementListPanel .list-header {
     font-size: var(--fs-xxl, 36px);
-    -unity-font-definition: resource("Fonts/Anton SDF");
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
     color: var(--color-accent-gold, rgb(217, 199, 115));
     margin-bottom: var(--space-s, 8px);

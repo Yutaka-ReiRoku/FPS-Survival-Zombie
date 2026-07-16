@@ -9,6 +9,7 @@
     right: 0;
     top: 0;
     bottom: 0;
+    background-color: rgba(0, 0, 0, 0) !important;
 }
 #SkillTreeWidget.open {
     flex-direction: column;
@@ -17,7 +18,7 @@
 /* Scrim — full-screen click blocker */
 #scrim {
     flex-grow: 1;
-    background-color: var(--color-scrim-bottom, rgba(0, 0, 0, 0.85));
+    background-color: rgba(0, 0, 0, 0);
 }
 
 /* Card — centered panel */
@@ -26,14 +27,12 @@
     left: 50%;
     top: 50%;
     translate: -50% -50%;
-    width: 920px;
-    height: 720px;
+    width: 1080px;
+    height: 800px;
     max-width: 95%;
     max-height: 95%;
-    background-color: rgba(16, 22, 30, 0.88);
-    border-width: 1px;
-    border-color: rgba(217, 199, 115, 0.25);
-    border-radius: var(--radius-m, 16px);
+    background-color: rgba(0, 0, 0, 0); /* Drawn by C# Vector API */
+    border-width: 0;
     opacity: 0;
     scale: var(--panel-start-scale, 0.9);
     transition: opacity var(--panel-in-duration, 0.22s) ease-out-back, scale var(--panel-in-duration, 0.22s) ease-out-back;
@@ -47,13 +46,13 @@
 #title {
     position: absolute;
     left: 50%;
-    top: var(--space-4xl, 40px);
+    top: 36px;
     translate: -50%;
-    width: 700px;
+    width: 800px;
     height: 56px;
-    color: var(--color-text-gold, rgb(217, 199, 115));
-    font-size: var(--fs-xxl, 36px);
-    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
+    color: rgb(230, 80, 40);
+    font-size: 42px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
 }
 
@@ -61,136 +60,185 @@
 #sp {
     position: absolute;
     left: 50%;
-    top: 90px;
+    top: 92px;
     translate: -50%;
-    width: 700px;
+    width: 800px;
     height: 36px;
-    color: var(--color-text-primary, rgba(245, 245, 245, 1));
-    font-size: var(--fs-xl, 28px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
+    color: rgba(230, 80, 40, 0.8);
+    font-size: 26px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
 }
 
 /* Branches row (3 column layout within card) */
 .branch {
     position: absolute;
-    width: 240px;
+    width: 280px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-#branch0 { left: 100px; top: 160px; }
-#branch1 { left: 340px; top: 160px; }
-#branch2 { left: 580px; top: 160px; }
+#branch0 { left: 80px; top: 155px; }
+#branch1 { left: 400px; top: 155px; }
+#branch2 { left: 720px; top: 155px; }
+
+/* SVG Branch Icons */
+.branch-icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 6px;
+    -unity-background-image-tint-color: rgb(230, 80, 40);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon-movement {
+    background-image: resource("Icons/icon_movement");
+}
+
+.icon-aim {
+    background-image: resource("Icons/icon_target");
+}
+
+.icon-intelligence {
+    background-image: resource("Icons/icon_intelligence");
+}
 
 .branch-header {
-    height: 32px;
-    color: var(--color-text-gold, rgb(217, 199, 115));
-    font-size: var(--fs-l, 22px);
-    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
+    height: 36px;
+    color: rgb(230, 80, 40);
+    font-size: 26px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
 }
 
 .branch-sub {
     height: 24px;
-    color: var(--color-text-muted, rgba(158, 168, 184, 1));
-    font-size: var(--fs-s, 16px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
+    color: rgba(230, 80, 40, 0.5);
+    font-size: 16px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
 }
 
 .node-container {
     position: relative;
-    width: 60px;
-    height: 400px;
-    margin-top: 6px;
-    margin-bottom: var(--space-xs, 4px);
+    width: 64px;
+    height: 440px;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
-/* Skill node circles */
+/* Skill node squares (Tactical Style) */
 .skill-node {
     position: absolute;
-    width: 60px;
-    height: 60px;
-    border-radius: var(--radius-round, 1000px);
-    background-color: var(--color-surface-top, rgba(31, 38, 46, 1));
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-s, 4px);
+    background-color: rgba(5, 7, 10, 0.85);
+    border-width: 1px;
+    border-color: rgba(230, 80, 40, 0.25);
+    align-items: center;
+    justify-content: center;
     transition: background-color var(--transition-medium, 0.22s), scale var(--transition-fast, 0.08s), border-color var(--transition-fast, 0.08s);
-    border-width: 2px;
-    border-color: rgba(0,0,0,0);
 }
 .skill-node:hover {
     scale: var(--hover-scale, 1.06);
-    border-color: var(--color-accent-gold-light, rgb(255, 230, 150));
+    border-color: rgb(250, 100, 60);
 }
 .skill-node.unlocked {
-    background-color: var(--color-accent-gold, rgb(217, 199, 115));
+    background-color: rgb(230, 80, 40);
+    border-color: rgb(230, 80, 40);
 }
 .skill-node.available {
-    background-color: var(--color-success-bottom, rgb(30, 138, 79));
+    background-color: rgba(230, 80, 40, 0.15);
+    border-color: rgb(230, 80, 40);
 }
 .skill-node.locked {
-    background-color: var(--color-surface-top, rgba(31, 38, 46, 1));
-}
-.skill-node.unlocked .node-label,
-.skill-node.available .node-label {
-    color: var(--color-card-face, rgb(25, 30, 37));
+    background-color: rgba(5, 7, 10, 0.85);
+    border-color: rgba(230, 80, 40, 0.25);
 }
 
-/* Node number label */
-.node-label {
-    -unity-text-align: middle-center;
-    font-size: var(--fs-l, 22px);
-    color: var(--color-text-muted, rgba(158, 168, 184, 1));
-    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
+/* Node vector icon style rules with dynamic color tinting */
+.node-icon {
+    width: 32px;
+    height: 32px;
+    -unity-background-scale-mode: scale-to-fit;
 }
+.skill-node.unlocked .node-icon {
+    -unity-background-image-tint-color: rgb(9, 12, 17);
+}
+.skill-node.available .node-icon {
+    -unity-background-image-tint-color: rgb(230, 80, 40);
+}
+.skill-node.locked .node-icon {
+    -unity-background-image-tint-color: rgba(230, 80, 40, 0.25);
+}
+
+/* Node connection mappings for 15 SVGs */
+.node-icon-0-0 { background-image: resource("Icons/icon_walk"); }
+.node-icon-0-1 { background-image: resource("Icons/icon_run"); }
+.node-icon-0-2 { background-image: resource("Icons/icon_dash"); }
+.node-icon-0-3 { background-image: resource("Icons/icon_wallrun"); }
+.node-icon-0-4 { background-image: resource("Icons/icon_doublejump"); }
+
+.node-icon-1-0 { background-image: resource("Icons/icon_recoil"); }
+.node-icon-1-1 { background-image: resource("Icons/icon_target_crit10"); }
+.node-icon-1-2 { background-image: resource("Icons/icon_target_crit20"); }
+.node-icon-1-3 { background-image: resource("Icons/icon_crit_dmg"); }
+.node-icon-1-4 { background-image: resource("Icons/icon_oneshot"); }
+
+.node-icon-2-0 { background-image: resource("Icons/icon_xp_rad5"); }
+.node-icon-2-1 { background-image: resource("Icons/icon_xp_mult10"); }
+.node-icon-2-2 { background-image: resource("Icons/icon_xp_rad10"); }
+.node-icon-2-3 { background-image: resource("Icons/icon_xp_mult15"); }
+.node-icon-2-4 { background-image: resource("Icons/icon_xp_highlight"); }
 
 /* Connection lines */
 .skill-line {
     position: absolute;
     width: 6px;
-    height: 20px;
-    background-color: var(--color-divider, rgba(255, 255, 255, 0.1));
+    height: 26px;
+    background-color: rgba(230, 80, 40, 0.08);
     transition: background-color var(--transition-medium, 0.22s);
 }
 
 /* Next-node description */
 .next-desc {
     height: 22px;
-    width: 260px;
-    color: var(--color-text-muted, rgba(158, 168, 184, 1));
-    font-size: var(--fs-s, 16px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
+    width: 280px;
+    color: rgba(230, 80, 40, 0.6);
+    font-size: 16px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
 }
 
 /* Cost / status label */
 .cost-label {
     height: 24px;
-    width: 220px;
-    font-size: var(--fs-m, 18px);
-    -unity-font-definition: var(--font-display, resource("Fonts/Anton SDF"));
+    width: 280px;
+    font-size: 20px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
 }
 .cost-label.ready {
-    color: var(--color-success-bottom, rgb(30, 138, 79));
+    color: rgb(230, 80, 40);
 }
 .cost-label.muted {
-    color: var(--color-text-muted, rgba(158, 168, 184, 1));
+    color: rgba(230, 80, 40, 0.35);
 }
 .cost-label.accent {
-    color: var(--color-accent-gold, rgb(217, 199, 115));
+    color: rgb(230, 80, 40);
 }
 
 /* Hint */
 #hint {
     position: absolute;
     left: 50%;
-    bottom: var(--space-3xl, 32px);
+    bottom: 24px;
     translate: -50%;
-    width: 700px;
+    width: 800px;
     height: 28px;
-    color: var(--color-text-muted, rgba(158, 168, 184, 1));
-    font-size: var(--fs-m, 18px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
+    color: rgba(230, 80, 40, 0.5);
+    font-size: 18px;
+    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
 }
