@@ -35,11 +35,14 @@
     border-width: 0;
     opacity: 0;
     scale: 0;
-    transition: opacity 1s ease-out-back, scale 1s ease-out-back;
+    /* Exit transition: 0.5s (twice as fast) */
+    transition: opacity 0.5s ease-in, scale 0.5s ease-in;
 }
 #SkillTreeWidget.open #card {
     opacity: 1;
     scale: 1;
+    /* Entry transition: 1.0s with spring bounce */
+    transition: opacity 1s ease-out-back, scale 1s ease-out-back;
 }
 
 /* Title */

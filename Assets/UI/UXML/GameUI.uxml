@@ -149,10 +149,15 @@
         </ui:VisualElement>
         <ui:VisualElement name="JournalUI">
             <ui:VisualElement name="Card" class="journal-card">
-                <ui:Label name="JournalTitle" class="journal-title" text="" />
-                <ui:VisualElement name="Illustration" class="journal-illustration" />
-                <ui:Label name="JournalContent" class="journal-content" text="" />
-                <ui:Button name="CloseButton" text="CLOSE" class="journal-button" />
+                <ui:VisualElement name="BookPages" class="book-pages">
+                    <ui:Label name="JournalTitle" class="journal-title" text="" />
+                    <ui:VisualElement name="Illustration" class="journal-illustration" />
+                    <ui:VisualElement name="BinderCrease" class="binder-crease" />
+                    <ui:ScrollView name="JournalScroll" class="journal-scroll-view">
+                        <ui:Label name="JournalContent" class="journal-content" text="" />
+                    </ui:ScrollView>
+                    <ui:Button name="CloseButton" text="CLOSE" class="journal-button" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

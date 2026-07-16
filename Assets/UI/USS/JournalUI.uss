@@ -1,7 +1,7 @@
-/* ===== JournalUI.uss ===== */
+/* ===== JournalUI.uss — Parchment Field Book Theme ===== */
 @import url("Shared.uss");
 
-/* === Overlay: full-screen dim === */
+/* === Override Shared.uss overlay to make it fully transparent === */
 #JournalUI {
     position: absolute;
     left: 0;
@@ -10,102 +10,153 @@
     bottom: 0;
     justify-content: center;
     align-items: center;
-    background-color: var(--color-bg-root, rgba(5, 8, 13, 0.88));
+    background-color: rgba(0, 0, 0, 0) !important;
 }
 
-/* === Card container (sliced) === */
-.journal-card {
-    width: 900px;
-    height: 560px;
+#JournalUI.visible {
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+
+/* === Override #Card in Shared.uss to style it as a leather cover === */
+#JournalUI #Card {
+    width: 1000px;
+    height: 680px;
     max-width: 95%;
     max-height: 95%;
     flex-direction: column;
     align-items: center;
     position: relative;
-    background-color: rgba(16, 22, 30, 0.88);
-    border-width: 1px;
-    border-color: rgba(217, 199, 115, 0.25);
-    border-radius: var(--radius-m, 16px);
+    background-color: rgb(85, 65, 50); /* Rich brown leather cover */
+    border-width: 2px;
+    border-color: rgb(60, 45, 35); /* Shadow border on cover */
+    border-radius: 8px;
+    padding: 12px; /* Margin of cover showing around the pages */
     opacity: 0;
-    scale: var(--panel-start-scale, 0.9);
-    transition: opacity var(--panel-in-duration, 0.22s) ease-out-back, scale var(--panel-in-duration, 0.22s) ease-out-back;
+    scale: 0;
+    /* Exit transition: 0.5s (twice as fast) */
+    transition: opacity 0.5s ease-in, scale 0.5s ease-in;
 }
 
-#JournalUI.visible .journal-card {
+#JournalUI.visible #Card {
     opacity: 1;
     scale: 1;
+    /* Entry transition: 1.5s with spring bounce */
+    transition: opacity 1.5s ease-out-back, scale 1.5s ease-out-back;
 }
 
-/* === Title === */
+/* === Inside Pages container (White Paper sheets) === */
+.book-pages {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: rgb(250, 248, 242); /* Crisp white page paper */
+    border-width: 1px;
+    border-color: rgb(220, 215, 200); /* Soft pages edge shadow */
+    border-radius: 4px;
+    flex-direction: column;
+}
+
+/* === Binder Crease (Gáy sách) === */
+.binder-crease {
+    position: absolute;
+    left: 487px; /* Center of the page spread */
+    top: 70px;
+    bottom: 70px;
+    width: 2px;
+    background-color: rgba(150, 125, 95, 0.35); /* Faint fold/crease line */
+}
+
+/* === Title (Book Header) === */
 .journal-title {
     position: absolute;
-    left: var(--space-xxl, 24px);
-    right: var(--space-xxl, 24px);
-    top: var(--space-xxl, 24px);
-    height: 72px;
-    font-size: var(--fs-xxl, 36px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
-    color: var(--color-text-gold, rgb(217, 199, 115));
-    -unity-text-align: middle-left;
-    -unity-font-style: bold;
-    white-space: normal;
-}
-
-/* === Illustration area === */
-.journal-illustration {
-    position: absolute;
-    left: 290px;
-    top: 104px;
-    width: 320px;
-    height: 180px;
-    -unity-background-scale-mode: scale-to-fit;
-    
-    
-}
-
-/* === Content text === */
-.journal-content {
-    position: absolute;
-    left: var(--space-xxl, 24px);
-    right: var(--space-xxl, 24px);
-    top: 300px;
-    bottom: 80px;
-    font-size: var(--fs-xl, 28px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
-    color: var(--color-text-primary, rgba(245, 245, 245, 1));
-    -unity-text-align: upper-left;
-    white-space: normal;
-}
-
-/* === Close button (sliced) === */
-.journal-button {
-    position: absolute;
-    left: 330px;
-    bottom: 28px;
-    width: 240px;
-    height: 60px;
-    background-image: resource("Images/ui_button");
-    -unity-slice-left: var(--slice-button, 8);
-    -unity-slice-right: var(--slice-button, 8);
-    -unity-slice-top: var(--slice-button, 8);
-    -unity-slice-bottom: var(--slice-button, 8);
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
-    border-bottom-width: 0;
-    background-color: rgba(0, 0, 0, 0);
-    font-size: var(--fs-xl, 28px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
-    color: var(--color-scrim-bottom, #05080DFF);
+    left: 40px;
+    right: 40px;
+    top: 15px;
+    height: 50px;
+    font-size: 38px;
+    -unity-font: url("project://database/Assets/UI/Resources/Fonts/PatrickHand-Regular.ttf");
+    -unity-font-definition: initial;
+    color: rgb(25, 20, 15); /* Ink color */
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    transition: scale var(--transition-normal, 0.15s) var(--panel-easing, ease-out);
+    white-space: normal;
 }
 
-.journal-button:hover {
-    scale: var(--hover-scale, 1.06);
+/* === Illustration area (Left Page) === */
+.journal-illustration {
+    position: absolute;
+    left: 40px;
+    top: 80px;
+    width: 430px;
+    height: 460px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
-.journal-button:active {
-    scale: var(--press-scale, 0.95);
+/* === Scrollable Content (Right Page) === */
+.journal-scroll-view {
+    position: absolute;
+    left: 510px; /* Fallback default left position */
+    top: 80px;
+    right: 40px;
+    height: 460px;
+}
+
+/* === Content text (inside ScrollView, flows naturally) === */
+.journal-content {
+    color: rgb(25, 20, 15); /* Ink color */
+    font-size: 30px;
+    -unity-font: url("project://database/Assets/UI/Resources/Fonts/PatrickHand-Regular.ttf");
+    -unity-font-definition: initial;
+    -unity-text-align: upper-left;
+    white-space: normal;
+    padding-right: 16px; /* Gap so scrollbar doesn't clip text */
+}
+
+/* === Close button (Sepia Tag Style) === */
+#JournalUI #CloseButton {
+    position: absolute;
+    left: 368px; /* Centered relative to BookPages width (976 - 240) / 2 = 368 */
+    bottom: 12px;
+    width: 240px;
+    height: 40px;
+    background-color: rgb(75, 60, 45); /* Dark leather/wood tone */
+    border-radius: 4px;
+    border-width: 0;
+    font-size: 20px;
+    -unity-font: url("project://database/Assets/UI/Resources/Fonts/PatrickHand-Regular.ttf");
+    -unity-font-definition: initial;
+    color: rgb(250, 248, 242); /* Warm paper white text */
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    transition-property: scale, background-color;
+    transition-duration: 0.15s, 0.15s;
+    transition-timing-function: ease-out, ease-out;
+}
+
+#JournalUI #CloseButton:hover {
+    scale: 1.05;
+    background-color: rgb(95, 75, 55); /* Lighter leather */
+}
+
+#JournalUI #CloseButton:active {
+    scale: 0.95;
+    background-color: rgb(55, 45, 35); /* Darker leather */
+}
+
+/* ScrollView scrollbar customization to match ink theme */
+#JournalScroll #unity-slider {
+    margin: 0;
+}
+#JournalScroll .unity-scroller__slider {
+    min-width: 8px;
+    width: 8px;
+}
+#JournalScroll .unity-scroller__thumb {
+    background-color: rgb(75, 60, 45); /* Dark brown ink scroller thumb */
+    border-radius: 4px;
+    border-width: 0;
+}
+#JournalScroll .unity-scroller__high-button,
+#JournalScroll .unity-scroller__low-button {
+    display: none;
 }
