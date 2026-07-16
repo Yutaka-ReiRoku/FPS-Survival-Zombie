@@ -12,10 +12,14 @@
     align-items: center;
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0) !important;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s */
 }
 
 #PausePanel.visible {
     background-color: rgba(0, 0, 0, 0) !important;
+    opacity: 1;
+    transition: opacity 1.5s ease-in-out; /* Entry transition: 1.5s */
 }
 
 #PauseVignette {
@@ -27,21 +31,21 @@
     background-image: resource("Images/ui_vignette");
     -unity-background-scale-mode: scale-and-crop;
     opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    transition: opacity 1.5s ease-in-out;
 }
 
 #PausePanel.visible #PauseVignette {
     opacity: 1;
-    transition: opacity 0.5s ease-in-out;
+    transition: opacity 1.5s ease-in-out;
 }
 
-/* Card container transitions: pop up like skill tree (scale 0 to 1, opacity 0 to 1) over 0.5s for both entry & exit */
+/* Card container transitions: pop up like skill tree (scale 0 to 1, opacity 0 to 1) over 1.5s for both entry & exit */
 #PausePanel #PauseCard {
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
     opacity: 0;
     scale: 0;
-    transition: opacity 0.5s ease-in, scale 0.5s ease-in;
+    transition: opacity 1.5s ease-in, scale 1.5s ease-in;
     justify-content: flex-start !important; /* Top-aligned, spacing handled by margins */
     align-items: center !important;
     padding-top: 40px !important;
@@ -51,7 +55,7 @@
 #PausePanel.visible #PauseCard {
     opacity: 1;
     scale: 1;
-    transition: opacity 0.5s ease-out-back, scale 0.5s ease-out-back;
+    transition: opacity 1.5s ease-out-back, scale 1.5s ease-out-back;
 }
 
 #PausePanel #PauseCardShadow {

@@ -12,7 +12,7 @@
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0); /* Always transparent */
     opacity: 0;
-    transition: opacity 0.5s ease-in-out; /* Exit transition: 0.5s (matches card exit) */
+    transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s (matches card exit) */
 }
 
 #JournalUI.visible {
@@ -29,7 +29,7 @@
     background-image: resource("Images/ui_vignette");
     -unity-background-scale-mode: scale-and-crop;
     opacity: 0;
-    transition: opacity 0.5s ease-in-out; /* Exit transition: 0.5s (matches card exit) */
+    transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s (matches card exit) */
 }
 
 #JournalUI.visible .journal-scrim {
@@ -53,15 +53,15 @@
     padding: 12px; /* Margin of cover showing around the pages */
     opacity: 0;
     scale: 0;
-    /* Exit transition: 0.5s (twice as fast) */
-    transition: opacity 0.5s ease-in, scale 0.5s ease-in;
+    /* Exit transition: 1.5s */
+    transition: opacity 1.5s ease-in, scale 1.5s ease-in;
 }
 
 #JournalUI.visible #Card {
     opacity: 1;
     scale: 1;
-    /* Entry transition: 1s with spring bounce */
-    transition: opacity 1s ease-out-back, scale 1s ease-out-back;
+    /* Entry transition: 1.5s with spring bounce */
+    transition: opacity 1.5s ease-out-back, scale 1.5s ease-out-back;
 }
 
 /* === Inside Pages container (White Paper sheets) === */

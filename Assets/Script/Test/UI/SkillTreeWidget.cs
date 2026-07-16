@@ -40,12 +40,14 @@ public class SkillTreeWidget : MonoBehaviour
     private bool _open;
     private bool _initialized;
     private int _lastSp = -1;
+    private Coroutine _closeCoroutine;
 
     private static readonly string[] TreeNames = { "MOVEMENT", "AIM", "INTELLIGENCE" };
     private const int NodesPerTree = 5;
     private const int Trees = 3;
 
     public bool IsOpen => _open;
+    public bool IsOpenOrTransitioning => _open || _closeCoroutine != null;
 
     private void OnEnable()
     {
@@ -193,10 +195,10 @@ public class SkillTreeWidget : MonoBehaviour
         if (Input.GetKeyDown(toggleKey))
         {
             bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
-            bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
-            bool journalOpen = JournalUI.Instance != null && JournalUI.Instance.IsOpen;
+            bool pauseActive = PauseManager.Instance != null && PauseManager.Instance.IsOpenOrTransitioning;
+            bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
             if (_open) Close();
-            else if (!gameOver && !pauseOpen && !journalOpen) Open();
+            else if (!gameOver && !pauseActive && !journalActive) Open();
         }
         if (_open)
         {
@@ -229,6 +231,13 @@ public class SkillTreeWidget : MonoBehaviour
     {
         if (!_initialized) return;
         _open = true;
+
+        if (_closeCoroutine != null)
+        {
+            StopCoroutine(_closeCoroutine);
+            _closeCoroutine = null;
+        }
+
         _root.style.display = DisplayStyle.Flex;
         _root.AddToClassList("open");
         Time.timeScale = 0f;
@@ -244,29 +253,34 @@ public class SkillTreeWidget : MonoBehaviour
     {
         if (!_open) return;
         _open = false;
-        _root.RemoveFromClassList("open");
-        if (_card != null)
+
+        if (_closeCoroutine != null)
         {
-            _card.RegisterCallback<TransitionEndEvent>(OnSkillTreeExitTransitionEnd);
+            StopCoroutine(_closeCoroutine);
+        }
+
+        if (_root != null)
+        {
+            _closeCoroutine = StartCoroutine(CloseCoroutine());
         }
         else
         {
-            _root.style.display = DisplayStyle.None;
             ResumeGameplay();
         }
     }
 
-    private void OnSkillTreeExitTransitionEnd(TransitionEndEvent evt)
+    private IEnumerator CloseCoroutine()
     {
-        if (_card != null)
-        {
-            _card.UnregisterCallback<TransitionEndEvent>(OnSkillTreeExitTransitionEnd);
-        }
+        if (_root != null) _root.RemoveFromClassList("open");
+
+        yield return new WaitForSecondsRealtime(1.5f);
+
         if (!_open)
         {
             if (_root != null) _root.style.display = DisplayStyle.None;
             ResumeGameplay();
         }
+        _closeCoroutine = null;
     }
 
     private void ResumeGameplay()

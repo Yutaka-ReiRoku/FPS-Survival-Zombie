@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
@@ -15,6 +16,7 @@ public class PauseManager : MonoBehaviour
     public string mainMenuSceneName = "MainMenu";
 
     public bool IsPaused { get; private set; }
+    public bool IsOpenOrTransitioning => IsPaused || _resumeCoroutine != null;
 
     private PlayerControl playerControl;
     private Transform _canvasRoot;
@@ -26,6 +28,8 @@ public class PauseManager : MonoBehaviour
     private Button _quitButton;
 
     private bool _uiReady;
+
+    private Coroutine _resumeCoroutine;
 
     private void Awake()
     {
@@ -118,14 +122,17 @@ public class PauseManager : MonoBehaviour
         if (kb != null && kb.escapeKey.wasPressedThisFrame)
         {
             var skillTree = FindAnyObjectByType<SkillTreeWidget>();
-            if (skillTree != null && skillTree.IsOpen)
+            bool skillTreeActive = skillTree != null && skillTree.IsOpenOrTransitioning;
+            bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
+
+            if (skillTreeActive)
             {
-                skillTree.Close();
+                if (skillTree.IsOpen) skillTree.Close();
                 return;
             }
-            if (JournalUI.Instance != null && JournalUI.Instance.IsOpen)
+            if (journalActive)
             {
-                JournalUI.Instance.Close();
+                if (JournalUI.Instance.IsOpen) JournalUI.Instance.Close();
                 return;
             }
             Toggle();
@@ -142,6 +149,13 @@ public class PauseManager : MonoBehaviour
     {
         if (!_uiReady) return;
         IsPaused = true;
+
+        if (_resumeCoroutine != null)
+        {
+            StopCoroutine(_resumeCoroutine);
+            _resumeCoroutine = null;
+        }
+
         if (_pausePanel != null)
         {
             _pausePanel.style.display = DisplayStyle.Flex;
@@ -164,19 +178,15 @@ public class PauseManager : MonoBehaviour
     {
         if (!_uiReady) return;
         IsPaused = false;
+
+        if (_resumeCoroutine != null)
+        {
+            StopCoroutine(_resumeCoroutine);
+        }
+
         if (_pausePanel != null)
         {
-            _pausePanel.RemoveFromClassList("visible");
-            if (_pauseCard != null)
-            {
-                _pauseCard.RemoveFromClassList("visible");
-                _pauseCard.RegisterCallback<TransitionEndEvent>(OnPauseExitTransitionEnd);
-            }
-            else
-            {
-                _pausePanel.style.display = DisplayStyle.None;
-                ResumeGameplay();
-            }
+            _resumeCoroutine = StartCoroutine(ResumeCoroutine());
         }
         else
         {
@@ -184,19 +194,19 @@ public class PauseManager : MonoBehaviour
         }
     }
 
-    private void OnPauseExitTransitionEnd(TransitionEndEvent evt)
+    private IEnumerator ResumeCoroutine()
     {
-        if (evt.target != _pauseCard) return;
+        if (_pausePanel != null) _pausePanel.RemoveFromClassList("visible");
+        if (_pauseCard != null) _pauseCard.RemoveFromClassList("visible");
 
-        if (_pauseCard != null)
-        {
-            _pauseCard.UnregisterCallback<TransitionEndEvent>(OnPauseExitTransitionEnd);
-        }
+        yield return new WaitForSecondsRealtime(1.5f);
+
         if (!IsPaused)
         {
             if (_pausePanel != null) _pausePanel.style.display = DisplayStyle.None;
             ResumeGameplay();
         }
+        _resumeCoroutine = null;
     }
 
     private void ResumeGameplay()

@@ -60,7 +60,6 @@
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0); /* Always transparent to prevent dark flashes */
     opacity: 0;
-    transition: opacity var(--panel-in-duration, 0.22s) ease-out;
 }
 
 #SkillTreeWidget {
@@ -74,7 +73,6 @@
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0);
     opacity: 0;
-    transition: opacity var(--panel-in-duration, 0.22s) ease-out;
 }
 
 #GameOverPanel.visible,
@@ -115,8 +113,7 @@
 
 /* Card panel with 9-slice background + animation */
 .panel-card,
-#Card,
-#PauseCard {
+#Card {
     width: var(--panel-card-width, 760px);
     height: var(--panel-card-height, 720px);
     max-width: 95%;
@@ -131,6 +128,21 @@
     scale: var(--panel-start-scale, 0.9);
     transition: opacity var(--panel-in-duration, 0.22s) ease-out-back,
                 scale var(--panel-in-duration, 0.22s) ease-out-back;
+}
+
+#PauseCard {
+    width: var(--panel-card-width, 760px);
+    height: var(--panel-card-height, 720px);
+    max-width: 95%;
+    max-height: 95%;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(16, 22, 30, 0.88);
+    border-width: 1px;
+    border-color: rgba(217, 199, 115, 0.25);
+    border-radius: var(--radius-m, 16px);
+    opacity: 0;
+    scale: var(--panel-start-scale, 0.9);
 }
 
 .panel-card.visible,

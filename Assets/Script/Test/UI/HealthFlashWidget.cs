@@ -20,6 +20,10 @@ public class HealthFlashWidget : MonoBehaviour
     private float _lastXpFill = -1f;
     private int _lastLevel = -1;
 
+    private float _lastTimeScale = 1f;
+    private float _unpauseTime = -999f;
+    private float _suppressDuration = 3.0f;
+
     private void Awake()
     {
         var doc = GetComponent<UIDocument>();
@@ -35,7 +39,10 @@ public class HealthFlashWidget : MonoBehaviour
             _flash.style.backgroundImage = new StyleBackground(vignetteSprite);
     }
 
-    private void OnEnable() { StartCoroutine(Bind()); }
+    private void OnEnable()
+    {
+        StartCoroutine(Bind());
+    }
 
     private IEnumerator Bind()
     {
@@ -65,6 +72,16 @@ public class HealthFlashWidget : MonoBehaviour
         StopAllCoroutines();
     }
 
+    private void Update()
+    {
+        // Detect when the game unpauses (transitions from timeScale = 0 to timeScale > 0)
+        if (Time.timeScale > 0f && _lastTimeScale == 0f)
+        {
+            _unpauseTime = Time.realtimeSinceStartup;
+        }
+        _lastTimeScale = Time.timeScale;
+    }
+
     private void OnHealth(float hp, float max, bool damaged)
     {
         if (damaged || (_lastHp >= 0f && hp < _lastHp - 0.001f)) Flash(damageColor);
@@ -89,6 +106,18 @@ public class HealthFlashWidget : MonoBehaviour
     private void Flash(Color color)
     {
         if (_flash == null) return;
+        if (Time.timeScale == 0f) return;
+
+        // Instant unpause check to catch physics trigger events in the same frame
+        if (_lastTimeScale == 0f)
+        {
+            _unpauseTime = Time.realtimeSinceStartup;
+            _lastTimeScale = 1f;
+        }
+
+        // Suppress flashes in the immediate 3.0s window after unpausing
+        if (Time.realtimeSinceStartup - _unpauseTime < _suppressDuration) return;
+
         _fadeSched?.Pause();
         _flash.style.unityBackgroundImageTintColor = color;
         _flash.AddToClassList("flash");

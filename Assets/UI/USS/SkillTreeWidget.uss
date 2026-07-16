@@ -10,9 +10,13 @@
     top: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0) !important;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s */
 }
 #SkillTreeWidget.open {
     flex-direction: column;
+    opacity: 1;
+    transition: opacity 1.5s ease-in-out; /* Entry transition: 1.5s */
 }
 
 /* Scrim — full-screen click blocker and vignette overlay */
@@ -25,12 +29,12 @@
     background-image: resource("Images/ui_vignette");
     -unity-background-scale-mode: scale-and-crop;
     opacity: 0;
-    transition: opacity 0.5s ease-in-out; /* Exit transition: 0.5s (matches card exit) */
+    transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s (matches card exit) */
 }
 
 #SkillTreeWidget.open #scrim {
     opacity: 1;
-    transition: opacity 1s ease-in-out; /* Entry transition: 1s (matches card entry) */
+    transition: opacity 1.5s ease-in-out; /* Entry transition: 1.5s (matches card entry) */
 }
 
 /* Card — centered panel */
@@ -47,14 +51,14 @@
     border-width: 0;
     opacity: 0;
     scale: 0;
-    /* Exit transition: 0.5s (twice as fast) */
-    transition: opacity 0.5s ease-in, scale 0.5s ease-in;
+    /* Exit transition: 1.5s */
+    transition: opacity 1.5s ease-in, scale 1.5s ease-in;
 }
 #SkillTreeWidget.open #card {
     opacity: 1;
     scale: 1;
-    /* Entry transition: 1.0s with spring bounce */
-    transition: opacity 1s ease-out-back, scale 1s ease-out-back;
+    /* Entry transition: 1.5s with spring bounce */
+    transition: opacity 1.5s ease-out-back, scale 1.5s ease-out-back;
 }
 
 /* Title */

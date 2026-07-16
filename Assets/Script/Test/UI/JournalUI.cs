@@ -34,9 +34,11 @@ public class JournalUI : MonoBehaviour
     private AudioSource _audioSource;
     private PlayerControl _playerControl;
     private Coroutine _typewriterCoroutine;
+    private Coroutine _closeCoroutine;
     private bool _open;
 
     public bool IsOpen => _open;
+    public bool IsOpenOrTransitioning => _open || _closeCoroutine != null;
 
     void Awake()
     {
@@ -107,11 +109,11 @@ public class JournalUI : MonoBehaviour
 
     public void Show(JournalData journal)
     {
-        bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
-        bool skillTreeOpen = false;
+        bool pauseActive = PauseManager.Instance != null && PauseManager.Instance.IsOpenOrTransitioning;
+        bool skillTreeActive = false;
         var skillTree = FindAnyObjectByType<SkillTreeWidget>();
-        if (skillTree != null) skillTreeOpen = skillTree.IsOpen;
-        if (pauseOpen || skillTreeOpen) return;
+        if (skillTree != null) skillTreeActive = skillTree.IsOpenOrTransitioning;
+        if (pauseActive || skillTreeActive) return;
 
         _open = true;
         _panel.style.display = DisplayStyle.Flex;
@@ -153,6 +155,12 @@ public class JournalUI : MonoBehaviour
             }
         }
 
+        if (_closeCoroutine != null)
+        {
+            StopCoroutine(_closeCoroutine);
+            _closeCoroutine = null;
+        }
+
         if (_typewriterCoroutine != null)
         {
             StopCoroutine(_typewriterCoroutine);
@@ -174,26 +182,42 @@ public class JournalUI : MonoBehaviour
     {
         if (!_open) return;
         _open = false;
-        _panel.RemoveFromClassList("visible");
+
+        if (_closeCoroutine != null)
+        {
+            StopCoroutine(_closeCoroutine);
+        }
 
         if (_typewriterCoroutine != null)
         {
             StopCoroutine(_typewriterCoroutine);
             _typewriterCoroutine = null;
         }
-        
-        var card = _panel.Q("Card");
-        if (card != null)
+
+        if (_panel != null)
         {
-            card.RegisterCallback<TransitionEndEvent>(OnJournalExitTransitionEnd);
+            _closeCoroutine = StartCoroutine(CloseCoroutine());
         }
         else
         {
-            _panel.style.display = DisplayStyle.None;
             ResumeGameplay();
         }
 
         _audioSource.Stop();
+    }
+
+    private IEnumerator CloseCoroutine()
+    {
+        if (_panel != null) _panel.RemoveFromClassList("visible");
+
+        yield return new WaitForSecondsRealtime(1.5f);
+
+        if (!_open)
+        {
+            if (_panel != null) _panel.style.display = DisplayStyle.None;
+            ResumeGameplay();
+        }
+        _closeCoroutine = null;
     }
 
     private IEnumerator TypeText(string titleText, string fullContent, AudioClip voiceLog)
@@ -202,8 +226,8 @@ public class JournalUI : MonoBehaviour
         _title.text = "";
         _content.text = "";
 
-        // 2. Wait for the 1.0-second transition to complete
-        yield return new WaitForSecondsRealtime(1.0f);
+        // 2. Wait for the 1.5-second transition to complete
+        yield return new WaitForSecondsRealtime(1.5f);
 
         // 3. Start voice log if available
         if (voiceLog != null)
@@ -257,19 +281,6 @@ public class JournalUI : MonoBehaviour
         _typewriterCoroutine = null;
     }
 
-    private void OnJournalExitTransitionEnd(TransitionEndEvent evt)
-    {
-        var card = evt.currentTarget as VisualElement;
-        if (card != null)
-        {
-            card.UnregisterCallback<TransitionEndEvent>(OnJournalExitTransitionEnd);
-        }
-        if (!_open)
-        {
-            if (_panel != null) _panel.style.display = DisplayStyle.None;
-            ResumeGameplay();
-        }
-    }
 
     private void ResumeGameplay()
     {
