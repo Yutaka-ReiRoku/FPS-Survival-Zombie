@@ -15,10 +15,22 @@
     flex-direction: column;
 }
 
-/* Scrim — full-screen click blocker */
+/* Scrim — full-screen click blocker and vignette overlay */
 #scrim {
-    flex-grow: 1;
-    background-color: rgba(0, 0, 0, 0);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: resource("Images/ui_vignette");
+    -unity-background-scale-mode: scale-and-crop;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out; /* Exit transition: 0.5s (matches card exit) */
+}
+
+#SkillTreeWidget.open #scrim {
+    opacity: 1;
+    transition: opacity 1s ease-in-out; /* Entry transition: 1s (matches card entry) */
 }
 
 /* Card — centered panel */

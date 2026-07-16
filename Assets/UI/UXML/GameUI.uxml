@@ -149,6 +149,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="JournalUI">
+            <ui:VisualElement name="scrim" class="journal-scrim" picking-mode="Position" />
             <ui:VisualElement name="Card" class="journal-card">
                 <ui:VisualElement name="BookPages" class="book-pages">
                     <ui:Label name="JournalTitle" class="journal-title" text="" />

@@ -35,8 +35,7 @@
     background-color: var(--color-bg-root, rgba(5, 6, 9, 0.92));
 }
 
-#GameOverPanel,
-#JournalUI {
+#GameOverPanel {
     position: absolute;
     left: 0;
     right: 0;
@@ -80,8 +79,7 @@
 
 #GameOverPanel.visible,
 #PausePanel.visible,
-#SkillTreeWidget.open,
-#JournalUI.visible {
+#SkillTreeWidget.open {
     opacity: 1;
 }
 
