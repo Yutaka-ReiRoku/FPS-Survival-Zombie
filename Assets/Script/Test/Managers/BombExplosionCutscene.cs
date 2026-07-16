@@ -7,8 +7,8 @@ using UnityEngine.UIElements;
 public class BombExplosionCutscene : MonoBehaviour
 {
     [Header("Camera")]
-    [Tooltip("World position for the temporary cutscene camera.")]
-    public Vector3 cameraPoint = new Vector3(-271f, 37.08f, 42.47f);
+    [Tooltip("World position for the temporary cutscene camera. Must have a clear line of sight to explosionPoint — the old default (-271, 37.08, 42.47) was blocked by 4 high-rise buildings at ~179-211 units, making the explosion invisible. New default (-89, 41, 1.4) is 90 units west at height 41 with verified clear LOS.")]
+    public Vector3 cameraPoint = new Vector3(-89f, 41f, 1.4f);
 
     [Header("Explosion")]
     [Tooltip("World position where the bomb explodes (mushroom cloud VFX + SFX origin).")]
