@@ -18,8 +18,8 @@ public enum BeaconIconType
 
 /// <summary>
 /// World-space waypoint beacon that guides the player to the next quest
-/// objective. Shows a tall vertical light beam + a floating bobbing icon so
-/// the player can spot the destination from anywhere in the chapter.
+/// objective. Shows a glowing ground ring + a floating downward-pointing arrow
+/// so the player can spot the destination from anywhere in the chapter.
 ///
 /// The beacon auto-activates when its `showOnQuest` becomes the active quest
 /// (or when `showOnChapter` matches the current chapter and no quest is
@@ -51,38 +51,22 @@ public class QuestBeacon : MonoBehaviour
     [Tooltip("Distance at which the beacon hides (if hideWhenClose is true).")]
     public float hideDistance = 4f;
 
-    [Header("Beam")]
-    [Tooltip("Height of the light beam.")]
-    public float beamHeight = 12f;
+    [Header("Ground Snap")]
+    [Tooltip("If true, raycast downward from the beacon position to find the ground and snap all visuals to it. " +
+             "Prevents the beacon from floating when the beacon origin is above the ground.")]
+    public bool snapToGround = true;
 
-    [Tooltip("Radius of the beam cylinder.")]
-    public float beamRadius = 0.4f;
+    [Tooltip("How high above the beacon origin to start the ground raycast.")]
+    public float groundRaycastStart = 5f;
 
-    [Tooltip("Beam color.")]
-    public Color beamColor = new Color(1f, 0.85f, 0.3f, 0.5f);
+    [Tooltip("How far below to raycast for the ground.")]
+    public float groundRaycastDistance = 20f;
 
-    [Header("Floating Icon")]
-    [Tooltip("Icon height above the beacon origin.")]
-    public float iconHeight = 3f;
-
-    [Tooltip("Icon bob amplitude.")]
-    public float iconBobAmplitude = 0.4f;
-
-    [Tooltip("Icon bob speed.")]
-    public float iconBobSpeed = 2f;
-
-    [Tooltip("Icon size (world units).")]
-    public float iconSize = 1.2f;
-
-    [Tooltip("Icon color.")]
-    public Color iconColor = new Color(1f, 0.9f, 0.4f, 1f);
-
-    [Tooltip("Icon to display on the floating marker. Auto picks based on activation source " +
-             "(chapter = house, side quest = book, main quest = skull).")]
-    public BeaconIconType iconType = BeaconIconType.Auto;
+    [Tooltip("Layer mask for ground detection. Leave 0 to use default (everything).")]
+    public LayerMask groundMask = 0;
 
     [Header("Ground Ring")]
-    [Tooltip("Show a pulsing ring on the ground.")]
+    [Tooltip("Show a glowing pulsing ring on the ground.")]
     public bool showGroundRing = true;
 
     [Tooltip("Ground ring radius.")]
@@ -91,33 +75,65 @@ public class QuestBeacon : MonoBehaviour
     [Tooltip("Ground ring color.")]
     public Color ringColor = new Color(1f, 0.85f, 0.3f, 0.6f);
 
-    [Header("VFX")]
-    [Tooltip("Add a rising particle stream inside the beam for extra glow.")]
-    public bool beamParticles = true;
-
     [Tooltip("Add an expanding ripple particle effect on the ground ring.")]
     public bool ringParticles = true;
 
-    [Tooltip("Add a point light at the beam base for ambient glow.")]
-    public bool beamLight = true;
+    [Tooltip("Add a point light at the ring for ambient glow.")]
+    public bool ringLight = true;
 
-    private GameObject _beam;
-    private GameObject _icon;
+    [Header("Floating Arrow")]
+    [Tooltip("Height of the floating arrow above the ground.")]
+    public float arrowHeight = 4f;
+
+    [Tooltip("Arrow bob amplitude.")]
+    public float arrowBobAmplitude = 0.5f;
+
+    [Tooltip("Arrow bob speed.")]
+    public float arrowBobSpeed = 2f;
+
+    [Tooltip("Arrow size (world units).")]
+    public float arrowSize = 1.5f;
+
+    [Tooltip("Arrow color.")]
+    public Color arrowColor = new Color(1f, 0.9f, 0.4f, 1f);
+
+    [Tooltip("Icon color (sprite above the arrow).")]
+    public Color iconColor = new Color(1f, 0.9f, 0.4f, 1f);
+
+    [Tooltip("Icon to display on the floating marker. Auto picks based on activation source " +
+             "(chapter = house, side quest = book, main quest = skull).")]
+    public BeaconIconType iconType = BeaconIconType.Auto;
+
+    // ---- Backward-compatible aliases (used by StoryChapterBuilder editor scripts) ----
+    /// <summary>Alias for arrowColor. Old builder scripts set beamColor.</summary>
+    public Color beamColor
+    {
+        get => arrowColor;
+        set { arrowColor = value; ringColor = value; }
+    }
+
+    /// <summary>Alias for arrowHeight. Old builder scripts set beamHeight.</summary>
+    public float beamHeight
+    {
+        get => arrowHeight;
+        set => arrowHeight = value;
+    }
+
     private GameObject _ring;
-    private GameObject _beamParticles;
     private GameObject _ringParticles;
-    private Light _beamLight;
-    private Material _beamMat;
-    private Material _iconMat;
+    private GameObject _arrow;
+    private GameObject _icon;
+    private Light _ringLight;
     private Material _ringMat;
+    private Material _arrowMat;
+    private Material _iconMat;
     private bool _active;
     private float _bobTime;
     private Transform _player;
+    private float _groundY; // Y of ground at beacon position
 
     // Cached base materials loaded once from Resources/Assets.
-    private static Material _baseBeamMat;
     private static Material _baseRingParticleMat;
-    private static Material _baseBeamParticleMat;
 
     private void OnEnable()
     {
@@ -151,9 +167,9 @@ public class QuestBeacon : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_beamMat != null) Destroy(_beamMat);
-        if (_iconMat != null) Destroy(_iconMat);
         if (_ringMat != null) Destroy(_ringMat);
+        if (_arrowMat != null) Destroy(_arrowMat);
+        if (_iconMat != null) Destroy(_iconMat);
     }
 
     /// <summary>
@@ -244,30 +260,55 @@ public class QuestBeacon : MonoBehaviour
     private void SetActive(bool active)
     {
         _active = active;
-        if (_beam != null) _beam.SetActive(active);
-        if (_icon != null) _icon.SetActive(active);
         if (_ring != null) _ring.SetActive(active);
-        if (_beamParticles != null) _beamParticles.SetActive(active);
         if (_ringParticles != null) _ringParticles.SetActive(active);
-        if (_beamLight != null) _beamLight.enabled = active;
+        if (_arrow != null) _arrow.SetActive(active);
+        if (_icon != null) _icon.SetActive(active);
+        if (_ringLight != null) _ringLight.enabled = active;
+    }
+
+    /// <summary>
+    /// Raycast downward from the beacon position to find the ground Y.
+    /// Falls back to the beacon's own Y if no ground is hit.
+    /// </summary>
+    private float FindGroundY()
+    {
+        if (!snapToGround) return transform.position.y;
+
+        Vector3 origin = transform.position + Vector3.up * groundRaycastStart;
+        int mask = groundMask.value != 0 ? groundMask.value : ~0;
+        // Ignore triggers when finding ground.
+        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, groundRaycastDistance, mask, QueryTriggerInteraction.Ignore))
+            return hit.point.y;
+
+        return transform.position.y;
     }
 
     private void BuildVisuals()
     {
-        if (_beam != null) return; // Already built.
+        // Destroy any existing beacon visuals so BuildVisuals is idempotent.
+        if (_ring != null)
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                var child = transform.GetChild(i);
+                if (child.name.StartsWith("Beacon_"))
+                    DestroyImmediate(child.gameObject);
+            }
+            _ring = null;
+            _arrow = null;
+            _icon = null;
+            _ringParticles = null;
+            _ringLight = null;
+        }
 
         Shader unlitShader = Shader.Find("Sprites/Default");
         if (unlitShader == null) unlitShader = Shader.Find("Unlit/Transparent");
 
+        // Find ground Y once so all visuals are placed on the ground.
+        _groundY = FindGroundY();
+
         // Load base materials once (cached statically so all beacons share the source).
-        if (_baseBeamMat == null)
-            _baseBeamMat = Resources.Load<Material>("VFX/Beacon/BeaconBeam");
-        if (_baseBeamParticleMat == null)
-        {
-            _baseBeamParticleMat = Resources.Load<Material>("VFX/Beacon/BeaconBeamParticle");
-            if (_baseBeamParticleMat == null && unlitShader != null)
-                _baseBeamParticleMat = new Material(unlitShader);
-        }
         if (_baseRingParticleMat == null)
         {
             _baseRingParticleMat = Resources.Load<Material>("VFX/Beacon/BeaconRingParticle");
@@ -277,106 +318,16 @@ public class QuestBeacon : MonoBehaviour
 
         // Reusable primitive meshes (avoid CreatePrimitive which leaks GameObjects).
         Mesh cylinderMesh = GetPrimitiveMesh(PrimitiveType.Cylinder);
+        Mesh coneMesh = GetConeMesh();
         Mesh quadMesh = GetPrimitiveMesh(PrimitiveType.Quad);
 
-        // ---- Beam (vertical cylinder with emission glow) ----
-        _beam = new GameObject("Beacon_Beam");
-        _beam.transform.SetParent(transform, false);
-        _beam.transform.localPosition = new Vector3(0f, beamHeight * 0.5f, 0f);
-        _beam.transform.localScale = new Vector3(beamRadius * 2f, beamHeight * 0.5f, beamRadius * 2f);
-
-        var beamFilter = _beam.AddComponent<MeshFilter>();
-        beamFilter.sharedMesh = cylinderMesh;
-        var beamRenderer = _beam.AddComponent<MeshRenderer>();
-        // Use Standard shader with emission if base material loaded, else fallback.
-        if (_baseBeamMat != null)
-        {
-            _beamMat = new Material(_baseBeamMat) { name = "BeaconBeam_Runtime" };
-            _beamMat.SetColor("_Color", new Color(beamColor.r, beamColor.g, beamColor.b, beamColor.a));
-            _beamMat.SetColor("_EmissionColor", new Color(beamColor.r, beamColor.g, beamColor.b) * 0.8f);
-        }
-        else
-        {
-            _beamMat = new Material(unlitShader) { name = "BeaconBeam_Runtime" };
-            _beamMat.color = beamColor;
-        }
-        beamRenderer.material = _beamMat;
-        beamRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        beamRenderer.receiveShadows = false;
-
-        // ---- Beam point light (ambient glow at base) ----
-        if (beamLight)
-        {
-            var lightGO = new GameObject("Beacon_Light");
-            lightGO.transform.SetParent(transform, false);
-            lightGO.transform.localPosition = new Vector3(0f, 0.5f, 0f);
-            _beamLight = lightGO.AddComponent<Light>();
-            _beamLight.type = LightType.Point;
-            _beamLight.color = new Color(beamColor.r, beamColor.g, beamColor.b, 1f);
-            _beamLight.intensity = 1.2f;
-            _beamLight.range = 6f;
-            _beamLight.shadows = LightShadows.None;
-        }
-
-        // ---- Beam particles (rising sparks inside the beam) ----
-        if (beamParticles && _baseBeamParticleMat != null)
-        {
-            _beamParticles = new GameObject("Beacon_BeamParticles");
-            _beamParticles.transform.SetParent(transform, false);
-            _beamParticles.transform.localPosition = Vector3.zero;
-            var ps = _beamParticles.AddComponent<ParticleSystem>();
-            var main = ps.main;
-            main.loop = true;
-            main.startLifetime = beamHeight / 2f;
-            main.startSpeed = beamHeight / main.startLifetime.constant;
-            main.startSize = 0.15f;
-            main.startColor = new Color(beamColor.r, beamColor.g, beamColor.b, 0.7f);
-            main.maxParticles = 40;
-            main.simulationSpace = ParticleSystemSimulationSpace.Local;
-            var emit = ps.emission;
-            emit.rateOverTime = 15f;
-            var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Cone;
-            shape.radius = beamRadius * 0.5f;
-            shape.angle = 5f;
-            var col = ps.colorOverLifetime;
-            col.enabled = true;
-            var grad = new Gradient();
-            grad.SetKeys(
-                new GradientColorKey[] { new GradientColorKey(beamColor, 0f), new GradientColorKey(beamColor, 1f) },
-                new GradientAlphaKey[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(0.8f, 0.3f), new GradientAlphaKey(0f, 1f) });
-            col.color = grad;
-            var rend = _beamParticles.GetComponent<ParticleSystemRenderer>();
-            rend.material = _baseBeamParticleMat;
-        }
-
-        // ---- Floating icon (quad with sprite texture, billboard) ----
-        BeaconIconType resolvedIcon = ResolveIconType();
-        Sprite iconSprite = LoadIconSprite(resolvedIcon);
-
-        _icon = new GameObject("Beacon_Icon");
-        _icon.transform.SetParent(transform, false);
-        _icon.transform.localPosition = new Vector3(0f, iconHeight, 0f);
-        _icon.transform.localScale = new Vector3(iconSize, iconSize, iconSize);
-
-        var iconFilter = _icon.AddComponent<MeshFilter>();
-        iconFilter.sharedMesh = quadMesh;
-        var iconRenderer = _icon.AddComponent<MeshRenderer>();
-        _iconMat = new Material(unlitShader) { name = "BeaconIcon_Runtime" };
-        _iconMat.color = iconColor;
-        if (iconSprite != null)
-            _iconMat.SetTexture("_MainTex", iconSprite.texture);
-        iconRenderer.material = _iconMat;
-        iconRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        iconRenderer.receiveShadows = false;
-
-        // ---- Ground ring (flat cylinder with pulse) ----
+        // ---- Ground ring (flat hollow-looking cylinder with pulse) ----
         if (showGroundRing)
         {
             _ring = new GameObject("Beacon_Ring");
             _ring.transform.SetParent(transform, false);
-            _ring.transform.localPosition = new Vector3(0f, 0.05f, 0f);
-            _ring.transform.localScale = new Vector3(ringRadius * 2f, 0.05f, ringRadius * 2f);
+            _ring.transform.localPosition = new Vector3(0f, _groundY - transform.position.y + 0.05f, 0f);
+            _ring.transform.localScale = new Vector3(ringRadius * 2f, 0.02f, ringRadius * 2f);
 
             var ringFilter = _ring.AddComponent<MeshFilter>();
             ringFilter.sharedMesh = cylinderMesh;
@@ -387,12 +338,26 @@ public class QuestBeacon : MonoBehaviour
             ringRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             ringRenderer.receiveShadows = false;
 
+            // ---- Ring point light (ambient glow at ground) ----
+            if (ringLight)
+            {
+                var lightGO = new GameObject("Beacon_Light");
+                lightGO.transform.SetParent(transform, false);
+                lightGO.transform.localPosition = new Vector3(0f, _groundY - transform.position.y + 0.5f, 0f);
+                _ringLight = lightGO.AddComponent<Light>();
+                _ringLight.type = LightType.Point;
+                _ringLight.color = new Color(ringColor.r, ringColor.g, ringColor.b, 1f);
+                _ringLight.intensity = 1.5f;
+                _ringLight.range = 6f;
+                _ringLight.shadows = LightShadows.None;
+            }
+
             // ---- Ring particles (expanding ripple) ----
             if (ringParticles && _baseRingParticleMat != null)
             {
                 _ringParticles = new GameObject("Beacon_RingParticles");
                 _ringParticles.transform.SetParent(transform, false);
-                _ringParticles.transform.localPosition = new Vector3(0f, 0.1f, 0f);
+                _ringParticles.transform.localPosition = new Vector3(0f, _groundY - transform.position.y + 0.1f, 0f);
                 var rps = _ringParticles.AddComponent<ParticleSystem>();
                 var rmain = rps.main;
                 rmain.loop = true;
@@ -424,6 +389,44 @@ public class QuestBeacon : MonoBehaviour
                 rrend.material = _baseRingParticleMat;
             }
         }
+
+        // ---- Floating arrow (cone pointing down, bobbing) ----
+        _arrow = new GameObject("Beacon_Arrow");
+        _arrow.transform.SetParent(transform, false);
+        _arrow.transform.localPosition = new Vector3(0f, _groundY - transform.position.y + arrowHeight, 0f);
+        _arrow.transform.localScale = new Vector3(arrowSize, arrowSize, arrowSize);
+        // Cone primitive points up by default; rotate 180° so it points down.
+        _arrow.transform.localRotation = Quaternion.Euler(180f, 0f, 0f);
+
+        var arrowFilter = _arrow.AddComponent<MeshFilter>();
+        arrowFilter.sharedMesh = coneMesh;
+        var arrowRenderer = _arrow.AddComponent<MeshRenderer>();
+        _arrowMat = new Material(unlitShader) { name = "BeaconArrow_Runtime" };
+        _arrowMat.color = arrowColor;
+        arrowRenderer.material = _arrowMat;
+        arrowRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        arrowRenderer.receiveShadows = false;
+
+        // ---- Optional icon sprite above the arrow ----
+        BeaconIconType resolvedIcon = ResolveIconType();
+        Sprite iconSprite = LoadIconSprite(resolvedIcon);
+        if (resolvedIcon != BeaconIconType.None && iconSprite != null)
+        {
+            _icon = new GameObject("Beacon_Icon");
+            _icon.transform.SetParent(transform, false);
+            _icon.transform.localPosition = new Vector3(0f, _groundY - transform.position.y + arrowHeight + 1.2f, 0f);
+            _icon.transform.localScale = new Vector3(arrowSize * 0.8f, arrowSize * 0.8f, arrowSize * 0.8f);
+
+            var iconFilter = _icon.AddComponent<MeshFilter>();
+            iconFilter.sharedMesh = quadMesh;
+            var iconRenderer = _icon.AddComponent<MeshRenderer>();
+            _iconMat = new Material(unlitShader) { name = "BeaconIcon_Runtime" };
+            _iconMat.color = iconColor;
+            _iconMat.SetTexture("_MainTex", iconSprite.texture);
+            iconRenderer.material = _iconMat;
+            iconRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            iconRenderer.receiveShadows = false;
+        }
     }
 
     /// <summary>
@@ -432,6 +435,7 @@ public class QuestBeacon : MonoBehaviour
     /// subsequent calls don't leak GameObjects into the scene.
     /// </summary>
     private static Mesh _cylinderMesh;
+    private static Mesh _coneMesh;
     private static Mesh _quadMesh;
     private static Mesh GetPrimitiveMesh(PrimitiveType type)
     {
@@ -444,6 +448,68 @@ public class QuestBeacon : MonoBehaviour
         if (type == PrimitiveType.Cylinder) _cylinderMesh = mesh;
         else if (type == PrimitiveType.Quad) _quadMesh = mesh;
         return mesh;
+    }
+
+    /// <summary>
+    /// Creates a cone mesh (pointing up, base at origin) procedurally.
+    /// Unity has no built-in Cone primitive, so we build one with 16 segments.
+    /// </summary>
+    private static Mesh GetConeMesh()
+    {
+        if (_coneMesh != null) return _coneMesh;
+
+        int segments = 16;
+        var vertices = new System.Collections.Generic.List<Vector3>();
+        var triangles = new System.Collections.Generic.List<int>();
+        var normals = new System.Collections.Generic.List<Vector3>();
+
+        float height = 1f;
+        float radius = 0.5f;
+
+        // Apex
+        vertices.Add(new Vector3(0f, height, 0f));
+        normals.Add(Vector3.up);
+
+        // Base ring
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = i * Mathf.PI * 2f / segments;
+            vertices.Add(new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius));
+            normals.Add(Vector3.up);
+        }
+
+        // Side triangles (apex + 2 base verts)
+        for (int i = 0; i < segments; i++)
+        {
+            int apex = 0;
+            int a = 1 + i;
+            int b = 1 + (i + 1) % segments;
+            triangles.Add(apex);
+            triangles.Add(b);
+            triangles.Add(a);
+        }
+
+        // Base center
+        int baseCenter = vertices.Count;
+        vertices.Add(new Vector3(0f, 0f, 0f));
+        normals.Add(Vector3.down);
+
+        // Base triangles
+        for (int i = 0; i < segments; i++)
+        {
+            int a = 1 + i;
+            int b = 1 + (i + 1) % segments;
+            triangles.Add(baseCenter);
+            triangles.Add(a);
+            triangles.Add(b);
+        }
+
+        _coneMesh = new Mesh { name = "BeaconCone" };
+        _coneMesh.SetVertices(vertices);
+        _coneMesh.SetTriangles(triangles, 0);
+        _coneMesh.SetNormals(normals);
+        _coneMesh.RecalculateBounds();
+        return _coneMesh;
     }
 
     private void EnsurePlayer()
@@ -459,12 +525,19 @@ public class QuestBeacon : MonoBehaviour
 
         EnsurePlayer();
 
-        // Bob the icon.
-        _bobTime += Time.deltaTime * iconBobSpeed;
+        // Bob the arrow + icon.
+        _bobTime += Time.deltaTime * arrowBobSpeed;
+        float bob = Mathf.Sin(_bobTime) * arrowBobAmplitude;
+        float groundOffset = _groundY - transform.position.y;
+
+        if (_arrow != null)
+        {
+            _arrow.transform.localPosition = new Vector3(0f, groundOffset + arrowHeight + bob, 0f);
+        }
+
         if (_icon != null)
         {
-            float bob = Mathf.Sin(_bobTime) * iconBobAmplitude;
-            _icon.transform.localPosition = new Vector3(0f, iconHeight + bob, 0f);
+            _icon.transform.localPosition = new Vector3(0f, groundOffset + arrowHeight + 1.2f + bob, 0f);
 
             // Face the camera (billboard).
             if (Camera.main != null)
@@ -478,7 +551,7 @@ public class QuestBeacon : MonoBehaviour
         if (_ring != null)
         {
             float pulse = 1f + Mathf.Sin(_bobTime * 1.5f) * 0.15f;
-            _ring.transform.localScale = new Vector3(ringRadius * 2f * pulse, 0.05f, ringRadius * 2f * pulse);
+            _ring.transform.localScale = new Vector3(ringRadius * 2f * pulse, 0.02f, ringRadius * 2f * pulse);
         }
 
         // Hide when player is close.
@@ -488,11 +561,11 @@ public class QuestBeacon : MonoBehaviour
                 new Vector3(_player.position.x, 0f, _player.position.z),
                 new Vector3(transform.position.x, 0f, transform.position.z));
             bool show = dist > hideDistance;
-            if (_beam != null) _beam.SetActive(show);
             if (_ring != null) _ring.SetActive(show);
-            if (_beamParticles != null) _beamParticles.SetActive(show);
             if (_ringParticles != null) _ringParticles.SetActive(show);
-            if (_beamLight != null) _beamLight.enabled = show;
+            if (_arrow != null) _arrow.SetActive(show);
+            if (_icon != null) _icon.SetActive(show);
+            if (_ringLight != null) _ringLight.enabled = show;
         }
     }
 }
