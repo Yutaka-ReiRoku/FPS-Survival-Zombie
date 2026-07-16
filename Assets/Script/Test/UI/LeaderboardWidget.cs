@@ -47,13 +47,17 @@ public class LeaderboardWidget : MonoBehaviour
         }
         if (_scrim != null) _scrim.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
 
-        var closeBtn = root.Q("CloseButton");
+        var closeBtn = root.Q("LeaderboardCloseButton");
         if (closeBtn != null) closeBtn.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
 
         var refreshBtn = root.Q("RefreshButton");
         if (refreshBtn != null) refreshBtn.RegisterCallback<ClickEvent>(_ => RefreshLeaderboard());
 
-        if (_panel != null) _panel.style.display = DisplayStyle.None;
+        if (_panel != null)
+        {
+            _panel.style.display = DisplayStyle.None;
+            _panel.generateVisualContent += OnGeneratePanelBackground;
+        }
         if (_scrim != null) _scrim.style.display = DisplayStyle.None;
         if (_chip != null) _chip.style.display = DisplayStyle.None;
     }
@@ -111,29 +115,63 @@ public class LeaderboardWidget : MonoBehaviour
 
     private void TogglePanel() => SetPanelVisible(!_panelVisible);
 
-    private void SetPanelVisible(bool visible)
+    public bool IsPanelVisible => _panelVisible;
+
+    public void SetPanelVisible(bool visible)
     {
-        _panelVisible = visible;
         if (visible)
         {
-            _scrim.style.display = DisplayStyle.Flex;
-            _panel.style.display = DisplayStyle.Flex;
-            _scrim.style.opacity = 0.8f;
-            _panel.style.opacity = 1f;
+            var profile = FindFirstObjectByType<PlayerProfileWidget>();
+            if (profile != null && profile.IsPanelVisible)
+            {
+                profile.SetPanelVisible(false);
+            }
+        }
+
+        StopAllCoroutines();
+        StartCoroutine(AnimatePanel(visible));
+
+        if (visible)
+        {
             RefreshLeaderboard();
+        }
+    }
+
+    private IEnumerator AnimatePanel(bool show)
+    {
+        var mainMenu = FindMainMenuContent();
+        _panelVisible = show;
+
+        if (show)
+        {
+            if (mainMenu != null) mainMenu.SetActive(false);
+            if (_scrim != null)
+            {
+                _scrim.style.display = DisplayStyle.Flex;
+                _scrim.style.opacity = 0f;
+            }
+            if (_panel != null)
+            {
+                _panel.style.display = DisplayStyle.Flex;
+                _panel.RemoveFromClassList("slide-in");
+            }
+            
+            yield return null;
+            
+            if (_scrim != null) _scrim.style.opacity = 0.8f;
+            if (_panel != null) _panel.AddToClassList("slide-in");
         }
         else
         {
-            _scrim.style.opacity = 0f;
-            _panel.style.opacity = 0f;
-            _panel.schedule.Execute(() => {
-                _scrim.style.display = DisplayStyle.None;
-                _panel.style.display = DisplayStyle.None;
-            }).StartingIn(200);
+            if (_scrim != null) _scrim.style.opacity = 0f;
+            if (_panel != null) _panel.RemoveFromClassList("slide-in");
+            
+            yield return new WaitForSeconds(1.5f);
+            
+            if (_scrim != null) _scrim.style.display = DisplayStyle.None;
+            if (_panel != null) _panel.style.display = DisplayStyle.None;
+            if (mainMenu != null) mainMenu.SetActive(true);
         }
-
-        var mainMenu = FindMainMenuContent();
-        if (mainMenu != null) mainMenu.SetActive(!visible);
     }
 
     public void RefreshLeaderboard()
@@ -170,6 +208,7 @@ public class LeaderboardWidget : MonoBehaviour
     private void BuildRows(List<PlayFabManager.LeaderboardEntry> entries)
     {
         ClearRows();
+        if (_listContainer == null) return;
 
         string myPlayFabId = PlayFabManager.Instance != null ? PlayFabManager.Instance.PlayFabId : null;
 
@@ -179,44 +218,30 @@ public class LeaderboardWidget : MonoBehaviour
 
             var row = new VisualElement();
             row.name = $"Row_{entry.rank}";
-            row.style.minHeight = rowHeight;
-            row.style.backgroundColor = isMe ? RowHighlight : RowDefault;
+            row.AddToClassList("leaderboard-row");
+            if (isMe) row.AddToClassList("is-me");
+            if (entry.rank == 1) row.AddToClassList("rank-1");
+            else if (entry.rank == 2) row.AddToClassList("rank-2");
+            else if (entry.rank == 3) row.AddToClassList("rank-3");
+            
             _listContainer.Add(row);
 
-            string rankStr = entry.rank <= 3 ? GetRankMedal(entry.rank) : entry.rank.ToString();
+            string rankStr = entry.rank <= 3 ? $"#{entry.rank}" : entry.rank.ToString();
             var rankLbl = new Label(rankStr);
-            rankLbl.style.fontSize = 18;
-            rankLbl.style.color = isMe || entry.rank <= 3 ? AccentColor : Color.white;
-            rankLbl.style.width = 50;
+            rankLbl.AddToClassList("row-rank");
             row.Add(rankLbl);
 
             var nameLbl = new Label(entry.displayName);
-            nameLbl.style.fontSize = 16;
-            nameLbl.style.color = isMe ? AccentColor : Color.white;
-            nameLbl.style.flexGrow = 1;
+            nameLbl.AddToClassList("row-name");
             row.Add(nameLbl);
 
             var scoreLbl = new Label(entry.score.ToString());
-            scoreLbl.style.fontSize = 18;
-            scoreLbl.style.color = isMe ? AccentColor : Color.white;
-            scoreLbl.style.width = 100;
-            scoreLbl.style.unityTextAlign = TextAnchor.MiddleRight;
+            scoreLbl.AddToClassList("row-score");
             row.Add(scoreLbl);
         }
     }
 
     private void ClearRows() { _listContainer?.Clear(); }
-
-    private string GetRankMedal(int rank)
-    {
-        switch (rank)
-        {
-            case 1: return "#1";
-            case 2: return "#2";
-            case 3: return "#3";
-            default: return rank.ToString();
-        }
-    }
 
     private GameObject FindMainMenuContent()
     {
@@ -227,6 +252,60 @@ public class LeaderboardWidget : MonoBehaviour
             if (contentTr != null) return contentTr.gameObject;
         }
         return null;
+    }
+
+    private void OnGeneratePanelBackground(MeshGenerationContext mgc)
+    {
+        var rect = _panel.layout;
+        if (rect.width <= 0 || rect.height <= 0) return;
+
+        var painter = mgc.painter2D;
+        float chamferSize = 16f;
+
+        // 1. Draw solid dark blue-gray translucent background shape to match HUD modules
+        Color fillCol = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.94f);
+        painter.fillColor = fillCol;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Fill();
+
+        // 2. Draw tactical thin neon orange border
+        Color borderCol = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.22f);
+        painter.strokeColor = borderCol;
+        painter.lineWidth = 1.5f;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Stroke();
+
+        // 3. Draw mini accent ticks in corners for industrial HUD aesthetic
+        painter.strokeColor = new Color(230f / 255f, 80f / 255f, 40f / 255f, 0.6f);
+        painter.lineWidth = 2f;
+        // Top-left chamfer tick
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(0, chamferSize + 4f));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.LineTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(chamferSize + 4f, 0));
+        painter.Stroke();
+        // Bottom-right chamfer tick
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(rect.width, rect.height - chamferSize - 4f));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(rect.width - chamferSize - 4f, rect.height));
+        painter.Stroke();
     }
 
     private void OnDestroy()

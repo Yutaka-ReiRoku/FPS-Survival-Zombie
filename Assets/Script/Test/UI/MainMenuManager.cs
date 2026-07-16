@@ -96,7 +96,104 @@ public class MainMenuManager : MonoBehaviour
 
     public void PlayGame()
     {
+        StartCoroutine(LaunchOperationCoroutine());
+    }
+
+    private IEnumerator LaunchOperationCoroutine()
+    {
         Time.timeScale = 1f;
+
+        // 1. Find all required components
+        var loginUI = FindFirstObjectByType<PlayFabLoginUI>();
+        var profileWidget = FindFirstObjectByType<PlayerProfileWidget>();
+        var leaderboardWidget = FindFirstObjectByType<LeaderboardWidget>();
+        var cameraOrbit = FindFirstObjectByType<MenuCameraOrbit>();
+
+        // 2. Close any open widgets/panels (Profile, Rankings)
+        if (profileWidget != null && profileWidget.IsPanelVisible)
+        {
+            profileWidget.SetPanelVisible(false);
+        }
+        if (leaderboardWidget != null && leaderboardWidget.IsPanelVisible)
+        {
+            leaderboardWidget.SetPanelVisible(false);
+        }
+
+        // 3. Slide out all left menu modules, quit button, and logout button
+        if (loginUI != null)
+        {
+            loginUI.SlideOutAllMenuElements();
+        }
+
+        // 4. Wait for the slide-out UI transition (1.5 seconds)
+        yield return new WaitForSeconds(1.5f);
+
+        // 5. Get the black overlay element, make it visible and transparent initially
+        VisualElement overlay = null;
+        if (_doc != null)
+        {
+            overlay = _doc.rootVisualElement.Q("BlackOverlay");
+        }
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.Flex;
+            overlay.style.opacity = 0f;
+            overlay.RemoveFromClassList("fade-out"); // Make sure css transitions don't fight us
+        }
+
+        // 6. Transition: Fade black overlay to 1.0 and shrink all camera parameters to 0 over 3 seconds
+        float startRadius = cameraOrbit != null ? cameraOrbit.radius : 130f;
+        float startHeight = cameraOrbit != null ? cameraOrbit.height : 55f;
+        float startBob = cameraOrbit != null ? cameraOrbit.bobAmplitude : 2.5f;
+        float startSway = cameraOrbit != null ? cameraOrbit.lookSwayDeg : 1.1f;
+        
+        float duration = 3f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            
+            // Standard Ease-In-Out for overlay opacity, bob, and sway
+            float easeT = t * t * (3f - 2f * t);
+
+            // Ease-Out Cubic for horizontal radius: 1 - (1 - t)^3
+            float invT = 1f - t;
+            float easeT_radius = 1f - (invT * invT * invT);
+
+            // Ease-In Cubic for vertical height: t^3
+            float easeT_height = t * t * t;
+
+            // Lerp opacity of overlay
+            if (overlay != null)
+            {
+                overlay.style.opacity = easeT;
+            }
+
+            // Lerp camera orbit parameters to 0
+            if (cameraOrbit != null)
+            {
+                cameraOrbit.radius = Mathf.Lerp(startRadius, 0f, easeT_radius);
+                cameraOrbit.height = Mathf.Lerp(startHeight, 0f, easeT_height);
+                cameraOrbit.bobAmplitude = Mathf.Lerp(startBob, 0f, easeT);
+                cameraOrbit.lookSwayDeg = Mathf.Lerp(startSway, 0f, easeT);
+            }
+
+            yield return null;
+        }
+
+        // Ensure final values
+        if (overlay != null) overlay.style.opacity = 1f;
+        if (cameraOrbit != null)
+        {
+            cameraOrbit.radius = 0f;
+            cameraOrbit.height = 0f;
+            cameraOrbit.bobAmplitude = 0f;
+            cameraOrbit.lookSwayDeg = 0f;
+        }
+
+        // 7. Load scene
         if (AchievementManager.Instance != null)
             AchievementManager.Instance.ResetProgress();
         SceneManager.LoadScene(gameSceneName);

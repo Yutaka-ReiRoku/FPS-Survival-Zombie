@@ -51,7 +51,7 @@ public class PlayerProfileWidget : MonoBehaviour
             _chip.focusable = true;
             _chip.RegisterCallback<ClickEvent>(_ => TogglePanel());
         }
-        var closeBtn = root.Q("CloseButton");
+        var closeBtn = root.Q("ProfileCloseButton");
         if (closeBtn != null) closeBtn.RegisterCallback<ClickEvent>(_ => SetPanelVisible(false));
 
         if (_panel != null)
@@ -117,8 +117,19 @@ public class PlayerProfileWidget : MonoBehaviour
         SetPanelVisible(!_panelVisible);
     }
 
-    private void SetPanelVisible(bool visible)
+    public bool IsPanelVisible => _panelVisible;
+
+    public void SetPanelVisible(bool visible)
     {
+        if (visible)
+        {
+            var leaderboard = FindFirstObjectByType<LeaderboardWidget>();
+            if (leaderboard != null && leaderboard.IsPanelVisible)
+            {
+                leaderboard.SetPanelVisible(false);
+            }
+        }
+
         if (_transitionCoroutine != null) StopCoroutine(_transitionCoroutine);
         _transitionCoroutine = StartCoroutine(AnimatePanel(visible));
     }

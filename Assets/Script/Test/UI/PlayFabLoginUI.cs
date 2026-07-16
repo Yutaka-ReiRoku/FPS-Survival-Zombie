@@ -341,6 +341,26 @@ public class PlayFabLoginUI : MonoBehaviour
         }
     }
 
+    public void SlideOutAllMenuElements()
+    {
+        var root = _doc?.rootVisualElement;
+        if (root == null) return;
+
+        var logoutBtn = root.Q("TacticalLogoutButton");
+        var quitBtn = root.Q("TacticalQuitButton");
+        var headerModule = root.Q("HeaderModule");
+        var playModule = root.Q("MainMenuModule_Play");
+        var profileModule = root.Q("MainMenuModule_Profile");
+        var rankingsModule = root.Q("MainMenuModule_Rankings");
+
+        if (logoutBtn != null) logoutBtn.RemoveFromClassList("slide-in");
+        if (quitBtn != null) quitBtn.RemoveFromClassList("slide-in");
+        if (headerModule != null) headerModule.RemoveFromClassList("slide-in");
+        if (playModule != null) playModule.RemoveFromClassList("slide-in");
+        if (profileModule != null) profileModule.RemoveFromClassList("slide-in");
+        if (rankingsModule != null) rankingsModule.RemoveFromClassList("slide-in");
+    }
+
     private void OnDisable()
     {
         var pm = PlayFabManager.Instance;
