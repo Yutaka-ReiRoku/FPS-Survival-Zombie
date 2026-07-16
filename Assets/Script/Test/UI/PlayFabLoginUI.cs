@@ -67,6 +67,18 @@ public class PlayFabLoginUI : MonoBehaviour
         _usernameInput = root.Q<TextField>("UsernameInput");
         _passwordInput = root.Q<TextField>("PasswordInput");
 
+        // Focus text field when clicking anywhere inside their respective input-container-inner
+        var userInner = root.Q("InputModule_User")?.Q(className: "input-container-inner");
+        if (userInner != null)
+        {
+            userInner.RegisterCallback<ClickEvent>(_ => _usernameInput?.Focus());
+        }
+        var passInner = root.Q("InputModule_Pass")?.Q(className: "input-container-inner");
+        if (passInner != null)
+        {
+            passInner.RegisterCallback<ClickEvent>(_ => _passwordInput?.Focus());
+        }
+
         _actionButton = root.Q("ActionButton");
         if (_actionButton != null)
         {
