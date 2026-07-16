@@ -573,7 +573,40 @@ public class PlayFabManager : MonoBehaviour
     private string ParseError(PlayFabError error)
     {
         if (error == null) return "Unknown error";
-        if (!string.IsNullOrEmpty(error.ErrorMessage)) return error.ErrorMessage;
+
+        // 1. Detect API rate limits, concurrent limits, or connection volume issues
+        int code = (int)error.Error;
+        if (code == 1073 || code == 1249 || code == 1142 ||
+            error.Error.ToString().Contains("Limit") ||
+            (error.ErrorMessage != null && (
+                error.ErrorMessage.IndexOf("limit", System.StringComparison.OrdinalIgnoreCase) >= 0 || 
+                error.ErrorMessage.IndexOf("exceeded", System.StringComparison.OrdinalIgnoreCase) >= 0 || 
+                error.ErrorMessage.IndexOf("too many", System.StringComparison.OrdinalIgnoreCase) >= 0
+            )))
+        {
+            return "Request limit exceeded.";
+        }
+
+        // 2. Format and sanitize regular errors
+        if (!string.IsNullOrEmpty(error.ErrorMessage))
+        {
+            string msg = error.ErrorMessage;
+            
+            // Clean up developer payload details
+            int detailsIdx = msg.IndexOf("Details:");
+            if (detailsIdx > 0)
+            {
+                msg = msg.Substring(0, detailsIdx).Trim();
+            }
+
+            // Ensure the error message doesn't overflow UI text limits (max 25 characters)
+            if (msg.Length > 25)
+            {
+                msg = msg.Substring(0, 22) + "...";
+            }
+            return msg;
+        }
+
         return error.Error.ToString();
     }
 

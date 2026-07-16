@@ -194,9 +194,17 @@ public class LeaderboardWidget : MonoBehaviour
             _loading = false;
             _entries = entries;
 
-            if (entries == null || entries.Count == 0)
+            if (entries == null)
+            {
+                if (_statusText != null) _statusText.text = "Failed to load leaderboard. Please try again.";
+                ClearRows();
+                return;
+            }
+
+            if (entries.Count == 0)
             {
                 if (_statusText != null) _statusText.text = "No leaderboard data yet.";
+                ClearRows();
                 return;
             }
 
