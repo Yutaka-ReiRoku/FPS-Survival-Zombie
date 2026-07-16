@@ -24,6 +24,10 @@ public class SkillTreeWidget : MonoBehaviour
     private UIDocument _doc;
     private VisualElement _root;
     private VisualElement _card;
+    private VisualElement _tooltip;
+    private Label _tooltipName;
+    private Label _tooltipDesc;
+    private Label _tooltipStatus;
     private Label _sp;
     private readonly VisualElement[] _nodeContainer = new VisualElement[Trees];
     private readonly VisualElement[,] _nodes = new VisualElement[Trees, NodesPerTree];
@@ -81,6 +85,42 @@ public class SkillTreeWidget : MonoBehaviour
             _card.generateVisualContent += OnGenerateCardBackground;
         }
 
+        // Dynamically instantiate the floating tooltip to avoid UXML desyncs
+        _tooltip = new VisualElement();
+        _tooltip.name = "tooltip";
+        _tooltip.pickingMode = PickingMode.Ignore; // Mouse clicks pass straight through to node beneath
+        _tooltip.style.display = DisplayStyle.None;
+        _tooltip.style.opacity = 0f;
+
+        _tooltipName = new Label();
+        _tooltipName.name = "tooltip-name";
+        _tooltipName.AddToClassList("tooltip-header");
+        _tooltipName.pickingMode = PickingMode.Ignore;
+        _tooltip.Add(_tooltipName);
+
+        _tooltipDesc = new Label();
+        _tooltipDesc.name = "tooltip-desc";
+        _tooltipDesc.AddToClassList("tooltip-body");
+        _tooltipDesc.pickingMode = PickingMode.Ignore;
+        _tooltip.Add(_tooltipDesc);
+
+        var divider = new VisualElement();
+        divider.name = "tooltip-divider";
+        divider.AddToClassList("tooltip-divider");
+        divider.pickingMode = PickingMode.Ignore;
+        _tooltip.Add(divider);
+
+        _tooltipStatus = new Label();
+        _tooltipStatus.name = "tooltip-status";
+        _tooltipStatus.AddToClassList("tooltip-status");
+        _tooltipStatus.pickingMode = PickingMode.Ignore;
+        _tooltip.Add(_tooltipStatus);
+
+        if (_card != null)
+        {
+            _card.Add(_tooltip);
+        }
+
         for (int t = 0; t < Trees; t++)
         {
             _nodeContainer[t] = _root.Q("nodes" + t);
@@ -119,6 +159,7 @@ public class SkillTreeWidget : MonoBehaviour
                 int ti = t;
                 int ni = n;
                 node.RegisterCallback<MouseEnterEvent>(_ => OnNodeHover(ti, ni));
+                node.RegisterCallback<MouseLeaveEvent>(_ => OnNodeLeave(ti, ni));
                 node.RegisterCallback<ClickEvent>(_ => TryUpgrade(ti, ni));
 
                 if (n < NodesPerTree - 1)
@@ -211,7 +252,25 @@ public class SkillTreeWidget : MonoBehaviour
         else
         {
             _root.style.display = DisplayStyle.None;
+            ResumeGameplay();
         }
+    }
+
+    private void OnSkillTreeExitTransitionEnd(TransitionEndEvent evt)
+    {
+        if (_card != null)
+        {
+            _card.UnregisterCallback<TransitionEndEvent>(OnSkillTreeExitTransitionEnd);
+        }
+        if (!_open)
+        {
+            if (_root != null) _root.style.display = DisplayStyle.None;
+            ResumeGameplay();
+        }
+    }
+
+    private void ResumeGameplay()
+    {
         bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
         bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
         if (!pauseOpen && !gameOver)
@@ -225,18 +284,6 @@ public class SkillTreeWidget : MonoBehaviour
         }
     }
 
-    private void OnSkillTreeExitTransitionEnd(TransitionEndEvent evt)
-    {
-        if (_card != null)
-        {
-            _card.UnregisterCallback<TransitionEndEvent>(OnSkillTreeExitTransitionEnd);
-        }
-        if (!_open && _root != null)
-        {
-            _root.style.display = DisplayStyle.None;
-        }
-    }
-
     private void OnNodeHover(int tree, int nodeIndex)
     {
         if (_mgr == null) return;
@@ -246,10 +293,97 @@ public class SkillTreeWidget : MonoBehaviour
         bool canAfford = !maxed && _mgr.CurrentSkillPoints >= cost;
         bool isNext = nodeIndex == lvl && !maxed;
 
+        var node = _nodes[tree, nodeIndex];
+
+        // Play hover sound for available nodes
         if (isNext && canAfford && hoverSFX != null && cowsins.SoundManager.Instance != null)
         {
             cowsins.SoundManager.Instance.PlaySound(hoverSFX, 0f, 0f, false);
         }
+
+        // Show and configure the floating tooltip
+        if (_tooltip != null && node != null && _card != null)
+        {
+            if (_tooltipName != null) _tooltipName.text = GetNodeName(tree, nodeIndex);
+            if (_tooltipDesc != null) _tooltipDesc.text = SkillTreeManager.GetNodeDescription(tree, nodeIndex + 1);
+
+            if (_tooltipStatus != null)
+            {
+                _tooltipStatus.ClearClassList();
+                _tooltipStatus.AddToClassList("tooltip-status");
+                bool unlocked = nodeIndex < lvl;
+                if (unlocked)
+                {
+                    _tooltipStatus.text = "STATUS: ACQUIRED";
+                    _tooltipStatus.AddToClassList("acquired");
+                }
+                else if (isNext && canAfford)
+                {
+                    _tooltipStatus.text = $"STATUS: AVAILABLE (Cost: {cost} SP)";
+                    _tooltipStatus.AddToClassList("available");
+                }
+                else
+                {
+                    _tooltipStatus.text = isNext ? $"LOCKED: Need {cost} SP" : "LOCKED: Unlock Previous First";
+                    _tooltipStatus.AddToClassList("locked");
+                }
+            }
+
+            // Convert local node boundaries to card space for positioning
+            Vector2 nodeLocalPos = node.parent.ChangeCoordinatesTo(_card, node.layout.position);
+            _tooltip.style.left = nodeLocalPos.x + (node.layout.width / 2f);
+            _tooltip.style.top = nodeLocalPos.y - 12f;
+
+            _tooltip.style.display = DisplayStyle.Flex;
+            _tooltip.style.opacity = 1f;
+        }
+    }
+
+    private void OnNodeLeave(int tree, int nodeIndex)
+    {
+        if (_tooltip != null)
+        {
+            _tooltip.style.opacity = 0f;
+            _tooltip.style.display = DisplayStyle.None;
+        }
+    }
+
+    private string GetNodeName(int tree, int nodeIndex)
+    {
+        switch (tree)
+        {
+            case 0:
+                switch (nodeIndex)
+                {
+                    case 0: return "Walk Speed Boost";
+                    case 1: return "Sprint Thrusters";
+                    case 2: return "Jet Dash Engine";
+                    case 3: return "Wall Run System";
+                    case 4: return "Cybernetic Grapple Hook";
+                }
+                break;
+            case 1:
+                switch (nodeIndex)
+                {
+                    case 0: return "Recoil Dampeners";
+                    case 1: return "Targeting Array I";
+                    case 2: return "Targeting Array II";
+                    case 3: return "Hyper-Critical Lens";
+                    case 4: return "One-Shot Decimator";
+                }
+                break;
+            case 2:
+                switch (nodeIndex)
+                {
+                    case 0: return "Bio-Magnetic XP Ring";
+                    case 1: return "XP Multiplier Matrix I";
+                    case 2: return "Bio-Magnetic XP Pulse";
+                    case 3: return "XP Multiplier Matrix II";
+                    case 4: return "Bio-Visor Highlight";
+                }
+                break;
+        }
+        return "Upgrade Node";
     }
 
     private void TryUpgrade(int tree, int nodeIndex)
