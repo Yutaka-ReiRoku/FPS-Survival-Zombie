@@ -1,4 +1,4 @@
-/* ===== GameOverPanel.uss ===== */
+/* ===== GameOverPanel.uss — Crimson Death Theme ===== */
 @import url("Shared.uss");
 
 #GameOverPanel {
@@ -10,7 +10,7 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: var(--color-bg-root);
+    background-color: var(--color-bg-root, rgba(12, 6, 6, 0.94));
 }
 
 #GameOverPanel #Vignette {
@@ -23,74 +23,81 @@
     -unity-background-scale-mode: scale-and-crop;
 }
 
+/* High-specificity override for the Game Over Card */
+#GameOverPanel #Card {
+    width: var(--panel-card-width, 760px);
+    height: 800px;
+    max-height: 95%;
+    max-width: 95%;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(18, 9, 9, 0.96); /* Dark blood red tint background */
+    border-width: 2px;
+    border-color: rgba(230, 75, 75, 0.35); /* Blood red outline */
+    border-radius: 12px;
+}
+
 #GameOverPanel #TopAccent {
-    background-color: var(--color-accent-red);
+    background-color: var(--color-accent-red, rgb(230, 75, 75));
 }
 
 #GameOverPanel #SkullIcon {
     width: 72px;
     height: 72px;
-    margin-top: var(--space-xxl);
+    margin-top: var(--space-xxl, 24px);
     flex-shrink: 0;
     background-image: url("project://database/Assets/UI/Resources/Icons/icon_skull.svg");
-    -unity-background-image-tint-color: var(--color-accent-red);
+    -unity-background-image-tint-color: var(--color-accent-red, rgb(230, 75, 75));
     -unity-background-scale-mode: scale-to-fit;
 }
 
 #GameOverPanel #Title {
-    font-size: var(--fs-display);
+    font-size: var(--fs-display, 48px);
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
-    letter-spacing: 6px;
+    letter-spacing: 8px;
     width: 720px;
     height: 130px;
-    margin-top: var(--space-l);
+    margin-top: var(--space-l, 16px);
     flex-shrink: 0;
-    color: var(--color-title-top);
-    -unity-text-outline-color: var(--color-title-bottom);
-    -unity-text-outline-width: var(--shadow-text-md);
+    color: var(--color-accent-red, rgb(230, 75, 75));
+    -unity-text-outline-color: var(--color-text-shadow, rgba(0, 0, 0, 0.8));
+    -unity-text-outline-width: var(--shadow-text-md, 2px);
 }
 
 #GameOverPanel #Divider {
     width: 620px;
     height: 2px;
     flex-shrink: 0;
-    margin-top: var(--space-s);
-    background-color: var(--color-divider);
+    margin-top: var(--space-s, 8px);
+    background-color: rgba(230, 75, 75, 0.2);
 }
 
 #GameOverPanel #StatWell {
-    width: var(--stat-well-width);
-    height: var(--stat-well-height);
+    width: var(--stat-well-width, 620px);
+    height: var(--stat-well-height, 160px);
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: var(--space-xxl);
+    margin-top: var(--space-xxl, 24px);
     flex-shrink: 0;
-    background-color: var(--color-stat-well-bg);
-    border-radius: var(--radius-s);
+    background-color: rgba(26, 12, 12, 0.5); /* Semi-transparent inner well */
+    border-radius: var(--radius-s, 8px);
 }
 
 .stat-text {
-    font-size: var(--fs-xl);
+    font-size: var(--fs-xl, 28px);
     -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
-    color: var(--color-text-primary);
+    color: var(--color-text-primary, rgb(245, 245, 245));
     -unity-text-align: middle-center;
     width: 100%;
     height: 36px;
     flex-shrink: 0;
-    margin: var(--space-xs) 0;
+    margin: var(--space-xs, 4px) 0;
 }
 
 .stat-text.gold {
-    color: var(--color-text-gold);
-}
-
-/* Override dimensions for GameOver panel specifically to fit 759px height content */
-#GameOverPanel #Card {
-    height: 800px;
-    max-height: 95%;
-    max-width: 95%;
+    color: var(--color-accent-gold, rgb(217, 199, 115));
 }
 
 #GameOverPanel #CardShadow {
@@ -98,4 +105,36 @@
     margin-top: -420px; /* Center offset (half of 840) */
     max-height: 95%;
     max-width: 95%;
+}
+
+/* === Game Over Buttons === */
+.gameover-button {
+    width: 280px;
+    height: 50px;
+    margin-top: var(--space-m, 12px);
+    background-color: rgba(22, 12, 12, 0.88);
+    border-width: 1px;
+    border-color: rgba(230, 75, 75, 0.25);
+    border-radius: var(--radius-s, 8px);
+    font-size: var(--fs-l, 22px);
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    color: var(--color-text-primary, rgb(245, 245, 245));
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    letter-spacing: 4px;
+    transition-property: scale, background-color, border-color;
+    transition-duration: 0.15s, 0.15s, 0.15s;
+    transition-timing-function: ease-out, ease-out, ease-out;
+}
+
+.gameover-button:hover {
+    scale: 1.05;
+    background-color: rgba(42, 22, 22, 0.95);
+    border-color: var(--color-accent-red, rgb(230, 75, 75));
+    color: var(--color-accent-red, rgb(230, 75, 75));
+}
+
+.gameover-button:active {
+    scale: 0.95;
+    background-color: rgba(12, 6, 6, 0.95);
 }

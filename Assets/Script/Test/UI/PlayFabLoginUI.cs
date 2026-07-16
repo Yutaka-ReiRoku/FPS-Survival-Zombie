@@ -353,12 +353,70 @@ public class PlayFabLoginUI : MonoBehaviour
         var profileModule = root.Q("MainMenuModule_Profile");
         var rankingsModule = root.Q("MainMenuModule_Rankings");
 
+        // Login screen modules (crucial for sliding out when quitting from login screen)
+        var userModule = root.Q("InputModule_User");
+        var passModule = root.Q("InputModule_Pass");
+        var actionModule = root.Q("ActionModule");
+
         if (logoutBtn != null) logoutBtn.RemoveFromClassList("slide-in");
         if (quitBtn != null) quitBtn.RemoveFromClassList("slide-in");
         if (headerModule != null) headerModule.RemoveFromClassList("slide-in");
         if (playModule != null) playModule.RemoveFromClassList("slide-in");
         if (profileModule != null) profileModule.RemoveFromClassList("slide-in");
         if (rankingsModule != null) rankingsModule.RemoveFromClassList("slide-in");
+
+        if (userModule != null) userModule.RemoveFromClassList("slide-in");
+        if (passModule != null) passModule.RemoveFromClassList("slide-in");
+        if (actionModule != null) actionModule.RemoveFromClassList("slide-in");
+    }
+
+    public IEnumerator SlideOutAllMenuElementsCoroutine()
+    {
+        var root = _doc?.rootVisualElement;
+        if (root == null) yield break;
+
+        var logoutBtn = root.Q("TacticalLogoutButton");
+        var quitBtn = root.Q("TacticalQuitButton");
+        var headerModule = root.Q("HeaderModule");
+
+        var loginModules = root.Query(className: "login-only").ToList();
+        var menuModules = root.Query(className: "menu-only").ToList();
+
+        // Build list of active slide-in elements from bottom to top
+        var elements = new System.Collections.Generic.List<VisualElement>();
+
+        // 1. TacticalQuitButton (bottom-most)
+        if (quitBtn != null && quitBtn.ClassListContains("slide-in"))
+            elements.Add(quitBtn);
+
+        // 2. TacticalLogoutButton
+        if (logoutBtn != null && logoutBtn.ClassListContains("slide-in"))
+            elements.Add(logoutBtn);
+
+        // 3. Login modules (bottom to top)
+        for (int i = loginModules.Count - 1; i >= 0; i--)
+        {
+            if (loginModules[i] != null && loginModules[i].ClassListContains("slide-in"))
+                elements.Add(loginModules[i]);
+        }
+
+        // 4. Menu modules (bottom to top)
+        for (int i = menuModules.Count - 1; i >= 0; i--)
+        {
+            if (menuModules[i] != null && menuModules[i].ClassListContains("slide-in"))
+                elements.Add(menuModules[i]);
+        }
+
+        // 5. HeaderModule (top-most)
+        if (headerModule != null && headerModule.ClassListContains("slide-in"))
+            elements.Add(headerModule);
+
+        // Slide out sequentially with 0.15s delay
+        foreach (var el in elements)
+        {
+            el.RemoveFromClassList("slide-in");
+            yield return new WaitForSeconds(0.15f);
+        }
     }
 
     private void OnDisable()

@@ -1,6 +1,7 @@
-/* ===== PausePanel.uss ===== */
+/* ===== PausePanel.uss — Gold Tactical Pause Theme ===== */
 @import url("Shared.uss");
 
+/* Override Shared.uss overlay to make it fully transparent */
 #PausePanel {
     position: absolute;
     left: 0;
@@ -10,7 +11,11 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: var(--color-bg-root);
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+
+#PausePanel.visible {
+    background-color: rgba(0, 0, 0, 0) !important;
 }
 
 #PauseVignette {
@@ -23,43 +28,102 @@
     -unity-background-scale-mode: scale-and-crop;
 }
 
-#PauseTopAccent {
-    background-color: var(--color-accent-blue);
+/* Card container transitions: only modify opacity (0.22s ease-out) to prevent resizing issues. Scale is kept constant at 1. */
+#PausePanel #PauseCard {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    opacity: 0;
+    scale: 1;
+    transition: opacity 0.22s ease-out;
+    justify-content: flex-start !important; /* Top-aligned, spacing handled by margins */
+    align-items: center !important;
+    padding-top: 40px !important;
+    padding-bottom: 25px !important;
+}
+
+#PausePanel.visible #PauseCard {
+    opacity: 1;
+    scale: 1;
+    transition: opacity 0.22s ease-out;
+}
+
+#PausePanel #PauseCardShadow {
+    display: none;
+}
+
+#PausePanel #PauseTopAccent {
+    display: none;
 }
 
 #PauseIcon {
     width: 58px;
     height: 58px;
-    margin-top: var(--space-xxl);
+    margin-top: 0 !important;
     flex-shrink: 0;
     background-image: url("project://database/Assets/UI/Resources/Icons/icon_pause.svg");
-    -unity-background-image-tint-color: var(--color-accent-blue-light);
+    -unity-background-image-tint-color: var(--color-accent-gold, rgb(217, 199, 115));
     -unity-background-scale-mode: scale-to-fit;
-    
-    
 }
 
 #PauseTitle {
-    font-size: var(--fs-display);
-    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
+    font-size: var(--fs-display, 48px);
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
     -unity-text-align: middle-center;
-    letter-spacing: 6px;
+    letter-spacing: 8px;
     width: 720px;
-    height: 130px;
-    margin-top: var(--space-l);
+    height: auto !important;
+    margin-top: 12px !important;
+    margin-bottom: 12px !important;
     flex-shrink: 0;
-    color: var(--color-text-primary);
-    -unity-text-outline-color: var(--shadow-color-default);
-    -unity-text-outline-width: var(--shadow-text-md);
+    color: var(--color-accent-gold, rgb(217, 199, 115));
+    -unity-text-outline-color: var(--color-text-shadow, rgba(0, 0, 0, 0.8));
+    -unity-text-outline-width: var(--shadow-text-md, 2px);
 }
 
 #PauseDivider {
     width: 620px;
     height: 2px;
     flex-shrink: 0;
-    margin-top: var(--space-s);
-    background-color: var(--color-divider);
+    margin-top: 8px !important;
+    margin-bottom: 25px !important; /* Total gap to 1st button: 25px + 25px = 50px */
+    background-color: rgba(217, 199, 115, 0.2);
+}
+
+/* === Pause Buttons — High Specificity Overrides to completely bypass Shared.uss pill style === */
+#PausePanel .pause-button {
+    width: 540px !important;
+    height: 84px !important;
+    margin-top: 25px !important; /* Total gap between buttons: 25px + 25px = 50px */
+    margin-bottom: 25px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    align-self: center !important;
+    background-color: rgba(16, 22, 30, 0.9) !important;
+    background-image: none !important;
+    border-width: 1px !important;
+    border-color: rgba(217, 199, 115, 0.3) !important;
+    border-radius: 4px !important;
+    font-size: 30px !important;
+    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF") !important;
+    color: rgb(217, 199, 115) !important;
+    -unity-text-align: middle-center !important;
+    -unity-font-style: bold !important;
+    letter-spacing: 8px !important;
+    transition-property: scale, background-color, border-color, color !important;
+    transition-duration: 0.15s, 0.15s, 0.15s, 0.15s !important;
+    transition-timing-function: ease-out, ease-out, ease-out, ease-out !important;
+}
+
+#PausePanel .pause-button:hover {
+    scale: 1.05 !important;
+    background-color: rgba(217, 199, 115, 0.15) !important;
+    border-color: rgb(217, 199, 115) !important;
+    color: rgb(217, 199, 115) !important;
+}
+
+#PausePanel .pause-button:active {
+    scale: 0.95 !important;
+    background-color: rgba(217, 199, 115, 0.05) !important;
 }
 
 

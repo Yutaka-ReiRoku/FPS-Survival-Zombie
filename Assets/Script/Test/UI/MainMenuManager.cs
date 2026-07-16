@@ -119,14 +119,16 @@ public class MainMenuManager : MonoBehaviour
             leaderboardWidget.SetPanelVisible(false);
         }
 
-        // 3. Slide out all left menu modules, quit button, and logout button
+        // 3. Slide out all left menu modules, quit button, and logout button sequentially (bottom first)
         if (loginUI != null)
         {
-            loginUI.SlideOutAllMenuElements();
+            yield return StartCoroutine(loginUI.SlideOutAllMenuElementsCoroutine());
+            yield return new WaitForSeconds(1.0f); // Allow remaining time of transition to finish (1.5s total)
         }
-
-        // 4. Wait for the slide-out UI transition (1.5 seconds)
-        yield return new WaitForSeconds(1.5f);
+        else
+        {
+            yield return new WaitForSeconds(1.5f);
+        }
 
         // 5. Get the black overlay element, make it visible and transparent initially
         VisualElement overlay = null;
@@ -201,6 +203,74 @@ public class MainMenuManager : MonoBehaviour
 
     public void QuitGame()
     {
+        StartCoroutine(TransitionAndQuit());
+    }
+
+    private System.Collections.IEnumerator TransitionAndQuit()
+    {
+        // 1. Find all required components (Crucial fix: resolved compilation error due to undefined variables)
+        var loginUI = FindFirstObjectByType<PlayFabLoginUI>();
+        var profileWidget = FindFirstObjectByType<PlayerProfileWidget>();
+        var leaderboardWidget = FindFirstObjectByType<LeaderboardWidget>();
+
+        // 2. Close any open widgets/panels (Profile, Rankings)
+        if (profileWidget != null && profileWidget.IsPanelVisible)
+        {
+            profileWidget.SetPanelVisible(false);
+        }
+        if (leaderboardWidget != null && leaderboardWidget.IsPanelVisible)
+        {
+            leaderboardWidget.SetPanelVisible(false);
+        }
+
+        // 3. Slide out all left menu modules, quit button, and logout button sequentially (bottom first)
+        if (loginUI != null)
+        {
+            yield return StartCoroutine(loginUI.SlideOutAllMenuElementsCoroutine());
+            yield return new WaitForSeconds(1.0f); // Allow remaining time of transition to finish (1.5s total)
+        }
+        else
+        {
+            yield return new WaitForSeconds(1.5f);
+        }
+
+        // 5. Get the black overlay element, make it visible and transparent initially
+        VisualElement overlay = null;
+        if (_doc != null)
+        {
+            overlay = _doc.rootVisualElement.Q("BlackOverlay");
+        }
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.Flex;
+            overlay.style.opacity = 0f;
+            overlay.RemoveFromClassList("fade-out"); // Make sure css transitions don't fight us
+        }
+
+        // 5. Transition: Fade black overlay to 1.0 over 3 seconds
+        float duration = 3f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            
+            // Standard Ease-In-Out for overlay opacity
+            float easeT = t * t * (3f - 2f * t);
+
+            // Lerp opacity of overlay
+            if (overlay != null)
+            {
+                overlay.style.opacity = easeT;
+            }
+
+            yield return null;
+        }
+
+        // Ensure final values
+        if (overlay != null) overlay.style.opacity = 1f;
+
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else

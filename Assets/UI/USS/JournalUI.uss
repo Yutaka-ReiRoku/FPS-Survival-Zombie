@@ -40,8 +40,8 @@
 #JournalUI.visible #Card {
     opacity: 1;
     scale: 1;
-    /* Entry transition: 1.5s with spring bounce */
-    transition: opacity 1.5s ease-out-back, scale 1.5s ease-out-back;
+    /* Entry transition: 1s with spring bounce */
+    transition: opacity 1s ease-out-back, scale 1s ease-out-back;
 }
 
 /* === Inside Pages container (White Paper sheets) === */
@@ -128,17 +128,24 @@
     color: rgb(250, 248, 242); /* Warm paper white text */
     -unity-text-align: middle-center;
     -unity-font-style: bold;
-    transition-property: scale, background-color;
-    transition-duration: 0.15s, 0.15s;
-    transition-timing-function: ease-out, ease-out;
+    opacity: 0;
+    scale: 0.8;
+    transition-property: opacity, scale, background-color;
+    transition-duration: 0.3s, 0.3s, 0.15s;
+    transition-timing-function: ease-out, ease-out, ease-out;
 }
 
-#JournalUI #CloseButton:hover {
+#JournalUI #CloseButton.btn-visible {
+    opacity: 1;
+    scale: 1;
+}
+
+#JournalUI #CloseButton.btn-visible:hover {
     scale: 1.05;
     background-color: rgb(95, 75, 55); /* Lighter leather */
 }
 
-#JournalUI #CloseButton:active {
+#JournalUI #CloseButton.btn-visible:active {
     scale: 0.95;
     background-color: rgb(55, 45, 35); /* Darker leather */
 }

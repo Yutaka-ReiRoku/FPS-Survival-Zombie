@@ -59,6 +59,10 @@ public class PauseManager : MonoBehaviour
         if (_resumeButton != null) _resumeButton.clicked -= Resume;
         if (_mainMenuButton != null) _mainMenuButton.clicked -= GoToMainMenu;
         if (_quitButton != null) _quitButton.clicked -= QuitGame;
+        if (_pauseCard != null)
+        {
+            _pauseCard.generateVisualContent -= OnGenerateCardBackground;
+        }
     }
 
     private void SetupUI()
@@ -90,6 +94,11 @@ public class PauseManager : MonoBehaviour
         _quitButton = _pausePanel.Q<Button>("PauseQuitButton");
 
         _pausePanel.style.display = DisplayStyle.None;
+
+        if (_pauseCard != null)
+        {
+            _pauseCard.generateVisualContent += OnGenerateCardBackground;
+        }
 
         if (_resumeButton != null)
             _resumeButton.clicked += Resume;
@@ -138,7 +147,10 @@ public class PauseManager : MonoBehaviour
             _pausePanel.style.display = DisplayStyle.Flex;
             _pausePanel.AddToClassList("visible");
             if (_pauseCard != null)
+            {
                 _pauseCard.AddToClassList("visible");
+                _pauseCard.MarkDirtyRepaint();
+            }
         }
         SetHUDVisible(_canvasRoot, false);
         if (playerControl != null)
@@ -163,26 +175,38 @@ public class PauseManager : MonoBehaviour
             else
             {
                 _pausePanel.style.display = DisplayStyle.None;
+                ResumeGameplay();
             }
         }
+        else
+        {
+            ResumeGameplay();
+        }
+    }
+
+    private void OnPauseExitTransitionEnd(TransitionEndEvent evt)
+    {
+        if (evt.target != _pauseCard) return;
+
+        if (_pauseCard != null)
+        {
+            _pauseCard.UnregisterCallback<TransitionEndEvent>(OnPauseExitTransitionEnd);
+        }
+        if (!IsPaused)
+        {
+            if (_pausePanel != null) _pausePanel.style.display = DisplayStyle.None;
+            ResumeGameplay();
+        }
+    }
+
+    private void ResumeGameplay()
+    {
         SetHUDVisible(_canvasRoot, true);
         Time.timeScale = 1f;
         if (playerControl != null)
             playerControl.GrantControl();
         UnityEngine.Cursor.lockState = CursorLockMode.Locked;
         UnityEngine.Cursor.visible = false;
-    }
-
-    private void OnPauseExitTransitionEnd(TransitionEndEvent evt)
-    {
-        if (_pauseCard != null)
-        {
-            _pauseCard.UnregisterCallback<TransitionEndEvent>(OnPauseExitTransitionEnd);
-        }
-        if (!IsPaused && _pausePanel != null)
-        {
-            _pausePanel.style.display = DisplayStyle.None;
-        }
     }
 
     public static void SetHUDVisible(Transform canvasRoot, bool visible)
@@ -235,17 +259,194 @@ public class PauseManager : MonoBehaviour
 
     public void GoToMainMenu()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(mainMenuSceneName);
+        StartCoroutine(TransitionAndLoadScene(mainMenuSceneName));
     }
 
     public void QuitGame()
     {
+        StartCoroutine(TransitionAndQuit());
+    }
+
+    private System.Collections.IEnumerator TransitionAndLoadScene(string sceneName)
+    {
+        var root = uiDocument.rootVisualElement;
+        var overlay = root?.Q("BlackOverlay");
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.Flex;
+            overlay.style.opacity = 0f;
+            overlay.RemoveFromClassList("fade-out"); // Make sure css transitions don't fight us
+        }
+
+        float duration = 3f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            
+            // Standard Ease-In-Out for overlay opacity
+            float easeT = t * t * (3f - 2f * t);
+
+            if (overlay != null)
+            {
+                overlay.style.opacity = easeT;
+            }
+
+            yield return null;
+        }
+
+        if (overlay != null) overlay.style.opacity = 1f;
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(sceneName);
+    }
+
+    private System.Collections.IEnumerator TransitionAndQuit()
+    {
+        var root = uiDocument.rootVisualElement;
+        var overlay = root?.Q("BlackOverlay");
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.Flex;
+            overlay.style.opacity = 0f;
+            overlay.RemoveFromClassList("fade-out");
+        }
+
+        float duration = 3f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            
+            // Standard Ease-In-Out for overlay opacity
+            float easeT = t * t * (3f - 2f * t);
+
+            if (overlay != null)
+            {
+                overlay.style.opacity = easeT;
+            }
+
+            yield return null;
+        }
+
+        if (overlay != null) overlay.style.opacity = 1f;
+
         Time.timeScale = 1f;
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
         Application.Quit();
 #endif
+    }
+
+    private void OnGenerateCardBackground(MeshGenerationContext mgc)
+    {
+        if (_pauseCard == null) return;
+        var rect = _pauseCard.layout;
+        if (rect.width <= 0 || rect.height <= 0) return;
+
+        var painter = mgc.painter2D;
+        float chamferSize = 32f;
+
+        // 1. Draw solid dark blue-gray translucent background shape to match HUD modules (0.85 alpha as requested)
+        Color fillCol = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.85f);
+        painter.fillColor = fillCol;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Fill();
+
+        // 2. Draw yellow-black diagonal warning stripes at the top edge (adapted to Gold)
+        float badgeW = 60f;
+        float badgeH = 7f;
+        float startX = rect.width - badgeW - 24f;
+        float startY = 4f;
+
+        painter.lineWidth = 1.0f;
+        for (float offset = 0; offset < badgeW; offset += 6f)
+        {
+            // Gold stripe
+            painter.strokeColor = new Color(217f / 255f, 199f / 255f, 115f / 255f, 0.8f);
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(startX + offset, startY));
+            painter.LineTo(new Vector2(startX + offset - 4f, startY + badgeH));
+            painter.Stroke();
+
+            // Black stripe
+            painter.strokeColor = new Color(16f / 255f, 14f / 255f, 14f / 255f, 0.9f);
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(startX + offset + 3f, startY));
+            painter.LineTo(new Vector2(startX + offset - 1f, startY + badgeH));
+            painter.Stroke();
+        }
+
+        // 3. Draw outer border with gold breathing glow
+        float pulse = 0.35f + Mathf.PingPong(Time.realtimeSinceStartup * 1.5f, 0.45f);
+        Color strokeCol = new Color(217f / 255f, 199f / 255f, 115f / 255f, pulse);
+        float lineWidth = 1.5f;
+
+        painter.strokeColor = strokeCol;
+        painter.lineWidth = lineWidth;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Stroke();
+
+        // 4. Draw inner offset double-line border
+        float d = 3.5f;
+        if (rect.width > d * 2 && rect.height > d * 2)
+        {
+            Color innerCol = new Color(217f / 255f, 199f / 255f, 115f / 255f, 0.15f);
+            painter.strokeColor = innerCol;
+            painter.lineWidth = 1.0f;
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(chamferSize, d));
+            painter.LineTo(new Vector2(rect.width - d, d));
+            painter.LineTo(new Vector2(rect.width - d, rect.height - chamferSize));
+            painter.LineTo(new Vector2(rect.width - chamferSize, rect.height - d));
+            painter.LineTo(new Vector2(d, rect.height - d));
+            painter.LineTo(new Vector2(d, chamferSize));
+            painter.ClosePath();
+            painter.Stroke();
+        }
+
+        // 5. Draw 4 3D metallic gold corner rivets (screws)
+        System.Action<Vector2> drawRivet = center =>
+        {
+            painter.fillColor = new Color(16f / 255f, 14f / 255f, 14f / 255f, 0.6f);
+            painter.BeginPath();
+            painter.Arc(center + new Vector2(0.5f, 0.5f), 3.5f, 0f, 360f);
+            painter.Fill();
+
+            painter.fillColor = new Color(175f / 255f, 150f / 255f, 90f / 255f, 1.0f); // Gold screw head
+            painter.BeginPath();
+            painter.Arc(center, 3.0f, 0f, 360f);
+            painter.Fill();
+
+            painter.fillColor = Color.white;
+            painter.BeginPath();
+            painter.Arc(center - new Vector2(0.8f, 0.8f), 0.6f, 0f, 360f);
+            painter.Fill();
+        };
+
+        float rOffset = 10f;
+        drawRivet(new Vector2(rOffset, rOffset));
+        drawRivet(new Vector2(rect.width - rOffset, rOffset));
+        drawRivet(new Vector2(rect.width - rOffset, rect.height - rOffset));
+        drawRivet(new Vector2(rOffset, rect.height - rOffset));
     }
 }

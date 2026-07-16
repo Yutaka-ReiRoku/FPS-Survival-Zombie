@@ -35,7 +35,10 @@
     translate: -50% -50%;
     width: 620px;
     height: 800px;
-    background-color: var(--color-surface-top, rgba(31, 38, 46, 0.96));
+    background-color: rgba(9, 13, 19, 0.95); /* Dark tactical card background */
+    border-width: 2px;
+    border-color: rgba(217, 199, 115, 0.35); /* Gold outline */
+    border-radius: 12px;
     opacity: 0;
     scale: 0.92;
     transition: opacity var(--panel-in-duration, 0.22s), scale var(--panel-in-duration, 0.22s);
@@ -51,7 +54,7 @@
     right: 0;
     top: 0;
     height: 4px;
-    background-color: var(--color-accent-gold-dark, rgb(217, 199, 115));
+    background-color: var(--color-accent-gold, rgb(217, 199, 115));
 }
 
 .stats-title {
@@ -62,7 +65,7 @@
     height: 56px;
     font-size: var(--fs-xxl, 36px);
     -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
-    color: var(--color-text-primary, white);
+    color: var(--color-accent-gold, rgb(217, 199, 115));
     -unity-text-align: middle-center;
 }
 
@@ -72,8 +75,7 @@
     right: var(--space-xxl, 24px);
     top: 86px;
     height: 2px;
-    background-color: var(--color-accent-gold-dark, rgb(217, 199, 115));
-    opacity: var(--opacity-medium, 0.6);
+    background-color: rgba(217, 199, 115, 0.2);
 }
 
 .stats-grid {
@@ -83,5 +85,13 @@
     top: 100px;
     bottom: var(--space-xl, 20px);
     flex-direction: column;
+}
+
+/* Row-level divider customization to match notebook lines styling */
+.stats-row {
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(217, 199, 115, 0.12); /* Faint gold separator */
+    padding-bottom: var(--space-xs, 4px);
+    height: 36px;
 }
 

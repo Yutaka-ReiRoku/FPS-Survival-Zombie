@@ -117,6 +117,12 @@ public class JournalUI : MonoBehaviour
         _panel.style.display = DisplayStyle.Flex;
         _panel.AddToClassList("visible");
 
+        if (_closeButton != null)
+        {
+            _closeButton.RemoveFromClassList("btn-visible");
+            _closeButton.pickingMode = PickingMode.Ignore;
+        }
+
         if (_content != null)
         {
             _content.style.marginTop = contentTopOffset;
@@ -196,8 +202,8 @@ public class JournalUI : MonoBehaviour
         _title.text = "";
         _content.text = "";
 
-        // 2. Wait for the 1.5-second transition to complete
-        yield return new WaitForSecondsRealtime(1.5f);
+        // 2. Wait for the 1.0-second transition to complete
+        yield return new WaitForSecondsRealtime(1.0f);
 
         // 3. Start voice log if available
         if (voiceLog != null)
@@ -241,6 +247,12 @@ public class JournalUI : MonoBehaviour
             }
 
             yield return new WaitForSecondsRealtime(charDelay);
+        }
+
+        if (_closeButton != null)
+        {
+            _closeButton.AddToClassList("btn-visible");
+            _closeButton.pickingMode = PickingMode.Position;
         }
         _typewriterCoroutine = null;
     }

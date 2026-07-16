@@ -211,6 +211,79 @@ public class GameOverManager : MonoBehaviour
 
     public void RestartGame()
     {
+        StartCoroutine(TransitionAndRestart());
+    }
+
+    public void GoToMainMenu()
+    {
+        StartCoroutine(TransitionAndLoadScene(mainMenuSceneName));
+    }
+
+    public void QuitGame()
+    {
+        StartCoroutine(TransitionAndQuit());
+    }
+
+    private System.Collections.IEnumerator TransitionAndLoadScene(string sceneName)
+    {
+        var root = uiDocument.rootVisualElement;
+        var overlay = root?.Q("BlackOverlay");
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.Flex;
+            overlay.style.opacity = 0f;
+            overlay.RemoveFromClassList("fade-out"); // Make sure css transitions don't fight us
+        }
+
+        float duration = 3f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float easeT = t * t * (3f - 2f * t);
+            if (overlay != null)
+            {
+                overlay.style.opacity = easeT;
+            }
+            yield return null;
+        }
+
+        if (overlay != null) overlay.style.opacity = 1f;
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(sceneName);
+    }
+
+    private System.Collections.IEnumerator TransitionAndRestart()
+    {
+        var root = uiDocument.rootVisualElement;
+        var overlay = root?.Q("BlackOverlay");
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.Flex;
+            overlay.style.opacity = 0f;
+            overlay.RemoveFromClassList("fade-out");
+        }
+
+        float duration = 3f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float easeT = t * t * (3f - 2f * t);
+            if (overlay != null)
+            {
+                overlay.style.opacity = easeT;
+            }
+            yield return null;
+        }
+
+        if (overlay != null) overlay.style.opacity = 1f;
+
         Time.timeScale = 1f;
 
         if (AchievementManager.Instance != null)
@@ -239,6 +312,19 @@ public class GameOverManager : MonoBehaviour
             UnityEngine.Cursor.lockState = CursorLockMode.Locked;
             UnityEngine.Cursor.visible = false;
 
+            // Fade back out when respawning!
+            if (overlay != null)
+            {
+                float elapsedOut = 0f;
+                while (elapsedOut < 1f) // Fade out over 1s
+                {
+                    elapsedOut += Time.unscaledDeltaTime;
+                    overlay.style.opacity = 1f - Mathf.Clamp01(elapsedOut / 1f);
+                    yield return null;
+                }
+                overlay.style.display = DisplayStyle.None;
+            }
+
             var ps = FindAnyObjectByType<PlayerStats>();
             if (ps != null)
             {
@@ -255,20 +341,40 @@ public class GameOverManager : MonoBehaviour
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
-            return;
+            yield break;
         }
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    public void GoToMainMenu()
+    private System.Collections.IEnumerator TransitionAndQuit()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(mainMenuSceneName);
-    }
+        var root = uiDocument.rootVisualElement;
+        var overlay = root?.Q("BlackOverlay");
+        if (overlay != null)
+        {
+            overlay.style.display = DisplayStyle.Flex;
+            overlay.style.opacity = 0f;
+            overlay.RemoveFromClassList("fade-out");
+        }
 
-    public void QuitGame()
-    {
+        float duration = 3f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float easeT = t * t * (3f - 2f * t);
+            if (overlay != null)
+            {
+                overlay.style.opacity = easeT;
+            }
+            yield return null;
+        }
+
+        if (overlay != null) overlay.style.opacity = 1f;
+
         Time.timeScale = 1f;
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;

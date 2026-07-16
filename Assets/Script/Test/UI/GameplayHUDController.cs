@@ -16,6 +16,9 @@ public class GameplayHUDController : MonoBehaviour
 
     private void Awake()
     {
+        // Freeze timescale immediately at Awake to prevent game logic / physics before transition ends
+        Time.timeScale = 0f;
+
         _doc = GetComponent<UIDocument>();
         if (_doc == null) return;
 
@@ -65,12 +68,16 @@ public class GameplayHUDController : MonoBehaviour
             overlay.AddToClassList("fade-out");
         }
 
-        yield return new WaitForSeconds(3.0f);
+        // Wait 3.0 seconds in REALTIME because Time.timeScale is 0!
+        yield return new WaitForSecondsRealtime(3.0f);
 
         if (overlay != null)
         {
             overlay.style.display = DisplayStyle.None;
         }
+
+        // Unfreeze timescale to resume gameplay
+        Time.timeScale = 1f;
     }
 
     private void OnEnable()
