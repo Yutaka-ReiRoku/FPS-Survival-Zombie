@@ -159,6 +159,13 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     [Tooltip("Vận tốc ngang tối đa khi loot bị bắn ra (m/s).")]
     public float lootPopHorizontalSpeed = 2.5f;
 
+    [Header("GiftBox Drop")]
+    [Tooltip("Prefab hộp quà sẽ rơi với tỉ lệ giftBoxDropChance khi zombie chết.")]
+    public GameObject giftBoxPrefab;
+    [Range(0, 100)]
+    [Tooltip("Tỉ lệ rơi hộp quà (%).")]
+    public float giftBoxDropChance = 10f;
+
     [Header("Loot Trail Effect")]
     [Tooltip("Cấu hình vệt trail + glow particle khi loot bay. Chỉnh trực tiếp trên zombie.")]
     public LootTrailSettings lootTrailSettings = new LootTrailSettings();
@@ -916,6 +923,27 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             lootPopUpwardSpeed,
             lootPopHorizontalSpeed,
             lootTrailSettings);
+
+        if (giftBoxPrefab != null && Random.Range(0f, 100f) <= giftBoxDropChance)
+        {
+            Vector3 dropPos = transform.position;
+            dropPos.y += dropHeightOffset;
+            GameObject giftBox = Instantiate(giftBoxPrefab, dropPos, Quaternion.identity);
+            if (popLootOnDeath)
+            {
+                var pop = giftBox.GetComponent<LootPop>();
+                if (pop == null) pop = giftBox.AddComponent<LootPop>();
+                pop.upwardSpeed = lootPopUpwardSpeed;
+                pop.horizontalSpeed = lootPopHorizontalSpeed;
+                pop.Launch(dropPos);
+                if (lootTrailSettings != null)
+                {
+                    var trail = giftBox.GetComponent<LootTrail>();
+                    if (trail == null) trail = giftBox.AddComponent<LootTrail>();
+                    trail.Initialize(lootTrailSettings);
+                }
+            }
+        }
     }
 
     //==================================================

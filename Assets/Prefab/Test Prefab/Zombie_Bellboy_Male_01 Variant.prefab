@@ -16,6 +16,10 @@ PrefabInstance:
       propertyPath: walkSpeed
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: -5898154939529675990, guid: 2165f6a67f710bc47a7cfc0882e7e964, type: 3}
+      propertyPath: giftBoxPrefab
+      value: 
+      objectReference: {fileID: 5597026042441387653, guid: aeda1d4ad92c1ab4ba7a0b2cef51e203, type: 3}
     - target: {fileID: 1418193975600942, guid: 2165f6a67f710bc47a7cfc0882e7e964, type: 3}
       propertyPath: m_Name
       value: Zombie_Bellboy_Male_01 Variant

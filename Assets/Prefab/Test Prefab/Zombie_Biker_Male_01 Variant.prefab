@@ -56,6 +56,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: d49c109e9e1d92e468674ccf05e8c41c, type: 2}
+    - target: {fileID: 8901207075478252851, guid: 6cb63163261c5a84a8a7410cf0775135, type: 3}
+      propertyPath: giftBoxPrefab
+      value: 
+      objectReference: {fileID: 5597026042441387653, guid: aeda1d4ad92c1ab4ba7a0b2cef51e203, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -106,12 +110,6 @@ MonoBehaviour:
   stuckRepathRadius: 5
   playerMovedRepathThreshold: 1
   maxRepathInterval: 0.1
-  useDirectSteeringWhenLOS: 1
-  directSteeringWallCheckDistance: 1.5
-  directSteeringLOSCacheInterval: 0.15
-  directSteeringWallCooldown: 1.5
-  wallCheckBodyHeight: 0.5
-  maxDirectSteerHeightDiff: 2
   attackCooldown: 2
   attackDamage: 20
   maxHealth: 100
@@ -127,6 +125,8 @@ MonoBehaviour:
   popLootOnDeath: 1
   lootPopUpwardSpeed: 4.5
   lootPopHorizontalSpeed: 2.5
+  giftBoxPrefab: {fileID: 0}
+  giftBoxDropChance: 10
   lootTrailSettings:
     trailTime: 0.45
     startWidth: 0.35
@@ -143,3 +143,4 @@ MonoBehaviour:
   headshotBonusExperience: 5
   coinReward: 5
   headshotBonusCoins: 5
+  forceDetectPlayer: 1
