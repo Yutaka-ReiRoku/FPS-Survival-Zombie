@@ -16,7 +16,9 @@ public class PauseManager : MonoBehaviour
     public string mainMenuSceneName = "MainMenu";
 
     public bool IsPaused { get; private set; }
-    public bool IsOpenOrTransitioning => IsPaused || _resumeCoroutine != null;
+    private float _transitionEndTime = 0f;
+    public bool IsTransitioning => Time.realtimeSinceStartup < _transitionEndTime;
+    public bool IsOpenOrTransitioning => IsPaused || IsTransitioning;
 
     private PlayerControl playerControl;
     private Transform _canvasRoot;
@@ -28,6 +30,8 @@ public class PauseManager : MonoBehaviour
     private Button _quitButton;
 
     private bool _uiReady;
+    private cowsins.InputManager _cowsinsInputManager;
+    private int _lastEscapeFrame;
 
     private Coroutine _resumeCoroutine;
 
@@ -46,17 +50,28 @@ public class PauseManager : MonoBehaviour
     {
         _canvasRoot = GameObject.Find("GameUICanvas")?.transform;
 
+        // Find and disable all active and inactive scene instances of Cowsins' built-in PauseMenu to prevent input/cursor conflicts
+        var allPauseMenus = Resources.FindObjectsOfTypeAll<cowsins.PauseMenu>();
+        foreach (var pm in allPauseMenus)
+        {
+            if (pm.gameObject.scene.name != null)
+            {
+                Debug.Log("[PauseManager Debug] Disabling cowsins.PauseMenu on scene GameObject: " + pm.gameObject.name);
+                pm.enabled = false;
+            }
+        }
+
         var p = GameObject.FindGameObjectWithTag("Player");
         if (p != null)
             playerControl = p.GetComponentInChildren<PlayerControl>();
 
         if (!IsPaused && (GameOverManager.Instance == null || !GameOverManager.Instance.IsGameOver))
         {
-            UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-            UnityEngine.Cursor.visible = false;
+            StartCoroutine(ForceLockMouseCoroutine());
         }
-    }
 
+        SubscribeToInputManager();
+    }
 
     private void OnDisable()
     {
@@ -66,6 +81,35 @@ public class PauseManager : MonoBehaviour
         if (_pauseCard != null)
         {
             _pauseCard.generateVisualContent -= OnGenerateCardBackground;
+        }
+        UnsubscribeFromInputManager();
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeFromInputManager();
+    }
+
+    private void SubscribeToInputManager()
+    {
+        if (_cowsinsInputManager == null)
+        {
+            _cowsinsInputManager = FindAnyObjectByType<cowsins.InputManager>();
+            if (_cowsinsInputManager != null)
+            {
+                _cowsinsInputManager.OnTogglePause += HandleEscapeInput;
+                Debug.Log("[PauseManager Debug] Successfully subscribed to cowsins.InputManager.OnTogglePause");
+            }
+        }
+    }
+
+    private void UnsubscribeFromInputManager()
+    {
+        if (_cowsinsInputManager != null)
+        {
+            _cowsinsInputManager.OnTogglePause -= HandleEscapeInput;
+            _cowsinsInputManager = null;
+            Debug.Log("[PauseManager Debug] Unsubscribed from cowsins.InputManager.OnTogglePause");
         }
     }
 
@@ -116,27 +160,54 @@ public class PauseManager : MonoBehaviour
 
     private void Update()
     {
+        SubscribeToInputManager();
+
         if (GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver)
             return;
+
         var kb = Keyboard.current;
         if (kb != null && kb.escapeKey.wasPressedThisFrame)
         {
-            var skillTree = FindAnyObjectByType<SkillTreeWidget>();
-            bool skillTreeActive = skillTree != null && skillTree.IsOpenOrTransitioning;
-            bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
-
-            if (skillTreeActive)
-            {
-                if (skillTree.IsOpen) skillTree.Close();
-                return;
-            }
-            if (journalActive)
-            {
-                if (JournalUI.Instance.IsOpen) JournalUI.Instance.Close();
-                return;
-            }
-            Toggle();
+            Debug.Log("[PauseManager Debug] Escape key pressed (detected in Update)");
+            HandleEscapeInput();
         }
+    }
+
+    private void HandleEscapeInput()
+    {
+        if (Time.frameCount == _lastEscapeFrame) return;
+        _lastEscapeFrame = Time.frameCount;
+
+        Debug.Log($"[PauseManager Debug] HandleEscapeInput called. IsPaused={IsPaused}, IsTransitioning={IsTransitioning}");
+
+        if (GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver)
+            return;
+        if (IsTransitioning) return;
+
+        var skillTree = FindAnyObjectByType<SkillTreeWidget>();
+        bool skillTreeActive = skillTree != null && skillTree.IsOpenOrTransitioning;
+        bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
+
+        if (skillTreeActive)
+        {
+            if (skillTree.IsOpen && !skillTree.IsTransitioning)
+            {
+                Debug.Log("[PauseManager Debug] Escape -> closing SkillTree");
+                skillTree.Close();
+            }
+            return;
+        }
+        if (journalActive)
+        {
+            if (JournalUI.Instance.IsOpen && !JournalUI.Instance.IsTransitioning)
+            {
+                Debug.Log("[PauseManager Debug] Escape -> closing Journal");
+                JournalUI.Instance.Close();
+            }
+            return;
+        }
+
+        Toggle();
     }
 
     public void Toggle()
@@ -147,8 +218,24 @@ public class PauseManager : MonoBehaviour
 
     public void Pause()
     {
-        if (!_uiReady) return;
+        if (!_uiReady || IsTransitioning) return;
+        Debug.Log("[PauseManager Debug] Pause() called. Setting IsPaused=true");
         IsPaused = true;
+        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+
+        // Find and disable all active and inactive scene instances of Cowsins' built-in PauseMenu to prevent input/cursor conflicts
+        var allPauseMenus = Resources.FindObjectsOfTypeAll<cowsins.PauseMenu>();
+        foreach (var pm in allPauseMenus)
+        {
+            if (pm.gameObject.scene.name != null)
+            {
+                Debug.Log("[PauseManager Debug] Disabling cowsins.PauseMenu in scene: " + pm.gameObject.name);
+                pm.enabled = false;
+            }
+        }
+
+        // Set Cowsins pause state
+        cowsins.PauseMenu.isPaused = true;
 
         if (_resumeCoroutine != null)
         {
@@ -170,14 +257,36 @@ public class PauseManager : MonoBehaviour
         if (playerControl != null)
             playerControl.LoseControl();
         Time.timeScale = 0f;
-        UnityEngine.Cursor.lockState = CursorLockMode.None;
-        UnityEngine.Cursor.visible = true;
+        if (cowsins.UIController.Instance != null)
+        {
+            cowsins.UIController.Instance.UnlockMouse();
+            Debug.Log($"[PauseManager Debug] Pause -> UIController.UnlockMouse called. Cursor.lockState={UnityEngine.Cursor.lockState}, Cursor.visible={UnityEngine.Cursor.visible}");
+        }
+        else
+        {
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+            Debug.Log($"[PauseManager Debug] Pause -> Manual Unlock called. Cursor.lockState={UnityEngine.Cursor.lockState}, Cursor.visible={UnityEngine.Cursor.visible}");
+        }
     }
 
     public void Resume()
     {
-        if (!_uiReady) return;
+        if (!_uiReady || IsTransitioning) return;
+        Debug.Log("[PauseManager Debug] Resume() called. Setting IsPaused=false");
         IsPaused = false;
+        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+
+        // Find and disable all active and inactive scene instances of Cowsins' built-in PauseMenu to prevent input/cursor conflicts
+        var allPauseMenus2 = Resources.FindObjectsOfTypeAll<cowsins.PauseMenu>();
+        foreach (var pm in allPauseMenus2)
+        {
+            if (pm.gameObject.scene.name != null)
+            {
+                Debug.Log("[PauseManager Debug] Disabling cowsins.PauseMenu in scene during Resume: " + pm.gameObject.name);
+                pm.enabled = false;
+            }
+        }
 
         if (_resumeCoroutine != null)
         {
@@ -199,6 +308,7 @@ public class PauseManager : MonoBehaviour
         if (_pausePanel != null) _pausePanel.RemoveFromClassList("visible");
         if (_pauseCard != null) _pauseCard.RemoveFromClassList("visible");
 
+        Debug.Log("[PauseManager Debug] ResumeCoroutine started. Waiting 1.5s real-time");
         yield return new WaitForSecondsRealtime(1.5f);
 
         if (!IsPaused)
@@ -211,12 +321,81 @@ public class PauseManager : MonoBehaviour
 
     private void ResumeGameplay()
     {
-        SetHUDVisible(_canvasRoot, true);
+        cowsins.PauseMenu.isPaused = false;
         Time.timeScale = 1f;
+
+        // Clear UI Toolkit focus
+        if (_resumeButton != null) _resumeButton.Blur();
+        if (_mainMenuButton != null) _mainMenuButton.Blur();
+        if (_quitButton != null) _quitButton.Blur();
+        if (_pausePanel != null) _pausePanel.Blur();
+
+        // Clear EventSystem selection
+        if (UnityEngine.EventSystems.EventSystem.current != null)
+        {
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+        }
+
+        StartCoroutine(ForceLockMouseCoroutine());
         if (playerControl != null)
             playerControl.GrantControl();
-        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-        UnityEngine.Cursor.visible = false;
+        SetHUDVisible(_canvasRoot, true);
+    }
+
+    private IEnumerator ForceLockMouseCoroutine()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            cowsins.PauseMenu.isPaused = false;
+            if (cowsins.UIController.Instance != null)
+            {
+                cowsins.UIController.Instance.LockMouse();
+            }
+            else
+            {
+                UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+                UnityEngine.Cursor.visible = false;
+            }
+
+#if UNITY_EDITOR
+            // Force the Unity Editor to allow cursor locking and refocus the GameView
+            PauseManager.EditorReallowCursorLock();
+            System.Type gameViewType = System.Type.GetType("UnityEditor.GameView,UnityEditor");
+            if (gameViewType != null)
+            {
+                UnityEditor.EditorWindow.FocusWindowIfItsOpen(gameViewType);
+            }
+#endif
+
+            yield return null;
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (_uiReady && !IsPaused && !IsTransitioning && (GameOverManager.Instance == null || !GameOverManager.Instance.IsGameOver))
+        {
+            var skillTree = FindAnyObjectByType<SkillTreeWidget>();
+            bool skillTreeActive = skillTree != null && skillTree.IsOpenOrTransitioning;
+            bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
+
+            if (!skillTreeActive && !journalActive)
+            {
+                if (UnityEngine.Cursor.lockState != CursorLockMode.Locked || UnityEngine.Cursor.visible)
+                {
+                    cowsins.PauseMenu.isPaused = false;
+                    if (cowsins.UIController.Instance != null)
+                    {
+                        cowsins.UIController.Instance.LockMouse();
+                    }
+                    else
+                    {
+                        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+                        UnityEngine.Cursor.visible = false;
+                    }
+                }
+            }
+        }
     }
 
     public static void SetHUDVisible(Transform canvasRoot, bool visible)
@@ -419,4 +598,33 @@ public class PauseManager : MonoBehaviour
         drawRivet(new Vector2(rect.width - rOffset, rect.height - rOffset));
         drawRivet(new Vector2(rOffset, rect.height - rOffset));
     }
+
+#if UNITY_EDITOR
+    public static void EditorReallowCursorLock()
+    {
+        try
+        {
+            System.Type gameViewType = System.Type.GetType("UnityEditor.GameView,UnityEditor");
+            if (gameViewType != null)
+            {
+                var gameViews = Resources.FindObjectsOfTypeAll(gameViewType);
+                var method = gameViewType.GetMethod("AllowCursorLockAndHide", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (method != null)
+                {
+                    foreach (var gv in gameViews)
+                    {
+                        if (gv != null)
+                        {
+                            method.Invoke(gv, new object[] { true });
+                        }
+                    }
+                }
+            }
+        }
+        catch (System.Exception)
+        {
+            // Fail silently in Editor without console spam
+        }
+    }
+#endif
 }

@@ -38,7 +38,9 @@ public class JournalUI : MonoBehaviour
     private bool _open;
 
     public bool IsOpen => _open;
-    public bool IsOpenOrTransitioning => _open || _closeCoroutine != null;
+    private float _transitionEndTime = 0f;
+    public bool IsTransitioning => Time.realtimeSinceStartup < _transitionEndTime;
+    public bool IsOpenOrTransitioning => _open || IsTransitioning;
 
     void Awake()
     {
@@ -113,9 +115,10 @@ public class JournalUI : MonoBehaviour
         bool skillTreeActive = false;
         var skillTree = FindAnyObjectByType<SkillTreeWidget>();
         if (skillTree != null) skillTreeActive = skillTree.IsOpenOrTransitioning;
-        if (pauseActive || skillTreeActive) return;
+        if (pauseActive || skillTreeActive || IsTransitioning) return;
 
         _open = true;
+        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
         _panel.style.display = DisplayStyle.Flex;
         _panel.AddToClassList("visible");
 
@@ -167,8 +170,14 @@ public class JournalUI : MonoBehaviour
         }
         _typewriterCoroutine = StartCoroutine(TypeText(journal.title, journal.content, journal.voiceLog));
 
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        cowsins.PauseMenu.isPaused = true;
+        if (cowsins.UIController.Instance != null)
+            cowsins.UIController.Instance.UnlockMouse();
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
 
         Time.timeScale = 0;
 
@@ -180,8 +189,9 @@ public class JournalUI : MonoBehaviour
 
     public void Close()
     {
-        if (!_open) return;
+        if (!_open || IsTransitioning) return;
         _open = false;
+        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
 
         if (_closeCoroutine != null)
         {
@@ -288,15 +298,51 @@ public class JournalUI : MonoBehaviour
         bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
         if (!pauseOpen && !gameOver)
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-
+            cowsins.PauseMenu.isPaused = false;
             Time.timeScale = 1;
 
+            // Clear UI Toolkit focus
+            if (_panel != null) _panel.Blur();
+            if (_closeButton != null) _closeButton.Blur();
+
+            // Clear EventSystem selection
+            if (UnityEngine.EventSystems.EventSystem.current != null)
+            {
+                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+            }
+
+            StartCoroutine(ForceLockMouseCoroutine());
             if (_playerControl != null)
                 _playerControl.GrantControl();
 
             PauseManager.SetHUDVisible(transform, true);
+        }
+    }
+
+    private IEnumerator ForceLockMouseCoroutine()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            cowsins.PauseMenu.isPaused = false;
+            if (cowsins.UIController.Instance != null)
+                cowsins.UIController.Instance.LockMouse();
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+
+#if UNITY_EDITOR
+            // Force the Unity Editor to allow cursor locking and refocus the GameView
+            PauseManager.EditorReallowCursorLock();
+            System.Type gameViewType = System.Type.GetType("UnityEditor.GameView,UnityEditor");
+            if (gameViewType != null)
+            {
+                UnityEditor.EditorWindow.FocusWindowIfItsOpen(gameViewType);
+            }
+#endif
+
+            yield return null;
         }
     }
 

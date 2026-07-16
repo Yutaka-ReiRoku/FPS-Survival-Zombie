@@ -47,7 +47,9 @@ public class SkillTreeWidget : MonoBehaviour
     private const int Trees = 3;
 
     public bool IsOpen => _open;
-    public bool IsOpenOrTransitioning => _open || _closeCoroutine != null;
+    private float _transitionEndTime = 0f;
+    public bool IsTransitioning => Time.realtimeSinceStartup < _transitionEndTime;
+    public bool IsOpenOrTransitioning => _open || IsTransitioning;
 
     private void OnEnable()
     {
@@ -194,6 +196,8 @@ public class SkillTreeWidget : MonoBehaviour
     {
         if (Input.GetKeyDown(toggleKey))
         {
+            if (IsTransitioning) return;
+
             bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
             bool pauseActive = PauseManager.Instance != null && PauseManager.Instance.IsOpenOrTransitioning;
             bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
@@ -229,8 +233,9 @@ public class SkillTreeWidget : MonoBehaviour
 
     private void Open()
     {
-        if (!_initialized) return;
+        if (!_initialized || IsTransitioning) return;
         _open = true;
+        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
 
         if (_closeCoroutine != null)
         {
@@ -241,8 +246,14 @@ public class SkillTreeWidget : MonoBehaviour
         _root.style.display = DisplayStyle.Flex;
         _root.AddToClassList("open");
         Time.timeScale = 0f;
-        UnityEngine.Cursor.lockState = CursorLockMode.None;
-        UnityEngine.Cursor.visible = true;
+        cowsins.PauseMenu.isPaused = true;
+        if (cowsins.UIController.Instance != null)
+            cowsins.UIController.Instance.UnlockMouse();
+        else
+        {
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+        }
         if (_playerControl != null)
             _playerControl.LoseControl();
         PauseManager.SetHUDVisible(_canvasRoot != null ? _canvasRoot : transform, false);
@@ -251,8 +262,9 @@ public class SkillTreeWidget : MonoBehaviour
 
     public void Close()
     {
-        if (!_open) return;
+        if (!_open || IsTransitioning) return;
         _open = false;
+        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
 
         if (_closeCoroutine != null)
         {
@@ -289,12 +301,49 @@ public class SkillTreeWidget : MonoBehaviour
         bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
         if (!pauseOpen && !gameOver)
         {
+            cowsins.PauseMenu.isPaused = false;
             Time.timeScale = 1f;
-            UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-            UnityEngine.Cursor.visible = false;
+
+            // Clear UI Toolkit focus
+            if (_root != null) _root.Blur();
+
+            // Clear EventSystem selection
+            if (UnityEngine.EventSystems.EventSystem.current != null)
+            {
+                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+            }
+
+            StartCoroutine(ForceLockMouseCoroutine());
             if (_playerControl != null)
                 _playerControl.GrantControl();
             PauseManager.SetHUDVisible(_canvasRoot != null ? _canvasRoot : transform, true);
+        }
+    }
+
+    private IEnumerator ForceLockMouseCoroutine()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            cowsins.PauseMenu.isPaused = false;
+            if (cowsins.UIController.Instance != null)
+                cowsins.UIController.Instance.LockMouse();
+            else
+            {
+                UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+                UnityEngine.Cursor.visible = false;
+            }
+
+#if UNITY_EDITOR
+            // Force the Unity Editor to allow cursor locking and refocus the GameView
+            PauseManager.EditorReallowCursorLock();
+            System.Type gameViewType = System.Type.GetType("UnityEditor.GameView,UnityEditor");
+            if (gameViewType != null)
+            {
+                UnityEditor.EditorWindow.FocusWindowIfItsOpen(gameViewType);
+            }
+#endif
+
+            yield return null;
         }
     }
 
