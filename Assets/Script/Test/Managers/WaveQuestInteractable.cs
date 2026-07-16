@@ -98,6 +98,13 @@ public class WaveQuestInteractable : Interactable
     private Coroutine _waveRoutine;
     private string _originalInteractText;
 
+    // All enemies (regular zombies + bosses) spawned by this WaveQuestInteractable.
+    // Tracked so we can destroy them when the player dies mid-wave — otherwise
+    // wave-spawned bosses (e.g. the Tank in Q11) are not registered with either
+    // AIDirector or SpecialEnemyDirector and survive the respawn, causing a
+    // duplicate boss to appear when the player re-triggers the quest.
+    private readonly List<GameObject> _spawnedEnemies = new List<GameObject>();
+
     /// <summary>
     /// Called by InteractManager when the player presses the interact key.
     /// Starts the wave sequence. The quest completes after all waves are cleared.
@@ -184,6 +191,13 @@ public class WaveQuestInteractable : Interactable
             _waveRoutine = null;
         }
 
+        // Destroy every enemy this quest spawned so they don't persist after
+        // respawn (most importantly wave-spawned bosses like the Tank, which
+        // are not registered with AIDirector or SpecialEnemyDirector and would
+        // otherwise survive the respawn — causing a duplicate boss when the
+        // player re-triggers the quest).
+        CleanupSpawnedEnemies();
+
         // Unlock the boundary so the player can move freely after respawning.
         if (lockBoundary != null) lockBoundary.UnlockExternal();
 
@@ -200,6 +214,26 @@ public class WaveQuestInteractable : Interactable
 
         _used = false;
         _wavesCleared = false;
+    }
+
+    /// <summary>
+    /// Destroys every enemy spawned by this WaveQuestInteractable and clears
+    /// the tracking list. Called on player death (mid-wave) to prevent
+    /// wave-spawned bosses — which are not registered with AIDirector or
+    /// SpecialEnemyDirector — from surviving the respawn and duplicating when
+    /// the quest is re-triggered.
+    /// </summary>
+    private void CleanupSpawnedEnemies()
+    {
+        if (_spawnedEnemies.Count == 0) return;
+
+        Debug.Log($"[WaveQuestInteractable] Cleaning up {_spawnedEnemies.Count} spawned enemy(ies).");
+        for (int i = 0; i < _spawnedEnemies.Count; i++)
+        {
+            var go = _spawnedEnemies[i];
+            if (go != null) Destroy(go);
+        }
+        _spawnedEnemies.Clear();
     }
 
     private IEnumerator RunWaveSequence()
@@ -279,6 +313,13 @@ public class WaveQuestInteractable : Interactable
         }
 
         _waveRoutine = null;
+
+        // All waves cleared successfully — drop our references to the spawned
+        // enemies. They are already dead (or dying on a delayed Destroy, e.g.
+        // the Tank's 6s death animation) and will clean themselves up. Keeping
+        // them in the list would only risk a stale Destroy() if the player
+        // dies during phase 2.
+        _spawnedEnemies.Clear();
 
         if (requireSecondInteraction)
         {
@@ -374,6 +415,7 @@ public class WaveQuestInteractable : Interactable
 
             var go = Instantiate(prefab, pos, Quaternion.identity, container);
             go.SetActive(true);
+            _spawnedEnemies.Add(go);
             Debug.Log($"[WaveQuestInteractable] Spawned {go.name} at {pos}.");
 
             // Track the first boss (ISpecialEnemy) spawned in this wave if
