@@ -139,10 +139,13 @@ public class StatsPanelUI : MonoBehaviour
 
         if (PanelManager.Instance != null)
         {
-            PanelManager.Instance.RegisterPanelActive("Stats", visible, Toggle);
-            if (!instant)
+            if (visible)
             {
-                StartCoroutine(RegisterTransition("Stats", PanelManager.PanelTransitionDuration));
+                PanelManager.Instance.RegisterPanelActive("Stats", true, Toggle);
+                if (!instant)
+                {
+                    StartCoroutine(RegisterTransition("Stats", PanelManager.PanelTransitionDuration));
+                }
             }
         }
 
@@ -163,6 +166,10 @@ public class StatsPanelUI : MonoBehaviour
             {
                 _root.RemoveFromClassList("visible");
                 _root.style.display = DisplayStyle.None;
+                if (PanelManager.Instance != null)
+                {
+                    PanelManager.Instance.RegisterPanelActive("Stats", false);
+                }
             }
             else
             {
@@ -181,6 +188,10 @@ public class StatsPanelUI : MonoBehaviour
         if (!_visible)
         {
             _root.style.display = DisplayStyle.None;
+            if (PanelManager.Instance != null)
+            {
+                PanelManager.Instance.RegisterPanelActive("Stats", false);
+            }
         }
         _closeCoroutine = null;
     }
