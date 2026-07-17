@@ -43,6 +43,8 @@ public class GameplayHUDController : MonoBehaviour
 
         if (CowsinsHUDAdapter.Instance != null)
             CowsinsHUDAdapter.Instance.OnCoinsChanged += OnCoinsChanged;
+
+        RegisterChipBackgrounds();
     }
 
     private void Start()
@@ -116,6 +118,8 @@ public class GameplayHUDController : MonoBehaviour
     {
         if (CowsinsHUDAdapter.Instance != null)
             CowsinsHUDAdapter.Instance.OnCoinsChanged -= OnCoinsChanged;
+
+        UnregisterChipBackgrounds();
     }
 
     private void ShowChip(VisualElement chip, bool show)
@@ -125,6 +129,7 @@ public class GameplayHUDController : MonoBehaviour
             chip.RemoveFromClassList("hud-chip-hidden");
         else
             chip.AddToClassList("hud-chip-hidden");
+        chip.MarkDirtyRepaint();
     }
 
     private void OnWaveStarted(int wave)
@@ -233,5 +238,121 @@ public class GameplayHUDController : MonoBehaviour
             _lastCollectibles = c;
             _collectiblesLabel.text = $"Journals : {c}/{cm.Total}";
         }
+    }
+
+    private void RegisterChipBackgrounds()
+    {
+        if (_waveChip != null) _waveChip.generateVisualContent += OnGenerateChipBackground;
+        if (_killsChip != null) _killsChip.generateVisualContent += OnGenerateChipBackground;
+        if (_scoreChip != null) _scoreChip.generateVisualContent += OnGenerateChipBackground;
+        if (_coinsChip != null) _coinsChip.generateVisualContent += OnGenerateChipBackground;
+        if (_critsChip != null) _critsChip.generateVisualContent += OnGenerateChipBackground;
+        if (_timerChip != null) _timerChip.generateVisualContent += OnGenerateChipBackground;
+        if (_collectiblesChip != null) _collectiblesChip.generateVisualContent += OnGenerateChipBackground;
+    }
+
+    private void UnregisterChipBackgrounds()
+    {
+        if (_waveChip != null) _waveChip.generateVisualContent -= OnGenerateChipBackground;
+        if (_killsChip != null) _killsChip.generateVisualContent -= OnGenerateChipBackground;
+        if (_scoreChip != null) _scoreChip.generateVisualContent -= OnGenerateChipBackground;
+        if (_coinsChip != null) _coinsChip.generateVisualContent -= OnGenerateChipBackground;
+        if (_critsChip != null) _critsChip.generateVisualContent -= OnGenerateChipBackground;
+        if (_timerChip != null) _timerChip.generateVisualContent -= OnGenerateChipBackground;
+        if (_collectiblesChip != null) _collectiblesChip.generateVisualContent -= OnGenerateChipBackground;
+    }
+
+    private void OnGenerateChipBackground(MeshGenerationContext mgc)
+    {
+        var targetElement = mgc.visualElement;
+        if (targetElement == null) return;
+        var rect = targetElement.layout;
+        if (rect.width <= 0 || rect.height <= 0) return;
+
+        var painter = mgc.painter2D;
+        float chamferSize = 8f;
+
+        // 1. Draw solid dark blue-gray translucent background shape (0.85 alpha as requested)
+        Color fillCol = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.85f);
+        painter.fillColor = fillCol;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Fill();
+
+        // 2. Identify themed accent color based on element name
+        Color accentCol = Color.white;
+        string name = targetElement.name;
+        if (name == "WaveChip" || name == "TimerChip")
+        {
+            accentCol = new Color(78f / 255f, 205f / 255f, 196f / 255f, 1.0f); // Cyan
+        }
+        else if (name == "KillsChip" || name == "HeadshotsChip")
+        {
+            accentCol = new Color(229f / 255f, 72f / 255f, 60f / 255f, 1.0f); // Red
+        }
+        else if (name == "ScoreChip" || name == "CoinsChip")
+        {
+            accentCol = new Color(217f / 255f, 199f / 255f, 115f / 255f, 1.0f); // Gold
+        }
+        else if (name == "CollectiblesChip")
+        {
+            accentCol = new Color(179f / 255f, 217f / 255f, 255f / 255f, 1.0f); // Blue-Light
+        }
+
+        // 3. Draw left accent vertical line (4px thick) along the left beveled edge
+        painter.strokeColor = accentCol;
+        painter.lineWidth = 4f;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(2f, chamferSize));
+        painter.LineTo(new Vector2(2f, rect.height - chamferSize));
+        painter.Stroke();
+
+        // 4. Draw outer border (faint white/gray line)
+        Color strokeCol = new Color(255f / 255f, 255f / 255f, 255f / 255f, 0.1f);
+        painter.strokeColor = strokeCol;
+        painter.lineWidth = 1.0f;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Stroke();
+
+        // 5. Draw 4 3D metallic gold mini rivets (screws) in the corners
+        System.Action<Vector2> drawRivet = center =>
+        {
+            // rivet shadow
+            painter.fillColor = new Color(16f / 255f, 14f / 255f, 14f / 255f, 0.6f);
+            painter.BeginPath();
+            painter.Arc(center + new Vector2(0.3f, 0.3f), 1.8f, 0f, 360f);
+            painter.Fill();
+
+            // rivet body
+            painter.fillColor = new Color(175f / 255f, 150f / 255f, 90f / 255f, 1.0f); // Gold screw head
+            painter.BeginPath();
+            painter.Arc(center, 1.5f, 0f, 360f);
+            painter.Fill();
+
+            // rivet highlight
+            painter.fillColor = Color.white;
+            painter.BeginPath();
+            painter.Arc(center - new Vector2(0.4f, 0.4f), 0.3f, 0f, 360f);
+            painter.Fill();
+        };
+
+        float rOffset = 6f;
+        drawRivet(new Vector2(rOffset + 2f, rOffset)); // offset slightly to the right of the 4px left bar
+        drawRivet(new Vector2(rect.width - rOffset, rOffset));
+        drawRivet(new Vector2(rect.width - rOffset, rect.height - rOffset));
+        drawRivet(new Vector2(rOffset + 2f, rect.height - rOffset));
     }
 }
