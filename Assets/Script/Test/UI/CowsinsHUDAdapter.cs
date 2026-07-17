@@ -432,14 +432,57 @@ public class CowsinsHUDAdapter : MonoBehaviour
     private void HandleWeaponChanged() { PullWeapon(); var wref = _weapon as IWeaponReferenceProvider; if (wref != null) { SelectedWeaponIndex = wref.CurrentWeaponIndex; OnWeaponSelected?.Invoke(SelectedWeaponIndex); } }
     private void HandleUnholster(bool a, bool b) => PullWeapon();
 
+    public string CaliberText { get; private set; } = "9MM NATO";
+    public string FireModeText { get; private set; } = "AUTO";
+
     private void PullWeapon()
     {
         if (_weapon == null) return;
         var w = _weapon.Weapon;
-        HasWeapon = w != null;
-        WeaponName = w != null ? w._name : string.Empty;
-        WeaponIcon = w != null ? w.icon : null;
-        ReloadTime = w != null ? w.reloadTime : 0f;
+        if (w != null)
+        {
+            HasWeapon = true;
+            WeaponName = w._name;
+            WeaponIcon = w.icon;
+            ReloadTime = w.reloadTime;
+
+            string n = (w._name ?? string.Empty).ToUpperInvariant();
+            if (n.Contains("PISTOL") || n.Contains("REVOLVER") || n.Contains("HANDGUN"))
+            {
+                CaliberText = "9MM NATO";
+                FireModeText = "SEMI";
+            }
+            else if (n.Contains("SHOTGUN"))
+            {
+                CaliberText = "12 GAUGE";
+                FireModeText = "PUMP";
+            }
+            else if (n.Contains("SNIPER"))
+            {
+                CaliberText = ".50 BMG";
+                FireModeText = "BOLT";
+            }
+            else if (n.Contains("SMG"))
+            {
+                CaliberText = "9MM";
+                FireModeText = "BURST";
+            }
+            else
+            {
+                CaliberText = "5.56MM";
+                FireModeText = "AUTO";
+            }
+        }
+        else
+        {
+            HasWeapon = false;
+            WeaponName = string.Empty;
+            WeaponIcon = null;
+            ReloadTime = 0f;
+            CaliberText = string.Empty;
+            FireModeText = string.Empty;
+        }
+
         var cp = w != null ? w.crosshairParts : null;
         CHTop = cp != null && cp.topPart;
         CHDown = cp != null && cp.downPart;

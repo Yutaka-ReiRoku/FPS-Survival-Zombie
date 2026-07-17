@@ -31,7 +31,7 @@ public class ProgressionHUDWidget : MonoBehaviour
         var root = doc.rootVisualElement;
         _root = root.Q<VisualElement>("ProgressionCluster");
         _coinsLabel = _root?.Q<Label>("CoinsLabel");
-        _levelValue = _root?.Q<Label>("LevelValue");
+        _levelValue = root.Q<Label>("LevelValue");
         _xpFill = _root?.Q<VisualElement>("XpFill");
         _xpGhost = _root?.Q<VisualElement>("XpGhost");
         if (_xpFill != null) _xpFill.usageHints = UsageHints.DynamicTransform;

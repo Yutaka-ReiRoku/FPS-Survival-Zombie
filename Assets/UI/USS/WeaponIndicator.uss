@@ -2,37 +2,33 @@
 @import url("Shared.uss");
 
 #WeaponIndicator {
-    position: absolute;
-    right: var(--hud-cluster-right, 48px);
-    bottom: 210px;
+    position: relative;
+    right: auto;
+    bottom: auto;
     flex-direction: row;
-    justify-content: flex-end;
     align-items: center;
-    height: 64px;
-    padding: 0 var(--space-m, 12px);
-    background-image: resource("Images/ui_panel");
-    -unity-slice-top: 16;
-    -unity-slice-bottom: 16;
-    -unity-slice-left: 16;
-    -unity-slice-right: 16;
-}
-
-#WeaponName {
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
-    font-size: var(--fs-xl, 28px);
-    color: var(--color-ammo-normal, rgb(235, 224, 199));
-    -unity-text-align: middle-right;
-    width: 244px;
-    height: 48px;
-    flex-shrink: 0;
+    background-image: none;
+    padding: 0;
+    height: auto;
 }
 
 #WeaponIcon {
-    width: 74px;
-    height: 46px;
-    
-    
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
     -unity-background-scale-mode: scale-to-fit;
     flex-shrink: 0;
-    margin-left: 10px;
+}
+
+#WeaponName {
+    font-size: 14px;
+    -unity-font-definition: var(--font-body-sdf);
+    -unity-font-style: bold;
+    color: var(--color-accent-gold, rgb(217, 199, 115));
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
 }

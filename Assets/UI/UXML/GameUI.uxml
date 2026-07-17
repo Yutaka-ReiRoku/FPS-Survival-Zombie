@@ -33,56 +33,79 @@
 
 
         <!-- ==================== HUDCluster (inlined) ==================== -->
-        <!-- Health -->
+        <!-- Health & Progression Unified Cluster -->
         <ui:VisualElement name="HealthCluster">
-            <ui:Label name="HealthLabel" text="HEALTH" />
+            <ui:VisualElement name="HealthHeaderRow">
+                <ui:VisualElement name="LevelBadge" class="header-badge level-badge">
+                    <ui:VisualElement name="LevelIcon" class="header-badge-icon level-icon" />
+                    <ui:Label name="LevelValue" text="LV 1" />
+                </ui:VisualElement>
+                <ui:VisualElement name="HealthBadge" class="header-badge health-badge">
+                    <ui:VisualElement name="HealthIcon" class="header-badge-icon health-icon" />
+                    <ui:Label name="HealthValue" text="100 HP" />
+                </ui:VisualElement>
+            </ui:VisualElement>
             <ui:VisualElement name="HealthBarRow">
                 <ui:VisualElement name="HealthTrack">
                     <ui:VisualElement name="HealthGhost" />
                     <ui:VisualElement name="HealthFill" />
+                    <ui:VisualElement name="HealthNotchesOverlay" class="track-notches-overlay" />
                 </ui:VisualElement>
-                <ui:Label name="HealthValue" text="100" />
             </ui:VisualElement>
             <ui:VisualElement name="ShieldRoot">
                 <ui:VisualElement name="ShieldTrack">
                     <ui:VisualElement name="ShieldFill" />
                 </ui:VisualElement>
             </ui:VisualElement>
-        </ui:VisualElement>
-        <!-- Ammo -->
-        <ui:VisualElement name="AmmoCluster">
-            <ui:Label name="AmmoLabel" text="AMMO" />
-            <ui:VisualElement name="AmmoValueRow">
-                <ui:VisualElement name="AmmoValueGradient" />
-                <ui:VisualElement name="AmmoPunchRoot">
-                    <ui:Label name="AmmoValue" text="30" />
+            <ui:VisualElement name="ProgressionCluster">
+                <ui:VisualElement name="XpBarRow">
+                    <ui:VisualElement name="XpTrack">
+                        <ui:VisualElement name="XpGhost" />
+                        <ui:VisualElement name="XpFill" />
+                        <ui:VisualElement name="XpNotchesOverlay" class="track-notches-overlay" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="AmmoReserve" text="&#x221E;" />
+        </ui:VisualElement>
+        <!-- Ammo & Weapon Unified Cluster -->
+        <ui:VisualElement name="AmmoCluster">
+            <!-- Top Header Row: Weapon Indicator + Quick Slots -->
+            <ui:VisualElement name="AmmoHeaderRow">
+                <ui:VisualElement name="WeaponIndicator">
+                    <ui:VisualElement name="WeaponIcon" />
+                    <ui:Label name="WeaponName" text="WEAPON" />
+                </ui:VisualElement>
+                <ui:VisualElement name="WeaponInventoryCluster" />
+            </ui:VisualElement>
+
+            <!-- Middle Content Row: Caliber/FireMode Info (Left) + Big Ammo Count (Right) -->
+            <ui:VisualElement name="AmmoMiddleRow">
+                <ui:VisualElement name="CaliberInfoColumn">
+                    <ui:VisualElement name="CaliberBadge">
+                        <ui:Label name="CaliberLabel" text="9MM NATO" />
+                        <ui:Label name="FireModeLabel" text="AUTO" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="BulletGauge" />
+                </ui:VisualElement>
+                <ui:VisualElement name="AmmoMainRow">
+                    <ui:VisualElement name="AmmoPunchRoot">
+                        <ui:Label name="AmmoValue" text="30" />
+                    </ui:VisualElement>
+                    <ui:Label name="AmmoDivider" text="/" />
+                    <ui:Label name="AmmoReserve" text="&#x221E;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Bottom Row: Heat Track -->
             <ui:VisualElement name="HeatBarTrack">
                 <ui:VisualElement name="HeatBarFill" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <!-- Progression -->
-        <ui:VisualElement name="ProgressionCluster">
-            <ui:Label name="ProgressionLabel" text="LEVEL" />
-            <ui:VisualElement name="XpBarRow">
-                <ui:VisualElement name="XpTrack">
-                    <ui:VisualElement name="XpGhost" />
-                    <ui:VisualElement name="XpFill" />
-                </ui:VisualElement>
-                <ui:Label name="LevelValue" text="LV 1" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-        <!-- Weapons -->
-        <ui:VisualElement name="WeaponIndicator">
-            <ui:Label name="WeaponName" text="" />
-            <ui:VisualElement name="WeaponIcon" />
-        </ui:VisualElement>
         <ui:VisualElement name="ReloadIndicator">
             <ui:VisualElement name="ReloadRing" />
+            <ui:Label name="ReloadPercent" text="0%" />
+            <ui:Label name="ReloadText" text="RELOADING" />
         </ui:VisualElement>
-        <ui:VisualElement name="WeaponInventoryCluster" />
         <!-- Compass -->
         <ui:VisualElement name="CompassViewport">
             <ui:VisualElement name="CompassStrip" />

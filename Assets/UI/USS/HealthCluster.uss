@@ -3,44 +3,93 @@
 
 #HealthCluster {
     position: absolute;
-    left: var(--hud-cluster-left, 48px);
-    bottom: var(--hud-cluster-bottom, 48px);
+    left: 20px;
+    bottom: 20px;
     flex-direction: column;
-    width: var(--hud-cluster-width, 470px);
-    padding: var(--hud-cluster-padding-v, 10px) var(--hud-cluster-padding-h, 20px) var(--hud-bottom-margin, 16px);
-    background-color: rgba(16, 22, 30, 0.8);
+    width: 320px;
+    padding: 10px 14px;
+    background-color: transparent;
+    border-width: 0;
+    border-radius: 0;
+}
+
+#HealthHeaderRow {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.header-badge {
+    flex-direction: row;
+    align-items: center;
+    padding: 3px 8px;
+    background-color: rgba(14, 18, 24, 0.6);
     border-width: 1px;
-    border-color: rgba(217, 199, 115, 0.18);
-    border-radius: var(--radius-s, 8px);
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    border-color: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
 }
 
-#HealthCluster.low {
-    background-color: rgba(60, 15, 15, 0.88);
-    border-color: var(--color-health-low, rgb(184, 31, 31));
+.level-badge {
+    border-color: rgba(217, 199, 115, 0.3);
 }
 
-#HealthLabel {
-    font-size: var(--fs-m, 18px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
-    color: var(--color-text-gold, rgba(204, 191, 153, 0.85));
-    height: 24px;
-    flex-shrink: 0;
-    margin-bottom: var(--space-xs, 4px);
+.health-badge {
+    border-color: rgba(229, 72, 60, 0.3);
+}
+
+.header-badge-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.level-icon {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_star.svg");
+    -unity-background-image-tint-color: var(--color-accent-gold, rgb(217, 199, 115));
+}
+
+.health-icon {
+    background-image: url("project://database/Assets/UI/Resources/Icons/icon_target.svg");
+    -unity-background-image-tint-color: var(--color-accent-red, rgb(229, 72, 60));
+}
+
+#LevelValue {
+    font-size: 14px;
+    -unity-font-definition: var(--font-body-sdf);
+    -unity-font-style: bold;
+    color: var(--color-accent-gold, rgb(217, 199, 115));
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+    margin: 0;
+    padding: 0;
+}
+
+#HealthValue {
+    font-size: 14px;
+    -unity-font-definition: var(--font-body-sdf);
+    -unity-font-style: bold;
+    color: rgb(235, 224, 199);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+    margin: 0;
+    padding: 0;
 }
 
 #HealthBarRow {
     flex-direction: row;
     align-items: center;
+    width: 100%;
+    margin-bottom: 4px;
 }
 
 #HealthTrack {
     position: relative;
-    width: var(--track-width, 330px);
-    height: var(--track-height-sm, 26px);
+    width: 100%;
+    height: 18px;
     flex-shrink: 0;
-    margin-right: var(--space-s, 8px);
-    background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
+    background-color: rgba(20, 25, 32, 0.9);
+    border-radius: 2px;
     overflow: hidden;
 }
 
@@ -64,26 +113,18 @@
     transition: width var(--transition-fast, 0.15s) ease-out, background-color var(--transition-fast, 0.15s) ease-out;
 }
 
-#HealthValue {
-    font-size: var(--fs-value-xl, 44px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
-    color: var(--color-ammo-normal, rgb(235, 224, 199));
-    width: var(--value-width, 104px);
-    height: var(--value-height, 56px);
-    flex-shrink: 0;
-    -unity-text-align: middle-left;
-}
-
 #ShieldRoot {
     flex-shrink: 0;
-    margin-top: 6px;
+    width: 100%;
+    margin-bottom: 4px;
 }
 
 #ShieldTrack {
     position: relative;
-    width: var(--track-width, 330px);
-    height: var(--track-height-xs, 12px);
-    background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
+    width: 100%;
+    height: 8px;
+    background-color: rgba(20, 25, 32, 0.9);
+    border-radius: 2px;
     overflow: hidden;
 }
 
@@ -95,4 +136,13 @@
     height: 100%;
     background-color: var(--color-shield, rgb(115, 199, 242));
     transition: width var(--transition-fast, 0.15s) ease-out;
+}
+
+.track-notches-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    picking-mode: Ignore;
 }

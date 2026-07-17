@@ -51,6 +51,7 @@ public class CrosshairWidget : MonoBehaviour
             _container = doc.rootVisualElement.Q("Crosshair");
             if (_container == null) { enabled = false; return; }
             Build();
+            _container.generateVisualContent += OnGenerateCrosshairOverlay;
             _initialized = true;
         }
         StartCoroutine(Bind());
@@ -81,6 +82,7 @@ public class CrosshairWidget : MonoBehaviour
     private void OnDisable()
     {
         if (_adapter != null) _adapter.OnFired -= HandleFired;
+        if (_container != null) _container.generateVisualContent -= OnGenerateCrosshairOverlay;
         StopAllCoroutines();
     }
 
@@ -127,7 +129,7 @@ public class CrosshairWidget : MonoBehaviour
         Set(_bars[3],  noWeapon || a.CHLeft,      -halfGap,0f,       L,  t,   spotted, cx, cy);
 
         float d = Mathf.Min(t, L);
-        Set(_bars[4],  a != null && a.HasWeapon && a.CHCenter, 0f, 0f, d, d, spotted, cx, cy);
+        Set(_bars[4],  false, 0f, 0f, d, d, spotted, cx, cy); // Rendered via C# Painter2D Diamond
 
         bool tl = a != null && a.HasWeapon && a.CHTopLeft;
         bool tr = a != null && a.HasWeapon && a.CHTopRight;
@@ -144,6 +146,8 @@ public class CrosshairWidget : MonoBehaviour
 
         bool hidden = a != null && (a.IsDead || (a.IsAiming && removeCrosshairOnAiming));
         _container.style.opacity = Mathf.MoveTowards(_container.style.opacity.value, hidden ? 0f : 1f, 12f * dt);
+
+        _container.MarkDirtyRepaint();
     }
 
     private void Set(VisualElement bar, bool active, float posX, float posY, float w, float h, bool enemy, float cx, float cy)
@@ -155,5 +159,76 @@ public class CrosshairWidget : MonoBehaviour
         bar.style.width = w;
         bar.style.height = h;
         bar.EnableInClassList("crosshair-bar--enemy", enemy);
+    }
+
+    private void OnGenerateCrosshairOverlay(MeshGenerationContext ctx)
+    {
+        var painter = ctx.painter2D;
+        float width = _container.resolvedStyle.width;
+        float height = _container.resolvedStyle.height;
+        if (width <= 0 || height <= 0) return;
+
+        Vector2 center = new Vector2(width / 2f, height / 2f);
+        bool spotted = _adapter != null && _adapter.EnemySpotted;
+
+        Color primaryColor = spotted ? new Color(255f / 255f, 42f / 255f, 42f / 255f, 0.95f)
+                                     : new Color(0f / 255f, 255f / 255f, 204f / 255f, 0.95f);
+        Color shadowColor = new Color(6f / 255f, 12f / 255f, 18f / 255f, 0.9f);
+
+        float spread = _spread;
+
+        // 1. Draw 4 Outer Range Finder Radial Ticks (at 45°, 135°, 225°, 315°)
+        float outerRadius = spread + 18f;
+        float tickLen = 6f;
+
+        for (int i = 0; i < 4; i++)
+        {
+            float angleDeg = 45f + i * 90f;
+            float rad = angleDeg * Mathf.Deg2Rad;
+            Vector2 dir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+            Vector2 p1 = center + dir * outerRadius;
+            Vector2 p2 = center + dir * (outerRadius + tickLen);
+
+            // Shadow outline
+            painter.strokeColor = shadowColor;
+            painter.lineWidth = 3.5f;
+            painter.BeginPath();
+            painter.MoveTo(p1);
+            painter.LineTo(p2);
+            painter.Stroke();
+
+            // Neon stroke
+            painter.strokeColor = primaryColor;
+            painter.lineWidth = 1.8f;
+            painter.BeginPath();
+            painter.MoveTo(p1);
+            painter.LineTo(p2);
+            painter.Stroke();
+        }
+
+        // 2. Draw Center Diamond Reticle (45-degree rotated square dot)
+        if (_adapter == null || !_adapter.HasWeapon || _adapter.CHCenter)
+        {
+            float dSize = 3.5f;
+            // Shadow Diamond
+            painter.fillColor = shadowColor;
+            painter.BeginPath();
+            painter.MoveTo(center + new Vector2(0, -dSize - 1.2f));
+            painter.LineTo(center + new Vector2(dSize + 1.2f, 0));
+            painter.LineTo(center + new Vector2(0, dSize + 1.2f));
+            painter.LineTo(center + new Vector2(-dSize - 1.2f, 0));
+            painter.ClosePath();
+            painter.Fill();
+
+            // Neon Diamond
+            painter.fillColor = primaryColor;
+            painter.BeginPath();
+            painter.MoveTo(center + new Vector2(0, -dSize));
+            painter.LineTo(center + new Vector2(dSize, 0));
+            painter.LineTo(center + new Vector2(0, dSize));
+            painter.LineTo(center + new Vector2(-dSize, 0));
+            painter.ClosePath();
+            painter.Fill();
+        }
     }
 }

@@ -3,82 +3,133 @@
 
 #AmmoCluster {
     position: absolute;
-    right: var(--hud-cluster-right, 48px);
-    bottom: var(--hud-cluster-bottom, 48px);
+    right: 20px;
+    bottom: 20px;
     flex-direction: column;
-    align-items: flex-end;
-    width: 360px;
-    padding: var(--space-m, 12px) var(--hud-cluster-padding-h, 20px) var(--space-m, 12px);
-    background-color: rgba(16, 22, 30, 0.8);
-    border-width: 1px;
-    border-color: rgba(217, 199, 115, 0.18);
-    border-radius: var(--radius-s, 8px);
+    width: 320px;
+    padding: 10px 14px;
+    background-color: transparent;
+    border-width: 0;
+    border-radius: 0;
 }
 
-#AmmoLabel {
-    font-size: var(--fs-m, 18px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
-    color: var(--color-text-gold, rgba(204, 191, 153, 0.85));
-    height: 24px;
-    flex-shrink: 0;
-    -unity-text-align: middle-right;
+#AmmoHeaderRow {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
+    margin-bottom: 6px;
 }
 
-#AmmoValueRow {
-    position: relative;
+#AmmoMiddleRow {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+#CaliberInfoColumn {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#CaliberBadge {
     flex-direction: row;
     align-items: center;
-    justify-content: flex-end;
-    height: 90px;
-    width: 100%;
+    padding: 3px 8px;
+    background-color: rgba(14, 18, 24, 0.6);
+    border-width: 1px;
+    border-color: rgba(217, 199, 115, 0.3);
+    border-radius: 4px;
+    margin-bottom: 4px;
 }
 
-#AmmoValueGradient {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--color-accent-gold, rgba(217, 199, 115, 0.15));
+#CaliberLabel {
+    font-size: 11px;
+    -unity-font-definition: var(--font-body-sdf);
+    -unity-font-style: bold;
+    color: var(--color-accent-gold, rgb(217, 199, 115));
+    letter-spacing: 1px;
+    margin: 0;
+    padding: 0;
+    margin-right: 6px;
+}
+
+#FireModeLabel {
+    font-size: 10px;
+    -unity-font-definition: var(--font-body-sdf);
+    -unity-font-style: bold;
+    color: rgb(235, 224, 199);
+    background-color: rgba(217, 199, 115, 0.2);
+    padding: 1px 4px;
+    border-radius: 2px;
+    margin: 0;
+}
+
+#BulletGauge {
+    height: 8px;
+    width: 100px;
+    position: relative;
+}
+
+#AmmoMainRow {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: baseline;
 }
 
 #AmmoPunchRoot {
-    flex-grow: 1;
-    height: 100%;
     flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
+    align-items: baseline;
+    transition-property: scale;
+    transition-duration: 0.12s;
+    transition-timing-function: ease-out;
 }
 
 #AmmoValue {
-    font-size: var(--fs-value-xl, 44px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
-    color: var(--color-ammo-normal, rgb(235, 224, 199));
-    -unity-text-align: middle-right;
-    flex-grow: 0;
-    height: auto;
+    font-size: 38px;
+    -unity-font-definition: var(--font-body-sdf);
+    -unity-font-style: bold;
+    color: rgb(235, 224, 199);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+    margin: 0;
+    padding: 0;
+    transition-property: color;
+    transition-duration: 0.35s;
+    transition-timing-function: ease-out;
+}
+
+#AmmoCluster.low-ammo #AmmoValue {
+    color: var(--color-ammo-low, rgb(229, 72, 60));
+}
+
+#AmmoDivider {
+    font-size: 24px;
+    -unity-font-definition: var(--font-body-sdf);
+    color: rgba(204, 191, 153, 0.6);
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 #AmmoReserve {
-    font-size: var(--fs-xxl, 36px);
-    -unity-font-definition: var(--font-body, resource("Fonts/Outfit-SemiBold SDF"));
-    color: var(--color-text-gold, rgba(191, 184, 158, 0.9));
-    height: 34px;
-    flex-shrink: 0;
-    -unity-text-align: middle-right;
-    width: 100%;
-    margin-top: var(--space-2xs, 2px);
+    font-size: 22px;
+    -unity-font-definition: var(--font-body-sdf);
+    -unity-font-style: bold;
+    color: var(--color-accent-gold, rgb(217, 199, 115));
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+    margin: 0;
+    padding: 0;
 }
 
 #HeatBarTrack {
     position: relative;
     width: 100%;
-    height: var(--track-heat-height, 8px);
-    flex-shrink: 0;
-    margin-top: var(--space-xs, 4px);
-    background-color: var(--color-surface-top, rgba(36, 31, 31, 0.9));
+    height: 8px;
+    background-color: rgba(20, 25, 32, 0.9);
+    border-radius: 2px;
     overflow: hidden;
+    margin-top: 4px;
 }
 
 #HeatBarFill {
@@ -87,5 +138,5 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--color-health-full, rgb(217, 199, 115));
+    background-color: var(--color-accent-red, rgb(229, 72, 60));
 }

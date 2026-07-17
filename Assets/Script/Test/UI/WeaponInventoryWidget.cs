@@ -76,8 +76,7 @@ public class WeaponInventoryWidget : MonoBehaviour
         {
             if (_slots[i].style.display == DisplayStyle.None) continue;
             bool sel = i == index;
-            _slots[i].style.backgroundColor = sel ? _selected : _slotBg;
-            _slots[i].style.scale = sel ? new Scale(Vector3.one * 1.1f) : new Scale(Vector3.one);
+            _slots[i].EnableInClassList("selected", sel);
         }
     }
 

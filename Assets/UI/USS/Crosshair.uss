@@ -1,4 +1,15 @@
+/* ===== Crosshair.uss ===== */
 @import url("Shared.uss");
+
+#Crosshair {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    opacity: 1;
+}
 
 .crosshair-container {
     position: absolute;
@@ -7,13 +18,18 @@
     top: 0;
     bottom: 0;
     overflow: hidden;
-    opacity: var(--opacity-full, 1);
+    opacity: 1;
 }
 
 .crosshair-bar {
     position: absolute;
-    background-color: var(--color-text-primary);
-    transition: translate var(--transition-fast, 0.08s) ease-out, width var(--transition-fast, 0.08s) ease-out, height var(--transition-fast, 0.08s) ease-out;
+    background-color: rgb(0, 255, 204);
+    border-width: 1px;
+    border-color: rgba(6, 12, 18, 0.95);
+    border-radius: 1px;
+    transition-property: translate, width, height, background-color, border-color, opacity;
+    transition-duration: 0.08s;
+    transition-timing-function: ease-out;
 }
 
 .crosshair-bar--hidden {
@@ -21,5 +37,6 @@
 }
 
 .crosshair-bar--enemy {
-    background-color: var(--color-danger-top, rgb(220, 50, 50));
+    background-color: rgb(255, 42, 42);
+    border-color: rgba(40, 6, 6, 0.95);
 }

@@ -9,7 +9,6 @@ public class WeaponIndicatorWidget : MonoBehaviour
     private VisualElement _weaponIcon;
     private VisualElement _root;
     private float _currentOpacity = 1f;
-    private float _targetOpacity = 1f;
 
     private void Awake()
     {
@@ -36,23 +35,36 @@ public class WeaponIndicatorWidget : MonoBehaviour
         if (a != null) a.OnWeaponChanged -= OnWeapon;
     }
 
+    private float _slideOffset = 0f;
+
     private void OnWeapon(string n, Sprite icon)
     {
-        _weaponName.text = string.IsNullOrEmpty(n) ? string.Empty : n.ToUpperInvariant();
-        if (icon != null)
-            _weaponIcon.style.backgroundImage = new StyleBackground(icon);
-        else
-            _weaponIcon.style.backgroundImage = null;
+        if (_weaponName != null) _weaponName.text = string.IsNullOrEmpty(n) ? string.Empty : n.ToUpperInvariant();
+        if (_weaponIcon != null)
+        {
+            if (icon != null) _weaponIcon.style.backgroundImage = new StyleBackground(icon);
+            else _weaponIcon.style.backgroundImage = null;
+        }
 
-        _currentOpacity = 0.25f;
-        _targetOpacity = 1f;
-        _root.style.opacity = _currentOpacity;
+        _currentOpacity = 0.1f;
+        _slideOffset = -15f;
+        if (_root != null)
+        {
+            _root.style.opacity = _currentOpacity;
+            _root.style.translate = new Translate(_slideOffset, 0f);
+        }
     }
 
     private void Update()
     {
-        if (_currentOpacity >= _targetOpacity) return;
-        _currentOpacity = Mathf.MoveTowards(_currentOpacity, _targetOpacity, fadeSpeed * Time.unscaledDeltaTime);
-        _root.style.opacity = _currentOpacity;
+        if (_root == null) return;
+        if (_currentOpacity < 1f || Mathf.Abs(_slideOffset) > 0.05f)
+        {
+            float dt = Time.unscaledDeltaTime;
+            _currentOpacity = Mathf.MoveTowards(_currentOpacity, 1f, fadeSpeed * dt);
+            _slideOffset = Mathf.Lerp(_slideOffset, 0f, 1f - Mathf.Exp(-12f * dt));
+            _root.style.opacity = _currentOpacity;
+            _root.style.translate = new Translate(_slideOffset, 0f);
+        }
     }
 }
