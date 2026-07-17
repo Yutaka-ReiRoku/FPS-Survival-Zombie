@@ -52,7 +52,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     public float sightEyeHeight = 1.5f;
 
     [Header("Attack")]
-    public float attackRange = 1.5f;
+    public float attackRange = 2.0f;
     public float attackCooldown = 2.5f;
     public float attackDamage = 30f;
     [Tooltip("Delay after triggering Attack before applying damage. Now driven by AnimationEvent 'WitchAttackHit' on the Punching clip; this is a fallback if the event is missing.")]
@@ -210,7 +210,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
             agent.speed = runSpeed;
             agent.acceleration = 22f; // tuned for smooth charge without jerky startups
             agent.angularSpeed = 360f;
-            agent.stoppingDistance = attackRange * 0.5f;
+            agent.stoppingDistance = attackRange * 0.8f;
             agent.updateRotation = false;
             agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
             agent.avoidancePriority = 8; // Mini-boss — high priority, regular zombies yield.
@@ -338,6 +338,16 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         if (animator != null)
         {
             float targetAnimSpeed = agent != null && agent.isOnNavMesh ? agent.velocity.magnitude / runSpeed : 0f;
+
+            // When holding position inside attack range (waiting for cooldown),
+            // the agent is stopped so velocity=0 which would drive the Speed
+            // parameter to 0. The Run state uses Speed as its playback speed
+            // (speedParameter="Speed"), so Speed=0 freezes the Run animation
+            // on a single frame. Keep a small minimum so the Witch still
+            // shifts in place instead of locking up.
+            if (state == WitchState.Chasing && !isAttacking && targetAnimSpeed < 0.2f)
+                targetAnimSpeed = 0.2f;
+
             animator.SetFloat(SpeedHash, targetAnimSpeed, animSpeedDamping, Time.deltaTime);
 
             // Frenetic chase animation: scale playback speed slightly faster when chasing
@@ -434,11 +444,17 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         // Play cry audio as a looping clip so audioSource.Stop() can cut it.
         // Volume is scaled by distance to the player so the cry is only
         // audible within cryMaxDistance around the Witch's resting point.
+        // NOTE: distance falloff MUST be applied BEFORE Play() so the cry
+        // does not blip at full volume for one frame when the game starts
+        // with the player far away.
+        float t = Mathf.InverseLerp(cryMaxDistance, cryMinDistance, distance);
+        float targetVolume = cryBaseVolume * Mathf.Clamp01(t);
+
         if (!cryAudioPlaying && cryClip != null)
         {
             audioSource.clip = cryClip;
             audioSource.loop = true;
-            audioSource.volume = cryBaseVolume;
+            audioSource.volume = targetVolume;
             audioSource.Play();
             cryAudioPlaying = true;
         }
@@ -446,8 +462,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         // Distance-based volume falloff: full at cryMinDistance, silent at cryMaxDistance
         if (cryAudioPlaying)
         {
-            float t = Mathf.InverseLerp(cryMaxDistance, cryMinDistance, distance);
-            audioSource.volume = cryBaseVolume * Mathf.Clamp01(t);
+            audioSource.volume = targetVolume;
         }
 
         // Provoke by proximity
@@ -485,40 +500,49 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
             return;
         }
 
-        // Chase: re-path responsively
         if (!isAttacking)
         {
-            CancelStop();
-
-            _pathTimer += Time.deltaTime;
-            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-            bool canRepath = agent != null && !agent.pathPending &&
-                (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
-
-            // Dynamic re-path interval based on distance and LOS
-            bool hasLOS = HasLineOfSight();
-            float dynamicInterval = Mathf.Lerp(0.15f, 1.0f, Mathf.Clamp01((distance - 5f) / 15f));
-            float dynamicThreshold = Mathf.Lerp(1.0f, 5.0f, Mathf.Clamp01((distance - 5f) / 15f));
-            if (!hasLOS)
+            if (distance <= attackRange)
             {
-                dynamicInterval *= 2.0f;
-                dynamicThreshold *= 1.5f;
-            }
-
-            if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
-            {
-                SetDestinationRobust(target.position);
-                _lastSetDestination = target.position;
-                _pathTimer = 0f;
-            }
-
-            if (locomotion != null)
-                locomotion.HandleStuckDetection(distance, attackRange * 0.5f);
-
-            if (distance > attackRange)
-                FaceMovementDirection();
-            else
+                // Inside attack range but not ready to attack yet (cooldown):
+                // hold position and face the player. Do NOT CancelStop or repath,
+                // otherwise the agent shuffles toward the player between attacks
+                // and physically pushes the player.
+                RequestStop();
                 FaceTarget();
+            }
+            else
+            {
+                // Player is outside attack range — resume chasing.
+                CancelStop();
+
+                _pathTimer += Time.deltaTime;
+                float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+                bool canRepath = agent != null && !agent.pathPending &&
+                    (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+
+                // Dynamic re-path interval based on distance and LOS
+                bool hasLOS = HasLineOfSight();
+                float dynamicInterval = Mathf.Lerp(0.15f, 1.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                float dynamicThreshold = Mathf.Lerp(1.0f, 5.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                if (!hasLOS)
+                {
+                    dynamicInterval *= 2.0f;
+                    dynamicThreshold *= 1.5f;
+                }
+
+                if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
+                {
+                    SetDestinationRobust(target.position);
+                    _lastSetDestination = target.position;
+                    _pathTimer = 0f;
+                }
+
+                if (locomotion != null)
+                    locomotion.HandleStuckDetection(distance, attackRange * 0.5f);
+
+                FaceMovementDirection();
+            }
         }
     }
 

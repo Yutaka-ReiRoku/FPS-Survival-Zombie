@@ -51,13 +51,13 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     public float sightEyeHeight = 1.5f;
 
     [Header("Attack")]
-    public float attackRange = 2f;
+    public float attackRange = 2.5f;
     public float attackCooldown = 2.5f;
     public float attackDamage = 30f;
     [Tooltip("Delay after triggering Attack before applying damage. Now driven by AnimationEvent 'BigGuyAttackHit' on the Mutant Punch clip; this is a fallback if the event is missing.")]
     public float damageApplyDelay = 1.0f;
-    [Tooltip("How long the attack animation plays before returning to Walk (seconds). Should match the Mutant Punch clip length (~1.1s) plus a small buffer. If this is shorter than attackCooldown, the Big Guy walks between attacks.")]
-    public float attackAnimDuration = 1.2f;
+    [Tooltip("How long the attack animation plays before returning to Walk (seconds). Should be slightly shorter than the Mutant Punch clip length (~1.1s) so the Attack→Walk transition fires before the clip freezes on its last frame. If this is shorter than attackCooldown, the Big Guy walks between attacks.")]
+    public float attackAnimDuration = 1.0f;
 
     [Header("Scream")]
     [Tooltip("Duration of the roar before starting to walk toward the player (seconds). Matches the Zombie Scream clip length (2.27s).")]
@@ -190,7 +190,7 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             agent.speed = walkSpeed;
             agent.acceleration = 10f; // lower accel for a heavy, smooth start/stop
             agent.angularSpeed = 120f; // slower, smoother turning for a big guy
-            agent.stoppingDistance = attackRange * 0.5f;
+            agent.stoppingDistance = attackRange * 0.8f;
             agent.updateRotation = false;
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
             agent.avoidancePriority = 10; // Boss gets high priority so regular zombies yield
@@ -299,6 +299,16 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         if (animator != null)
         {
             float targetAnimSpeed = agent != null && agent.isOnNavMesh ? agent.velocity.magnitude / walkSpeed : 0f;
+
+            // When holding position inside attack range (waiting for cooldown),
+            // the agent is stopped so velocity=0 which would drive the Speed
+            // parameter to 0. The Walk state uses Speed as its playback speed
+            // (speedParameter="Speed"), so Speed=0 freezes the Walk animation
+            // on a single frame. Keep a small minimum so Big Guy still shuffles
+            // in place menacingly instead of locking up.
+            if (state == BigGuyState.Chasing && !isAttacking && targetAnimSpeed < 0.2f)
+                targetAnimSpeed = 0.2f;
+
             animator.SetFloat(SpeedHash, targetAnimSpeed, animSpeedDamping, Time.deltaTime);
 
             // Heavy chase animation: scale playback speed slightly slower when
@@ -428,40 +438,49 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             return;
         }
 
-        // Chase: re-path responsively
         if (!isAttacking)
         {
-            CancelStop();
-
-            _pathTimer += Time.deltaTime;
-            float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
-            bool canRepath = agent != null && !agent.pathPending &&
-                (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
-
-            // Dynamic re-path interval based on distance and LOS
-            bool hasLOS = HasLineOfSight();
-            float dynamicInterval = Mathf.Lerp(0.2f, 1.5f, Mathf.Clamp01((distance - 5f) / 15f));
-            float dynamicThreshold = Mathf.Lerp(1.0f, 5.0f, Mathf.Clamp01((distance - 5f) / 15f));
-            if (!hasLOS)
+            if (distance <= attackRange)
             {
-                dynamicInterval *= 2.0f;
-                dynamicThreshold *= 1.5f;
-            }
-
-            if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
-            {
-                SetDestinationRobust(target.position);
-                _lastSetDestination = target.position;
-                _pathTimer = 0f;
-            }
-
-            if (locomotion != null)
-                locomotion.HandleStuckDetection(distance, attackRange * 0.5f);
-
-            if (distance > attackRange)
-                FaceMovementDirection();
-            else
+                // Inside attack range but not ready to attack yet (cooldown):
+                // hold position and face the player. Do NOT CancelStop or repath,
+                // otherwise the agent shuffles toward the player between attacks
+                // and physically pushes the player.
+                RequestStop();
                 FaceTarget();
+            }
+            else
+            {
+                // Player is outside attack range — resume chasing.
+                CancelStop();
+
+                _pathTimer += Time.deltaTime;
+                float distToLastDest = Vector3.Distance(target.position, _lastSetDestination);
+                bool canRepath = agent != null && !agent.pathPending &&
+                    (locomotion == null || !locomotion.IsRecoveringFromStuck || !agent.hasPath);
+
+                // Dynamic re-path interval based on distance and LOS
+                bool hasLOS = HasLineOfSight();
+                float dynamicInterval = Mathf.Lerp(0.2f, 1.5f, Mathf.Clamp01((distance - 5f) / 15f));
+                float dynamicThreshold = Mathf.Lerp(1.0f, 5.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                if (!hasLOS)
+                {
+                    dynamicInterval *= 2.0f;
+                    dynamicThreshold *= 1.5f;
+                }
+
+                if (canRepath && (_pathTimer >= dynamicInterval || distToLastDest > dynamicThreshold))
+                {
+                    SetDestinationRobust(target.position);
+                    _lastSetDestination = target.position;
+                    _pathTimer = 0f;
+                }
+
+                if (locomotion != null)
+                    locomotion.HandleStuckDetection(distance, attackRange * 0.5f);
+
+                FaceMovementDirection();
+            }
         }
     }
 
