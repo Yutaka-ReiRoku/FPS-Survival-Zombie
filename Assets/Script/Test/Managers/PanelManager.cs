@@ -113,8 +113,8 @@ public class PanelManager : MonoBehaviour
                 cowsins.UIController.Instance.UnlockMouse();
             else
             {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                UnityEngine.Cursor.lockState = CursorLockMode.None;
+                UnityEngine.Cursor.visible = true;
             }
 
             if (playerControl != null)
@@ -150,8 +150,8 @@ public class PanelManager : MonoBehaviour
                 cowsins.UIController.Instance.LockMouse();
             else
             {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
+                UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+                UnityEngine.Cursor.visible = false;
             }
 
 #if UNITY_EDITOR
@@ -223,6 +223,13 @@ public class PanelManager : MonoBehaviour
         {
             _transitioningPanels.Remove(name);
         }
+    }
+
+    private IEnumerator RegisterTransition(string name, float duration)
+    {
+        RegisterPanelTransitioning(name, true);
+        yield return new WaitForSecondsRealtime(duration);
+        RegisterPanelTransitioning(name, false);
     }
 
     public bool IsAnyPanelActive()
