@@ -331,12 +331,25 @@ public class PauseManager : MonoBehaviour
         if (GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver)
             return;
 
+        if (IsAnyCutscenePlaying())
+            return;
+
         var kb = Keyboard.current;
         if (kb != null && kb.escapeKey.wasPressedThisFrame)
         {
             Debug.Log("[PauseManager Debug] Escape key pressed (detected in Update)");
             HandleEscapeInput();
         }
+    }
+
+    private bool IsAnyCutscenePlaying()
+    {
+        var players = FindObjectsByType<CutscenePlayer>(FindObjectsSortMode.None);
+        foreach (var p in players)
+        {
+            if (p != null && p.IsPlaying) return true;
+        }
+        return false;
     }
 
     private void HandleEscapeInput()

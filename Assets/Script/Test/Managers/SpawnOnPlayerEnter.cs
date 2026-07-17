@@ -31,6 +31,8 @@ public class SpawnOnPlayerEnter : MonoBehaviour
     private bool _fired;
     private static Transform _runtimeContainer;
 
+
+
     private void Reset()
     {
         var c = GetComponent<Collider>();

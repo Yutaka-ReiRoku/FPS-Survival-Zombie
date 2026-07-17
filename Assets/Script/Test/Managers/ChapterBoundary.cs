@@ -46,6 +46,9 @@ public class ChapterBoundary : MonoBehaviour
     /// <summary>Last known forward direction of the player while inside (for teleport-back orientation).</summary>
     private Quaternion _lastInsideRot;
 
+    private float _checkTimer = 0f;
+    private bool _isPlayerInside = false;
+
     private GameObject _cachedPlayer;
     private Rigidbody _cachedPlayerRb;
 
@@ -121,6 +124,7 @@ public class ChapterBoundary : MonoBehaviour
         // activate spawners and pending quest.
         if (player != null && _triggerCol != null && _triggerCol.bounds.Contains(player.transform.position))
         {
+            _isPlayerInside = true;
             SetSpawnersActive(true);
             if (sm != null && sm.CurrentChapter == chapter && sm.PendingChapterEntry)
             {
@@ -164,18 +168,63 @@ public class ChapterBoundary : MonoBehaviour
         // Safety: if externally locked and the player is somehow outside the
         // boundary (e.g. respawned outside after dying during waves), teleport
         // them back inside. This catches edge cases that OnTriggerExit might miss.
-        if (!_externallyLocked || _triggerCol == null) return;
-        var player = GetPlayer();
-        if (player == null) return;
-        if (!_triggerCol.bounds.Contains(player.transform.position))
+        if (_externallyLocked && _triggerCol != null)
         {
-            Debug.Log($"[ChapterBoundary] Ch{chapter} player outside during external lock — teleporting back.");
-            if (_cachedPlayerRb != null)
+            var player = GetPlayer();
+            if (player != null)
             {
-                _cachedPlayerRb.linearVelocity = Vector3.zero;
-                _cachedPlayerRb.angularVelocity = Vector3.zero;
+                if (!_triggerCol.bounds.Contains(player.transform.position))
+                {
+                    Debug.Log($"[ChapterBoundary] Ch{chapter} player outside during external lock — teleporting back.");
+                    if (_cachedPlayerRb != null)
+                    {
+                        _cachedPlayerRb.linearVelocity = Vector3.zero;
+                        _cachedPlayerRb.angularVelocity = Vector3.zero;
+                    }
+                    player.transform.position = _lastInsidePos != Vector3.zero ? _lastInsidePos : transform.position;
+                }
             }
-            player.transform.position = _lastInsidePos != Vector3.zero ? _lastInsidePos : transform.position;
+        }
+
+        // Periodically verify the player's presence in the trigger volume to heal desync bugs
+        _checkTimer += Time.unscaledDeltaTime;
+        if (_checkTimer >= 1f)
+        {
+            _checkTimer = 0f;
+            var player = GetPlayer();
+            if (player != null && _triggerCol != null)
+            {
+                bool isInside = _triggerCol.bounds.Contains(player.transform.position);
+                if (isInside != _isPlayerInside)
+                {
+                    _isPlayerInside = isInside;
+                    if (_isPlayerInside)
+                    {
+                        // Enable spawners if the chapter is current
+                        var sm = StoryManager.Instance;
+                        if (!_locked && (sm == null || chapter <= sm.CurrentChapter))
+                        {
+                            SetSpawnersActive(true);
+                            if (sm != null && sm.CurrentChapter == chapter && sm.PendingChapterEntry)
+                            {
+                                sm.ActivatePendingChapterQuest();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Disable spawners when player leaves
+                        SetSpawnersActive(false);
+                        var sm = StoryManager.Instance;
+                        bool done = sm != null && (sm.CurrentChapter > chapter || IsChapterComplete(sm));
+                        if (done)
+                        {
+                            _locked = true;
+                            _wallCol.enabled = true;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -327,6 +376,34 @@ public class ChapterBoundary : MonoBehaviour
         foreach (var s in spawners)
         {
             if (s != null) s.enabled = active;
+        }
+    }
+
+    public void ReevaluateState(Vector3 playerPosition)
+    {
+        var sm = StoryManager.Instance;
+        if (_locked || (sm != null && chapter > sm.CurrentChapter))
+        {
+            _isPlayerInside = false;
+            SetSpawnersActive(false);
+            return;
+        }
+
+        if (_triggerCol != null && _triggerCol.bounds.Contains(playerPosition))
+        {
+            _isPlayerInside = true;
+            SetSpawnersActive(true);
+            if (sm != null && sm.CurrentChapter == chapter && sm.PendingChapterEntry)
+            {
+                sm.ActivatePendingChapterQuest();
+            }
+            Debug.Log($"[ChapterBoundary] Ch{chapter} ReevaluateState: Player is inside. Activated spawners.");
+        }
+        else
+        {
+            _isPlayerInside = false;
+            SetSpawnersActive(false);
+            Debug.Log($"[ChapterBoundary] Ch{chapter} ReevaluateState: Player is outside. Deactivated spawners.");
         }
     }
 

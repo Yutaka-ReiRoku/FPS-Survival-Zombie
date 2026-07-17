@@ -34,6 +34,8 @@ public class PanelManager : MonoBehaviour
     private bool _hudCurrentlyVisibleState = true;
     private bool _firstFrameSet = false;
 
+    public bool forceFreezeTimeScale = false;
+
     public void OpenPanel(string name, VisualElement panel, VisualElement card, System.Action closeCallback = null)
     {
         _desiredActiveStates[name] = true;
@@ -140,7 +142,10 @@ public class PanelManager : MonoBehaviour
         else
         {
             cowsins.PauseMenu.isPaused = false;
-            Time.timeScale = 1f;
+            if (!forceFreezeTimeScale)
+            {
+                Time.timeScale = 1f;
+            }
 
             if (playerControl != null)
                 playerControl.GrantControl();

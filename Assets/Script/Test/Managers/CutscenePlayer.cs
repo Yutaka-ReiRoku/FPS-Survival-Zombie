@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
+using cowsins;
 
 public class CutscenePlayer : MonoBehaviour
 {
@@ -20,6 +21,10 @@ public class CutscenePlayer : MonoBehaviour
     public Color scrim = new Color(0f, 0f, 0f, 0.85f);
     public Color titleColor = new Color(0.85f, 0.78f, 0.45f, 1f);
     public Color bodyColor = new Color(0.92f, 0.92f, 0.92f, 1f);
+
+    [Header("Audio")]
+    [Tooltip("Sound clip played during text typing. If left empty, will dynamically try to fetch UI Hover SFX.")]
+    public AudioClip typeSFX;
 
     private UIDocument _doc;
     private VisualElement _root;
@@ -91,14 +96,29 @@ public class CutscenePlayer : MonoBehaviour
 
     private IEnumerator PlayRoutine(System.Action onComplete)
     {
-        _title.text = string.IsNullOrEmpty(title) ? "" : title.ToUpper();
-        _body.text = body;
+        // 1. Clear text and prepare audio SFX
+        _title.text = "";
+        _body.text = "";
+
+        if (typeSFX == null)
+        {
+            var gom = FindAnyObjectByType<GameOverManager>();
+            if (gom != null) typeSFX = gom.hoverSFX;
+            
+            if (typeSFX == null)
+            {
+                var jui = FindAnyObjectByType<JournalUI>();
+                if (jui != null) typeSFX = jui.hoverSFX;
+            }
+        }
 
         _scrim.style.backgroundColor = scrim;
         _title.style.color = titleColor;
         _body.style.color = bodyColor;
 
+        // 2. Setup display and lock mouse interaction to scrim
         _root.style.display = DisplayStyle.Flex;
+        _root.style.opacity = 0f; // Start fully transparent
         _scrim.pickingMode = PickingMode.Position;
 
         Rigidbody playerRb = null;
@@ -116,10 +136,53 @@ public class CutscenePlayer : MonoBehaviour
         float prevTimeScale = Time.timeScale;
         Time.timeScale = 0f;
 
+        yield return null; // Wait one frame for Yoga layout engine to register opacity: 0
+
+        // 3. Fade in scrim class overlay (starts 1.5s USS transition to opacity 1)
         _root.style.opacity = 1f;
-        yield return new WaitForSecondsRealtime(fadeIn + hold);
+        yield return new WaitForSecondsRealtime(1.5f); // Wait for scrim fade-in to complete
+
+        // 4. Typewrite the title text (first)
+        string fullTitle = string.IsNullOrEmpty(title) ? "" : title.ToUpper();
+        string currentTitle = "";
+        float charDelay = 0.015f; // fast, satisfying typewriter speed
+        int sfxInterval = 2;
+
+        for (int i = 0; i < fullTitle.Length; i++)
+        {
+            currentTitle += fullTitle[i];
+            _title.text = currentTitle;
+
+            if (i % sfxInterval == 0 && typeSFX != null && SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySound(typeSFX, 0f, 0f, false);
+            }
+            yield return new WaitForSecondsRealtime(charDelay);
+        }
+
+        // Slight pause between title and body typing
+        yield return new WaitForSecondsRealtime(0.2f);
+
+        // 5. Typewrite the body/subtitle text (second)
+        string currentBody = "";
+        for (int i = 0; i < body.Length; i++)
+        {
+            currentBody += body[i];
+            _body.text = currentBody;
+
+            if (i % sfxInterval == 0 && typeSFX != null && SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySound(typeSFX, 0f, 0f, false);
+            }
+            yield return new WaitForSecondsRealtime(charDelay);
+        }
+
+        // 6. Hold for 1.5s after typing is completely done
+        yield return new WaitForSecondsRealtime(1.5f);
+
+        // 7. Fade out entire panel (starts 1.5s USS transition to opacity 0)
         _root.style.opacity = 0f;
-        yield return new WaitForSecondsRealtime(fadeOut);
+        yield return new WaitForSecondsRealtime(1.5f); // Wait for fade-out to complete
 
         _scrim.pickingMode = PickingMode.Ignore;
         _root.style.display = DisplayStyle.None;

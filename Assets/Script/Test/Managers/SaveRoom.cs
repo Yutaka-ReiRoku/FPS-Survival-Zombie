@@ -44,6 +44,7 @@ public class SaveRoom : MonoBehaviour
     private bool _inside;
     private bool _cutscenePlayed;
     private Vector3 _checkpointPos;
+    private float _checkTimer = 0f;
 
     /// <summary>
     /// Last save room checkpoint the player entered, scene-persistent (static).
@@ -52,6 +53,13 @@ public class SaveRoom : MonoBehaviour
     /// </summary>
     public static Vector3? LastCheckpoint { get; private set; }
     public static Quaternion LastCheckpointRotation { get; private set; }
+
+    private void SaveCheckpoint()
+    {
+        LastCheckpoint = _checkpointPos;
+        LastCheckpointRotation = transform.rotation;
+        Debug.Log($"[SaveRoom] Checkpoint updated to {_checkpointPos}.");
+    }
 
     private void Reset()
     {
@@ -65,20 +73,17 @@ public class SaveRoom : MonoBehaviour
         if (restIndicator != null) restIndicator.SetActive(false);
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void HandlePlayerEnter(GameObject playerObj)
     {
-        if (!other.CompareTag("Player")) return;
         _inside = true;
-        _playerStats = other.GetComponentInParent<PlayerStats>();
-        if (_playerStats == null) _playerStats = other.GetComponentInChildren<PlayerStats>();
+        _playerStats = playerObj.GetComponentInParent<PlayerStats>();
+        if (_playerStats == null) _playerStats = playerObj.GetComponentInChildren<PlayerStats>();
 
         SetSpawners(false);
         if (restIndicator != null) restIndicator.SetActive(true);
 
         // Update the global checkpoint so GameOverManager can respawn here.
-        LastCheckpoint = _checkpointPos;
-        LastCheckpointRotation = transform.rotation;
-        Debug.Log($"[SaveRoom] Checkpoint updated to {_checkpointPos}.");
+        SaveCheckpoint();
 
         if (healRate <= 0f && _playerStats != null)
         {
@@ -97,21 +102,47 @@ public class SaveRoom : MonoBehaviour
         Debug.Log($"[SaveRoom] Player entered save room at {_checkpointPos}.");
     }
 
-    private void OnTriggerStay(Collider other)
-    {
-        if (!_inside || _playerStats == null) return;
-        if (healRate > 0f && !_playerStats.IsFullyHealed())
-        {
-            _playerStats.HealHealthOnly(healRate * Time.deltaTime);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        _inside = false;
-        SetSpawners(true);
-        if (restIndicator != null) restIndicator.SetActive(false);
+        HandlePlayerEnter(other.gameObject);
+    }
+
+    private void Update()
+    {
+        _checkTimer += Time.unscaledDeltaTime;
+        if (_checkTimer >= 1f)
+        {
+            _checkTimer = 0f;
+            var player = GameObject.FindGameObjectWithTag("Player");
+            var trigger = GetComponent<Collider>();
+            if (player != null && trigger != null)
+            {
+                bool isInside = trigger.bounds.Contains(player.transform.position);
+                if (isInside != _inside)
+                {
+                    if (isInside)
+                    {
+                        HandlePlayerEnter(player);
+                    }
+                    else
+                    {
+                        _inside = false;
+                        SetSpawners(true);
+                        if (restIndicator != null) restIndicator.SetActive(false);
+                        Debug.Log($"[SaveRoom] Player left save room.");
+                    }
+                }
+            }
+        }
+
+        if (_inside && _playerStats != null)
+        {
+            if (healRate > 0f && !_playerStats.IsFullyHealed())
+            {
+                _playerStats.HealHealthOnly(healRate * Time.deltaTime);
+            }
+        }
     }
 
     private void SetSpawners(bool active)
@@ -125,4 +156,23 @@ public class SaveRoom : MonoBehaviour
 
     /// <summary>Checkpoint position for external respawn systems.</summary>
     public Vector3 CheckpointPosition => _checkpointPos;
+
+    public void ReevaluateState(Vector3 playerPosition)
+    {
+        var trigger = GetComponent<Collider>();
+        if (trigger != null && trigger.bounds.Contains(playerPosition))
+        {
+            _inside = true;
+            _playerStats = FindAnyObjectByType<PlayerStats>();
+            SetSpawners(false);
+            if (restIndicator != null) restIndicator.SetActive(true);
+            Debug.Log($"[SaveRoom] ReevaluateState: Player is inside save room. Suppressed spawners.");
+        }
+        else
+        {
+            _inside = false;
+            if (restIndicator != null) restIndicator.SetActive(false);
+            Debug.Log($"[SaveRoom] ReevaluateState: Player is outside save room.");
+        }
+    }
 }

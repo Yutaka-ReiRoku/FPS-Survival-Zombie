@@ -373,6 +373,7 @@ public class GameOverManager : MonoBehaviour
 
         if (PanelManager.Instance != null)
         {
+            PanelManager.Instance.forceFreezeTimeScale = true; // Lock PanelManager timescale unfreezing
             PanelManager.Instance.ClosePanel("GameOver", _gameOverPanel, _card);
         }
         else
@@ -397,8 +398,6 @@ public class GameOverManager : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(PanelManager.BlackOverlayDuration);
 
-        Time.timeScale = 1f;
-
         if (AchievementManager.Instance != null)
             AchievementManager.Instance.ResetProgress();
 
@@ -406,6 +405,44 @@ public class GameOverManager : MonoBehaviour
         if (sm != null && SaveRoom.LastCheckpoint.HasValue)
         {
             isGameOver = false;
+
+            // Warp and respawn player immediately while screen is black!
+            var ps = FindAnyObjectByType<PlayerStats>();
+            if (ps != null)
+            {
+                ps.Respawn(SaveRoom.LastCheckpoint.Value);
+                
+                // Immediately re-evaluate ChapterBoundary and SaveRoom states based on new position
+                var checkpointPos = SaveRoom.LastCheckpoint.Value;
+                var boundaries = FindObjectsByType<ChapterBoundary>(FindObjectsSortMode.None);
+                foreach (var b in boundaries)
+                {
+                    if (b != null) b.ReevaluateState(checkpointPos);
+                }
+
+                var saverooms = FindObjectsByType<SaveRoom>(FindObjectsSortMode.None);
+                foreach (var sr in saverooms)
+                {
+                    if (sr != null) sr.ReevaluateState(checkpointPos);
+                }
+
+                var playerGO = GameObject.FindGameObjectWithTag("Player");
+                if (playerGO != null)
+                {
+                    var control = playerGO.GetComponentInChildren<PlayerControl>();
+                    if (control != null) control.LoseControl(); // Lock control initially
+                }
+                Debug.Log($"[GameOverManager] Warped and respawned player at checkpoint {checkpointPos} and re-evaluated trigger states.");
+            }
+            else
+            {
+                if (PanelManager.Instance != null)
+                    PanelManager.Instance.forceFreezeTimeScale = false;
+                Time.timeScale = 1f;
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                yield break;
+            }
+
             if (PanelManager.Instance == null)
             {
                 if (_gameOverPanel != null)
@@ -416,19 +453,6 @@ public class GameOverManager : MonoBehaviour
                 }
             }
 
-            if (AIDirector.Instance != null)
-                AIDirector.Instance.FlushActiveZombies();
-
-            var spawners = FindObjectsByType<Spawm>(FindObjectsSortMode.None);
-            foreach (var spawner in spawners)
-            {
-                if (spawner != null)
-                    spawner.FlushSpawner();
-            }
-
-            if (SpecialEnemyDirector.Instance != null)
-                SpecialEnemyDirector.Instance.FlushSpecialEnemies();
-
             // Fade back out when respawning using pure USS transition
             if (overlay != null)
             {
@@ -437,25 +461,30 @@ public class GameOverManager : MonoBehaviour
                 overlay.pickingMode = PickingMode.Ignore; // Allow clicks to pass through
             }
 
-            var ps = FindAnyObjectByType<PlayerStats>();
-            if (ps != null)
+            // Wait another 1.5 seconds for HUD slide-in transition to fully complete!
+            yield return new WaitForSecondsRealtime(1.5f);
+
+            // Unlock PanelManager timescale and resume gameplay!
+            if (PanelManager.Instance != null)
             {
-                ps.Respawn(SaveRoom.LastCheckpoint.Value);
-                var playerGO = GameObject.FindGameObjectWithTag("Player");
-                if (playerGO != null)
-                {
-                    var control = playerGO.GetComponentInChildren<PlayerControl>();
-                    if (control != null) control.GrantControl();
-                }
-                Debug.Log($"[GameOverManager] Respawned at save room checkpoint {SaveRoom.LastCheckpoint.Value}.");
+                PanelManager.Instance.forceFreezeTimeScale = false;
             }
-            else
+            Time.timeScale = 1f;
+
+            var playerGO2 = GameObject.FindGameObjectWithTag("Player");
+            if (playerGO2 != null)
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                var control = playerGO2.GetComponentInChildren<PlayerControl>();
+                if (control != null) control.GrantControl();
             }
             yield break;
         }
 
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.forceFreezeTimeScale = false;
+        }
+        Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

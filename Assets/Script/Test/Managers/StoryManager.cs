@@ -215,6 +215,7 @@ public class StoryManager : MonoBehaviour
         Debug.Log($"[StoryManager] Player entered Chapter {CurrentChapter} area. Activating first quest.");
     }
 
+
     /// <summary>
     /// Plays the chapter transition cutscene for the given chapter number.
     /// Called by SaveRoom when the player enters the new chapter's save room.

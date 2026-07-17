@@ -11,7 +11,7 @@
     justify-content: center;
     align-items: center;
     opacity: 0;
-    transition: opacity var(--transition-normal, 0.6s) ease-out;
+    transition: opacity 1.5s ease-in-out;
 }
 
 .cutscene-scrim {
@@ -28,10 +28,12 @@
     color: var(--color-text-gold);
     -unity-text-align: middle-center;
     width: 90%;
-    height: 100px;
+    height: auto;
+    max-height: 20%;
     position: absolute;
     top: 35%;
     left: 5%;
+    white-space: normal;
 }
 
 .cutscene-body {
@@ -40,8 +42,10 @@
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
     width: 90%;
-    height: 120px;
+    height: auto;
+    max-height: 35%;
     position: absolute;
     top: 55%;
     left: 5%;
+    white-space: normal;
 }
