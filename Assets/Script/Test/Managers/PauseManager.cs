@@ -432,9 +432,6 @@ public class PauseManager : MonoBehaviour
             }
         }
 
-        // Set Cowsins pause state
-        cowsins.PauseMenu.isPaused = true;
-
         if (_resumeCoroutine != null)
         {
             StopCoroutine(_resumeCoroutine);
@@ -450,21 +447,6 @@ public class PauseManager : MonoBehaviour
                 _pauseCard.AddToClassList("visible");
                 _pauseCard.MarkDirtyRepaint();
             }
-        }
-        SetHUDVisible(_canvasRoot, false);
-        if (playerControl != null)
-            playerControl.LoseControl();
-        Time.timeScale = 0f;
-        if (cowsins.UIController.Instance != null)
-        {
-            cowsins.UIController.Instance.UnlockMouse();
-            Debug.Log($"[PauseManager Debug] Pause -> UIController.UnlockMouse called. Cursor.lockState={UnityEngine.Cursor.lockState}, Cursor.visible={UnityEngine.Cursor.visible}");
-        }
-        else
-        {
-            UnityEngine.Cursor.lockState = CursorLockMode.None;
-            UnityEngine.Cursor.visible = true;
-            Debug.Log($"[PauseManager Debug] Pause -> Manual Unlock called. Cursor.lockState={UnityEngine.Cursor.lockState}, Cursor.visible={UnityEngine.Cursor.visible}");
         }
     }
 
@@ -529,9 +511,6 @@ public class PauseManager : MonoBehaviour
             PanelManager.Instance.RegisterPanelActive("Pause", false);
         }
 
-        cowsins.PauseMenu.isPaused = false;
-        Time.timeScale = 1f;
-
         // Clean up settings classes so it resets for next pause
         if (_pauseCard != null) _pauseCard.RemoveFromClassList("slide-down");
         if (_settingsCard != null) _settingsCard.RemoveFromClassList("active");
@@ -548,11 +527,6 @@ public class PauseManager : MonoBehaviour
         {
             UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
         }
-
-        StartCoroutine(ForceLockMouseCoroutine());
-        if (playerControl != null)
-            playerControl.GrantControl();
-        SetHUDVisible(_canvasRoot, true);
     }
 
     private System.Collections.IEnumerator RegisterTransition(string name, float duration)
@@ -692,44 +666,12 @@ public class PauseManager : MonoBehaviour
         }
     }
 
-    private IEnumerator ForceLockMouseCoroutine()
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            cowsins.PauseMenu.isPaused = false;
-            if (cowsins.UIController.Instance != null)
-            {
-                cowsins.UIController.Instance.LockMouse();
-            }
-            else
-            {
-                UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-                UnityEngine.Cursor.visible = false;
-            }
-
-#if UNITY_EDITOR
-            // Force the Unity Editor to allow cursor locking and refocus the GameView
-            PauseManager.EditorReallowCursorLock();
-            System.Type gameViewType = System.Type.GetType("UnityEditor.GameView,UnityEditor");
-            if (gameViewType != null)
-            {
-                UnityEditor.EditorWindow.FocusWindowIfItsOpen(gameViewType);
-            }
-#endif
-
-            yield return null;
-        }
-    }
-
     private void LateUpdate()
     {
         if (_uiReady && !IsPaused && !IsTransitioning && (GameOverManager.Instance == null || !GameOverManager.Instance.IsGameOver))
         {
-            var skillTree = FindAnyObjectByType<SkillTreeWidget>();
-            bool skillTreeActive = skillTree != null && skillTree.IsOpenOrTransitioning;
-            bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
-
-            if (!skillTreeActive && !journalActive)
+            bool anyPanelActive = PanelManager.Instance != null && PanelManager.Instance.IsAnyPanelActive();
+            if (!anyPanelActive)
             {
                 if (UnityEngine.Cursor.lockState != CursorLockMode.Locked || UnityEngine.Cursor.visible)
                 {
@@ -750,51 +692,8 @@ public class PauseManager : MonoBehaviour
 
     public static void SetHUDVisible(Transform canvasRoot, bool visible)
     {
-        if (canvasRoot != null)
-        {
-            string[] overlayNames = { "PausePanel", "GameOverPanel", "JournalUI", "SkillTreeWidget", "QuestTrackerWidget" };
-
-            if (!visible)
-            {
-                if (_hudActiveState.Count > 0) return;
-                for (int i = 0; i < canvasRoot.childCount; i++)
-                {
-                    var child = canvasRoot.GetChild(i);
-                    bool isOverlay = false;
-                    foreach (var n in overlayNames)
-                    {
-                        if (child.name == n) { isOverlay = true; break; }
-                    }
-                    if (!isOverlay)
-                    {
-                        _hudActiveState[child.name] = child.gameObject.activeSelf;
-                        child.gameObject.SetActive(false);
-                    }
-                }
-            }
-            else
-            {
-                if (_hudActiveState.Count == 0) return;
-                for (int i = 0; i < canvasRoot.childCount; i++)
-                {
-                    var child = canvasRoot.GetChild(i);
-                    bool wasActive;
-                    if (_hudActiveState.TryGetValue(child.name, out wasActive))
-                        child.gameObject.SetActive(wasActive);
-                }
-                _hudActiveState.Clear();
-            }
-        }
-
-        var player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            var crosshair = player.GetComponentInChildren<cowsins.Crosshair>(true);
-            if (crosshair != null) crosshair.gameObject.SetActive(visible);
-        }
+        PanelManager.SetHUDVisible(canvasRoot, visible);
     }
-
-    private static readonly System.Collections.Generic.Dictionary<string, bool> _hudActiveState = new System.Collections.Generic.Dictionary<string, bool>();
 
     public void GoToMainMenu()
     {

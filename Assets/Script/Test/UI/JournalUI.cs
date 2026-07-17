@@ -179,22 +179,6 @@ public class JournalUI : MonoBehaviour
             StopCoroutine(_typewriterCoroutine);
         }
         _typewriterCoroutine = StartCoroutine(TypeText(journal.title, journal.content, journal.voiceLog));
-
-        cowsins.PauseMenu.isPaused = true;
-        if (cowsins.UIController.Instance != null)
-            cowsins.UIController.Instance.UnlockMouse();
-        else
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-
-        Time.timeScale = 0;
-
-        if (_playerControl != null)
-            _playerControl.LoseControl();
-
-        PauseManager.SetHUDVisible(transform, false);
     }
 
     public void Close()
@@ -314,28 +298,14 @@ public class JournalUI : MonoBehaviour
             PanelManager.Instance.RegisterPanelActive("Journal", false);
         }
 
-        bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
-        bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
-        if (!pauseOpen && !gameOver)
+        // Clear UI Toolkit focus
+        if (_panel != null) _panel.Blur();
+        if (_closeButton != null) _closeButton.Blur();
+
+        // Clear EventSystem selection
+        if (UnityEngine.EventSystems.EventSystem.current != null)
         {
-            cowsins.PauseMenu.isPaused = false;
-            Time.timeScale = 1;
-
-            // Clear UI Toolkit focus
-            if (_panel != null) _panel.Blur();
-            if (_closeButton != null) _closeButton.Blur();
-
-            // Clear EventSystem selection
-            if (UnityEngine.EventSystems.EventSystem.current != null)
-            {
-                UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-            }
-
-            StartCoroutine(ForceLockMouseCoroutine());
-            if (_playerControl != null)
-                _playerControl.GrantControl();
-
-            PauseManager.SetHUDVisible(transform, true);
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
         }
     }
 
@@ -349,33 +319,6 @@ public class JournalUI : MonoBehaviour
         if (PanelManager.Instance != null)
         {
             PanelManager.Instance.RegisterPanelTransitioning(name, false);
-        }
-    }
-
-    private IEnumerator ForceLockMouseCoroutine()
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            cowsins.PauseMenu.isPaused = false;
-            if (cowsins.UIController.Instance != null)
-                cowsins.UIController.Instance.LockMouse();
-            else
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
-
-#if UNITY_EDITOR
-            // Force the Unity Editor to allow cursor locking and refocus the GameView
-            PauseManager.EditorReallowCursorLock();
-            System.Type gameViewType = System.Type.GetType("UnityEditor.GameView,UnityEditor");
-            if (gameViewType != null)
-            {
-                UnityEditor.EditorWindow.FocusWindowIfItsOpen(gameViewType);
-            }
-#endif
-
-            yield return null;
         }
     }
 
