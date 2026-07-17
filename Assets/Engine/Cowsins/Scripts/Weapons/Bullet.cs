@@ -62,23 +62,44 @@ namespace cowsins
                 return;
 
             IDamageable damageable = other.GetComponent<IDamageable>();
+            if (damageable == null)
+                damageable = CowsinsUtilities.GatherDamageableParent(other.transform);
 
-            if (other.CompareTag("Critical"))
+            if (damageable != null && !other.CompareTag("Player"))
             {
-                DamageTarget(damageable, damage * criticalMultiplier, true);
-            }
-            else if (other.CompareTag("BodyShot"))
-            {
-                DamageTarget(CowsinsUtilities.GatherDamageableParent(other.transform), damage, false);
-            }
-            else if (damageable != null && !other.CompareTag("Player"))
-            {
-                DamageTarget(damageable, damage, false);
+                bool isHeadshot = other.CompareTag("Critical") || CheckIsHeadshot(other, damageable);
+                DamageTarget(damageable, isHeadshot ? (damage * criticalMultiplier) : damage, isHeadshot);
             }
             else if (IsGroundOrObstacleLayer(other.gameObject.layer))
             {
                 DestroyProjectile();
             }
+        }
+
+        private bool CheckIsHeadshot(Collider other, IDamageable target)
+        {
+            if (target == null) return false;
+            
+            var targetMb = target as MonoBehaviour;
+            if (targetMb == null) return false;
+
+            // Projectile forward direction
+            Vector3 rayDir = transform.forward;
+            Vector3 rayOrigin = transform.position - rayDir * 0.2f;
+
+            RaycastHit[] hits = Physics.RaycastAll(rayOrigin, rayDir, 4.0f);
+            foreach (var hit in hits)
+            {
+                if (hit.collider.CompareTag("Critical"))
+                {
+                    if (hit.collider.transform.IsChildOf(targetMb.transform))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private void DamageTarget(

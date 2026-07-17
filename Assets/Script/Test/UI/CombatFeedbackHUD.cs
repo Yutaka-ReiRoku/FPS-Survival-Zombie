@@ -28,10 +28,10 @@ public class CombatFeedbackHUD : MonoBehaviour
     private int _critFrame;
     public void FlagCriticalHit() { _critPending = true; _critFrame = Time.frameCount; }
 
-    private class Dmg { public VisualElement ve; public Label label; public float life; public Vector2 vel; public bool active; }
+    private class Dmg { public VisualElement ve; public Label label; public float life; public Vector3 worldPos; public Vector3 worldVel; public float scaleMultiplier; public bool active; }
     private readonly List<Dmg> _pool = new List<Dmg>();
     private const int PoolSize = 28;
-    private float _dmgLife = 0.8f;
+    private float _dmgLife = 1.0f;
 
     private class Kill { public VisualElement entry; public Label label; public float life; public bool active; }
     private readonly List<Kill> _kills = new List<Kill>();
@@ -107,26 +107,57 @@ public class CombatFeedbackHUD : MonoBehaviour
 
         var d = GetDmg();
         if (d == null) return;
+
+        // Initialize 3D physics parameters
+        d.worldPos = worldPos + Vector3.up * 1.5f; // Start at chest/head level
+        
+        // Random 3D launch velocity
+        float angle = Random.Range(0f, Mathf.PI * 2f);
+        float planarSpeed = Random.Range(1.5f, 3.5f); // horizontal spread
+        float upwardSpeed = Random.Range(4.5f, 7.0f);  // snappy vertical bounce
+        d.worldVel = new Vector3(Mathf.Cos(angle) * planarSpeed, upwardSpeed, Mathf.Sin(angle) * planarSpeed);
+
+        d.scaleMultiplier = (crit || headshot) ? 1.5f : 1.0f;
+        d.life = _dmgLife;
+
+        int dmgInt = Mathf.Max(1, Mathf.RoundToInt(damage));
+        d.label.text = GetDamageString(dmgInt, crit);
+        
+        // Apply styling classes to both parent VE and Label
+        d.ve.EnableInClassList("dmg-number--kill", headshot);
+        d.ve.EnableInClassList("dmg-number--crit", crit);
+        d.label.EnableInClassList("dmg-number--kill", headshot);
+        d.label.EnableInClassList("dmg-number--crit", crit);
+
+        // Pre-position on the very first frame to avoid any 1-frame (0,0) flickering
         var cam = worldCamera != null ? worldCamera : Camera.main;
         if (cam != null)
         {
-            Vector3 sp = cam.WorldToScreenPoint(worldPos + Vector3.up * 1.6f);
+            Vector3 sp = cam.WorldToScreenPoint(d.worldPos);
             if (sp.z < 0f) { d.active = false; d.ve.AddToClassList("dmg-number--hidden"); return; }
             var doc = GetComponent<UIDocument>();
-            if (doc == null) return;
-            var panel = doc.rootVisualElement.panel;
-            if (panel == null) return;
-            var panelPos = RuntimePanelUtils.ScreenToPanel(panel, sp);
-            d.ve.style.translate = new Translate(panelPos.x + Random.Range(-18f, 18f), panelPos.y);
+            if (doc != null && doc.rootVisualElement != null)
+            {
+                var panel = doc.rootVisualElement.panel;
+                if (panel != null)
+                {
+                    var panelPos = RuntimePanelUtils.ScreenToPanel(panel, sp);
+                    d.ve.style.left = panelPos.x;
+                    d.ve.style.top = panelPos.y;
+
+                    float dist = Vector3.Distance(cam.transform.position, d.worldPos);
+                    dist = Mathf.Max(2f, dist);
+                    float distanceScale = 12f / dist; // 12m reference distance
+                    distanceScale = Mathf.Clamp(distanceScale, 0.4f, 2.5f);
+                    float finalScale = d.scaleMultiplier * distanceScale;
+
+                    d.ve.style.scale = new Scale(Vector2.one * finalScale);
+                    d.ve.style.opacity = 1f;
+                }
+            }
         }
-        int dmgInt = Mathf.Max(1, Mathf.RoundToInt(damage));
-        d.label.text = GetDamageString(dmgInt, crit);
-        d.label.EnableInClassList("dmg-number--kill", headshot);
-        d.label.EnableInClassList("dmg-number--crit", crit);
-        d.label.style.fontSize = crit ? 42 : headshot ? 36 : 28;
+
         d.ve.RemoveFromClassList("dmg-number--hidden");
-        d.life = _dmgLife;
-        d.vel = new Vector2(Random.Range(-10f, 10f), -90f);
         d.active = true;
     }
 
@@ -198,20 +229,51 @@ public class CombatFeedbackHUD : MonoBehaviour
             if (_hitTimer <= 0f) _hitmarker.EnableInClassList("hitmarker--visible", false);
         }
 
+        var cam = worldCamera != null ? worldCamera : Camera.main;
+        var doc = GetComponent<UIDocument>();
+        var panel = doc != null && doc.rootVisualElement != null ? doc.rootVisualElement.panel : null;
+
         for (int i = 0; i < _pool.Count; i++)
         {
             var d = _pool[i];
             if (!d.active) continue;
             d.life -= dt;
-            if (d.life <= 0f)
+            if (d.life <= 0f || cam == null || panel == null)
             {
                 d.active = false;
                 d.ve.AddToClassList("dmg-number--hidden");
                 continue;
             }
-            d.ve.style.translate = new Translate(
-                d.ve.style.translate.value.x.value + d.vel.x * dt,
-                d.ve.style.translate.value.y.value + d.vel.y * dt);
+
+            // Apply 3D arcade gravity (15 m/s^2)
+            d.worldVel += Vector3.down * 15f * dt;
+            d.worldPos += d.worldVel * dt;
+
+            // Project 3D position to 2D Screen and convert to UITK Panel Space
+            Vector3 sp = cam.WorldToScreenPoint(d.worldPos);
+            if (sp.z < 0f)
+            {
+                d.active = false;
+                d.ve.AddToClassList("dmg-number--hidden");
+                continue;
+            }
+
+            var panelPos = RuntimePanelUtils.ScreenToPanel(panel, sp);
+            d.ve.style.left = panelPos.x;
+            d.ve.style.top = panelPos.y;
+
+            // Calculate scale based on distance to World Camera
+            float dist = Vector3.Distance(cam.transform.position, d.worldPos);
+            dist = Mathf.Max(2f, dist);
+            float distanceScale = 12f / dist; // 12m reference distance
+            distanceScale = Mathf.Clamp(distanceScale, 0.4f, 2.5f);
+            float finalScale = d.scaleMultiplier * distanceScale;
+
+            // Fade out smoothly over life
+            float alpha = Mathf.Clamp01(d.life / _dmgLife);
+
+            d.ve.style.scale = new Scale(Vector2.one * finalScale);
+            d.ve.style.opacity = alpha;
         }
 
         for (int i = _kills.Count - 1; i >= 0; i--)

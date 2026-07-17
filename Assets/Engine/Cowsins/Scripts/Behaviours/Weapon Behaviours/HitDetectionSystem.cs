@@ -56,13 +56,14 @@ namespace cowsins
             var hitTransform = h.collider.transform;
             float finalDamage = damage * GetDistanceDamageReduction(hitTransform);
 
+            // Resolve target damageable once at the beginning of the hit resolution
+            var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
+            if (damageable == null)
+                damageable = h.collider.GetComponent<IDamageable>();
+
             // Aim skill tree: OneShotCrook — 25% chance to instantly kill ICrookEnemy (e.g. zombies)
             if (aimSystem != null && aimSystem.OneShotCrook && Random.value <= 0.25f)
             {
-                var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
-                if (damageable == null)
-                    damageable = h.collider.GetComponent<IDamageable>();
-
                 if (damageable is MonoBehaviour enemyMb)
                 {
                     var crook = enemyMb.GetComponent<ICrookEnemy>();
@@ -78,10 +79,6 @@ namespace cowsins
             // Aim skill tree: BonusDamageVsSpecial — 2x damage vs ISpecialEnemy (e.g. Boomer, Tank)
             if (aimSystem != null && aimSystem.BonusDamageVsSpecial)
             {
-                var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
-                if (damageable == null)
-                    damageable = h.collider.GetComponent<IDamageable>();
-
                 if (damageable is MonoBehaviour enemyMb2)
                 {
                     var special = enemyMb2.GetComponent<ISpecialEnemy>();
@@ -100,35 +97,53 @@ namespace cowsins
                 isAimCrit = true;
             }
 
-            // Determine hit type and apply damage accordingly
-            if (hitTransform.CompareTag("Critical"))
+            if (damageable != null)
             {
-                settings.userEvents.OnCriticalHit?.Invoke();
-                var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
-                if (damageable != null)
+                // Check if hit was a headshot directly or via penetrating raycast to critical children
+                bool isHeadshot = hitTransform.CompareTag("Critical") || CheckIsHeadshot(h, damageable);
+
+                if (isHeadshot)
                 {
+                    settings.userEvents.OnCriticalHit?.Invoke();
                     damageable.Damage(finalDamage * weapon.criticalDamageMultiplier, true);
-                    AIDirector.Instance?.RegisterHit();
                 }
-            }
-            else if (hitTransform.CompareTag("BodyShot"))
-            {
-                var damageable = CowsinsUtilities.GatherDamageableParent(hitTransform);
-                if (damageable != null)
+                else
                 {
                     damageable.Damage(finalDamage, isAimCrit);
-                    AIDirector.Instance?.RegisterHit();
                 }
+                AIDirector.Instance?.RegisterHit();
             }
-            else
+        }
+
+        private bool CheckIsHeadshot(RaycastHit h, IDamageable target)
+        {
+            if (target == null) return false;
+            
+            var targetMb = target as MonoBehaviour;
+            if (targetMb == null) return false;
+
+            var cam = mainCamera != null ? mainCamera : Camera.main;
+            if (cam == null) return false;
+
+            Vector3 rayOrigin = cam.transform.position;
+            Vector3 rayDir = (h.point - rayOrigin).normalized;
+
+            // Raycast starting slightly before the hit point to detect overlapping child colliders
+            Vector3 startPoint = h.point - rayDir * 0.2f;
+            RaycastHit[] hits = Physics.RaycastAll(startPoint, rayDir, 4.0f);
+
+            foreach (var hit in hits)
             {
-                var damageable = h.collider.GetComponent<IDamageable>();
-                if (damageable != null)
+                if (hit.collider.CompareTag("Critical"))
                 {
-                    damageable.Damage(finalDamage, isAimCrit);
-                    AIDirector.Instance?.RegisterHit();
+                    if (hit.collider.transform.IsChildOf(targetMb.transform))
+                    {
+                        return true;
+                    }
                 }
             }
+
+            return false;
         }
 
         private float GetDistanceDamageReduction(Transform target)
