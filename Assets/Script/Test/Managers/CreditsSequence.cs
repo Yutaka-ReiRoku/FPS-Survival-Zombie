@@ -73,6 +73,11 @@ public class CreditsSequence : MonoBehaviour
     {
         if (_played) { onComplete?.Invoke(); return; }
         _played = true;
+
+        // Switch to the credits music.
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayAfterCreditMusic();
+
         StartCoroutine(PlayRoutine(onComplete));
     }
 

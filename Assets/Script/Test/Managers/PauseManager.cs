@@ -577,6 +577,10 @@ public class PauseManager : MonoBehaviour
         PlayerPrefs.SetFloat("sfxVolume", sfxVol);
         PlayerPrefs.Save();
 
+        // Notify the MusicManager to re-read volume settings immediately.
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.RefreshVolume();
+
         var gsm = cowsins.GameSettingsManager.Instance;
         if (gsm != null)
         {

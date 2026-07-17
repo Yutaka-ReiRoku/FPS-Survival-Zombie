@@ -125,8 +125,6 @@ MonoBehaviour:
   popLootOnDeath: 1
   lootPopUpwardSpeed: 4.5
   lootPopHorizontalSpeed: 2.5
-  giftBoxPrefab: {fileID: 0}
-  giftBoxDropChance: 10
   lootTrailSettings:
     trailTime: 0.45
     startWidth: 0.35

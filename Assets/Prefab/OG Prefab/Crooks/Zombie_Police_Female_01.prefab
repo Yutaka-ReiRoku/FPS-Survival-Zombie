@@ -1843,18 +1843,12 @@ MonoBehaviour:
     dropChance: 20
     minQuantity: 1
     maxQuantity: 1
-  - prefab: {fileID: 5597026042441387653, guid: aeda1d4ad92c1ab4ba7a0b2cef51e203, type: 3}
-    dropChance: 15
-    minQuantity: 1
-    maxQuantity: 1
   dropPrefab: {fileID: 3821068731288931261, guid: 5144d72f9767e2f4aacd4ed8fdf87ad0, type: 3}
   dropChance: 50
   dropHeightOffset: 0.5
   popLootOnDeath: 1
   lootPopUpwardSpeed: 4.5
   lootPopHorizontalSpeed: 2.5
-  giftBoxPrefab: {fileID: 0}
-  giftBoxDropChance: 10
   lootTrailSettings:
     trailTime: 0.45
     startWidth: 0.12
@@ -1984,6 +1978,7 @@ MonoBehaviour:
   heightOffset: 2.1
   barSize: {x: 120, y: 16}
   worldScale: 0.01
+  enemyType: 0
 --- !u!1 &1934420352407756
 GameObject:
   m_ObjectHideFlags: 0

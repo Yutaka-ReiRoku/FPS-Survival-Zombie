@@ -22,6 +22,10 @@ public class MainMenuManager : MonoBehaviour
         UnityEngine.Cursor.lockState = CursorLockMode.None;
         UnityEngine.Cursor.visible = true;
 
+        // Start playing the main menu music.
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayMenuMusic();
+
         if (_doc != null)
         {
             var root = _doc.rootVisualElement;
@@ -197,6 +201,11 @@ public class MainMenuManager : MonoBehaviour
         // 7. Load scene
         if (AchievementManager.Instance != null)
             AchievementManager.Instance.ResetProgress();
+
+        // Crossfade to Chapter 1 music as the game scene loads.
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayChapterMusic(1);
+
         SceneManager.LoadScene(gameSceneName);
     }
 

@@ -725,6 +725,10 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealt
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.AddKill(500);
 
+        // Return to the current chapter music after the final boss dies.
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.StopFinalBossMusic();
+
         agent.enabled = false;
 
         animator.SetBool(

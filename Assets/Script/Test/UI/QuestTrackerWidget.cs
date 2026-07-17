@@ -46,18 +46,35 @@ public class QuestTrackerWidget : MonoBehaviour
         if (_container != null)
             _container.generateVisualContent += OnGenerateCardBackground;
 
+        SubscribeToManagers();
+        UpdateDisplay();
+        StartCoroutine(PollRoutine());
+    }
+
+    private void Start()
+    {
+        // Retry subscription in case StoryManager/SideQuestManager awakened
+        // after this widget's OnEnable (script execution order race).
+        SubscribeToManagers();
+        UpdateDisplay();
+    }
+
+    private void SubscribeToManagers()
+    {
         if (StoryManager.Instance != null)
         {
+            StoryManager.Instance.OnActiveQuestChanged -= HandleQuestChanged;
             StoryManager.Instance.OnActiveQuestChanged += HandleQuestChanged;
+            StoryManager.Instance.OnChapterChanged -= HandleChapterChanged;
             StoryManager.Instance.OnChapterChanged += HandleChapterChanged;
         }
         if (SideQuestManager.Instance != null)
         {
+            SideQuestManager.Instance.OnSideQuestCompleted -= HandleSideQuestChanged;
             SideQuestManager.Instance.OnSideQuestCompleted += HandleSideQuestChanged;
+            SideQuestManager.Instance.OnSideQuestActivated -= HandleSideQuestChanged;
             SideQuestManager.Instance.OnSideQuestActivated += HandleSideQuestChanged;
         }
-        UpdateDisplay();
-        StartCoroutine(PollRoutine());
     }
 
     private void OnDisable()
@@ -97,11 +114,28 @@ public class QuestTrackerWidget : MonoBehaviour
                 _lastSideQuestCount = sqCount;
                 TriggerUpdateAnimation();
             }
+
+            // Fallback: detect active quest / chapter changes even if the
+            // OnActiveQuestChanged subscription was missed (race condition).
+            var sm = StoryManager.Instance;
+            if (sm != null)
+            {
+                string curTitle = sm.ActiveQuest?.title;
+                int curCh = sm.CurrentChapter;
+                if (curTitle != _lastActiveQuestTitle || curCh != _lastActiveChapter)
+                {
+                    _lastActiveQuestTitle = curTitle;
+                    _lastActiveChapter = curCh;
+                    TriggerUpdateAnimation();
+                }
+            }
         }
     }
 
     private int _lastCollectibleCount = -1;
     private int _lastSideQuestCount = -1;
+    private string _lastActiveQuestTitle = "__init__";
+    private int _lastActiveChapter = -1;
 
     private void HandleQuestChanged(QuestData oldQuest, QuestData newQuest) => TriggerUpdateAnimation();
     private void HandleChapterChanged(int oldCh, int newCh) => TriggerUpdateAnimation();

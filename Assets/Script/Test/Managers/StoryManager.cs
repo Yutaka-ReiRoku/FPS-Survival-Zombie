@@ -196,6 +196,11 @@ public class StoryManager : MonoBehaviour
         // Advance silently — the chapter transition cutscene is played when the
         // player reaches the new chapter's Save Room (see SaveRoom.chapterTransitionOnEnter).
         OnChapterChanged?.Invoke(oldChapter, CurrentChapter);
+
+        // Switch background music to the new chapter.
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayChapterMusic(CurrentChapter);
+
         // Do NOT set the active quest here — it will be activated when the player
         // enters the new chapter's boundary (ChapterBoundary.OnTriggerEnter).
         SetActiveQuest(null);

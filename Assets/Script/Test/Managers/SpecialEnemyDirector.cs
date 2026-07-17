@@ -220,6 +220,10 @@ public class SpecialEnemyDirector : MonoBehaviour
         if (tankSpawnWarningClip != null && _audioSource != null)
             _audioSource.PlayOneShot(tankSpawnWarningClip, tankSpawnWarningVolume);
 
+        // Switch to the final-boss fight music.
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.PlayFinalBossMusic();
+
         GameObject tank = Instantiate(
             tankPrefab,
             spawnPos,
