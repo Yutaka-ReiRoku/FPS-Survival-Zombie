@@ -7,8 +7,10 @@ using cowsins;
 /// her child, normally sits alone crying (Cry state) at a fixed point.
 /// When disturbed (player approaches within provokeRadius, or gets shot),
 /// she screams briefly then charges at the player at high speed
-/// (Scream → Chase). If she loses sight of the player, she returns to
-/// Cry state. At close range she attacks dealing high damage.
+/// (Scream → Chase). Once provoked, she NEVER returns to Cry — she chases
+/// the player relentlessly until she or the player is dead. Her looping
+/// cry audio fades with distance so it is only audible within a small
+/// area around her resting point (cryMaxDistance).
 ///
 /// Mini-boss stats: health 60, speed 6.5 m/s, damage 30, scream 1.2s.
 /// </summary>
@@ -38,7 +40,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     [Header("Detection")]
     [Tooltip("Distance the player must approach to provoke the Witch (transitions from Cry to Scream).")]
     public float provokeRadius = 8f;
-    [Tooltip("Distance at which the Witch loses sight of the player. Larger than provokeRadius to prevent flip-flop.")]
+    [Tooltip("DEPRECATED: Witch no longer loses sight of the player once provoked. Kept for scene serialization compatibility.")]
     public float loseSightDistance = 20f;
 
     [Header("Line of Sight")]
@@ -73,17 +75,26 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
     [Header("Animation Smoothing")]
     [Tooltip("Damping time for the Speed animator parameter (lower = snappier, higher = smoother).")]
-    public float animSpeedDamping = 0.08f;
+    public float animSpeedDamping = 0.14f;
     [Tooltip("Scales Run animation playback speed by actual agent speed. Requires Speed parameter active on Run state.")]
     public bool scaleAnimBySpeed = true;
     [Tooltip("Multiplier applied to animator.speed when chasing (gives a more frenetic, L4D2-like motion).")]
-    public float chaseAnimSpeedMultiplier = 1.15f;
+    public float chaseAnimSpeedMultiplier = 1.05f;
     [Tooltip("Grace period (s) after entering Cry/ReturnToCrying before the agent fully stops, for smoother deceleration.")]
-    public float stopDecelTime = 0.25f;
+    public float stopDecelTime = 0.35f;
 
-    [Header("Audio")]
-    [Tooltip("Looping crying sound while in Cry state (loop).")]
+    [Header("Cry Audio (Distance Falloff)")]
+    [Tooltip("Looping crying sound while in Cry state (loop). Volume is scaled by distance to the player using cryMinDistance..cryMaxDistance.")]
     public AudioClip cryClip;
+    [Tooltip("Distance (m) at which the cry audio is at full volume (player inside this radius hears it loudly).")]
+    public float cryMinDistance = 3f;
+    [Tooltip("Distance (m) at which the cry audio fades to silence. The cry is only audible within this radius around the Witch.")]
+    public float cryMaxDistance = 12f;
+    [Tooltip("Base volume of the cry loop before distance falloff is applied.")]
+    [Range(0f, 1f)]
+    public float cryBaseVolume = 1f;
+
+    [Header("Audio (One-Shot)")]
     [Tooltip("Screaming sound when provoked.")]
     public AudioClip screamClip;
     [Tooltip("Sound when attacking.")]
@@ -197,7 +208,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         if (agent != null)
         {
             agent.speed = runSpeed;
-            agent.acceleration = 30f; // higher accel for snappier L4D2-like charge
+            agent.acceleration = 22f; // tuned for smooth charge without jerky startups
             agent.angularSpeed = 360f;
             agent.stoppingDistance = attackRange * 0.5f;
             agent.updateRotation = false;
@@ -266,12 +277,29 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
         float distance = Vector3.Distance(transform.position, target.position);
 
-        // Check if player is dead
+        // Check if player is dead — Witch stops and stands still (does NOT return to crying)
         if (_targetStats != null && _targetStats.IsDead)
         {
             if (state == WitchState.Chasing || state == WitchState.Attacking)
             {
-                ReturnToCrying();
+                RequestStop();
+                state = WitchState.Crying; // reuse Crying as the "idle" state but do not restart cry audio
+                isAttacking = false;
+                attackDamageTimerActive = false;
+                attackResetTimerActive = false;
+                if (animator != null)
+                {
+                    animator.SetBool(IsChasingHash, false);
+                    animator.SetBool(IsCryingHash, false);
+                }
+                // Stop any looping cry audio so she stands silent over the corpse
+                if (cryAudioPlaying)
+                {
+                    audioSource.Stop();
+                    audioSource.clip = null;
+                    audioSource.loop = false;
+                    cryAudioPlaying = false;
+                }
             }
             return;
         }
@@ -403,13 +431,23 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
     private void UpdateCrying(float distance)
     {
-        // Play cry audio as a looping clip so audioSource.Stop() can cut it
+        // Play cry audio as a looping clip so audioSource.Stop() can cut it.
+        // Volume is scaled by distance to the player so the cry is only
+        // audible within cryMaxDistance around the Witch's resting point.
         if (!cryAudioPlaying && cryClip != null)
         {
             audioSource.clip = cryClip;
             audioSource.loop = true;
+            audioSource.volume = cryBaseVolume;
             audioSource.Play();
             cryAudioPlaying = true;
+        }
+
+        // Distance-based volume falloff: full at cryMinDistance, silent at cryMaxDistance
+        if (cryAudioPlaying)
+        {
+            float t = Mathf.InverseLerp(cryMaxDistance, cryMinDistance, distance);
+            audioSource.volume = cryBaseVolume * Mathf.Clamp01(t);
         }
 
         // Provoke by proximity
@@ -437,12 +475,8 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
     private void UpdateChasing(float distance)
     {
-        // Lost sight — return to crying
-        if (distance > loseSightDistance)
-        {
-            ReturnToCrying();
-            return;
-        }
+        // Witch NEVER returns to Crying once provoked — she chases until
+        // she or the player is dead. No loseSightDistance check here.
 
         // In attack range and cooldown ready
         if (!isAttacking && distance <= attackRange && attackTimer >= attackCooldown)
@@ -500,13 +534,19 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         hasScreamed = true;
         state = WitchState.StandingUp;
 
-        // Stop looping cry audio so it doesn't overlap with the scream
+        // Stop looping cry audio so it doesn't overlap with the scream.
+        // Also reset volume to full since the cry falloff may have lowered it.
         if (cryAudioPlaying)
         {
             audioSource.Stop();
             audioSource.clip = null;
             audioSource.loop = false;
+            audioSource.volume = 1f;
             cryAudioPlaying = false;
+        }
+        else
+        {
+            audioSource.volume = 1f;
         }
 
         if (agent != null)
@@ -609,32 +649,6 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         CancelStop();
 
         _pathTimer = maxRepathInterval;
-    }
-
-    //==================================================
-    // RETURN TO CRYING
-    //==================================================
-
-    private void ReturnToCrying()
-    {
-        state = WitchState.Crying;
-        hasScreamed = false;
-        isAttacking = false;
-
-        // Cancel any pending attack timers
-        attackDamageTimerActive = false;
-        attackResetTimerActive = false;
-
-        if (agent != null)
-            RequestStop();
-
-        if (animator != null)
-        {
-            animator.SetBool(IsChasingHash, false);
-            animator.SetBool(IsCryingHash, true);
-        }
-
-        cryAudioPlaying = false; // cry will restart on next UpdateCrying
     }
 
     //==================================================
@@ -838,8 +852,9 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, provokeRadius);
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, loseSightDistance);
+        // Cry audio falloff radius (only audible inside this)
+        Gizmos.color = new Color(0.5f, 0.8f, 1f, 0.6f);
+        Gizmos.DrawWireSphere(transform.position, cryMaxDistance);
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);

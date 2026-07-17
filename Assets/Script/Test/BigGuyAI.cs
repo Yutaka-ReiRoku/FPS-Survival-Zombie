@@ -11,7 +11,9 @@ using cowsins;
 /// Unlike the Witch, once provoked he NEVER returns to Dazed — he chases
 /// until he or the player is dead.
 ///
-/// Mini-boss stats: health 80, speed 2 m/s, damage 30, scream 2.0s.
+/// Mini-boss stats: health 80, speed 3 m/s, damage 30, scream 2.27s.
+/// Tuned for smooth, heavy motion: low acceleration, slow turning, and
+/// a sub-1 chase animation multiplier for a deliberate, menacing walk.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(AudioSource))]
@@ -74,13 +76,13 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
     [Header("Animation Smoothing")]
     [Tooltip("Damping time for the Speed animator parameter (lower = snappier, higher = smoother).")]
-    public float animSpeedDamping = 0.12f;
+    public float animSpeedDamping = 0.18f;
     [Tooltip("Scales Walk animation playback speed by actual agent speed. Requires Speed parameter active on Walk state.")]
     public bool scaleAnimBySpeed = true;
     [Tooltip("Multiplier applied to animator.speed when chasing (below 1 = heavy, sluggish walk; above 1 = frantic).")]
-    public float chaseAnimSpeedMultiplier = 0.9f;
+    public float chaseAnimSpeedMultiplier = 0.85f;
     [Tooltip("Grace period (s) after entering Dazed before the agent fully stops, for smoother deceleration.")]
-    public float stopDecelTime = 0.3f;
+    public float stopDecelTime = 0.45f;
 
     [Header("Audio")]
     [Tooltip("Roaring sound when provoked.")]
@@ -186,8 +188,8 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         if (agent != null)
         {
             agent.speed = walkSpeed;
-            agent.acceleration = 15f; // lower accel for a heavy, sluggish feel
-            agent.angularSpeed = 180f; // slower turning for a big guy
+            agent.acceleration = 10f; // lower accel for a heavy, smooth start/stop
+            agent.angularSpeed = 120f; // slower, smoother turning for a big guy
             agent.stoppingDistance = attackRange * 0.5f;
             agent.updateRotation = false;
             agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.LowQualityObstacleAvoidance;
