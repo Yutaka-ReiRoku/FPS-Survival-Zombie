@@ -4,7 +4,7 @@
     position: absolute;
     right: 20px; /* Relocated to top-right corner to prevent overlapping HUD chips */
     left: auto;
-    top: 80px;   /* Symmetrical with HUD chips on the left */
+    top: 20px;   /* Moved all the way to the top */
     width: 420px;
     flex-direction: column;
 }
