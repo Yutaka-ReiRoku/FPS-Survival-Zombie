@@ -12,12 +12,16 @@
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0); /* Transparent to allow game scene behind it */
     opacity: 0;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #GameUIRoot #GameOverPanel.visible {
     opacity: 1;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #GameOverPanel #Vignette {
@@ -29,12 +33,16 @@
     background-image: resource("Images/ui_vignette");
     -unity-background-scale-mode: scale-and-crop;
     opacity: 0;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #GameOverPanel.visible #Vignette {
     opacity: 1;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 /* High-specificity override for the Game Over Card with Pause-matching pop animation */
@@ -56,14 +64,18 @@
     opacity: 0;
     scale: 0;
     translate: -50% -50%;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in, scale var(--premium-panel-transition-duration, 1.5s) ease-in, translate var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity, scale, translate;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in, ease-in, ease-in-out;
 }
 
 #GameOverPanel.visible #Card {
     opacity: 1;
     scale: 1;
     translate: -50% -50%;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-out-back, scale var(--premium-panel-transition-duration, 1.5s) ease-out-back, translate var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity, scale, translate;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-out-back, ease-out-back, ease-in-out;
 }
 
 #GameOverPanel #TopAccent {

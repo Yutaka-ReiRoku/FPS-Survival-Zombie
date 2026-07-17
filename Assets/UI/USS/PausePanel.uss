@@ -13,13 +13,17 @@
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0);
     opacity: 0;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out; /* Exit transition: 1.5s */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #GameUIRoot #PausePanel.visible {
     background-color: rgba(0, 0, 0, 0);
     opacity: 1;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out; /* Entry transition: 1.5s */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #PauseVignette {
@@ -31,12 +35,16 @@
     background-image: resource("Images/ui_vignette");
     -unity-background-scale-mode: scale-and-crop;
     opacity: 0;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #PausePanel.visible #PauseVignette {
     opacity: 1;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 /* Card container transitions: pop up like skill tree (scale 0 to 1, opacity 0 to 1) over 1.5s for both entry & exit */
@@ -51,7 +59,9 @@
     opacity: 0;
     scale: 0;
     translate: -50% -50%;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in, scale var(--premium-panel-transition-duration, 1.5s) ease-in, translate var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity, scale, translate;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in, ease-in, ease-in-out;
     justify-content: flex-start; /* Top-aligned, spacing handled by margins */
     align-items: center;
     padding-top: 40px;
@@ -62,7 +72,9 @@
     opacity: 1;
     scale: 1;
     translate: -50% -50%;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-out-back, scale var(--premium-panel-transition-duration, 1.5s) ease-out-back, translate var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity, scale, translate;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-out-back, ease-out-back, ease-in-out;
 }
 
 #PausePanel #PauseCardShadow {
@@ -170,7 +182,9 @@
     border-width: 0;
     opacity: 0;
     translate: -50% -170%; /* Hidden above the screen, using -50% base offset for perfect centering */
-    transition: opacity 1.5s ease-in-out, translate 1.5s ease-in-out;
+    transition-property: opacity, translate;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
     justify-content: flex-start;
     align-items: center;
     padding-top: 40px;
@@ -180,7 +194,9 @@
 #PausePanel #SettingsCard.active {
     opacity: 1;
     translate: -50% -50%; /* Centered in the screen */
-    transition: opacity 1.5s ease-in-out, translate 1.5s ease-in-out;
+    transition-property: opacity, translate;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 /* Slide down for PauseCard when Settings is active */
@@ -188,7 +204,9 @@
     opacity: 0;
     translate: -50% 70%; /* Slide down out of screen, keeping -50% horizontal offset */
     scale: 1; /* Keep scale 1 so it only slides down */
-    transition: opacity 1.5s ease-in-out, translate 1.5s ease-in-out, scale 1.5s ease-in-out;
+    transition-property: opacity, translate, scale;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #SettingsTitle {

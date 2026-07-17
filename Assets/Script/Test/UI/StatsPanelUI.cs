@@ -34,12 +34,13 @@ public class StatsPanelUI : MonoBehaviour
         _doc = GetComponent<UIDocument>();
         if (_doc == null)
         {
-            _doc = FindAnyObjectByType<UIDocument>();
+            var canvasGo = GameObject.Find("GameUICanvas");
+            if (canvasGo != null) _doc = canvasGo.GetComponent<UIDocument>();
         }
         if (_doc == null)
         {
-            var canvasGo = GameObject.Find("GameUICanvas");
-            if (canvasGo != null) _doc = canvasGo.GetComponent<UIDocument>();
+            var pm = FindAnyObjectByType<PauseManager>();
+            if (pm != null && pm.uiDocument != null) _doc = pm.uiDocument;
         }
         if (_doc == null) return;
 

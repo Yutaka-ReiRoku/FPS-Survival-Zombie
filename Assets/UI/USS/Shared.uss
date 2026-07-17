@@ -435,12 +435,16 @@ Button:active,
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0); /* Always transparent */
     opacity: 0;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #GameUIRoot .ui-panel-root.visible {
     opacity: 1;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 /* Generic vignette for panels */
@@ -453,12 +457,16 @@ Button:active,
     background-image: resource("Images/ui_vignette");
     -unity-background-scale-mode: scale-and-crop;
     opacity: 0;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 .ui-panel-root.visible .ui-panel-vignette {
     opacity: 1;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 /* Generic card container with 1.5s scale/fade transition and 0.85 alpha background */
@@ -473,13 +481,17 @@ Button:active,
     border-radius: 12px;
     opacity: 0;
     scale: 0.9;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in, scale var(--premium-panel-transition-duration, 1.5s) ease-in, translate var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity, scale, translate;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in, ease-in, ease-in-out;
 }
 
 .ui-panel-root.visible .ui-panel-card {
     opacity: 1;
     scale: 1;
-    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-out-back, scale var(--premium-panel-transition-duration, 1.5s) ease-out-back, translate var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+    transition-property: opacity, scale, translate;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-out-back, ease-out-back, ease-in-out;
 }
 
 /* Accent top bar */

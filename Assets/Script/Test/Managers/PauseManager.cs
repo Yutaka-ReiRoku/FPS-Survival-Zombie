@@ -74,6 +74,16 @@ public class PauseManager : MonoBehaviour
     {
         Instance = this;
         _hudActiveState.Clear();
+
+        if (PanelManager.Instance == null)
+        {
+            var pm = FindAnyObjectByType<PanelManager>();
+            if (pm == null)
+            {
+                gameObject.AddComponent<PanelManager>();
+                Debug.Log("[PauseManager] Added PanelManager component automatically to ensure centralized UI state.");
+            }
+        }
     }
 
     private void OnEnable()

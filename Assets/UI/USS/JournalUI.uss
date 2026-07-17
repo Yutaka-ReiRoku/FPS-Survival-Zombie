@@ -12,12 +12,16 @@
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0); /* Always transparent */
     opacity: 0;
-    transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s (matches card exit) */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #JournalUI.visible {
     opacity: 1;
-    transition: opacity 1.5s ease-in-out; /* Entry transition: 1.5s (matches card entry) */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 .journal-scrim {
@@ -29,12 +33,16 @@
     background-image: resource("Images/ui_vignette");
     -unity-background-scale-mode: scale-and-crop;
     opacity: 0;
-    transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s (matches card exit) */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #JournalUI.visible .journal-scrim {
     opacity: 1;
-    transition: opacity 1.5s ease-in-out; /* Entry transition: 1.5s (matches card entry) */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 /* === Override #Card in Shared.uss to style it as a leather cover === */
@@ -53,15 +61,17 @@
     padding: 12px; /* Margin of cover showing around the pages */
     opacity: 0;
     scale: 0;
-    /* Exit transition: 1.5s */
-    transition: opacity 1.5s ease-in, scale 1.5s ease-in;
+    transition-property: opacity, scale;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in, ease-in;
 }
 
 #JournalUI.visible #Card {
     opacity: 1;
     scale: 1;
-    /* Entry transition: 1.5s with spring bounce */
-    transition: opacity 1.5s ease-out-back, scale 1.5s ease-out-back;
+    transition-property: opacity, scale;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-out-back, ease-out-back;
 }
 
 /* === Inside Pages container (White Paper sheets) === */

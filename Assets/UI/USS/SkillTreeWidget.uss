@@ -11,12 +11,16 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0) !important;
     opacity: 0;
-    transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 #SkillTreeWidget.open {
     flex-direction: column;
     opacity: 1;
-    transition: opacity 1.5s ease-in-out; /* Entry transition: 1.5s */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 /* Scrim — full-screen click blocker and vignette overlay */
@@ -29,12 +33,16 @@
     background-image: resource("Images/ui_vignette");
     -unity-background-scale-mode: scale-and-crop;
     opacity: 0;
-    transition: opacity 1.5s ease-in-out; /* Exit transition: 1.5s (matches card exit) */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 #SkillTreeWidget.open #scrim {
     opacity: 1;
-    transition: opacity 1.5s ease-in-out; /* Entry transition: 1.5s (matches card entry) */
+    transition-property: opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
 }
 
 /* Card — centered panel */
@@ -51,14 +59,16 @@
     border-width: 0;
     opacity: 0;
     scale: 0;
-    /* Exit transition: 1.5s */
-    transition: opacity 1.5s ease-in, scale 1.5s ease-in;
+    transition-property: opacity, scale;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in, ease-in;
 }
 #SkillTreeWidget.open #card {
     opacity: 1;
     scale: 1;
-    /* Entry transition: 1.5s with spring bounce */
-    transition: opacity 1.5s ease-out-back, scale 1.5s ease-out-back;
+    transition-property: opacity, scale;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-out-back, ease-out-back;
 }
 
 /* Title */
