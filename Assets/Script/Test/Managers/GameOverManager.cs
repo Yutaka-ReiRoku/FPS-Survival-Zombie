@@ -240,26 +240,33 @@ public class GameOverManager : MonoBehaviour
 
         UpdateStatIcons(isStoryMode);
 
-        if (uiDocument != null)
+        if (PanelManager.Instance != null)
         {
-            PauseManager.SetHUDVisible(uiDocument.transform, false);
+            PanelManager.Instance.OpenPanel("GameOver", _gameOverPanel, _card);
         }
-
-        if (_gameOverPanel != null)
+        else
         {
-            _gameOverPanel.style.display = DisplayStyle.Flex;
-            _gameOverPanel.AddToClassList("visible");
-        }
+            if (uiDocument != null)
+            {
+                PauseManager.SetHUDVisible(uiDocument.transform, false);
+            }
 
-        if (_card != null)
-        {
-            _card.AddToClassList("visible");
-        }
+            if (_gameOverPanel != null)
+            {
+                _gameOverPanel.style.display = DisplayStyle.Flex;
+                _gameOverPanel.AddToClassList("visible");
+            }
 
-        UnityEngine.Cursor.lockState = CursorLockMode.None;
-        UnityEngine.Cursor.visible = true;
-        if (freezeTimeOnGameOver)
-            Time.timeScale = 0f;
+            if (_card != null)
+            {
+                _card.AddToClassList("visible");
+            }
+
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+            if (freezeTimeOnGameOver)
+                Time.timeScale = 0f;
+        }
     }
 
     private void UpdateStatIcons(bool isStoryMode)
@@ -318,13 +325,20 @@ public class GameOverManager : MonoBehaviour
         PauseManager.EditorReallowCursorLock();
 #endif
 
-        if (_gameOverPanel != null)
+        if (PanelManager.Instance != null)
         {
-            _gameOverPanel.RemoveFromClassList("visible");
+            PanelManager.Instance.ClosePanel("GameOver", _gameOverPanel, _card);
         }
-        if (_card != null)
+        else
         {
-            _card.RemoveFromClassList("visible");
+            if (_gameOverPanel != null)
+            {
+                _gameOverPanel.RemoveFromClassList("visible");
+            }
+            if (_card != null)
+            {
+                _card.RemoveFromClassList("visible");
+            }
         }
 
         var root = uiDocument.rootVisualElement;
@@ -337,9 +351,12 @@ public class GameOverManager : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(PanelManager.BlackOverlayDuration);
 
-        if (_gameOverPanel != null)
+        if (PanelManager.Instance == null)
         {
-            _gameOverPanel.style.display = DisplayStyle.None;
+            if (_gameOverPanel != null)
+            {
+                _gameOverPanel.style.display = DisplayStyle.None;
+            }
         }
 
         Time.timeScale = 1f;
@@ -354,13 +371,20 @@ public class GameOverManager : MonoBehaviour
         PauseManager.EditorReallowCursorLock();
 #endif
 
-        if (_gameOverPanel != null)
+        if (PanelManager.Instance != null)
         {
-            _gameOverPanel.RemoveFromClassList("visible");
+            PanelManager.Instance.ClosePanel("GameOver", _gameOverPanel, _card);
         }
-        if (_card != null)
+        else
         {
-            _card.RemoveFromClassList("visible");
+            if (_gameOverPanel != null)
+            {
+                _gameOverPanel.RemoveFromClassList("visible");
+            }
+            if (_card != null)
+            {
+                _card.RemoveFromClassList("visible");
+            }
         }
 
         var root = uiDocument.rootVisualElement;
@@ -382,9 +406,14 @@ public class GameOverManager : MonoBehaviour
         if (sm != null && SaveRoom.LastCheckpoint.HasValue)
         {
             isGameOver = false;
-            if (PanelManager.Instance != null)
+            if (PanelManager.Instance == null)
             {
-                PanelManager.Instance.RegisterPanelActive("GameOver", false);
+                if (_gameOverPanel != null)
+                    _gameOverPanel.style.display = DisplayStyle.None;
+                if (uiDocument != null)
+                {
+                    PauseManager.SetHUDVisible(uiDocument.transform, true);
+                }
             }
 
             if (AIDirector.Instance != null)
@@ -399,13 +428,6 @@ public class GameOverManager : MonoBehaviour
 
             if (SpecialEnemyDirector.Instance != null)
                 SpecialEnemyDirector.Instance.FlushSpecialEnemies();
-
-            if (_gameOverPanel != null)
-                _gameOverPanel.style.display = DisplayStyle.None;
-            if (uiDocument != null)
-            {
-                PauseManager.SetHUDVisible(uiDocument.transform, true);
-            }
 
             // Fade back out when respawning using pure USS transition
             if (overlay != null)
