@@ -114,8 +114,7 @@ public class JournalUI : MonoBehaviour
         if (PanelManager.Instance != null)
         {
             if (!PanelManager.Instance.CanOpenPanel("Journal")) return;
-            PanelManager.Instance.RegisterPanelActive("Journal", true, Close);
-            StartCoroutine(RegisterTransition("Journal", PanelManager.PanelTransitionDuration));
+            PanelManager.Instance.OpenPanel("Journal", _panel, null, Close);
         }
         else
         {
@@ -129,8 +128,6 @@ public class JournalUI : MonoBehaviour
 
         _open = true;
         _transitionEndTime = Time.realtimeSinceStartup + PanelManager.PanelTransitionDuration;
-        _panel.style.display = DisplayStyle.Flex;
-        _panel.AddToClassList("visible");
 
         if (_closeButton != null)
         {
@@ -168,12 +165,6 @@ public class JournalUI : MonoBehaviour
             }
         }
 
-        if (_closeCoroutine != null)
-        {
-            StopCoroutine(_closeCoroutine);
-            _closeCoroutine = null;
-        }
-
         if (_typewriterCoroutine != null)
         {
             StopCoroutine(_typewriterCoroutine);
@@ -187,11 +178,6 @@ public class JournalUI : MonoBehaviour
         _open = false;
         _transitionEndTime = Time.realtimeSinceStartup + PanelManager.PanelTransitionDuration;
 
-        if (PanelManager.Instance != null)
-        {
-            StartCoroutine(RegisterTransition("Journal", PanelManager.PanelTransitionDuration));
-        }
-
         if (_closeCoroutine != null)
         {
             StopCoroutine(_closeCoroutine);
@@ -203,9 +189,9 @@ public class JournalUI : MonoBehaviour
             _typewriterCoroutine = null;
         }
 
-        if (_panel != null)
+        if (PanelManager.Instance != null)
         {
-            _closeCoroutine = StartCoroutine(CloseCoroutine());
+            PanelManager.Instance.ClosePanel("Journal", _panel, null, ResumeGameplay);
         }
         else
         {
@@ -213,20 +199,6 @@ public class JournalUI : MonoBehaviour
         }
 
         _audioSource.Stop();
-    }
-
-    private IEnumerator CloseCoroutine()
-    {
-        if (_panel != null) _panel.RemoveFromClassList("visible");
-
-        yield return new WaitForSecondsRealtime(PanelManager.PanelTransitionDuration);
-
-        if (!_open)
-        {
-            if (_panel != null) _panel.style.display = DisplayStyle.None;
-            ResumeGameplay();
-        }
-        _closeCoroutine = null;
     }
 
     private IEnumerator TypeText(string titleText, string fullContent, AudioClip voiceLog)
@@ -293,11 +265,6 @@ public class JournalUI : MonoBehaviour
 
     private void ResumeGameplay()
     {
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelActive("Journal", false);
-        }
-
         // Clear UI Toolkit focus
         if (_panel != null) _panel.Blur();
         if (_closeButton != null) _closeButton.Blur();
@@ -306,19 +273,6 @@ public class JournalUI : MonoBehaviour
         if (UnityEngine.EventSystems.EventSystem.current != null)
         {
             UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-        }
-    }
-
-    private System.Collections.IEnumerator RegisterTransition(string name, float duration)
-    {
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelTransitioning(name, true);
-        }
-        yield return new WaitForSecondsRealtime(duration);
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelTransitioning(name, false);
         }
     }
 

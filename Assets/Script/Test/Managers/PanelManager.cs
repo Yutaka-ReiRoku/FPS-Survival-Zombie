@@ -27,6 +27,54 @@ public class PanelManager : MonoBehaviour
     private Coroutine _lockCoroutine;
     private static readonly Dictionary<string, bool> _hudActiveState = new Dictionary<string, bool>();
 
+    public void OpenPanel(string name, VisualElement panel, VisualElement card, System.Action closeCallback = null)
+    {
+        if (panel != null)
+        {
+            panel.style.display = DisplayStyle.Flex;
+            panel.AddToClassList("visible");
+        }
+        if (card != null)
+        {
+            card.AddToClassList("visible");
+            card.MarkDirtyRepaint();
+        }
+
+        RegisterPanelActive(name, true, closeCallback);
+        StartCoroutine(RegisterTransition(name, PanelTransitionDuration));
+    }
+
+    public void ClosePanel(string name, VisualElement panel, VisualElement card, System.Action onTransitionComplete = null)
+    {
+        if (panel == null)
+        {
+            RegisterPanelActive(name, false);
+            onTransitionComplete?.Invoke();
+            return;
+        }
+        StartCoroutine(ClosePanelCoroutine(name, panel, card, onTransitionComplete));
+    }
+
+    private IEnumerator ClosePanelCoroutine(string name, VisualElement panel, VisualElement card, System.Action onTransitionComplete)
+    {
+        if (panel != null) panel.RemoveFromClassList("visible");
+        if (card != null) card.RemoveFromClassList("visible");
+
+        StartCoroutine(RegisterTransition(name, PanelTransitionDuration));
+
+        yield return new WaitForSecondsRealtime(PanelTransitionDuration);
+
+        // Ensure state wasn't changed to open again during the transition wait
+        bool isActive = IsPanelActive(name);
+        if (!isActive)
+        {
+            if (panel != null) panel.style.display = DisplayStyle.None;
+        }
+
+        RegisterPanelActive(name, false);
+        onTransitionComplete?.Invoke();
+    }
+
     public void RegisterPanelActive(string name, bool active, System.Action closeCallback = null)
     {
         if (active)

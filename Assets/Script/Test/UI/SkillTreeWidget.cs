@@ -255,18 +255,8 @@ public class SkillTreeWidget : MonoBehaviour
 
         if (PanelManager.Instance != null)
         {
-            PanelManager.Instance.RegisterPanelActive("SkillTree", true, Close);
-            StartCoroutine(RegisterTransition("SkillTree", PanelManager.PanelTransitionDuration));
+            PanelManager.Instance.OpenPanel("SkillTree", _root, _card, Close);
         }
-
-        if (_closeCoroutine != null)
-        {
-            StopCoroutine(_closeCoroutine);
-            _closeCoroutine = null;
-        }
-
-        _root.style.display = DisplayStyle.Flex;
-        _root.AddToClassList("open");
         Refresh();
     }
 
@@ -278,17 +268,7 @@ public class SkillTreeWidget : MonoBehaviour
 
         if (PanelManager.Instance != null)
         {
-            StartCoroutine(RegisterTransition("SkillTree", PanelManager.PanelTransitionDuration));
-        }
-
-        if (_closeCoroutine != null)
-        {
-            StopCoroutine(_closeCoroutine);
-        }
-
-        if (_root != null)
-        {
-            _closeCoroutine = StartCoroutine(CloseCoroutine());
+            PanelManager.Instance.ClosePanel("SkillTree", _root, _card, ResumeGameplay);
         }
         else
         {
@@ -296,27 +276,8 @@ public class SkillTreeWidget : MonoBehaviour
         }
     }
 
-    private IEnumerator CloseCoroutine()
-    {
-        if (_root != null) _root.RemoveFromClassList("open");
-
-        yield return new WaitForSecondsRealtime(PanelManager.PanelTransitionDuration);
-
-        if (!_open)
-        {
-            if (_root != null) _root.style.display = DisplayStyle.None;
-            ResumeGameplay();
-        }
-        _closeCoroutine = null;
-    }
-
     private void ResumeGameplay()
     {
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelActive("SkillTree", false);
-        }
-
         // Clear UI Toolkit focus
         if (_root != null) _root.Blur();
 
@@ -324,19 +285,6 @@ public class SkillTreeWidget : MonoBehaviour
         if (UnityEngine.EventSystems.EventSystem.current != null)
         {
             UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-        }
-    }
-
-    private System.Collections.IEnumerator RegisterTransition(string name, float duration)
-    {
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelTransitioning(name, true);
-        }
-        yield return new WaitForSecondsRealtime(duration);
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelTransitioning(name, false);
         }
     }
 

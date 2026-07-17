@@ -137,28 +137,17 @@ public class StatsPanelUI : MonoBehaviour
         _visible = visible;
         if (_root == null) return;
 
-        if (PanelManager.Instance != null)
-        {
-            if (visible)
-            {
-                PanelManager.Instance.RegisterPanelActive("Stats", true, Toggle);
-                if (!instant)
-                {
-                    StartCoroutine(RegisterTransition("Stats", PanelManager.PanelTransitionDuration));
-                }
-            }
-        }
-
-        if (_closeCoroutine != null)
-        {
-            StopCoroutine(_closeCoroutine);
-            _closeCoroutine = null;
-        }
-
         if (visible)
         {
-            _root.style.display = DisplayStyle.Flex;
-            _root.AddToClassList("visible");
+            if (PanelManager.Instance != null)
+            {
+                PanelManager.Instance.OpenPanel("Stats", _root, null, Toggle);
+            }
+            else
+            {
+                _root.style.display = DisplayStyle.Flex;
+                _root.AddToClassList("visible");
+            }
         }
         else
         {
@@ -173,40 +162,20 @@ public class StatsPanelUI : MonoBehaviour
             }
             else
             {
-                _closeCoroutine = StartCoroutine(CloseCoroutine());
+                if (PanelManager.Instance != null)
+                {
+                    PanelManager.Instance.ClosePanel("Stats", _root, null);
+                }
+                else
+                {
+                    _root.RemoveFromClassList("visible");
+                    _root.style.display = DisplayStyle.None;
+                }
             }
         }
 
         if (instant)
             _fade = visible ? 1f : 0f;
-    }
-
-    private System.Collections.IEnumerator CloseCoroutine()
-    {
-        _root.RemoveFromClassList("visible");
-        yield return new WaitForSecondsRealtime(PanelManager.PanelTransitionDuration);
-        if (!_visible)
-        {
-            _root.style.display = DisplayStyle.None;
-            if (PanelManager.Instance != null)
-            {
-                PanelManager.Instance.RegisterPanelActive("Stats", false);
-            }
-        }
-        _closeCoroutine = null;
-    }
-
-    private System.Collections.IEnumerator RegisterTransition(string name, float duration)
-    {
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelTransitioning(name, true);
-        }
-        yield return new WaitForSecondsRealtime(duration);
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelTransitioning(name, false);
-        }
     }
 
     private void RefreshValues()

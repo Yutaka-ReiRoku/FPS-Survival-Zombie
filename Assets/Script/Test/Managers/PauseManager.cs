@@ -416,8 +416,7 @@ public class PauseManager : MonoBehaviour
 
         if (PanelManager.Instance != null)
         {
-            PanelManager.Instance.RegisterPanelActive("Pause", true);
-            StartCoroutine(RegisterTransition("Pause", PanelManager.PanelTransitionDuration));
+            PanelManager.Instance.OpenPanel("Pause", _pausePanel, _pauseCard);
         }
 
         // Find and disable all active and inactive scene instances of Cowsins' built-in PauseMenu to prevent input/cursor conflicts
@@ -430,23 +429,6 @@ public class PauseManager : MonoBehaviour
                 pm.enabled = false;
             }
         }
-
-        if (_resumeCoroutine != null)
-        {
-            StopCoroutine(_resumeCoroutine);
-            _resumeCoroutine = null;
-        }
-
-        if (_pausePanel != null)
-        {
-            _pausePanel.style.display = DisplayStyle.Flex;
-            _pausePanel.AddToClassList("visible");
-            if (_pauseCard != null)
-            {
-                _pauseCard.AddToClassList("visible");
-                _pauseCard.MarkDirtyRepaint();
-            }
-        }
     }
 
     public void Resume()
@@ -455,11 +437,6 @@ public class PauseManager : MonoBehaviour
         Debug.Log("[PauseManager Debug] Resume() called. Setting IsPaused=false");
         IsPaused = false;
         _transitionEndTime = Time.realtimeSinceStartup + PanelManager.PanelTransitionDuration;
-
-        if (PanelManager.Instance != null)
-        {
-            StartCoroutine(RegisterTransition("Pause", PanelManager.PanelTransitionDuration));
-        }
 
         // Find and disable all active and inactive scene instances of Cowsins' built-in PauseMenu to prevent input/cursor conflicts
         var allPauseMenus2 = Resources.FindObjectsOfTypeAll<cowsins.PauseMenu>();
@@ -472,14 +449,9 @@ public class PauseManager : MonoBehaviour
             }
         }
 
-        if (_resumeCoroutine != null)
+        if (PanelManager.Instance != null)
         {
-            StopCoroutine(_resumeCoroutine);
-        }
-
-        if (_pausePanel != null)
-        {
-            _resumeCoroutine = StartCoroutine(ResumeCoroutine());
+            PanelManager.Instance.ClosePanel("Pause", _pausePanel, _pauseCard, ResumeGameplay);
         }
         else
         {
@@ -487,29 +459,8 @@ public class PauseManager : MonoBehaviour
         }
     }
 
-    private IEnumerator ResumeCoroutine()
-    {
-        if (_pausePanel != null) _pausePanel.RemoveFromClassList("visible");
-        if (_pauseCard != null) _pauseCard.RemoveFromClassList("visible");
-
-        Debug.Log("[PauseManager Debug] ResumeCoroutine started. Waiting 1.5s real-time");
-        yield return new WaitForSecondsRealtime(PanelManager.PanelTransitionDuration);
-
-        if (!IsPaused)
-        {
-            if (_pausePanel != null) _pausePanel.style.display = DisplayStyle.None;
-            ResumeGameplay();
-        }
-        _resumeCoroutine = null;
-    }
-
     private void ResumeGameplay()
     {
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelActive("Pause", false);
-        }
-
         // Clean up settings classes so it resets for next pause
         if (_pauseCard != null) _pauseCard.RemoveFromClassList("slide-down");
         if (_settingsCard != null) _settingsCard.RemoveFromClassList("active");
@@ -525,19 +476,6 @@ public class PauseManager : MonoBehaviour
         if (UnityEngine.EventSystems.EventSystem.current != null)
         {
             UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-        }
-    }
-
-    private System.Collections.IEnumerator RegisterTransition(string name, float duration)
-    {
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelTransitioning(name, true);
-        }
-        yield return new WaitForSecondsRealtime(duration);
-        if (PanelManager.Instance != null)
-        {
-            PanelManager.Instance.RegisterPanelTransitioning(name, false);
         }
     }
 

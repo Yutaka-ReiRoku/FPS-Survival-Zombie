@@ -15,7 +15,7 @@
     transition-duration: var(--premium-panel-transition-duration, 1.5s);
     transition-timing-function: ease-in-out;
 }
-#SkillTreeWidget.open {
+#SkillTreeWidget.visible {
     flex-direction: column;
     opacity: 1;
     transition-property: opacity;
@@ -38,7 +38,7 @@
     transition-timing-function: ease-in-out;
 }
 
-#SkillTreeWidget.open #scrim {
+#SkillTreeWidget.visible #scrim {
     opacity: 1;
     transition-property: opacity;
     transition-duration: var(--premium-panel-transition-duration, 1.5s);
@@ -63,7 +63,7 @@
     transition-duration: var(--premium-panel-transition-duration, 1.5s);
     transition-timing-function: ease-in, ease-in;
 }
-#SkillTreeWidget.open #card {
+#SkillTreeWidget.visible #card {
     opacity: 1;
     scale: 1;
     transition-property: opacity, scale;
