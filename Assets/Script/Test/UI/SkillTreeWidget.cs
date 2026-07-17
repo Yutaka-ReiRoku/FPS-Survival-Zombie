@@ -198,11 +198,27 @@ public class SkillTreeWidget : MonoBehaviour
         {
             if (IsTransitioning) return;
 
-            bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
-            bool pauseActive = PauseManager.Instance != null && PauseManager.Instance.IsOpenOrTransitioning;
-            bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
-            if (_open) Close();
-            else if (!gameOver && !pauseActive && !journalActive) Open();
+            if (_open)
+            {
+                Close();
+            }
+            else
+            {
+                if (PanelManager.Instance != null)
+                {
+                    if (PanelManager.Instance.CanOpenPanel("SkillTree"))
+                    {
+                        Open();
+                    }
+                }
+                else
+                {
+                    bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+                    bool pauseActive = PauseManager.Instance != null && PauseManager.Instance.IsOpenOrTransitioning;
+                    bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
+                    if (!gameOver && !pauseActive && !journalActive) Open();
+                }
+            }
         }
         if (_open)
         {
@@ -237,6 +253,12 @@ public class SkillTreeWidget : MonoBehaviour
         _open = true;
         _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
 
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelActive("SkillTree", true);
+            StartCoroutine(RegisterTransition("SkillTree", 1.5f));
+        }
+
         if (_closeCoroutine != null)
         {
             StopCoroutine(_closeCoroutine);
@@ -265,6 +287,11 @@ public class SkillTreeWidget : MonoBehaviour
         if (!_open || IsTransitioning) return;
         _open = false;
         _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+
+        if (PanelManager.Instance != null)
+        {
+            StartCoroutine(RegisterTransition("SkillTree", 1.5f));
+        }
 
         if (_closeCoroutine != null)
         {
@@ -297,6 +324,11 @@ public class SkillTreeWidget : MonoBehaviour
 
     private void ResumeGameplay()
     {
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelActive("SkillTree", false);
+        }
+
         bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
         bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
         if (!pauseOpen && !gameOver)
@@ -317,6 +349,19 @@ public class SkillTreeWidget : MonoBehaviour
             if (_playerControl != null)
                 _playerControl.GrantControl();
             PauseManager.SetHUDVisible(_canvasRoot != null ? _canvasRoot : transform, true);
+        }
+    }
+
+    private System.Collections.IEnumerator RegisterTransition(string name, float duration)
+    {
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelTransitioning(name, true);
+        }
+        yield return new WaitForSecondsRealtime(duration);
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelTransitioning(name, false);
         }
     }
 

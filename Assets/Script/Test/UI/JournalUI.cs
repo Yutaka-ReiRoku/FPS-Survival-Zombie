@@ -111,11 +111,21 @@ public class JournalUI : MonoBehaviour
 
     public void Show(JournalData journal)
     {
-        bool pauseActive = PauseManager.Instance != null && PauseManager.Instance.IsOpenOrTransitioning;
-        bool skillTreeActive = false;
-        var skillTree = FindAnyObjectByType<SkillTreeWidget>();
-        if (skillTree != null) skillTreeActive = skillTree.IsOpenOrTransitioning;
-        if (pauseActive || skillTreeActive || IsTransitioning) return;
+        if (PanelManager.Instance != null)
+        {
+            if (!PanelManager.Instance.CanOpenPanel("Journal")) return;
+            PanelManager.Instance.RegisterPanelActive("Journal", true);
+            StartCoroutine(RegisterTransition("Journal", 1.5f));
+        }
+        else
+        {
+            bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+            bool pauseActive = PauseManager.Instance != null && PauseManager.Instance.IsOpenOrTransitioning;
+            bool skillTreeActive = false;
+            var skillTree = FindAnyObjectByType<SkillTreeWidget>();
+            if (skillTree != null) skillTreeActive = skillTree.IsOpenOrTransitioning;
+            if (gameOver || pauseActive || skillTreeActive || IsTransitioning) return;
+        }
 
         _open = true;
         _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
@@ -192,6 +202,11 @@ public class JournalUI : MonoBehaviour
         if (!_open || IsTransitioning) return;
         _open = false;
         _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+
+        if (PanelManager.Instance != null)
+        {
+            StartCoroutine(RegisterTransition("Journal", 1.5f));
+        }
 
         if (_closeCoroutine != null)
         {
@@ -294,6 +309,11 @@ public class JournalUI : MonoBehaviour
 
     private void ResumeGameplay()
     {
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelActive("Journal", false);
+        }
+
         bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
         bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
         if (!pauseOpen && !gameOver)
@@ -316,6 +336,19 @@ public class JournalUI : MonoBehaviour
                 _playerControl.GrantControl();
 
             PauseManager.SetHUDVisible(transform, true);
+        }
+    }
+
+    private System.Collections.IEnumerator RegisterTransition(string name, float duration)
+    {
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelTransitioning(name, true);
+        }
+        yield return new WaitForSecondsRealtime(duration);
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelTransitioning(name, false);
         }
     }
 

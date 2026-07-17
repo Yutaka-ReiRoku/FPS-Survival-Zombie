@@ -325,31 +325,59 @@ public class PauseManager : MonoBehaviour
 
         Debug.Log($"[PauseManager Debug] HandleEscapeInput called. IsPaused={IsPaused}, IsTransitioning={IsTransitioning}");
 
-        if (GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver)
-            return;
-        if (IsTransitioning) return;
-
-        var skillTree = FindAnyObjectByType<SkillTreeWidget>();
-        bool skillTreeActive = skillTree != null && skillTree.IsOpenOrTransitioning;
-        bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
-
-        if (skillTreeActive)
+        if (PanelManager.Instance != null)
         {
-            if (skillTree.IsOpen && !skillTree.IsTransitioning)
+            if (PanelManager.Instance.IsPanelActive("GameOver")) return;
+            if (PanelManager.Instance.IsAnyPanelTransitioning()) return;
+
+            if (PanelManager.Instance.IsPanelActive("SkillTree"))
             {
-                Debug.Log("[PauseManager Debug] Escape -> closing SkillTree");
-                skillTree.Close();
+                var skillTree = FindAnyObjectByType<SkillTreeWidget>();
+                if (skillTree != null && skillTree.IsOpen && !skillTree.IsTransitioning)
+                {
+                    Debug.Log("[PauseManager Debug] Escape -> closing SkillTree");
+                    skillTree.Close();
+                }
+                return;
             }
-            return;
+            if (PanelManager.Instance.IsPanelActive("Journal"))
+            {
+                if (JournalUI.Instance != null && JournalUI.Instance.IsOpen && !JournalUI.Instance.IsTransitioning)
+                {
+                    Debug.Log("[PauseManager Debug] Escape -> closing Journal");
+                    JournalUI.Instance.Close();
+                }
+                return;
+            }
         }
-        if (journalActive)
+        else
         {
-            if (JournalUI.Instance.IsOpen && !JournalUI.Instance.IsTransitioning)
+            if (GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver)
+                return;
+            if (IsTransitioning) return;
+
+            var skillTree = FindAnyObjectByType<SkillTreeWidget>();
+            bool skillTreeActive = skillTree != null && skillTree.IsOpenOrTransitioning;
+            bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
+
+            if (skillTreeActive)
             {
-                Debug.Log("[PauseManager Debug] Escape -> closing Journal");
-                JournalUI.Instance.Close();
+                if (skillTree.IsOpen && !skillTree.IsTransitioning)
+                {
+                    Debug.Log("[PauseManager Debug] Escape -> closing SkillTree");
+                    skillTree.Close();
+                }
+                return;
             }
-            return;
+            if (journalActive)
+            {
+                if (JournalUI.Instance.IsOpen && !JournalUI.Instance.IsTransitioning)
+                {
+                    Debug.Log("[PauseManager Debug] Escape -> closing Journal");
+                    JournalUI.Instance.Close();
+                }
+                return;
+            }
         }
 
         // Check if Settings Card is open
@@ -375,6 +403,12 @@ public class PauseManager : MonoBehaviour
         Debug.Log("[PauseManager Debug] Pause() called. Setting IsPaused=true");
         IsPaused = true;
         _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelActive("Pause", true);
+            StartCoroutine(RegisterTransition("Pause", 1.5f));
+        }
 
         // Find and disable all active and inactive scene instances of Cowsins' built-in PauseMenu to prevent input/cursor conflicts
         var allPauseMenus = Resources.FindObjectsOfTypeAll<cowsins.PauseMenu>();
@@ -430,6 +464,11 @@ public class PauseManager : MonoBehaviour
         IsPaused = false;
         _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
 
+        if (PanelManager.Instance != null)
+        {
+            StartCoroutine(RegisterTransition("Pause", 1.5f));
+        }
+
         // Find and disable all active and inactive scene instances of Cowsins' built-in PauseMenu to prevent input/cursor conflicts
         var allPauseMenus2 = Resources.FindObjectsOfTypeAll<cowsins.PauseMenu>();
         foreach (var pm in allPauseMenus2)
@@ -474,6 +513,11 @@ public class PauseManager : MonoBehaviour
 
     private void ResumeGameplay()
     {
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelActive("Pause", false);
+        }
+
         cowsins.PauseMenu.isPaused = false;
         Time.timeScale = 1f;
 
@@ -498,6 +542,19 @@ public class PauseManager : MonoBehaviour
         if (playerControl != null)
             playerControl.GrantControl();
         SetHUDVisible(_canvasRoot, true);
+    }
+
+    private System.Collections.IEnumerator RegisterTransition(string name, float duration)
+    {
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelTransitioning(name, true);
+        }
+        yield return new WaitForSecondsRealtime(duration);
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelTransitioning(name, false);
+        }
     }
 
     private void OpenSettings()

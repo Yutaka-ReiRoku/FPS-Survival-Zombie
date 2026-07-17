@@ -171,6 +171,10 @@ public class GameOverManager : MonoBehaviour
         if (isGameOver)
             return;
         isGameOver = true;
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelActive("GameOver", true);
+        }
         OnPlayerDied?.Invoke();
         StartCoroutine(ShowAfterDelay());
     }
@@ -378,6 +382,10 @@ public class GameOverManager : MonoBehaviour
         if (sm != null && SaveRoom.LastCheckpoint.HasValue)
         {
             isGameOver = false;
+            if (PanelManager.Instance != null)
+            {
+                PanelManager.Instance.RegisterPanelActive("GameOver", false);
+            }
 
             if (AIDirector.Instance != null)
                 AIDirector.Instance.FlushActiveZombies();

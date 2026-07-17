@@ -31,6 +31,15 @@ public class StatsPanelUI : MonoBehaviour
     private void Awake()
     {
         _doc = GetComponent<UIDocument>();
+        if (_doc == null)
+        {
+            _doc = FindAnyObjectByType<UIDocument>();
+        }
+        if (_doc == null)
+        {
+            var canvasGo = GameObject.Find("GameUICanvas");
+            if (canvasGo != null) _doc = canvasGo.GetComponent<UIDocument>();
+        }
         if (_doc == null) return;
 
         _root = _doc.rootVisualElement.Q("StatsPanel");
@@ -74,7 +83,24 @@ public class StatsPanelUI : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(toggleKey))
-            Toggle();
+        {
+            bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+            bool pauseActive = PauseManager.Instance != null && PauseManager.Instance.IsOpenOrTransitioning;
+            bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
+            
+            bool skillTreeActive = false;
+            var skillTree = FindAnyObjectByType<SkillTreeWidget>();
+            if (skillTree != null) skillTreeActive = skillTree.IsOpenOrTransitioning;
+
+            if (_visible)
+            {
+                Toggle();
+            }
+            else if (!gameOver && !pauseActive && !journalActive && !skillTreeActive)
+            {
+                Toggle();
+            }
+        }
         float target = _visible ? 1f : 0f;
         if (!Mathf.Approximately(_fade, target))
             _fade = Mathf.MoveTowards(_fade, target, 1f / Mathf.Max(0.01f, fadeDuration) * Time.unscaledDeltaTime);
@@ -106,11 +132,33 @@ public class StatsPanelUI : MonoBehaviour
         _visible = visible;
         if (_root == null) return;
 
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelActive("Stats", visible);
+            if (!instant)
+            {
+                StartCoroutine(RegisterTransition("Stats", 0.22f));
+            }
+        }
+
         if (visible) _root.AddToClassList("open");
         else _root.RemoveFromClassList("open");
 
         if (instant)
             _fade = visible ? 1f : 0f;
+    }
+
+    private System.Collections.IEnumerator RegisterTransition(string name, float duration)
+    {
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelTransitioning(name, true);
+        }
+        yield return new WaitForSecondsRealtime(duration);
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.RegisterPanelTransitioning(name, false);
+        }
     }
 
     private void RefreshValues()
