@@ -124,7 +124,14 @@
         <!-- FPS -->
         <ui:Label name="FPSLabel" text="-- FPS" class="fps-counter" />
         <!-- Interact -->
-        <ui:VisualElement name="InteractPrompt" class="interact-prompt" />
+        <ui:VisualElement name="InteractPrompt" class="interact-prompt">
+            <ui:VisualElement name="interact-panel" class="interact-panel">
+                <ui:Label name="interact-label" class="interact-label" />
+                <ui:VisualElement name="interact-progress" class="interact-progress">
+                    <ui:VisualElement name="interact-progress-fill" class="interact-progress-fill" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
         <!-- Wave -->
         <ui:VisualElement name="WaveAnnouncer" picking-mode="Ignore">
             <ui:Label name="WaveTitle" class="wave-title" text="WAVE 1" />
