@@ -73,7 +73,6 @@ public class PauseManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        _hudActiveState.Clear();
 
         if (PanelManager.Instance == null)
         {
@@ -118,7 +117,7 @@ public class PauseManager : MonoBehaviour
 
         if (!IsPaused && (GameOverManager.Instance == null || !GameOverManager.Instance.IsGameOver))
         {
-            StartCoroutine(ForceLockMouseCoroutine());
+            if (PanelManager.Instance != null) PanelManager.Instance.ForceLockMouse();
         }
 
         SubscribeToInputManager();

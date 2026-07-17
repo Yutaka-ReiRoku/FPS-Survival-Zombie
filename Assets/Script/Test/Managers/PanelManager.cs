@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using cowsins;
 
 public class PanelManager : MonoBehaviour
 {
@@ -202,6 +203,15 @@ public class PanelManager : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public void ForceLockMouse()
+    {
+        if (gameObject.activeInHierarchy)
+        {
+            if (_lockCoroutine != null) StopCoroutine(_lockCoroutine);
+            _lockCoroutine = StartCoroutine(ForceLockMouseCoroutine());
+        }
     }
 
     public bool CanOpenPanel(string name)
