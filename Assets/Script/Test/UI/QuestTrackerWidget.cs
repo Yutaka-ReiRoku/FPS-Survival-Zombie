@@ -37,6 +37,11 @@ public class QuestTrackerWidget : MonoBehaviour
 
     private void OnEnable()
     {
+        if (_mainPanel != null)
+            _mainPanel.generateVisualContent += OnGenerateCardBackground;
+        if (_sidePanel != null)
+            _sidePanel.generateVisualContent += OnGenerateCardBackground;
+
         if (StoryManager.Instance != null)
         {
             StoryManager.Instance.OnActiveQuestChanged += HandleQuestChanged;
@@ -53,6 +58,11 @@ public class QuestTrackerWidget : MonoBehaviour
 
     private void OnDisable()
     {
+        if (_mainPanel != null)
+            _mainPanel.generateVisualContent -= OnGenerateCardBackground;
+        if (_sidePanel != null)
+            _sidePanel.generateVisualContent -= OnGenerateCardBackground;
+
         if (StoryManager.Instance != null)
         {
             StoryManager.Instance.OnActiveQuestChanged -= HandleQuestChanged;
@@ -113,6 +123,8 @@ public class QuestTrackerWidget : MonoBehaviour
             _objective.text = "";
             _collectibles.text = "";
             RebuildSideBlock();
+            if (_mainPanel != null) _mainPanel.MarkDirtyRepaint();
+            if (_sidePanel != null) _sidePanel.MarkDirtyRepaint();
             return;
         }
 
@@ -142,6 +154,8 @@ public class QuestTrackerWidget : MonoBehaviour
         }
         UpdateCollectibleDisplay();
         RebuildSideBlock();
+        if (_mainPanel != null) _mainPanel.MarkDirtyRepaint();
+        if (_sidePanel != null) _sidePanel.MarkDirtyRepaint();
     }
 
     private void RebuildSideBlock()
@@ -168,5 +182,114 @@ public class QuestTrackerWidget : MonoBehaviour
             _sideLinesContainer.Add(line);
             _sideLines.Add(line);
         }
+        if (_sidePanel != null) _sidePanel.MarkDirtyRepaint();
+    }
+
+    private void OnGenerateCardBackground(MeshGenerationContext mgc)
+    {
+        var targetElement = mgc.visualElement;
+        if (targetElement == null) return;
+        var rect = targetElement.layout;
+        if (rect.width <= 0 || rect.height <= 0) return;
+
+        var painter = mgc.painter2D;
+        float chamferSize = 12f;
+
+        // 1. Draw solid dark blue-gray translucent background shape to match HUD modules (0.85 alpha as requested)
+        Color fillCol = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.85f);
+        painter.fillColor = fillCol;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Fill();
+
+        // 2. Draw yellow-black diagonal warning stripes at the top edge (adapted to Gold)
+        float badgeW = 40f;
+        float badgeH = 5f;
+        float startX = rect.width - badgeW - 16f;
+        float startY = 3f;
+
+        painter.lineWidth = 1.0f;
+        for (float offset = 0; offset < badgeW; offset += 5f)
+        {
+            // Gold stripe
+            painter.strokeColor = new Color(217f / 255f, 199f / 255f, 115f / 255f, 0.8f);
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(startX + offset, startY));
+            painter.LineTo(new Vector2(startX + offset - 3f, startY + badgeH));
+            painter.Stroke();
+
+            // Black stripe
+            painter.strokeColor = new Color(16f / 255f, 14f / 255f, 14f / 255f, 0.9f);
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(startX + offset + 2f, startY));
+            painter.LineTo(new Vector2(startX + offset - 1f, startY + badgeH));
+            painter.Stroke();
+        }
+
+        // 3. Draw outer border with gold breathing glow
+        float pulse = 0.35f + Mathf.PingPong(Time.realtimeSinceStartup * 1.5f, 0.45f);
+        Color strokeCol = new Color(217f / 255f, 199f / 255f, 115f / 255f, pulse * 0.5f);
+        float lineWidth = 1.2f;
+
+        painter.strokeColor = strokeCol;
+        painter.lineWidth = lineWidth;
+        painter.BeginPath();
+        painter.MoveTo(new Vector2(chamferSize, 0));
+        painter.LineTo(new Vector2(rect.width, 0));
+        painter.LineTo(new Vector2(rect.width, rect.height - chamferSize));
+        painter.LineTo(new Vector2(rect.width - chamferSize, rect.height));
+        painter.LineTo(new Vector2(0, rect.height));
+        painter.LineTo(new Vector2(0, chamferSize));
+        painter.ClosePath();
+        painter.Stroke();
+
+        // 4. Draw inner offset border
+        float d = 3f;
+        if (rect.width > d * 2 && rect.height > d * 2)
+        {
+            Color innerCol = new Color(217f / 255f, 199f / 255f, 115f / 255f, 0.1f);
+            painter.strokeColor = innerCol;
+            painter.lineWidth = 0.8f;
+            painter.BeginPath();
+            painter.MoveTo(new Vector2(chamferSize, d));
+            painter.LineTo(new Vector2(rect.width - d, d));
+            painter.LineTo(new Vector2(rect.width - d, rect.height - chamferSize));
+            painter.LineTo(new Vector2(rect.width - chamferSize, rect.height - d));
+            painter.LineTo(new Vector2(d, rect.height - d));
+            painter.LineTo(new Vector2(d, chamferSize));
+            painter.ClosePath();
+            painter.Stroke();
+        }
+
+        // 5. Draw 4 3D metallic gold corner rivets (screws)
+        System.Action<Vector2> drawRivet = center =>
+        {
+            painter.fillColor = new Color(16f / 255f, 14f / 255f, 14f / 255f, 0.6f);
+            painter.BeginPath();
+            painter.Arc(center + new Vector2(0.5f, 0.5f), 2.5f, 0f, 360f);
+            painter.Fill();
+
+            painter.fillColor = new Color(175f / 255f, 150f / 255f, 90f / 255f, 1.0f); // Gold screw head
+            painter.BeginPath();
+            painter.Arc(center, 2.0f, 0f, 360f);
+            painter.Fill();
+
+            painter.fillColor = Color.white;
+            painter.BeginPath();
+            painter.Arc(center - new Vector2(0.6f, 0.6f), 0.4f, 0f, 360f);
+            painter.Fill();
+        };
+
+        float rOffset = 8f;
+        drawRivet(new Vector2(rOffset, rOffset));
+        drawRivet(new Vector2(rect.width - rOffset, rOffset));
+        drawRivet(new Vector2(rect.width - rOffset, rect.height - rOffset));
+        drawRivet(new Vector2(rOffset, rect.height - rOffset));
     }
 }

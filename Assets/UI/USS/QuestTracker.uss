@@ -10,16 +10,7 @@
 }
 
 #MainPanel {
-    background-color: rgba(14, 18, 24, 0.78); /* Semi-transparent dark background */
-    background-image: resource("Images/ui_panel"); /* Premium 9-slice panel card */
-    -unity-background-scale-mode: stretch-to-fill;
-    -unity-slice-left: 12;
-    -unity-slice-right: 12;
-    -unity-slice-top: 12;
-    -unity-slice-bottom: 12;
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
+    /* Drawn dynamically by vector painter in QuestTrackerWidget.cs for premium HUD theme */
     padding: var(--space-m, 12px) var(--space-l, 16px);
     flex-direction: column;
 }
@@ -57,16 +48,7 @@
 }
 
 #SidePanel {
-    background-color: rgba(14, 18, 24, 0.78); /* Semi-transparent dark background */
-    background-image: resource("Images/ui_panel"); /* Premium 9-slice panel card */
-    -unity-background-scale-mode: stretch-to-fill;
-    -unity-slice-left: 12;
-    -unity-slice-right: 12;
-    -unity-slice-top: 12;
-    -unity-slice-bottom: 12;
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
+    /* Drawn dynamically by vector painter in QuestTrackerWidget.cs for premium HUD theme */
     padding: var(--space-s, 8px) var(--space-m, 12px);
     margin-top: var(--space-s, 8px);
     flex-direction: column;
