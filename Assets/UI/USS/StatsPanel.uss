@@ -1,60 +1,9 @@
 @import url("Shared.uss");
 
-.stats-root {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    display: none;
-    justify-content: center;
-    align-items: center;
-}
-.stats-root.open {
-    display: flex;
-}
-
-.stats-scrim {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background-color: var(--color-scrim-bottom, rgba(0, 0, 0, 0.86));
-    opacity: 0;
-    transition: opacity var(--panel-in-duration, 0.22s);
-}
-.stats-root.open .stats-scrim {
-    opacity: 1;
-}
-
+/* Specific dimensions for the statistics card */
 .stats-card {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    translate: -50% -50%;
     width: 620px;
     height: 800px;
-    background-color: rgba(9, 13, 19, 0.95); /* Dark tactical card background */
-    border-width: 2px;
-    border-color: rgba(217, 199, 115, 0.35); /* Gold outline */
-    border-radius: 12px;
-    opacity: 0;
-    scale: 0.92;
-    transition: opacity var(--panel-in-duration, 0.22s), scale var(--panel-in-duration, 0.22s);
-}
-.stats-root.open .stats-card {
-    opacity: 1;
-    scale: 1;
-}
-
-.stats-accent {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 4px;
-    background-color: var(--color-accent-gold, rgb(217, 199, 115));
 }
 
 .stats-title {
@@ -94,4 +43,3 @@
     padding-bottom: var(--space-xs, 4px);
     height: 36px;
 }
-

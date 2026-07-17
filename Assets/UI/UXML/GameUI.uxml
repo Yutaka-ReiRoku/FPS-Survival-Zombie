@@ -230,10 +230,10 @@
         </ui:VisualElement>
 
         <!-- ==================== StatsPanel (inlined) ==================== -->
-        <ui:VisualElement name="StatsPanel" class="stats-root">
-            <ui:VisualElement name="StatsScrim" class="stats-scrim" />
-            <ui:VisualElement name="StatsCard" class="stats-card">
-                <ui:VisualElement name="StatsAccent" class="stats-accent" />
+        <ui:VisualElement name="StatsPanel" class="ui-panel-root">
+            <ui:VisualElement name="StatsScrim" class="ui-panel-vignette" />
+            <ui:VisualElement name="StatsCard" class="ui-panel-card stats-card">
+                <ui:VisualElement name="StatsAccent" class="ui-panel-accent" />
                 <ui:Label name="StatsTitle" class="stats-title" text="STATISTICS" />
                 <ui:VisualElement name="StatsDivider" class="stats-divider" />
                 <ui:VisualElement name="StatsGrid" class="stats-grid" />

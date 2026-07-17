@@ -114,8 +114,8 @@ public class JournalUI : MonoBehaviour
         if (PanelManager.Instance != null)
         {
             if (!PanelManager.Instance.CanOpenPanel("Journal")) return;
-            PanelManager.Instance.RegisterPanelActive("Journal", true);
-            StartCoroutine(RegisterTransition("Journal", 1.5f));
+            PanelManager.Instance.RegisterPanelActive("Journal", true, Close);
+            StartCoroutine(RegisterTransition("Journal", PanelManager.PanelTransitionDuration));
         }
         else
         {
@@ -128,7 +128,7 @@ public class JournalUI : MonoBehaviour
         }
 
         _open = true;
-        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+        _transitionEndTime = Time.realtimeSinceStartup + PanelManager.PanelTransitionDuration;
         _panel.style.display = DisplayStyle.Flex;
         _panel.AddToClassList("visible");
 
@@ -201,11 +201,11 @@ public class JournalUI : MonoBehaviour
     {
         if (!_open || IsTransitioning) return;
         _open = false;
-        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+        _transitionEndTime = Time.realtimeSinceStartup + PanelManager.PanelTransitionDuration;
 
         if (PanelManager.Instance != null)
         {
-            StartCoroutine(RegisterTransition("Journal", 1.5f));
+            StartCoroutine(RegisterTransition("Journal", PanelManager.PanelTransitionDuration));
         }
 
         if (_closeCoroutine != null)
@@ -235,7 +235,7 @@ public class JournalUI : MonoBehaviour
     {
         if (_panel != null) _panel.RemoveFromClassList("visible");
 
-        yield return new WaitForSecondsRealtime(1.5f);
+        yield return new WaitForSecondsRealtime(PanelManager.PanelTransitionDuration);
 
         if (!_open)
         {

@@ -19,7 +19,7 @@ public class GameOverManager : MonoBehaviour
     public string mainMenuSceneName = "MainMenu";
 
     [Header("Behaviour")]
-    public float showDelay = 1.5f;
+    public float showDelay = PanelManager.PanelTransitionDuration;
     public bool freezeTimeOnGameOver = true;
 
     public bool IsGameOver => isGameOver;
@@ -335,7 +335,7 @@ public class GameOverManager : MonoBehaviour
             overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        yield return new WaitForSecondsRealtime(3.0f);
+        yield return new WaitForSecondsRealtime(PanelManager.BlackOverlayDuration);
 
         if (_gameOverPanel != null)
         {
@@ -371,7 +371,7 @@ public class GameOverManager : MonoBehaviour
             overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        yield return new WaitForSecondsRealtime(3.0f);
+        yield return new WaitForSecondsRealtime(PanelManager.BlackOverlayDuration);
 
         Time.timeScale = 1f;
 
@@ -411,7 +411,7 @@ public class GameOverManager : MonoBehaviour
             if (overlay != null)
             {
                 overlay.AddToClassList("fade-out"); // Starts 3s fade-out in USS!
-                yield return new WaitForSecondsRealtime(3.0f);
+                yield return new WaitForSecondsRealtime(PanelManager.BlackOverlayDuration);
                 overlay.pickingMode = PickingMode.Ignore; // Allow clicks to pass through
             }
 
@@ -462,7 +462,7 @@ public class GameOverManager : MonoBehaviour
             overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        yield return new WaitForSecondsRealtime(3.0f);
+        yield return new WaitForSecondsRealtime(PanelManager.BlackOverlayDuration);
 
         if (_gameOverPanel != null)
         {

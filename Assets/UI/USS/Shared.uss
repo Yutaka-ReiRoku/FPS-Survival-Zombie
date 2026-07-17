@@ -418,3 +418,78 @@ Button:active,
 .black-overlay.fade-out {
     opacity: 0;
 }
+
+/* ============================================================
+   PREMIUM GENERIC UI PANELS
+   ============================================================ */
+
+/* The root overlay container for the panel */
+#GameUIRoot .ui-panel-root {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0); /* Always transparent */
+    opacity: 0;
+    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+}
+
+#GameUIRoot .ui-panel-root.visible {
+    opacity: 1;
+    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+}
+
+/* Generic vignette for panels */
+.ui-panel-vignette {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-image: resource("Images/ui_vignette");
+    -unity-background-scale-mode: scale-and-crop;
+    opacity: 0;
+    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+}
+
+.ui-panel-root.visible .ui-panel-vignette {
+    opacity: 1;
+    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+}
+
+/* Generic card container with 1.5s scale/fade transition and 0.85 alpha background */
+.ui-panel-card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    background-color: var(--premium-panel-bg-color, rgba(9, 13, 19, 0.85));
+    border-width: 2px;
+    border-color: var(--premium-panel-border-color, rgba(217, 199, 115, 0.35));
+    border-radius: 12px;
+    opacity: 0;
+    scale: 0.9;
+    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-in, scale var(--premium-panel-transition-duration, 1.5s) ease-in, translate var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+}
+
+.ui-panel-root.visible .ui-panel-card {
+    opacity: 1;
+    scale: 1;
+    transition: opacity var(--premium-panel-transition-duration, 1.5s) ease-out-back, scale var(--premium-panel-transition-duration, 1.5s) ease-out-back, translate var(--premium-panel-transition-duration, 1.5s) ease-in-out;
+}
+
+/* Accent top bar */
+.ui-panel-accent {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 4px;
+    background-color: var(--color-accent-gold, rgb(217, 199, 115));
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}

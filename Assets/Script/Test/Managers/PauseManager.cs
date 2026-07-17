@@ -330,23 +330,9 @@ public class PauseManager : MonoBehaviour
             if (PanelManager.Instance.IsPanelActive("GameOver")) return;
             if (PanelManager.Instance.IsAnyPanelTransitioning()) return;
 
-            if (PanelManager.Instance.IsPanelActive("SkillTree"))
+            // Try to close active panel generically (e.g. SkillTree, Journal, Stats)
+            if (PanelManager.Instance.CloseActivePanel())
             {
-                var skillTree = FindAnyObjectByType<SkillTreeWidget>();
-                if (skillTree != null && skillTree.IsOpen && !skillTree.IsTransitioning)
-                {
-                    Debug.Log("[PauseManager Debug] Escape -> closing SkillTree");
-                    skillTree.Close();
-                }
-                return;
-            }
-            if (PanelManager.Instance.IsPanelActive("Journal"))
-            {
-                if (JournalUI.Instance != null && JournalUI.Instance.IsOpen && !JournalUI.Instance.IsTransitioning)
-                {
-                    Debug.Log("[PauseManager Debug] Escape -> closing Journal");
-                    JournalUI.Instance.Close();
-                }
                 return;
             }
         }
@@ -359,6 +345,9 @@ public class PauseManager : MonoBehaviour
             var skillTree = FindAnyObjectByType<SkillTreeWidget>();
             bool skillTreeActive = skillTree != null && skillTree.IsOpenOrTransitioning;
             bool journalActive = JournalUI.Instance != null && JournalUI.Instance.IsOpenOrTransitioning;
+
+            var statsPanel = FindAnyObjectByType<StatsPanelUI>();
+            bool statsActive = statsPanel != null && statsPanel.IsOpen;
 
             if (skillTreeActive)
             {
@@ -376,6 +365,12 @@ public class PauseManager : MonoBehaviour
                     Debug.Log("[PauseManager Debug] Escape -> closing Journal");
                     JournalUI.Instance.Close();
                 }
+                return;
+            }
+            if (statsActive)
+            {
+                Debug.Log("[PauseManager Debug] Escape -> closing StatsPanel");
+                statsPanel.Toggle();
                 return;
             }
         }
@@ -402,12 +397,12 @@ public class PauseManager : MonoBehaviour
         if (!_uiReady || IsTransitioning) return;
         Debug.Log("[PauseManager Debug] Pause() called. Setting IsPaused=true");
         IsPaused = true;
-        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+        _transitionEndTime = Time.realtimeSinceStartup + PanelManager.PanelTransitionDuration;
 
         if (PanelManager.Instance != null)
         {
             PanelManager.Instance.RegisterPanelActive("Pause", true);
-            StartCoroutine(RegisterTransition("Pause", 1.5f));
+            StartCoroutine(RegisterTransition("Pause", PanelManager.PanelTransitionDuration));
         }
 
         // Find and disable all active and inactive scene instances of Cowsins' built-in PauseMenu to prevent input/cursor conflicts
@@ -462,11 +457,11 @@ public class PauseManager : MonoBehaviour
         if (!_uiReady || IsTransitioning) return;
         Debug.Log("[PauseManager Debug] Resume() called. Setting IsPaused=false");
         IsPaused = false;
-        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+        _transitionEndTime = Time.realtimeSinceStartup + PanelManager.PanelTransitionDuration;
 
         if (PanelManager.Instance != null)
         {
-            StartCoroutine(RegisterTransition("Pause", 1.5f));
+            StartCoroutine(RegisterTransition("Pause", PanelManager.PanelTransitionDuration));
         }
 
         // Find and disable all active and inactive scene instances of Cowsins' built-in PauseMenu to prevent input/cursor conflicts
@@ -501,7 +496,7 @@ public class PauseManager : MonoBehaviour
         if (_pauseCard != null) _pauseCard.RemoveFromClassList("visible");
 
         Debug.Log("[PauseManager Debug] ResumeCoroutine started. Waiting 1.5s real-time");
-        yield return new WaitForSecondsRealtime(1.5f);
+        yield return new WaitForSecondsRealtime(PanelManager.PanelTransitionDuration);
 
         if (!IsPaused)
         {
@@ -820,7 +815,7 @@ public class PauseManager : MonoBehaviour
             overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        yield return new WaitForSecondsRealtime(3.0f);
+        yield return new WaitForSecondsRealtime(PanelManager.BlackOverlayDuration);
 
         if (_pausePanel != null)
         {
@@ -856,7 +851,7 @@ public class PauseManager : MonoBehaviour
             overlay.RemoveFromClassList("fade-out"); // Starts 3s fade to black in USS!
         }
 
-        yield return new WaitForSecondsRealtime(3.0f);
+        yield return new WaitForSecondsRealtime(PanelManager.BlackOverlayDuration);
 
         if (_pausePanel != null)
         {

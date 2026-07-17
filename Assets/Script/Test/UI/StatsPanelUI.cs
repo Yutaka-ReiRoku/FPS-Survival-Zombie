@@ -16,6 +16,7 @@ public class StatsPanelUI : MonoBehaviour
     private readonly List<Label> _values = new List<Label>();
     private readonly List<string> _lastValues = new List<string>();
     private bool _visible;
+    public bool IsOpen => _visible;
     private float _fade;
 
     private static readonly string[] StatLabels =
@@ -127,6 +128,8 @@ public class StatsPanelUI : MonoBehaviour
         SetVisible(!_visible);
     }
 
+    private Coroutine _closeCoroutine;
+
     public void SetVisible(bool visible, bool instant = false)
     {
         _visible = visible;
@@ -134,18 +137,50 @@ public class StatsPanelUI : MonoBehaviour
 
         if (PanelManager.Instance != null)
         {
-            PanelManager.Instance.RegisterPanelActive("Stats", visible);
+            PanelManager.Instance.RegisterPanelActive("Stats", visible, Toggle);
             if (!instant)
             {
-                StartCoroutine(RegisterTransition("Stats", 0.22f));
+                StartCoroutine(RegisterTransition("Stats", PanelManager.PanelTransitionDuration));
             }
         }
 
-        if (visible) _root.AddToClassList("open");
-        else _root.RemoveFromClassList("open");
+        if (_closeCoroutine != null)
+        {
+            StopCoroutine(_closeCoroutine);
+            _closeCoroutine = null;
+        }
+
+        if (visible)
+        {
+            _root.style.display = DisplayStyle.Flex;
+            _root.AddToClassList("visible");
+        }
+        else
+        {
+            if (instant)
+            {
+                _root.RemoveFromClassList("visible");
+                _root.style.display = DisplayStyle.None;
+            }
+            else
+            {
+                _closeCoroutine = StartCoroutine(CloseCoroutine());
+            }
+        }
 
         if (instant)
             _fade = visible ? 1f : 0f;
+    }
+
+    private System.Collections.IEnumerator CloseCoroutine()
+    {
+        _root.RemoveFromClassList("visible");
+        yield return new WaitForSecondsRealtime(PanelManager.PanelTransitionDuration);
+        if (!_visible)
+        {
+            _root.style.display = DisplayStyle.None;
+        }
+        _closeCoroutine = null;
     }
 
     private System.Collections.IEnumerator RegisterTransition(string name, float duration)

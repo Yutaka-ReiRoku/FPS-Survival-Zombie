@@ -178,6 +178,9 @@
 --panel-in-duration:         var(--transition-medium);
 --panel-out-duration:        var(--transition-fast);
 --panel-start-scale:         0.9;
+--premium-panel-transition-duration: 1.5s;
+--premium-panel-bg-color:            rgba(9, 13, 19, 0.85);
+--premium-panel-border-color:        rgba(217, 199, 115, 0.35);
 --panel-easing:              ease-out;
 
 /* === Crosshair === */

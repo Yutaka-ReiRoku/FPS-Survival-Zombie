@@ -5,7 +5,10 @@ public class PanelManager : MonoBehaviour
 {
     public static PanelManager Instance;
 
-    private readonly HashSet<string> _activePanels = new HashSet<string>();
+    public const float PanelTransitionDuration = 1.5f;
+    public const float BlackOverlayDuration = 3.0f;
+
+    private readonly Dictionary<string, System.Action> _activePanels = new Dictionary<string, System.Action>();
     private readonly HashSet<string> _transitioningPanels = new HashSet<string>();
 
     private void Awake()
@@ -20,11 +23,11 @@ public class PanelManager : MonoBehaviour
         }
     }
 
-    public void RegisterPanelActive(string name, bool active)
+    public void RegisterPanelActive(string name, bool active, System.Action closeCallback = null)
     {
         if (active)
         {
-            _activePanels.Add(name);
+            _activePanels[name] = closeCallback;
         }
         else
         {
@@ -56,13 +59,28 @@ public class PanelManager : MonoBehaviour
 
     public bool IsPanelActive(string name)
     {
-        return _activePanels.Contains(name);
+        return _activePanels.ContainsKey(name);
+    }
+
+    public bool CloseActivePanel()
+    {
+        foreach (var kvp in _activePanels)
+        {
+            // Close any active panel that is not Pause or GameOver, and has a close callback
+            if (kvp.Key != "Pause" && kvp.Key != "GameOver" && kvp.Value != null)
+            {
+                Debug.Log($"[PanelManager] Generic ESC -> Closing active panel: {kvp.Key}");
+                kvp.Value.Invoke();
+                return true; // Input consumed
+            }
+        }
+        return false;
     }
 
     public bool CanOpenPanel(string name)
     {
         // GameOver blocks everything except GameOver itself
-        if (_activePanels.Contains("GameOver"))
+        if (_activePanels.ContainsKey("GameOver"))
         {
             return name == "GameOver";
         }
@@ -74,7 +92,7 @@ public class PanelManager : MonoBehaviour
         }
 
         // If another panel is active, block
-        foreach (var p in _activePanels)
+        foreach (var p in _activePanels.Keys)
         {
             if (p != name)
             {

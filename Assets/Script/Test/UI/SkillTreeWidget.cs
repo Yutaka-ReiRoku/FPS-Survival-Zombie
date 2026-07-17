@@ -251,12 +251,12 @@ public class SkillTreeWidget : MonoBehaviour
     {
         if (!_initialized || IsTransitioning) return;
         _open = true;
-        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+        _transitionEndTime = Time.realtimeSinceStartup + PanelManager.PanelTransitionDuration;
 
         if (PanelManager.Instance != null)
         {
-            PanelManager.Instance.RegisterPanelActive("SkillTree", true);
-            StartCoroutine(RegisterTransition("SkillTree", 1.5f));
+            PanelManager.Instance.RegisterPanelActive("SkillTree", true, Close);
+            StartCoroutine(RegisterTransition("SkillTree", PanelManager.PanelTransitionDuration));
         }
 
         if (_closeCoroutine != null)
@@ -286,11 +286,11 @@ public class SkillTreeWidget : MonoBehaviour
     {
         if (!_open || IsTransitioning) return;
         _open = false;
-        _transitionEndTime = Time.realtimeSinceStartup + 1.5f;
+        _transitionEndTime = Time.realtimeSinceStartup + PanelManager.PanelTransitionDuration;
 
         if (PanelManager.Instance != null)
         {
-            StartCoroutine(RegisterTransition("SkillTree", 1.5f));
+            StartCoroutine(RegisterTransition("SkillTree", PanelManager.PanelTransitionDuration));
         }
 
         if (_closeCoroutine != null)
@@ -312,7 +312,7 @@ public class SkillTreeWidget : MonoBehaviour
     {
         if (_root != null) _root.RemoveFromClassList("open");
 
-        yield return new WaitForSecondsRealtime(1.5f);
+        yield return new WaitForSecondsRealtime(PanelManager.PanelTransitionDuration);
 
         if (!_open)
         {
