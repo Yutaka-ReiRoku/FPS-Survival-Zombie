@@ -1,34 +1,34 @@
+/* ===== Dash.uss ===== */
 @import url("Shared.uss");
 
-/* ===== Dash.uss — Dash charge pips ===== */
-
 #DashWidget {
-    position: absolute;
-    left: 50%;
-    translate: -50% 0;
-    bottom: 110px;
+    position: relative;
+    left: auto;
+    translate: 0 0;
+    bottom: auto;
     flex-direction: row;
-    justify-content: center;
     align-items: center;
-    height: var(--dash-pip-size, 20px);
-    display: none;
-    padding: 0;
-    margin: 0;
+    justify-content: flex-end;
+    height: 24px;
 }
 
 .dash-pip {
-    width: var(--dash-pip-size, 20px);
-    height: var(--dash-pip-size, 20px);
-    margin-left: var(--space-xs, 4px);
-    margin-right: var(--space-xs, 4px);
-    border-radius: var(--radius-round, 1000px);
-    background-color: rgba(255, 255, 255, 0.18);
+    width: 22px;
+    height: 22px;
+    margin-left: 5px;
+    background-image: resource("Icons/icon_dash");
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.25);
+    -unity-background-scale-mode: scale-to-fit;
     position: relative;
     flex-shrink: 0;
+    transition-property: scale, -unity-background-image-tint-color;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out;
 }
 
 .dash-pip--on {
-    background-color: var(--color-shield, rgb(115, 200, 242));
+    -unity-background-image-tint-color: rgb(0, 220, 180);
+    scale: 1.1;
 }
 
 .dash-pip__regen {

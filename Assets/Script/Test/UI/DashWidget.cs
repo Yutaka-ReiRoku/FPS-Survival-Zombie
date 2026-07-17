@@ -16,7 +16,7 @@ public class DashWidget : MonoBehaviour
     private float _regenStart;
     private CowsinsHUDAdapter _adapter;
 
-    private static readonly Color RegenColor = new Color(0.45f, 0.78f, 0.95f, 0.55f);
+    private static readonly Color RegenColor = new Color(0f, 0.86f, 0.7f, 0.45f);
 
     private void OnEnable()
     {

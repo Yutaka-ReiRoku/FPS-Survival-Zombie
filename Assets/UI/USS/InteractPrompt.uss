@@ -1,55 +1,53 @@
+/* ===== InteractPrompt.uss ===== */
 @import url("Shared.uss");
-
-/* ===== InteractPrompt.uss — Phase 14: Interaction prompt HUD element ===== */
 
 #InteractPrompt {
     position: absolute;
     left: 50%;
     translate: -50% 0;
-    bottom: 200px;
-    width: 540px;
-    height: 64px;
+    bottom: 220px;
+    width: 360px;
+    height: 52px;
     display: none;
 }
 
 .interact-panel {
     flex-grow: 1;
-    background-color: var(--color-surface-top, rgba(35, 42, 51, 0.94));
-    border-radius: var(--radius-s);
+    background-color: transparent;
+    border-radius: 0;
+    border-width: 0;
+    padding: 8px 12px;
+    justify-content: center;
 }
 
 .interact-label {
-    position: absolute;
-    left: var(--space-l, 16px);
-    top: var(--space-xs, 4px);
-    right: var(--space-l, 16px);
-    bottom: var(--space-s, 8px);
-    font-size: var(--fs-xl, 28px);
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    font-size: 15px;
+    -unity-font-definition: var(--font-body-sdf);
+    -unity-font-style: bold;
     -unity-text-align: middle-center;
-    color: var(--color-text-primary);
-    white-space: normal;
-    overflow: visible;
-    text-overflow: ellipsis;
+    color: var(--color-text-primary, rgb(245, 245, 245));
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.95);
+    margin: 0;
+    padding: 0;
 }
 
 .interact-label--forbidden {
-    color: var(--color-danger-top, rgb(240, 180, 180));
+    color: var(--color-accent-red, rgb(229, 72, 60));
 }
 
 .interact-progress {
     position: absolute;
-    left: var(--space-xs, 4px);
-    right: var(--space-xs, 4px);
-    bottom: var(--space-xs, 4px);
-    height: 5px;
+    left: 8px;
+    right: 8px;
+    bottom: 6px;
+    height: 4px;
     display: none;
-    background-color: var(--shadow-color-default, rgba(0, 0, 0, 0.5));
-    border-radius: var(--crosshair-radius, 2px);
+    background-color: rgba(20, 24, 30, 0.9);
+    border-radius: 2px;
+    overflow: hidden;
 }
 
 .interact-progress-fill {
     height: 100%;
-    background-color: var(--color-accent-gold-dark);
-    border-radius: var(--crosshair-radius, 2px);
+    background-color: var(--color-accent-gold, rgb(217, 199, 115));
 }

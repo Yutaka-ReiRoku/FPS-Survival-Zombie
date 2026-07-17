@@ -38,6 +38,9 @@ public class CrosshairWidget : MonoBehaviour
 
     private void Awake()
     {
+        lineLength = 16f;
+        lineThickness = 3.2f;
+        enemyThickness = 5.5f;
         _spread = defaultSpread;
         _thickness = lineThickness;
     }
@@ -178,8 +181,8 @@ public class CrosshairWidget : MonoBehaviour
         float spread = _spread;
 
         // 1. Draw 4 Outer Range Finder Radial Ticks (at 45°, 135°, 225°, 315°)
-        float outerRadius = spread + 18f;
-        float tickLen = 6f;
+        float outerRadius = spread + 20f;
+        float tickLen = 11f;
 
         for (int i = 0; i < 4; i++)
         {
@@ -191,7 +194,7 @@ public class CrosshairWidget : MonoBehaviour
 
             // Shadow outline
             painter.strokeColor = shadowColor;
-            painter.lineWidth = 3.5f;
+            painter.lineWidth = 4.5f;
             painter.BeginPath();
             painter.MoveTo(p1);
             painter.LineTo(p2);
@@ -199,7 +202,7 @@ public class CrosshairWidget : MonoBehaviour
 
             // Neon stroke
             painter.strokeColor = primaryColor;
-            painter.lineWidth = 1.8f;
+            painter.lineWidth = 2.4f;
             painter.BeginPath();
             painter.MoveTo(p1);
             painter.LineTo(p2);
@@ -209,14 +212,14 @@ public class CrosshairWidget : MonoBehaviour
         // 2. Draw Center Diamond Reticle (45-degree rotated square dot)
         if (_adapter == null || !_adapter.HasWeapon || _adapter.CHCenter)
         {
-            float dSize = 3.5f;
+            float dSize = 5.5f;
             // Shadow Diamond
             painter.fillColor = shadowColor;
             painter.BeginPath();
-            painter.MoveTo(center + new Vector2(0, -dSize - 1.2f));
-            painter.LineTo(center + new Vector2(dSize + 1.2f, 0));
-            painter.LineTo(center + new Vector2(0, dSize + 1.2f));
-            painter.LineTo(center + new Vector2(-dSize - 1.2f, 0));
+            painter.MoveTo(center + new Vector2(0, -dSize - 1.5f));
+            painter.LineTo(center + new Vector2(dSize + 1.5f, 0));
+            painter.LineTo(center + new Vector2(0, dSize + 1.5f));
+            painter.LineTo(center + new Vector2(-dSize - 1.5f, 0));
             painter.ClosePath();
             painter.Fill();
 

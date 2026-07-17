@@ -112,17 +112,17 @@
             <ui:VisualElement name="CompassBlips" />
         </ui:VisualElement>
         <ui:Label name="CompassHeading" text="0" />
-        <!-- Stamina -->
+        <!-- Stamina & Dash Cluster -->
         <ui:VisualElement name="StaminaCluster">
-            <ui:VisualElement name="StaminaBg" />
-            <ui:VisualElement name="StaminaFill" />
+            <ui:VisualElement name="StaminaBarTrack">
+                <ui:VisualElement name="StaminaFill" />
+            </ui:VisualElement>
+            <ui:VisualElement name="DashWidget" class="dash-widget" />
         </ui:VisualElement>
         <!-- Crosshair -->
         <ui:VisualElement name="Crosshair" class="crosshair-container" />
         <!-- FPS -->
         <ui:Label name="FPSLabel" text="-- FPS" class="fps-counter" />
-        <!-- Dash -->
-        <ui:VisualElement name="DashWidget" class="dash-widget" />
         <!-- Interact -->
         <ui:VisualElement name="InteractPrompt" class="interact-prompt" />
         <!-- Wave -->

@@ -6,9 +6,9 @@ public class FPSWidget : MonoBehaviour
     [Tooltip("Seconds between text refreshes.")] public float refreshRate = 0.5f;
     [Tooltip("Number of frames averaged for a stable reading.")] public int window = 50;
 
-    private static readonly Color Good = new(0.31f, 0.878f, 0.541f, 1f);
-    private static readonly Color Ok = new(1f, 0.83f, 0.30f, 1f);
-    private static readonly Color Bad = new(0.85f, 0.35f, 0.15f, 1f);
+    private static readonly Color Good = new(0.31f, 0.878f, 0.541f, 0.45f);
+    private static readonly Color Ok = new(1f, 0.83f, 0.30f, 0.45f);
+    private static readonly Color Bad = new(0.85f, 0.35f, 0.15f, 0.45f);
 
     private Label _label;
     private float[] _deltas;

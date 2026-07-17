@@ -10,13 +10,13 @@
 
 .fps-counter {
     position: absolute;
-    top: 18px;
+    bottom: 6px;
     left: 50%;
-    margin-left: -110px;
-    font-size: var(--fs-l, 22px);
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    translate: -50% 0;
+    font-size: 11px;
+    -unity-font-definition: var(--font-body-sdf);
     -unity-text-align: middle-center;
-    color: var(--color-fps-good);
-    width: 220px;
-    height: var(--compass-height, 30px);
+    color: rgba(235, 224, 199, 0.45);
+    width: 100px;
+    height: 16px;
 }
