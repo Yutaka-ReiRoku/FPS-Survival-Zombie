@@ -84,6 +84,12 @@ public class PauseManager : MonoBehaviour
                 Debug.Log("[PauseManager] Added PanelManager component automatically to ensure centralized UI state.");
             }
         }
+
+        if (FindAnyObjectByType<StatsPanelUI>() == null)
+        {
+            gameObject.AddComponent<StatsPanelUI>();
+            Debug.Log("[PauseManager] Added StatsPanelUI component automatically to host Statistics UI.");
+        }
     }
 
     private void OnEnable()
