@@ -78,6 +78,7 @@ public class StatsPanelUI : MonoBehaviour
 
         _visible = false;
         _fade = 0f;
+        _root.style.display = DisplayStyle.None;
 
         StartCoroutine(PollStats());
     }

@@ -148,7 +148,7 @@
                 <ui:VisualElement name="SideLines" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="JournalUI">
+        <ui:VisualElement name="JournalUI" style="display: none;">
             <ui:VisualElement name="scrim" class="journal-scrim" picking-mode="Position" />
             <ui:VisualElement name="Card" class="journal-card">
                 <ui:VisualElement name="BookPages" class="book-pages">
@@ -230,7 +230,7 @@
         </ui:VisualElement>
 
         <!-- ==================== StatsPanel (inlined) ==================== -->
-        <ui:VisualElement name="StatsPanel" class="ui-panel-root">
+        <ui:VisualElement name="StatsPanel" class="ui-panel-root" style="display: none;">
             <ui:VisualElement name="StatsScrim" class="ui-panel-vignette" />
             <ui:VisualElement name="StatsCard" class="ui-panel-card stats-card">
                 <ui:VisualElement name="StatsAccent" class="ui-panel-accent" />
