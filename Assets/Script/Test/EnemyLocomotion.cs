@@ -13,7 +13,7 @@ public class EnemyLocomotion : MonoBehaviour
     public float sightEyeHeight = 1.5f;
 
     [Header("Stuck Recovery")]
-    public float stuckTimeThreshold = 3f;
+    public float stuckTimeThreshold = 1.2f;
     public float stuckMoveThreshold = 1f;
     public float stuckRepathRadius = 5f;
 
@@ -38,6 +38,7 @@ public class EnemyLocomotion : MonoBehaviour
     private float _noPathRetryTimer;
 
     private float _stuckRecoveryCooldownTimer;
+    private float _pathPendingTimer;
 
     private void Awake()
     {
@@ -254,7 +255,7 @@ public class EnemyLocomotion : MonoBehaviour
     {
         if (Agent == null || target == null) return;
         Debug.Log($"[EnemyLocomotion] {name} is stuck! Running stuck recovery.");
-        _stuckRecoveryCooldownTimer = 1.5f; // Lock normal chasing re-pathing for 1.5s
+        _stuckRecoveryCooldownTimer = 0.5f; // Lock normal chasing re-pathing for 0.5s
 
         Vector3 toPlayer = target.position - transform.position;
         Vector3 midPoint = transform.position + toPlayer * 0.5f;
@@ -315,6 +316,22 @@ public class EnemyLocomotion : MonoBehaviour
         if (_stuckRecoveryCooldownTimer > 0f)
         {
             _stuckRecoveryCooldownTimer -= Time.deltaTime;
+        }
+
+        // Reset pathPending deadlock after 1.5 seconds
+        if (Agent != null && Agent.isOnNavMesh && Agent.pathPending)
+        {
+            _pathPendingTimer += Time.deltaTime;
+            if (_pathPendingTimer >= 1.5f)
+            {
+                Debug.LogWarning($"[EnemyLocomotion] {name} pathPending has been true for {_pathPendingTimer:F2}s. Forcing ResetPath to clear deadlock.");
+                Agent.ResetPath();
+                _pathPendingTimer = 0f;
+            }
+        }
+        else
+        {
+            _pathPendingTimer = 0f;
         }
     }
 }

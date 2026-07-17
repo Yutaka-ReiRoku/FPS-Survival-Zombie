@@ -64,7 +64,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     public float screamDuration = 3.0f;
 
     [Header("Stuck Recovery")]
-    public float stuckTimeThreshold = 3f;
+    public float stuckTimeThreshold = 1.2f;
     public float stuckMoveThreshold = 1f;
     public float stuckRepathRadius = 5f;
 
@@ -529,8 +529,8 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
                 // Dynamic re-path interval based on distance and LOS
                 bool hasLOS = HasLineOfSight();
-                float dynamicInterval = Mathf.Lerp(0.15f, 1.0f, Mathf.Clamp01((distance - 5f) / 15f));
-                float dynamicThreshold = Mathf.Lerp(1.0f, 5.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                float dynamicInterval = Mathf.Lerp(0.15f, 0.4f, Mathf.Clamp01((distance - 5f) / 15f));
+                float dynamicThreshold = Mathf.Lerp(1.0f, 2.0f, Mathf.Clamp01((distance - 5f) / 15f));
                 if (!hasLOS)
                 {
                     dynamicInterval *= 2.0f;

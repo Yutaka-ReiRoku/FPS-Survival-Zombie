@@ -120,7 +120,7 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     [Header("Stuck Recovery")]
     [Tooltip("How long (seconds) the zombie must be nearly stationary while chasing before it is considered stuck. Higher = more patient (less likely to re-path abruptly).")]
-    public float stuckTimeThreshold = 3f;
+    public float stuckTimeThreshold = 1.2f;
     [Tooltip("If the zombie moves less than this distance (meters) over stuckTimeThreshold, it is considered stuck.")]
     public float stuckMoveThreshold = 1f;
     [Tooltip("How far to search for an intermediate re-path position when stuck (no teleport — just re-pathing).")]
@@ -669,8 +669,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
             // Slower repathing when player is out of sight (no LOS) to save CPU
             bool hasLOS = locomotion != null && locomotion.HasLineOfSight();
-            float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
-            float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+            float dynamicInterval = Mathf.Lerp(0.15f, 0.4f, Mathf.Clamp01((distance - 5f) / 15f));
+            float dynamicThreshold = Mathf.Lerp(1.0f, 2.0f, Mathf.Clamp01((distance - 5f) / 15f));
             if (!hasLOS)
             {
                 dynamicInterval *= 2.0f;

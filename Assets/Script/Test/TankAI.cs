@@ -192,7 +192,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealt
             locomotion.requireLineOfSight = true; // Tank always requires LOS initially
             locomotion.sightObstructionMask = sightObstructionMask;
             locomotion.sightEyeHeight = sightEyeHeight;
-            locomotion.stuckTimeThreshold = 3f; // default stuck threshold
+            locomotion.stuckTimeThreshold = 1.2f; // default stuck threshold
             locomotion.stuckMoveThreshold = 1f;
             locomotion.stuckRepathRadius = 5f;
             locomotion.playerMovedRepathThreshold = playerMovedRepathThreshold;
@@ -351,8 +351,8 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealt
                 
                 // Slower repathing when player is out of sight (no LOS) to save CPU
                 bool hasLOS = HasLineOfSight();
-                float dynamicInterval = Mathf.Lerp(0.15f, 1.2f, Mathf.Clamp01((distance - 5f) / 15f));
-                float dynamicThreshold = Mathf.Lerp(1.0f, 6.0f, Mathf.Clamp01((distance - 5f) / 15f));
+                float dynamicInterval = Mathf.Lerp(0.15f, 0.4f, Mathf.Clamp01((distance - 5f) / 15f));
+                float dynamicThreshold = Mathf.Lerp(1.0f, 2.0f, Mathf.Clamp01((distance - 5f) / 15f));
                 if (!hasLOS)
                 {
                     dynamicInterval *= 2.0f;
