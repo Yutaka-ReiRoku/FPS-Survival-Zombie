@@ -26,19 +26,20 @@
 
 .hitmarker-bar {
     position: absolute;
-    width: 14px;
-    height: 4px;
-    border-radius: var(--radius-xs);
-    background-color: var(--color-text-primary);
+    width: 12px;
+    height: 2px;
+    border-radius: var(--radius-xs, 4px);
+    background-color: rgb(0, 240, 255); /* Default Neon Cyan for premium look */
 }
 
-.hitmarker-bar--tl { left: 13px; top: 18px; rotate: 45deg; }
-.hitmarker-bar--tr { left: 13px; top: 18px; rotate: -45deg; }
-.hitmarker-bar--bl { left: 21px; top: 18px; rotate: -45deg; }
-.hitmarker-bar--br { left: 21px; top: 18px; rotate: 45deg; }
+/* Match classes added in C# (hm-tl, hm-tr, hm-bl, hm-br) */
+.hm-tl { left: 13px; top: 18px; rotate: 45deg; }
+.hm-tr { left: 13px; top: 18px; rotate: -45deg; }
+.hm-bl { left: 21px; top: 18px; rotate: -45deg; }
+.hm-br { left: 21px; top: 18px; rotate: 45deg; }
 
 .hitmarker-bar--kill {
-    background-color: var(--color-danger-top, rgb(242, 82, 69));
+    background-color: var(--color-accent-red, rgb(229, 72, 60));
 }
 
 .hitmarker-bar--crit {
@@ -58,10 +59,13 @@
     width: 140px;
     height: 44px;
     margin-left: -70px;
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: var(--font-body-sdf, resource("Fonts/Outfit-SemiBold SDF"));
     -unity-text-align: middle-center;
-    font-size: var(--fs-xl);
-    color: var(--color-text-primary);
+    font-size: var(--fs-xl, 28px);
+    color: var(--color-text-primary, rgb(245, 245, 245));
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.95);
+    -unity-text-outline-width: 1.2px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.95);
     transition: opacity 0.25s ease-out;
 }
 
@@ -70,7 +74,7 @@
 }
 
 .dmg-number--kill {
-    color: var(--color-danger-top, rgb(242, 82, 69));
+    color: var(--color-accent-red, rgb(229, 72, 60));
 }
 
 .dmg-number--crit {
@@ -79,8 +83,8 @@
 
 #Killfeed {
     position: absolute;
-    right: var(--space-xxl);
-    top: var(--space-xxl);
+    right: var(--space-xxl, 24px);
+    top: 90px; /* Shifted down slightly to clear QuestTracker at top-right */
     width: 360px;
     height: 400px;
     flex-direction: column;
@@ -88,16 +92,19 @@
 }
 
 .killfeed-entry {
-    width: 360px;
-    height: 40px;
-    background-color: var(--color-surface-top);
+    width: 240px; /* Slimmer tactical look */
+    height: 34px;
+    background-color: var(--color-bg-root, rgba(9, 13, 19, 0.85));
     flex-shrink: 0;
-    opacity: var(--opacity-high);
+    opacity: 0.9;
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
-    padding-right: var(--space-m);
-    margin-bottom: var(--space-s);
+    padding-right: var(--space-m, 12px);
+    margin-bottom: var(--space-s, 8px);
+    border-right-width: 3.5px;
+    border-right-color: var(--color-accent-red, rgb(229, 72, 60));
+    border-radius: var(--radius-xs, 4px);
     transition: opacity 0.4s ease-out;
 }
 
@@ -106,8 +113,10 @@
 }
 
 .killfeed-entry-label {
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: var(--font-body-sdf, resource("Fonts/Outfit-SemiBold SDF"));
     -unity-text-align: middle-right;
-    font-size: var(--fs-l);
-    color: var(--color-text-primary);
+    font-size: 14px;
+    color: var(--color-text-secondary, rgb(210, 215, 225));
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
 }

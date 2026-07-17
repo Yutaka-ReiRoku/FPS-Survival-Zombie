@@ -3,7 +3,7 @@
 #HUDChips {
     position: absolute;
     left: 20px; /* Offset from left screen edge for premium look */
-    top: 80px;  /* Offset from top screen edge */
+    top: 20px;  /* Offset from top screen edge to utilize empty space */
     flex-direction: column;
 }
 

@@ -191,16 +191,18 @@ public class InteractPromptWidget : MonoBehaviour
         painter.lineWidth = 1.0f;
         for (float offset = 0; offset < stripeW; offset += 5f)
         {
+            float startY = offset < chamferSize ? (chamferSize - offset) : 0f;
             painter.strokeColor = _isForbidden ? new Color(229f / 255f, 72f / 255f, 60f / 255f, 0.85f)
                                                : new Color(217f / 255f, 199f / 255f, 115f / 255f, 0.8f);
             painter.BeginPath();
-            painter.MoveTo(new Vector2(offset, chamferSize));
+            painter.MoveTo(new Vector2(offset, startY));
             painter.LineTo(new Vector2(offset + 4f, rect.height));
             painter.Stroke();
 
+            float startYBlack = (offset + 2f) < chamferSize ? (chamferSize - (offset + 2f)) : 0f;
             painter.strokeColor = new Color(16f / 255f, 14f / 255f, 14f / 255f, 0.9f);
             painter.BeginPath();
-            painter.MoveTo(new Vector2(offset + 2f, chamferSize));
+            painter.MoveTo(new Vector2(offset + 2f, startYBlack));
             painter.LineTo(new Vector2(offset + 6f, rect.height));
             painter.Stroke();
         }
@@ -236,7 +238,7 @@ public class InteractPromptWidget : MonoBehaviour
 
         float rOffset = 6f;
         drawRivet(new Vector2(rect.width - rOffset, rOffset));
-        drawRivet(new Vector2(rect.width - rOffset, rect.height - rOffset));
+        drawRivet(new Vector2(rect.width - rOffset - chamferSize, rect.height - rOffset));
         drawRivet(new Vector2(rOffset + 20f, rect.height - rOffset));
         drawRivet(new Vector2(rOffset + 20f, rOffset));
     }

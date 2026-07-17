@@ -16,7 +16,7 @@
     background-color: transparent;
     border-radius: 0;
     border-width: 0;
-    padding: 8px 12px;
+    padding: 8px 12px 8px 32px; /* Pad left by 32px to clear 20px warning stripes and visually center text */
     justify-content: center;
 }
 
@@ -37,8 +37,8 @@
 
 .interact-progress {
     position: absolute;
-    left: 8px;
-    right: 8px;
+    left: 28px; /* Offset to clear warning stripes */
+    right: 12px;
     bottom: 6px;
     height: 4px;
     display: none;

@@ -8,11 +8,13 @@ public class QuestTrackerWidget : MonoBehaviour
     [Header("Layout")]
     public int maxSideQuestLines = 6;
 
+    private VisualElement _container;
     private VisualElement _mainPanel;
     private Label _chapter;
     private Label _title;
     private Label _objective;
     private Label _collectibles;
+    private VisualElement _divider;
     private VisualElement _sidePanel;
     private Label _sideHeader;
     private VisualElement _sideLinesContainer;
@@ -23,24 +25,26 @@ public class QuestTrackerWidget : MonoBehaviour
         var doc = GetComponent<UIDocument>();
         if (doc == null) { enabled = false; return; }
         var root = doc.rootVisualElement;
+        
+        _container = root.Q("QuestTracker");
         _mainPanel = root.Q("MainPanel");
         _chapter = root.Q<Label>("Chapter");
         _title = root.Q<Label>("Title");
         _objective = root.Q<Label>("Objective");
         _collectibles = root.Q<Label>("Collectibles");
+        _divider = root.Q("QuestDivider");
         _sidePanel = root.Q("SidePanel");
         _sideHeader = root.Q<Label>("SideHeader");
         _sideLinesContainer = root.Q("SideLines");
+
         if (_chapter == null || _title == null || _objective == null || _sideLinesContainer == null)
             enabled = false;
     }
 
     private void OnEnable()
     {
-        if (_mainPanel != null)
-            _mainPanel.generateVisualContent += OnGenerateCardBackground;
-        if (_sidePanel != null)
-            _sidePanel.generateVisualContent += OnGenerateCardBackground;
+        if (_container != null)
+            _container.generateVisualContent += OnGenerateCardBackground;
 
         if (StoryManager.Instance != null)
         {
@@ -58,10 +62,8 @@ public class QuestTrackerWidget : MonoBehaviour
 
     private void OnDisable()
     {
-        if (_mainPanel != null)
-            _mainPanel.generateVisualContent -= OnGenerateCardBackground;
-        if (_sidePanel != null)
-            _sidePanel.generateVisualContent -= OnGenerateCardBackground;
+        if (_container != null)
+            _container.generateVisualContent -= OnGenerateCardBackground;
 
         if (StoryManager.Instance != null)
         {
@@ -93,7 +95,7 @@ public class QuestTrackerWidget : MonoBehaviour
             if (sqCount != _lastSideQuestCount)
             {
                 _lastSideQuestCount = sqCount;
-                UpdateDisplay();
+                TriggerUpdateAnimation();
             }
         }
     }
@@ -101,9 +103,27 @@ public class QuestTrackerWidget : MonoBehaviour
     private int _lastCollectibleCount = -1;
     private int _lastSideQuestCount = -1;
 
-    private void HandleQuestChanged(QuestData oldQuest, QuestData newQuest) => UpdateDisplay();
-    private void HandleChapterChanged(int oldCh, int newCh) => UpdateDisplay();
-    private void HandleSideQuestChanged(QuestData quest) => UpdateDisplay();
+    private void HandleQuestChanged(QuestData oldQuest, QuestData newQuest) => TriggerUpdateAnimation();
+    private void HandleChapterChanged(int oldCh, int newCh) => TriggerUpdateAnimation();
+    private void HandleSideQuestChanged(QuestData quest) => TriggerUpdateAnimation();
+
+    private void TriggerUpdateAnimation()
+    {
+        if (_container == null)
+        {
+            UpdateDisplay();
+            return;
+        }
+
+        _container.AddToClassList("quest-updating");
+
+        // Wait 40ms for transition animation, then swap text and fade in smoothly
+        _container.schedule.Execute(() =>
+        {
+            UpdateDisplay();
+            _container.RemoveFromClassList("quest-updating");
+        }).ExecuteLater(40);
+    }
 
     private void UpdateCollectibleDisplay()
     {
@@ -123,8 +143,7 @@ public class QuestTrackerWidget : MonoBehaviour
             _objective.text = "";
             _collectibles.text = "";
             RebuildSideBlock();
-            if (_mainPanel != null) _mainPanel.MarkDirtyRepaint();
-            if (_sidePanel != null) _sidePanel.MarkDirtyRepaint();
+            if (_container != null) _container.MarkDirtyRepaint();
             return;
         }
 
@@ -154,8 +173,7 @@ public class QuestTrackerWidget : MonoBehaviour
         }
         UpdateCollectibleDisplay();
         RebuildSideBlock();
-        if (_mainPanel != null) _mainPanel.MarkDirtyRepaint();
-        if (_sidePanel != null) _sidePanel.MarkDirtyRepaint();
+        if (_container != null) _container.MarkDirtyRepaint();
     }
 
     private void RebuildSideBlock()
@@ -165,7 +183,14 @@ public class QuestTrackerWidget : MonoBehaviour
         _sideLines.Clear();
 
         var sqm = SideQuestManager.Instance;
-        if (sqm == null || sqm.ActiveQuests.Count == 0)
+        bool hasSide = sqm != null && sqm.ActiveQuests.Count > 0;
+
+        if (_divider != null)
+        {
+            _divider.style.display = hasSide ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        if (!hasSide)
         {
             _sidePanel.style.display = DisplayStyle.None;
             return;
@@ -182,7 +207,7 @@ public class QuestTrackerWidget : MonoBehaviour
             _sideLinesContainer.Add(line);
             _sideLines.Add(line);
         }
-        if (_sidePanel != null) _sidePanel.MarkDirtyRepaint();
+        if (_container != null) _container.MarkDirtyRepaint();
     }
 
     private void OnGenerateCardBackground(MeshGenerationContext mgc)
@@ -193,7 +218,7 @@ public class QuestTrackerWidget : MonoBehaviour
         if (rect.width <= 0 || rect.height <= 0) return;
 
         var painter = mgc.painter2D;
-        float chamferSize = 12f;
+        float chamferSize = 10f;
 
         // 1. Draw solid dark blue-gray translucent background shape to match HUD modules (0.85 alpha as requested)
         Color fillCol = new Color(9f / 255f, 13f / 255f, 19f / 255f, 0.85f);

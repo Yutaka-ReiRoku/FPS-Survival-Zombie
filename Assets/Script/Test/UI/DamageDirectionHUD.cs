@@ -7,7 +7,7 @@ public class DamageDirectionHUD : MonoBehaviour
     public static DamageDirectionHUD Instance { get; private set; }
 
     public float radius = 160f;
-    public float arcWidth = 120f, arcHeight = 16f;
+    public float arcWidth = 100f, arcHeight = 6f;
     public float fadeTime = 1.0f;
     public int poolSize = 8;
 
@@ -50,7 +50,6 @@ public class DamageDirectionHUD : MonoBehaviour
             arc.usageHints = UsageHints.DynamicTransform;
             arc.style.width = arcWidth;
             arc.style.height = arcHeight;
-            arc.style.backgroundColor = new StyleColor(ArcColor);
             arc.style.translate = new Translate(0, -radius);
             pivot.Add(arc);
         }

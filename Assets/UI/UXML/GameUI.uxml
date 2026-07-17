@@ -173,6 +173,7 @@
                 <ui:Label name="Objective" text="" />
                 <ui:Label name="Collectibles" text="" />
             </ui:VisualElement>
+            <ui:VisualElement name="QuestDivider" class="quest-divider" />
             <ui:VisualElement name="SidePanel">
                 <ui:Label name="SideHeader" text="SIDE QUESTS" />
                 <ui:VisualElement name="SideLines" />

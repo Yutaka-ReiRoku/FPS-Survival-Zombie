@@ -30,6 +30,10 @@ public class PanelManager : MonoBehaviour
     private static readonly Dictionary<string, bool> _hudActiveState = new Dictionary<string, bool>();
     private readonly Dictionary<string, bool> _desiredActiveStates = new Dictionary<string, bool>();
 
+    private float _blackOverlayClearTime = 0f;
+    private bool _hudCurrentlyVisibleState = true;
+    private bool _firstFrameSet = false;
+
     public void OpenPanel(string name, VisualElement panel, VisualElement card, System.Action closeCallback = null)
     {
         _desiredActiveStates[name] = true;
@@ -51,6 +55,8 @@ public class PanelManager : MonoBehaviour
     public void ClosePanel(string name, VisualElement panel, VisualElement card, System.Action onTransitionComplete = null)
     {
         _desiredActiveStates[name] = false;
+        UpdateGameplayState(); // Trigger HUD to slide back in immediately in parallel with panel fade/scale out
+
         if (panel == null)
         {
             RegisterPanelActive(name, false);
@@ -102,10 +108,19 @@ public class PanelManager : MonoBehaviour
         }
 
         bool anyActive = _activePanels.Count > 0;
+        
+        // Check desired states for HUD visibility
+        bool anyDesiredActive = false;
+        foreach (var val in _desiredActiveStates.Values)
+        {
+            if (val) { anyDesiredActive = true; break; }
+        }
+
         var player = GameObject.FindGameObjectWithTag("Player");
         var playerControl = player != null ? player.GetComponentInChildren<PlayerControl>() : null;
         var canvasGo = GameObject.Find("GameUICanvas");
 
+        // 1. Manage Timescale and Control based on actual active states (after transitions finish)
         if (anyActive)
         {
             Time.timeScale = 0f;
@@ -121,9 +136,6 @@ public class PanelManager : MonoBehaviour
 
             if (playerControl != null)
                 playerControl.LoseControl();
-
-            if (canvasGo != null)
-                SetHUDVisible(canvasGo.transform, false);
         }
         else
         {
@@ -133,13 +145,96 @@ public class PanelManager : MonoBehaviour
             if (playerControl != null)
                 playerControl.GrantControl();
 
-            if (canvasGo != null)
-                SetHUDVisible(canvasGo.transform, true);
-
             if (gameObject.activeInHierarchy)
             {
                 _lockCoroutine = StartCoroutine(ForceLockMouseCoroutine());
             }
+        }
+
+        // 2. Manage HUD Visibility based on desired states and black overlay
+        if (canvasGo != null)
+        {
+            bool targetVisible = !anyDesiredActive;
+            var uiDoc = canvasGo.GetComponent<UIDocument>();
+            if (uiDoc != null && uiDoc.rootVisualElement != null)
+            {
+                var root = uiDoc.rootVisualElement;
+                var overlay = root.Q("BlackOverlay");
+                if (overlay != null)
+                {
+                    bool isBlack = !overlay.ClassListContains("fade-out");
+                    if (isBlack)
+                    {
+                        targetVisible = false;
+                    }
+                    else if (_blackOverlayClearTime != 0f)
+                    {
+                        float elapsed = Time.realtimeSinceStartup - _blackOverlayClearTime;
+                        if (elapsed < 3.0f)
+                        {
+                            targetVisible = false;
+                        }
+                    }
+                }
+            }
+
+            if (!_firstFrameSet || _hudCurrentlyVisibleState != targetVisible)
+            {
+                _hudCurrentlyVisibleState = targetVisible;
+                _firstFrameSet = true;
+                SetHUDVisible(canvasGo.transform, targetVisible);
+            }
+        }
+    }
+
+    private void Update()
+    {
+        var canvasGo = GameObject.Find("GameUICanvas");
+        if (canvasGo == null) return;
+
+        var uiDoc = canvasGo.GetComponent<UIDocument>();
+        if (uiDoc == null || uiDoc.rootVisualElement == null) return;
+
+        var root = uiDoc.rootVisualElement;
+        var overlay = root.Q("BlackOverlay");
+        if (overlay == null) return;
+
+        bool isBlack = !overlay.ClassListContains("fade-out");
+        bool targetVisible;
+
+        if (isBlack)
+        {
+            _blackOverlayClearTime = 0f;
+            targetVisible = false;
+        }
+        else
+        {
+            if (_blackOverlayClearTime == 0f)
+            {
+                _blackOverlayClearTime = Time.realtimeSinceStartup;
+            }
+
+            float elapsed = Time.realtimeSinceStartup - _blackOverlayClearTime;
+            if (elapsed >= 3.0f)
+            {
+                bool anyDesiredActive = false;
+                foreach (var val in _desiredActiveStates.Values)
+                {
+                    if (val) { anyDesiredActive = true; break; }
+                }
+                targetVisible = !anyDesiredActive;
+            }
+            else
+            {
+                targetVisible = false;
+            }
+        }
+
+        if (!_firstFrameSet || _hudCurrentlyVisibleState != targetVisible)
+        {
+            _hudCurrentlyVisibleState = targetVisible;
+            _firstFrameSet = true;
+            SetHUDVisible(canvasGo.transform, targetVisible);
         }
     }
 
@@ -177,33 +272,65 @@ public class PanelManager : MonoBehaviour
 
             if (!visible)
             {
-                if (_hudActiveState.Count > 0) return;
-                for (int i = 0; i < canvasRoot.childCount; i++)
+                if (_hudActiveState.Count == 0)
                 {
-                    var child = canvasRoot.GetChild(i);
-                    bool isOverlay = false;
-                    foreach (var n in overlayNames)
+                    for (int i = 0; i < canvasRoot.childCount; i++)
                     {
-                        if (child.name == n) { isOverlay = true; break; }
-                    }
-                    if (!isOverlay)
-                    {
-                        _hudActiveState[child.name] = child.gameObject.activeSelf;
-                        child.gameObject.SetActive(false);
+                        var child = canvasRoot.GetChild(i);
+                        bool isOverlay = false;
+                        foreach (var n in overlayNames)
+                        {
+                            if (child.name == n) { isOverlay = true; break; }
+                        }
+                        if (!isOverlay)
+                        {
+                            _hudActiveState[child.name] = child.gameObject.activeSelf;
+                            child.gameObject.SetActive(false);
+                        }
                     }
                 }
             }
             else
             {
-                if (_hudActiveState.Count == 0) return;
-                for (int i = 0; i < canvasRoot.childCount; i++)
+                if (_hudActiveState.Count > 0)
                 {
-                    var child = canvasRoot.GetChild(i);
-                    bool wasActive;
-                    if (_hudActiveState.TryGetValue(child.name, out wasActive))
-                        child.gameObject.SetActive(wasActive);
+                    for (int i = 0; i < canvasRoot.childCount; i++)
+                    {
+                        var child = canvasRoot.GetChild(i);
+                        bool wasActive;
+                        if (_hudActiveState.TryGetValue(child.name, out wasActive))
+                            child.gameObject.SetActive(wasActive);
+                    }
+                    _hudActiveState.Clear();
                 }
-                _hudActiveState.Clear();
+            }
+
+            // Apply transition animation classes to UITK HUD elements
+            var uiDoc = canvasRoot.GetComponent<UIDocument>();
+            if (uiDoc != null && uiDoc.rootVisualElement != null)
+            {
+                var root = uiDoc.rootVisualElement;
+                string[] hudElementNames = {
+                    "HealthCluster", "StaminaCluster", "AmmoCluster",
+                    "CompassViewport", "ThreatWidget", "HUDChips",
+                    "QuestTracker", "Crosshair", "FPSLabel"
+                };
+
+                foreach (var elName in hudElementNames)
+                {
+                    var element = root.Q(elName);
+                    if (element != null)
+                    {
+                        if (!visible)
+                        {
+                            element.AddToClassList("hud-hidden");
+                        }
+                        else
+                        {
+                            element.RemoveFromClassList("hud-hidden");
+                        }
+                    }
+                }
             }
         }
 

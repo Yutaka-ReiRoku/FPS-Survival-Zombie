@@ -24,6 +24,6 @@
     left: 50%;
     top: 0;
     translate: -50% 0;
-    background-color: var(--color-accent-red);
-    border-radius: var(--radius-s);
+    background-color: var(--color-accent-red, rgb(229, 72, 60));
+    border-radius: var(--radius-xs, 4px);
 }

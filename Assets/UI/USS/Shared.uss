@@ -505,3 +505,66 @@ Button:active,
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
 }
+
+/* ===================== HUD TRANSLATION TRANSITIONS ===================== */
+
+/* Apply base transitions to all HUD elements so they transition smoothly */
+#HealthCluster,
+#StaminaCluster,
+#AmmoCluster,
+#CompassViewport,
+#ThreatWidget,
+#HUDChips,
+#QuestTracker,
+#Crosshair,
+#FPSLabel {
+    transition-property: translate, opacity;
+    transition-duration: var(--premium-panel-transition-duration, 1.5s);
+    transition-timing-function: ease-in-out;
+}
+
+/* Off-screen destination styles depending on closest edge */
+#HealthCluster.hud-hidden {
+    opacity: 0;
+    translate: -350px 0; /* Slide off left edge */
+}
+
+#StaminaCluster.hud-hidden {
+    opacity: 0;
+    translate: -350px 0; /* Slide off left edge */
+}
+
+#AmmoCluster.hud-hidden {
+    opacity: 0;
+    translate: 350px 0; /* Slide off right edge */
+}
+
+#CompassViewport.hud-hidden {
+    opacity: 0;
+    translate: 0 -100px; /* Slide off top edge */
+}
+
+#ThreatWidget.hud-hidden {
+    opacity: 0;
+    translate: 0 -120px; /* Slide off top edge */
+}
+
+#HUDChips.hud-hidden {
+    opacity: 0;
+    translate: -250px 0; /* Slide off left edge */
+}
+
+#QuestTracker.hud-hidden {
+    opacity: 0;
+    translate: 360px 0; /* Slide off right edge */
+}
+
+#Crosshair.hud-hidden {
+    opacity: 0;
+    /* Center element doesn't slide, just fades out */
+}
+
+#FPSLabel.hud-hidden {
+    opacity: 0;
+    translate: 0 -100px; /* Slide off top edge */
+}

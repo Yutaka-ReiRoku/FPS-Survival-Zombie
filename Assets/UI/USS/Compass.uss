@@ -32,6 +32,7 @@
 }
 
 #CompassHeading {
+    display: none;
     position: absolute;
     top: 42px; /* Directly below the compass strip */
     left: 50%;
