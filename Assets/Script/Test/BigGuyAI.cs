@@ -25,6 +25,7 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
         get { return maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f; }
     }
     public bool IsDead { get { return isDead; } }
+    public EnemyType EnemyType { get { return EnemyType.Special; } }
     public event System.Action<float> OnHealthChanged;
 
     [Header("Target")]
@@ -170,6 +171,11 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
 
     private void Awake()
     {
+        if (GetComponent<EnemyHealthBar>() == null)
+        {
+            gameObject.AddComponent<EnemyHealthBar>();
+        }
+
         animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();

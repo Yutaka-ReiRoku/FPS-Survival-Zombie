@@ -1,5 +1,12 @@
 using System;
 
+public enum EnemyType
+{
+    Normal,
+    Special,
+    Boss
+}
+
 /// <summary>
 /// Read-only health surface used by world-space UI such as <c>EnemyHealthBar</c>.
 /// Lets one bar component work for any enemy type (regular zombies, special
@@ -20,4 +27,7 @@ public interface IEnemyHealthReadout
     /// <see cref="HealthFraction"/> in [0,1].
     /// </summary>
     event Action<float> OnHealthChanged;
+
+    /// <summary>Identifies if the enemy is Normal, Special, or Boss.</summary>
+    EnemyType EnemyType { get; }
 }

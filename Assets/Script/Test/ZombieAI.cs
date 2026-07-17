@@ -55,6 +55,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         get { return isDead; }
     }
 
+    /// <summary>Identifies if the enemy is Normal, Special, or Boss.</summary>
+    public EnemyType EnemyType
+    {
+        get { return EnemyType.Normal; }
+    }
+
     /// <summary>
     /// True while the zombie is actively chasing the player (detected).
     /// </summary>

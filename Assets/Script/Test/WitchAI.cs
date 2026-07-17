@@ -24,6 +24,7 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
         get { return maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f; }
     }
     public bool IsDead { get { return isDead; } }
+    public EnemyType EnemyType { get { return EnemyType.Special; } }
     public event System.Action<float> OnHealthChanged;
 
     [Header("Target")]
@@ -190,6 +191,11 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
 
     private void Awake()
     {
+        if (GetComponent<EnemyHealthBar>() == null)
+        {
+            gameObject.AddComponent<EnemyHealthBar>();
+        }
+
         animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();

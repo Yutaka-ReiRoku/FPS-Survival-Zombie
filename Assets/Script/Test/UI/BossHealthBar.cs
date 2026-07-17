@@ -71,6 +71,6 @@ public class BossHealthBar : MonoBehaviour
     private void Show(bool show)
     {
         if (_root != null)
-            _root.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+            _root.style.display = DisplayStyle.None; // Force display to None always to remove screen-space overlay
     }
 }

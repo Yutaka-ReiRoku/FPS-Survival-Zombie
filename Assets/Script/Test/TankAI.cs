@@ -3,8 +3,12 @@ using UnityEngine.AI;
 using cowsins;
 
 [RequireComponent(typeof(AudioSource))]
-public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
+public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthReadout
 {
+    public event System.Action<float> OnHealthChanged;
+    public float HealthFraction => Mathf.Clamp01((float)currentHealth / maxHealth);
+    public EnemyType EnemyType => EnemyType.Boss;
+
     [Header("Player")]
     public Transform target;
 
@@ -129,6 +133,11 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
 
     private void Start()
     {
+        if (GetComponent<EnemyHealthBar>() == null)
+        {
+            gameObject.AddComponent<EnemyHealthBar>();
+        }
+
         currentHealth = maxHealth;
 
         animator = GetComponentInChildren<Animator>();
@@ -675,6 +684,7 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy
             return;
 
         currentHealth -= damage;
+        OnHealthChanged?.Invoke(HealthFraction);
 
         if (PlayerStatsTracker.Instance != null)
             PlayerStatsTracker.Instance.RegisterDamageDealt(damage);
