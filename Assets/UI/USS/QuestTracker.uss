@@ -2,23 +2,32 @@
 
 #QuestTracker {
     position: absolute;
-    left: var(--hud-cluster-right, 48px);
-    top: var(--space-xxl, 24px);
-    width: 440px;
+    right: 20px; /* Relocated to top-right corner to prevent overlapping HUD chips */
+    left: auto;
+    top: 80px;   /* Symmetrical with HUD chips on the left */
+    width: 420px;
     flex-direction: column;
 }
 
 #MainPanel {
-    background-color: var(--color-panel-bg, rgba(15, 13, 18, 0.62));
-    border-radius: var(--radius-s, 8px);
+    background-color: rgba(14, 18, 24, 0.78); /* Semi-transparent dark background */
+    background-image: resource("Images/ui_panel"); /* Premium 9-slice panel card */
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 12;
+    -unity-slice-right: 12;
+    -unity-slice-top: 12;
+    -unity-slice-bottom: 12;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
     padding: var(--space-m, 12px) var(--space-l, 16px);
     flex-direction: column;
 }
 
 #Chapter {
-    color: var(--color-text-gold, rgb(217, 199, 115));
+    color: var(--color-accent-gold, rgb(217, 199, 115)); /* Gold accent for chapter heading */
     font-size: var(--fs-l, 22px);
-    -unity-font-definition: resource("Fonts/BlackOpsOne-Regular SDF");
+    -unity-font-definition: var(--font-display-sdf);
     -unity-font-style: bold;
     margin-bottom: var(--space-xs, 4px);
     white-space: normal;
@@ -27,7 +36,7 @@
 #Title {
     color: var(--color-text-primary, rgb(245, 245, 245));
     font-size: var(--fs-xl, 28px);
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: var(--font-body-sdf);
     -unity-font-style: bold;
     margin-bottom: var(--space-s, 8px);
     white-space: normal;
@@ -36,30 +45,38 @@
 #Objective {
     color: var(--color-text-muted, rgb(158, 168, 184));
     font-size: var(--fs-m, 18px);
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: var(--font-body-sdf);
     white-space: normal;
 }
 
 #Collectibles {
-    color: var(--color-accent-cyan-light, rgb(102, 204, 255));
+    color: var(--color-accent-cyan, rgb(78, 205, 196)); /* Cyan accent matching HUD chips */
     font-size: var(--fs-s, 16px);
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: var(--font-body-sdf);
     margin-top: var(--space-xs, 4px);
 }
 
 #SidePanel {
-    background-color: var(--color-card-face);
-    border-radius: var(--radius-s, 8px);
+    background-color: rgba(14, 18, 24, 0.78); /* Semi-transparent dark background */
+    background-image: resource("Images/ui_panel"); /* Premium 9-slice panel card */
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-slice-left: 12;
+    -unity-slice-right: 12;
+    -unity-slice-top: 12;
+    -unity-slice-bottom: 12;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
     padding: var(--space-s, 8px) var(--space-m, 12px);
     margin-top: var(--space-s, 8px);
     flex-direction: column;
 }
 
 #SideHeader {
-    color: var(--color-success-top, rgb(85, 187, 85));
+    color: var(--color-accent-cyan, rgb(78, 205, 196)); /* Cyan accent for side quests header */
     font-size: var(--fs-s, 16px);
     -unity-font-style: bold;
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: var(--font-body-sdf);
     margin-bottom: var(--space-xs, 4px);
 }
 
@@ -68,8 +85,8 @@
 }
 
 .side-line {
-    color: var(--color-success-top, rgb(136, 221, 136));
+    color: var(--color-text-secondary, rgb(210, 215, 225));
     font-size: var(--fs-m, 18px);
-    -unity-font-definition: resource("Fonts/Outfit-SemiBold SDF");
+    -unity-font-definition: var(--font-body-sdf);
     height: var(--track-height-sm, 26px);
 }
