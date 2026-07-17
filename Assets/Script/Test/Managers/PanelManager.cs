@@ -28,9 +28,11 @@ public class PanelManager : MonoBehaviour
 
     private Coroutine _lockCoroutine;
     private static readonly Dictionary<string, bool> _hudActiveState = new Dictionary<string, bool>();
+    private readonly Dictionary<string, bool> _desiredActiveStates = new Dictionary<string, bool>();
 
     public void OpenPanel(string name, VisualElement panel, VisualElement card, System.Action closeCallback = null)
     {
+        _desiredActiveStates[name] = true;
         if (panel != null)
         {
             panel.style.display = DisplayStyle.Flex;
@@ -48,6 +50,7 @@ public class PanelManager : MonoBehaviour
 
     public void ClosePanel(string name, VisualElement panel, VisualElement card, System.Action onTransitionComplete = null)
     {
+        _desiredActiveStates[name] = false;
         if (panel == null)
         {
             RegisterPanelActive(name, false);
@@ -67,14 +70,13 @@ public class PanelManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(PanelTransitionDuration);
 
         // Ensure state wasn't changed to open again during the transition wait
-        bool isActive = IsPanelActive(name);
-        if (!isActive)
+        bool isDesiredActive = _desiredActiveStates.ContainsKey(name) && _desiredActiveStates[name];
+        if (!isDesiredActive)
         {
             if (panel != null) panel.style.display = DisplayStyle.None;
+            RegisterPanelActive(name, false);
+            onTransitionComplete?.Invoke();
         }
-
-        RegisterPanelActive(name, false);
-        onTransitionComplete?.Invoke();
     }
 
     public void RegisterPanelActive(string name, bool active, System.Action closeCallback = null)
