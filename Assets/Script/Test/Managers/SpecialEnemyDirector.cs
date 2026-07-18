@@ -52,6 +52,8 @@ public class SpecialEnemyDirector : MonoBehaviour
     public float tankSpawnInterval = 90f;
     [Tooltip("Maximum Tanks alive at once. Bosses are usually capped at 1.")]
     public int tankMaxAlive = 1;
+    [Tooltip("On boss waves, force-spawn the Tank immediately regardless of timer.")]
+    public bool forceTankOnBossWave = true;
 
     [Header("Tank Placement")]
     [Tooltip("Closest a Tank may spawn to the player (XZ).")]
@@ -146,9 +148,18 @@ public class SpecialEnemyDirector : MonoBehaviour
         //------------------------------------------------
         // TANK
         //------------------------------------------------
+        bool isBossWave = WaveManager.Instance != null && WaveManager.Instance.IsBossWave();
+
         if (tankPrefab != null && wave >= tankFirstWave)
         {
             PruneDeadTanks();
+
+            // On boss waves, force-spawn the Tank immediately (if under the cap).
+            if (isBossWave && forceTankOnBossWave && _aliveTanks.Count < tankMaxAlive)
+            {
+                _tankTimer = 0f;
+                TrySpawnTank(wave);
+            }
 
             _tankTimer += Time.deltaTime;
 

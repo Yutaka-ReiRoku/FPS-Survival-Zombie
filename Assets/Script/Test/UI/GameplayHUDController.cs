@@ -228,6 +228,12 @@ public class GameplayHUDController : MonoBehaviour
 
     private void UpdateCollectibles()
     {
+        if (GameModeManager.CurrentMode == GameMode.Endless)
+        {
+            ShowChip(_collectiblesChip, false);
+            return;
+        }
+
         var cm = CollectibleManager.Instance;
         if (cm == null || _collectiblesChip == null || _collectiblesLabel == null) return;
 

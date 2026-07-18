@@ -13,6 +13,12 @@ public class WaveManager : MonoBehaviour
 
     public int baseZombieCount = 10;
 
+    [Header("Endless Mode")]
+    [Tooltip("Extra zombies added per wave beyond wave 1 for endless mode. Overrides the default +5 when higher.")]
+    public int endlessZombiesPerWave = 8;
+    [Tooltip("Every Nth wave is a boss wave (Boomer/Tank guaranteed spawn). 0 = disabled.")]
+    public int bossWaveInterval = 5;
+
     public int zombiesToKill;
 
     public int zombiesKilledThisWave;
@@ -31,9 +37,17 @@ public class WaveManager : MonoBehaviour
     {
         zombiesKilledThisWave = 0;
 
+        int perWaveStep = GameModeManager.CurrentMode == GameMode.Endless
+            ? endlessZombiesPerWave
+            : 5;
+
         zombiesToKill =
             baseZombieCount +
-            ((currentWave - 1) * 5);
+            ((currentWave - 1) * perWaveStep);
+
+        if (bossWaveInterval > 0 && currentWave % bossWaveInterval == 0)
+            zombiesToKill += baseZombieCount / 2;
+
         OnWaveStarted?.Invoke(currentWave);
 
         Debug.Log(
@@ -42,6 +56,11 @@ public class WaveManager : MonoBehaviour
             " Started. Need Kill: " +
             zombiesToKill
         );
+    }
+
+    public bool IsBossWave()
+    {
+        return bossWaveInterval > 0 && currentWave % bossWaveInterval == 0;
     }
 
     public void RegisterZombieKill()

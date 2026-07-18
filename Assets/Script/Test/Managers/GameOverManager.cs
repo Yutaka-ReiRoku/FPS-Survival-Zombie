@@ -196,6 +196,8 @@ public class GameOverManager : MonoBehaviour
 
         var sm = StoryManager.Instance;
         bool isStoryMode = sm != null;
+        bool isEndless = GameModeManager.CurrentMode == GameMode.Endless;
+        bool isWaveMode = !isStoryMode && !isEndless;
 
         int finalScore = ScoreManager.Instance != null ? ScoreManager.Instance.GetFinalScore() : 0;
         int wave = WaveManager.Instance != null ? WaveManager.Instance.currentWave : 0;
@@ -216,6 +218,26 @@ public class GameOverManager : MonoBehaviour
                 _killsText.text = "Journals: " + journals + (journalsTotal > 0 ? " / " + journalsTotal : "");
             if (_bestScoreText != null)
                 _bestScoreText.text = sm.StoryComplete ? "Story Complete" : "Progress: Chapter " + chapter;
+        }
+        else if (isEndless)
+        {
+            int bestScore = PlayerPrefs.GetInt("BestEndlessScore", 0);
+            int bestWave = PlayerPrefs.GetInt("BestEndlessWave", 0);
+            if (finalScore > bestScore) { bestScore = finalScore; PlayerPrefs.SetInt("BestEndlessScore", bestScore); }
+            if (wave > bestWave) { bestWave = wave; PlayerPrefs.SetInt("BestEndlessWave", bestWave); }
+            PlayerPrefs.Save();
+
+            if (PlayFabManager.Instance != null && PlayFabManager.Instance.IsLoggedIn)
+                PlayFabManager.Instance.SaveAllToCloud();
+
+            if (_finalScoreText != null)
+                _finalScoreText.text = "Score : " + finalScore;
+            if (_waveReachedText != null)
+                _waveReachedText.text = "Wave : " + wave;
+            if (_killsText != null)
+                _killsText.text = "Kills : " + kills;
+            if (_bestScoreText != null)
+                _bestScoreText.text = "Best : " + bestScore + "  (Wave " + bestWave + ")";
         }
         else
         {

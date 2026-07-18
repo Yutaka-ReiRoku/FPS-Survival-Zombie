@@ -7,9 +7,11 @@ public class MainMenuManager : MonoBehaviour
 {
     [Header("Scenes")]
     public string gameSceneName = "Story mode";
+    public string endlessSceneName = "Endless";
 
     private UIDocument _doc;
     private Label _bestLabel;
+    private Label _bestEndlessLabel;
 
     private void Awake()
     {
@@ -37,11 +39,15 @@ public class MainMenuManager : MonoBehaviour
             }
 
             var playBtn = root.Q("MainMenuModule_Play");
+            var endlessBtn = root.Q("MainMenuModule_Endless");
             var quitBtn = root.Q("TacticalQuitButton");
             _bestLabel = root.Q<Label>("BestText");
+            _bestEndlessLabel = root.Q<Label>("BestEndlessText");
 
             if (playBtn != null)
                 playBtn.RegisterCallback<ClickEvent>(_ => PlayGame());
+            if (endlessBtn != null)
+                endlessBtn.RegisterCallback<ClickEvent>(_ => PlayEndless());
             if (quitBtn != null)
                 quitBtn.RegisterCallback<ClickEvent>(_ => QuitGame());
         }
@@ -90,20 +96,40 @@ public class MainMenuManager : MonoBehaviour
 
     public void RefreshBestScore()
     {
-        if (_bestLabel == null) return;
         int bestScore = PlayerPrefs.GetInt("BestScore", 0);
         int bestWave = PlayerPrefs.GetInt("BestWave", 0);
-        _bestLabel.text = bestScore > 0
-            ? ("Best  " + bestScore + "    Wave " + bestWave)
-            : "No record yet";
+        if (_bestLabel != null)
+        {
+            _bestLabel.text = bestScore > 0
+                ? ("Best  " + bestScore + "    Wave " + bestWave)
+                : "No record yet";
+        }
+
+        int bestEndlessScore = PlayerPrefs.GetInt("BestEndlessScore", 0);
+        int bestEndlessWave = PlayerPrefs.GetInt("BestEndlessWave", 0);
+        if (_bestEndlessLabel != null)
+        {
+            _bestEndlessLabel.text = bestEndlessScore > 0
+                ? ("Best  " + bestEndlessScore + "    Wave " + bestEndlessWave)
+                : "No record yet";
+        }
     }
 
     public void PlayGame()
     {
-        StartCoroutine(LaunchOperationCoroutine());
+        if (GameModeManager.Instance != null)
+            GameModeManager.Instance.SetMode(GameMode.Story);
+        StartCoroutine(LaunchOperationCoroutine(gameSceneName));
     }
 
-    private IEnumerator LaunchOperationCoroutine()
+    public void PlayEndless()
+    {
+        if (GameModeManager.Instance != null)
+            GameModeManager.Instance.SetMode(GameMode.Endless);
+        StartCoroutine(LaunchOperationCoroutine(endlessSceneName));
+    }
+
+    private IEnumerator LaunchOperationCoroutine(string targetSceneName)
     {
         Time.timeScale = 1f;
 
@@ -202,11 +228,10 @@ public class MainMenuManager : MonoBehaviour
         if (AchievementManager.Instance != null)
             AchievementManager.Instance.ResetProgress();
 
-        // Crossfade to Chapter 1 music as the game scene loads.
         if (MusicManager.Instance != null)
             MusicManager.Instance.PlayChapterMusic(1);
 
-        SceneManager.LoadScene(gameSceneName);
+        SceneManager.LoadScene(targetSceneName);
     }
 
     public void QuitGame()
