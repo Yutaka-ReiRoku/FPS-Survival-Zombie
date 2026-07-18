@@ -130,6 +130,28 @@ public class CreditsSequence : MonoBehaviour
         var doc = _docGO.GetComponent<UIDocument>();
         doc.sortingOrder = 1800;
 
+        // Copy panelSettings from an existing UIDocument so the panel actually renders.
+        // Without this, the UIDocument has no panel and nothing is visible on screen.
+        var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+        foreach (var d in allDocs)
+        {
+            if (d != doc && d.panelSettings != null)
+            {
+                doc.panelSettings = d.panelSettings;
+                break;
+            }
+        }
+        if (doc.panelSettings == null)
+        {
+            // Fallback: search all loaded PanelSettings assets directly.
+            var allPS = Resources.FindObjectsOfTypeAll(typeof(PanelSettings));
+            foreach (var ps in allPS)
+            {
+                doc.panelSettings = ps as PanelSettings;
+                break;
+            }
+        }
+
         var asset = Resources.Load<VisualTreeAsset>("CreditsSequence");
         if (asset == null) return;
         asset.CloneTree(doc.rootVisualElement);

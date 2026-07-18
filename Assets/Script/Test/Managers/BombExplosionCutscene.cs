@@ -174,6 +174,26 @@ public class BombExplosionCutscene : MonoBehaviour
         var doc = _fadeDocGO.GetComponent<UIDocument>();
         doc.sortingOrder = 2000;
 
+        // Copy panelSettings from an existing UIDocument so the panel actually renders.
+        var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+        foreach (var d in allDocs)
+        {
+            if (d != doc && d.panelSettings != null)
+            {
+                doc.panelSettings = d.panelSettings;
+                break;
+            }
+        }
+        if (doc.panelSettings == null)
+        {
+            var allPS = Resources.FindObjectsOfTypeAll(typeof(PanelSettings));
+            foreach (var ps in allPS)
+            {
+                doc.panelSettings = ps as PanelSettings;
+                break;
+            }
+        }
+
         var root = new VisualElement();
         root.name = "FadeOverlay";
         root.style.position = Position.Absolute;
