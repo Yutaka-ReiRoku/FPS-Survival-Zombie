@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FPS Survival Zombie — Đồ Án Tốt Nghiệp</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.slide-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  padding: 50px 60px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  overflow-y: auto;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: all;
+  z-index: 10;
+}
+
+/* ---- Background variants ---- */
+.bg-dark { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); }
+.bg-red { background: linear-gradient(135deg, #1a0000 0%, #2d0a0a 100%); }
+.bg-green { background: linear-gradient(135deg, #001a0a 0%, #0a2d1a 100%); }
+.bg-blue { background: linear-gradient(135deg, #000a1a 0%, #0a1a2d 100%); }
+.bg-purple { background: linear-gradient(135deg, #0a001a 0%, #1a0a2d 100%); }
+.bg-orange { background: linear-gradient(135deg, #1a0e00 0%, #2d1a00 100%); }
+.bg-cyan { background: linear-gradient(135deg, #001a1a 0%, #0a2d2d 100%); }
+
+/* ---- Navigation ---- */
+.nav {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 90vw;
+}
+
+.nav-btn {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid #666;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.nav-btn.active { background: #4CAF50; border-color: #4CAF50; transform: scale(1.3); }
+.nav-btn:hover { border-color: #aaa; }
+
+.arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #333;
+  color: #666;
+  padding: 16px 20px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 8px;
+}
+.arrow:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.arrow-left { left: 16px; }
+.arrow-right { right: 16px; }
+
+/* ---- Typography ---- */
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #4CAF50, #81C784);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4CAF50;
+  margin-bottom: 16px;
+}
+
+h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #81C784;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #888;
+  margin-bottom: 24px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+.tag-green { background: #1b5e20; color: #a5d6a7; }
+.tag-red { background: #b71c1c; color: #ef9a9a; }
+.tag-blue { background: #0d47a1; color: #90caf9; }
+.tag-orange { background: #e65100; color: #ffcc80; }
+.tag-purple { background: #4a148c; color: #ce93d8; }
+.tag-cyan { background: #006064; color: #80deea; }
+
+/* ---- Grid Cards ---- */
+.grid {
+  display: grid;
+  gap: 12px;
+  flex: 1;
+}
+
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.grid-5 { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s;
+}
+
+.card:hover { background: rgba(255,255,255,0.08); border-color: rgba(76,175,80,0.3); }
+
+.card h4 {
+  color: #a5d6a7;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.card p, .card li {
+  color: #aaa;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.card ul { list-style: none; }
+.card ul li::before { content: "▸ "; color: #4CAF50; }
+
+/* ---- Stats ---- */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+
+.stat-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-number {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: #4CAF50;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* ---- Weapon/Enemy rows ---- */
+.row-list { display: flex; flex-direction: column; gap: 6px; }
+.row-item {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 8px 12px;
+  gap: 12px;
+}
+.row-item .icon { font-size: 1.2rem; width: 32px; text-align: center; }
+.row-item .name { font-weight: 500; color: #c8e6c9; min-width: 120px; }
+.row-item .desc { color: #888; font-size: 0.8rem; flex: 1; }
+.row-item .chap { font-size: 0.7rem; color: #666; min-width: 70px; text-align: right; }
+
+/* ---- Timeline ---- */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  padding-left: 24px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom, #4CAF50, #1b5e20);
+}
+.tl-item {
+  position: relative;
+  padding: 10px 16px;
+  border-left: 2px solid transparent;
+}
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -21px; top: 14px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #4CAF50;
+  border: 2px solid #0a0a0a;
+}
+.tl-item .time { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: #4CAF50; }
+.tl-item .title { font-weight: 500; color: #e0e0e0; }
+.tl-item .detail { font-size: 0.8rem; color: #888; }
+
+/* ---- Scrollbar ---- */
+.slide::-webkit-scrollbar { width: 4px; }
+.slide::-webkit-scrollbar-track { background: transparent; }
+.slide::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+/* ---- Timeline progress ---- */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4CAF50, #81C784);
+  transition: width 0.4s;
+  z-index: 200;
+}
+
+/* ---- Screenshot gallery ---- */
+.screenshot-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.screenshot-gallery img {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.screenshot-gallery img:hover {
+  transform: scale(1.02);
+  border-color: #4CAF50;
+  box-shadow: 0 4px 20px rgba(76,175,80,0.2);
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.92);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  cursor: pointer;
+}
+.lightbox img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.1);
+}
+.lightbox.show { display: flex; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+  .grid-5 { grid-template-columns: 1fr 1fr 1fr; }
+  .slide { padding: 30px 30px; }
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.5rem; }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
+  .slide { padding: 20px; }
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.2rem; }
+  .arrow { display: none; }
+  .nav { bottom: 12px; gap: 4px; }
+  .nav-btn { width: 8px; height: 8px; }
+}
+
+.fade-in { animation: fadeIn 0.6s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="slide-container" id="app">
+
+<!-- SLIDE 0: MỞ ĐẦU -->
+<div class="slide bg-dark active" data-index="0">
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+    <div style="margin-bottom:20px;">
+      <span style="font-size:4rem;">🧟</span>
+    </div>
+    <h1 style="font-size:4rem; margin-bottom:8px;">FPS SURVIVAL</h1>
+    <h1 style="font-size:3.5rem; margin-bottom:16px; background:linear-gradient(135deg,#ff6b6b,#ff4757); -webkit-background-clip:text;">ZOMBIE</h1>
+    <div class="subtitle" style="font-size:1.2rem; color:#666;">Đồ Án Tốt Nghiệp — Unity / C#</div>
+    <div style="margin-top:16px; max-width:600px;">
+      <img src="Assets/Screenshots/slide_mainmenu.png" style="width:100%; border-radius:12px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 4px 30px rgba(0,0,0,0.5);" alt="Main Menu">
+    </div>
+    <div style="margin-top:16px; display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+      <span class="tag tag-green">5 Chương</span>
+      <span class="tag tag-red">7 Loại Zombie</span>
+      <span class="tag tag-blue">8 Vũ Khí</span>
+      <span class="tag tag-orange">15 Skill Node</span>
+      <span class="tag tag-purple">39 Journal</span>
+      <span class="tag tag-cyan">PlayFab Cloud</span>
+    </div>
+    <div style="margin-top:20px; color:#555; font-size:0.85rem;">
+      Nhấn → hoặc click dot để bắt đầu
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 1: MAIN MENU -->
+<div class="slide bg-dark" data-index="1">
+  <h2>🎮 MAIN MENU</h2>
+  <div class="subtitle">Giao diện bắt đầu game</div>
+  <div class="grid grid-2" style="flex:1;">
+    <div class="card">
+      <h4>🖥️ Main Menu</h4>
+      <ul>
+        <li>Nút Play — Bắt đầu game</li>
+        <li>Nút Quit — Thoát</li>
+        <li>Best Score — Điểm cao nhất</li>
+        <li>Menu Camera Orbit — Camera nền xoay</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>☁️ PlayFab Cloud</h4>
+      <ul>
+        <li>Đăng ký / Đăng nhập (Username + Password)</li>
+        <li>Cloud Save — Best Score, Wave, Achievement</li>
+        <li>Auto-save — 60 giây + khi quit/pause</li>
+        <li>Leaderboard — Xếp hạng toàn cầu</li>
+        <li>Data Merge — Hợp nhất đa thiết bị</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: TỔNG QUAN HỆ THỐNG -->
+<div class="slide bg-blue" data-index="2">
+  <h2>⚙️ HỆ THỐNG NỀN TẢNG</h2>
+  <div class="subtitle">Core Managers & Engine</div>
+  <div class="grid grid-3" style="flex:1;">
+    <div class="card"><h4>📖 StoryManager</h4><p>Điều phối cốt truyện 5 chương, kích hoạt quest, cutscene</p></div>
+    <div class="card"><h4>🧠 AIDirector</h4><p>Độ khó động: 4 trạng thái (Calm → BuildUp → Attack → Recovery), camper punish</p></div>
+    <div class="card"><h4>🌊 WaveManager</h4><p>Wave vô hạn: base 10 kill, +5 mỗi wave</p></div>
+    <div class="card"><h4>☀️ DayNightCycle</h4><p>Chu kỳ 24h, 5 keyframe: Dawn → Noon → Dusk → Night → Deep Night. Điều khiển mặt trời, sương mù, bầu trời, PostProcess</p></div>
+    <div class="card"><h4>🏆 AchievementManager</h4><p>5 Achievement, persistent, sync PlayFab</p></div>
+    <div class="card"><h4>📊 PlayerStatsTracker</h4><p>Theo dõi toàn bộ chỉ số: kills, damage, score, coins, journals...</p></div>
+    <div class="card"><h4>⏸️ PauseManager</h4><p>Menu tạm dừng game</p></div>
+    <div class="card"><h4>🔄 ScoreManager</h4><p>Tính điểm, final score</p></div>
+    <div class="card"><h4>📚 CollectibleManager</h4><p>Quản lý 39 journal, phát hiện từ Resources</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 3: DI CHUYỂN + SKILL TREE -->
+<div class="slide bg-green" data-index="3">
+  <h2>🏃 DI CHUYỂN & KỸ NĂNG</h2>
+  <div class="subtitle">Skill Tree mở từ đầu — mở khóa dần qua 5 chương</div>
+  <div style="display:flex; gap:12px; flex:1;">
+    <div style="flex:2; display:flex; flex-direction:column; gap:12px;">
+      <div class="grid grid-2" style="flex:1;">
+        <div class="card">
+          <h4>Cơ bản (có sẵn)</h4>
+          <ul>
+            <li>Walk / Run — Đi bộ / Chạy</li>
+            <li>Crouch / Slide — Ngồi / Trượt</li>
+            <li>Jump — Nhảy</li>
+            <li>Climb Ladder — Leo thang</li>
+            <li>Stamina System — Thanh thể lực (dùng chung)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>🔓 Mở khóa qua Skill Tree</h4>
+          <ul>
+            <li><strong>Dash</strong> — Node 3 Movement</li>
+            <li><strong>Wall Run / Wall Bounce</strong> — Node 4 Movement</li>
+            <li><strong>Double Jump + Grappling Hook</strong> — Node 5 Movement</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <h4>🌳 Skill Tree — 3 nhánh — 15 node</h4>
+        <div class="grid grid-3" style="margin-top:8px;">
+          <div><strong>Movement</strong><br>
+          <span style="font-size:0.78rem;color:#aaa;">Walk Speed → Run Speed → Air Control → <strong style="color:#4CAF50;">Dash</strong> → <strong style="color:#4CAF50;">Wall Run</strong> → <strong style="color:#4CAF50;">Double Jump + Grapple</strong></span><br>
+          <span style="font-size:0.75rem;color:#666;">+Stamina mỗi node | SP: 2→3→5→8→12</span></div>
+          <div><strong>Aim</strong><br>
+          <span style="font-size:0.78rem;color:#aaa;">Recoil → Crit 10% → Crit 20% → Crit x1.5 → <strong style="color:#4CAF50;">One-shot Crook + Bonus Special</strong></span><br>
+          <span style="font-size:0.75rem;color:#666;">+Damage mỗi node | SP: 2→3→5→8→12</span></div>
+          <div><strong>Intelligence</strong><br>
+          <span style="font-size:0.78rem;color:#aaa;">XP Radius → x1.1 → Radius +10 → x1.15 → <strong style="color:#4CAF50;">Radius +15 + Highlight</strong></span><br>
+          <span style="font-size:0.75rem;color:#666;">+HP mỗi node | SP: 2→3→5→8→12</span></div>
+        </div>
+        <p style="margin-top:8px;font-size:0.8rem;color:#888;">⚡ PlayerUpgradeManager tự động áp dụng chỉ số vào nhân vật</p>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+      <img src="Assets/Screenshots/slide_gameplay2.png" style="width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Gameplay">
+      <img src="Assets/Screenshots/slide_combat.png" style="width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Combat">
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: VŨ KHÍ -->
+<div class="slide bg-red" data-index="4">
+  <h2>🔫 VŨ KHÍ — 8 LOẠI</h2>
+  <div class="subtitle">Thu thập dần qua 5 chương — mỗi chương vũ khí mạnh hơn</div>
+  <div style="display:flex; gap:12px; flex:1;">
+    <div style="flex:2; display:flex; flex-direction:column;">
+      <div class="row-list" style="flex:1;">
+    <div class="row-item">
+      <span class="icon">🔫</span>
+      <span class="name">Pistol</span>
+      <span class="desc">Súng lục cơ bản — khẩu đầu tiên</span>
+      <span class="chap">Chương 1</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">🔫</span>
+      <span class="name">Rifle</span>
+      <span class="desc">Súng trường, ổn định, tầm xa</span>
+      <span class="chap">Chương 2</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">🔫</span>
+      <span class="name">SMG</span>
+      <span class="desc">Súng tiểu liên, tốc độ bắn cao</span>
+      <span class="chap">Chương 3</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">🔫</span>
+      <span class="name">Shotgun</span>
+      <span class="desc">Súng ngắn, sát thương gần diện rộng</span>
+      <span class="chap">Chương 3</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">🚀</span>
+      <span class="name">Rocket Launcher</span>
+      <span class="desc">Súng rocket, nổ diện rộng</span>
+      <span class="chap">Chương 4</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">🔫</span>
+      <span class="name">Revolver</span>
+      <span class="desc">Súng ổ quay, sát thương cao, đạn ít</span>
+      <span class="chap">Chương 4</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">⚔️</span>
+      <span class="name">Katana</span>
+      <span class="desc">Kiếm cận chiến</span>
+      <span class="chap">Chương 4</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">🔫</span>
+      <span class="name">Burst Rifle</span>
+      <span class="desc">Súng bắn 3 phát, chính xác</span>
+      <span class="chap">Chương 4</span>
+    </div>
+    </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+      <img src="Assets/Screenshots/slide_weapon.png" style="width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Weapons">
+      <img src="Assets/Screenshots/slide_combat.png" style="width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Combat">
+    </div>
+  </div>
+  <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+    <span class="tag tag-green">ADS — Ngắm bắn</span>
+    <span class="tag tag-green">Reload — Nạp đạn</span>
+    <span class="tag tag-green">Recoil + Spread — Giật + Xoáy</span>
+    <span class="tag tag-green">Muzzle Flash — Lửa nòng</span>
+    <span class="tag tag-green">Bullet Holes — Lỗ đạn (gỗ, kim loại, bùn, cỏ)</span>
+    <span class="tag tag-green">Hitmarker — Dấu trúng đích</span>
+  </div>
+</div>
+
+<!-- SLIDE 5: ENEMY -->
+<div class="slide bg-purple" data-index="5">
+  <h2>🧟 ENEMY — 7 LOẠI</h2>
+  <div class="subtitle">AI đa dạng — từ zombie thường đến boss</div>
+  <div class="row-list" style="flex:1;">
+    <div class="row-item">
+      <span class="icon">🧟</span>
+      <span class="name">Crook</span>
+      <span class="desc">100 HP. 28+ biến thể (Biker, Clown, Cop, Bride...). NavMesh, LOS, lunge/feint, headshot</span>
+      <span class="chap">Chương 1</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">💥</span>
+      <span class="name">Boomer</span>
+      <span class="desc">100 HP. Kêu rít → phát nổ → vũng acid. Sát thương vùng</span>
+      <span class="chap">Wave 3+</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">👊</span>
+      <span class="name">Tank</span>
+      <span class="desc">500+ HP (scale wave). 3 đòn: Punch, Swipe, Jump Attack. Gầm toàn map</span>
+      <span class="chap">Wave 5+</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">👻</span>
+      <span class="name">Witch</span>
+      <span class="desc">60 HP. Ngồi khóc → kích động → lao 6.5 m/s. Mất dấu quay lại</span>
+      <span class="chap">Chương 5</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">🦍</span>
+      <span class="name">Big Guy</span>
+      <span class="desc">80 HP. Choáng → gầm → rượt chậm, đấm mạnh. Mặc váy công chúa</span>
+      <span class="chap">Chương 5</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">👾</span>
+      <span class="name">Snatcher</span>
+      <span class="desc">Enemy đặc biệt</span>
+      <span class="chap">Chương 3+</span>
+    </div>
+    <div class="row-item">
+      <span class="icon">👾</span>
+      <span class="name">Hooker</span>
+      <span class="desc">Enemy đặc biệt</span>
+      <span class="chap">Chương 3+</span>
+    </div>
+  </div>
+  <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+    <span class="tag tag-red">AIDirector — 4 trạng thái</span>
+    <span class="tag tag-red">NavMesh Pathfinding</span>
+    <span class="tag tag-red">Line-of-sight Detection</span>
+    <span class="tag tag-red">Stuck Recovery</span>
+    <span class="tag tag-red">Camper Punishment</span>
+    <span class="tag tag-red">Object Pooling (60 con)</span>
+    <span class="tag tag-red">SpecialEnemyDirector — Boomer wave 3+, Tank wave 5+</span>
+  </div>
+</div>
+
+<!-- SLIDE 6: HUD -->
+<div class="slide bg-cyan" data-index="6">
+  <h2>📺 HUD & GIAO DIỆN</h2>
+  <div class="subtitle">Toàn bộ widget hiển thị xuyên suốt game</div>
+  <div style="display:flex; gap:12px; flex:1;">
+    <div style="flex:2;">
+      <div class="grid grid-4">
+    <div class="card"><h4>❤️ Health</h4><p>Thanh máu + Low Health Vignette (viền đỏ) + Health Flash</p></div>
+    <div class="card"><h4>⚡ Stamina</h4><p>Thanh thể lực dùng chung</p></div>
+    <div class="card"><h4>🔫 Ammo</h4><p>Đếm đạn + Reload Indicator</p></div>
+    <div class="card"><h4>🏃 Dash Cooldown</h4><p>Hồi chiêu dash</p></div>
+    <div class="card"><h4>🎯 Crosshair</h4><p>Tâm ngắm giãn theo spread</p></div>
+    <div class="card"><h4>🧭 Compass</h4><p>La bàn + Quest Beacon đánh dấu mục tiêu</p></div>
+    <div class="card"><h4>⬅️ Damage Direction</h4><p>Chỉ thị hướng bị tấn công</p></div>
+    <div class="card"><h4>💥 Combat Feedback</h4><p>Số sát thương + kill feed</p></div>
+    <div class="card"><h4>📊 FPS Counter</h4><p>Chỉ số khung hình</p></div>
+    <div class="card"><h4>⚠️ Threat Level</h4><p>Mức đe dọa từ AIDirector</p></div>
+    <div class="card"><h4>🔄 Interact Prompt</h4><p>"Nhấn E" khi đến gần vật phẩm</p></div>
+    <div class="card"><h4>👹 Boss Health Bar</h4><p>Thanh máu boss khi xuất hiện</p></div>
+    <div class="card"><h4>📢 Wave Announcer</h4><p>Thông báo wave start/end</p></div>
+    <div class="card"><h4>🧩 Quest Tracker</h4><p>Mục tiêu nhiệm vụ hiện tại</p></div>
+    <div class="card"><h4>📚 Journal UI</h4><p>Popup nhật ký: text + hình + voice</p></div>
+    <div class="card"><h4>🏆 Achievement</h4><p>Toast notification khi đạt</p></div>
+  </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+      <img src="Assets/Screenshots/slide_hud.png" style="width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="HUD">
+      <img src="Assets/Screenshots/slide_gameplay2.png" style="width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Gameplay HUD">
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: CHƯƠNG 1 -->
+<div class="slide bg-orange" data-index="7">
+  <h2>🌅 CHƯƠNG 1 — BÌNH MINH</h2>
+  <div class="subtitle">Dawn (6h) — SaveRoom đầu tiên, Pistol, Crook, Loot</div>
+  <div class="grid grid-2" style="flex:1;">
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>📌 Thành phần</h4>
+        <ul>
+          <li>DayNight Cycle — Dawn (6h)</li>
+          <li>SaveRoom (Checkpoint 1) — Hồi máu + lưu</li>
+          <li>ChapterBoundary — Ranh giới chương</li>
+          <li>StoryManager — Kích hoạt quest đầu</li>
+          <li>QuestTracker — Chỉ dẫn mục tiêu</li>
+          <li>CutscenePlayer — Chuyển chương</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🔫 Vũ khí</h4>
+        <p><strong>Pistol</strong> — khẩu duy nhất</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>🧟 Chiến đấu</h4>
+        <ul>
+          <li><strong>Crook</strong> — zombie đầu tiên</li>
+          <li><strong>AIDirector</strong> — Calm → BuildUp</li>
+          <li><strong>Spawner</strong> — Object Pooling</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>💰 Loot System (hoạt động ngay)</h4>
+        <ul>
+          <li>Coin, EXP, Healthpack</li>
+          <li>LootPop — Hiệu ứng nảy</li>
+          <li>LootTrail — Vệt sáng</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🎬 Kết thúc</h4>
+        <p>Cutscene → "Chương 2 — Bệnh Viện"<br>DayNight → Noon (12h)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: CHƯƠNG 2 -->
+<div class="slide bg-blue" data-index="8">
+  <h2>☀️ CHƯƠNG 2 — BUỔI TRƯA</h2>
+  <div class="subtitle">Noon (12h) — Bệnh viện, Side Quest, Journal đầu tiên</div>
+  <div class="grid grid-2" style="flex:1;">
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>🌟 Nâng Skill Tree lần đầu</h4>
+        <p>Đủ EXP để upgrade node 1 (tăng speed / giảm recoil / tăng XP radius)</p>
+      </div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>🔫 Vũ khí mới</h4>
+        <p><strong>Rifle</strong> — tổng 2 súng</p>
+      </div>
+      <div class="card">
+        <h4>📚 Journal</h4>
+        <p>Nhật ký đầu tiên — popup với text, hình ảnh, voice log</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>📋 8 Side Quest</h4>
+        <ul>
+          <li>Church — Nhà thờ</li>
+          <li>Auto Repair — Tiệm sửa xe</li>
+          <li>Motel — Nhà nghỉ</li>
+          <li>Quarantine — Khu cách ly</li>
+          <li>HighRise Base — Căn cứ cao tầng</li>
+          <li>Mother's Story — Câu chuyện người mẹ</li>
+          <li>Lighthouse — Hải đăng</li>
+        </ul>
+        <p style="margin-top:6px;font-size:0.8rem;color:#888;">Độc lập với cốt truyện chính</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9: CHƯƠNG 3 -->
+<div class="slide bg-red" data-index="9">
+  <h2>🏗️ CHƯƠNG 3 — HOÀNG HÔN</h2>
+  <div class="subtitle">Dusk (18h) — Công trường, Wave, Boomer, Dash</div>
+  <div class="grid grid-2" style="flex:1;">
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>🌊 Wave System</h4>
+        <ul>
+          <li>WaveManager — Wave đầu 10 kill, +5 mỗi wave</li>
+          <li>WaveQuestInteractable — Khóa vùng, sống sót N wave</li>
+          <li>Boundary lock + Teleport-back</li>
+          <li>Wave Announcer</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🔫 Vũ khí mới</h4>
+        <p><strong>SMG + Shotgun</strong> — tổng 4 súng</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>🔓 Kỹ năng mở khóa</h4>
+        <p><strong>Dash + Air Control</strong> (nếu nâng Movement)</p>
+      </div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>💥 Boomer</h4>
+        <p>100 HP. Kêu rít → phát nổ → vũng acid. SpecialEnemyDirector từ wave 3+</p>
+      </div>
+      <div class="card">
+        <h4>👾 Enemies phụ</h4>
+        <p>Ceiling Zombie, Snatcher, Hooker</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10: CHƯƠNG 4 -->
+<div class="slide bg-purple" data-index="10">
+  <h2>🌃 CHƯƠNG 4 — MÀN ĐÊM</h2>
+  <div class="subtitle">Night (22h) — Skill cao, full vũ khí, Tank boss</div>
+  <div class="grid grid-2" style="flex:1;">
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>🔓 Kỹ năng cao cấp</h4>
+        <ul>
+          <li><strong>Wall Run + Wall Bounce</strong> (Node 4 Move)</li>
+          <li><strong>Double Jump + Grappling Hook</strong> (Node 5 Move)</li>
+          <li><strong>One-shot Crook</strong> (Node 5 Aim)</li>
+          <li><strong>Highlight journal</strong> (Node 5 Intel) — Outline shader</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🔫 Vũ khí mới</h4>
+        <p><strong>Rocket · Revolver · Katana · Burst Rifle</strong><br>→ Tổng 8 súng — full arsenal</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>👊 Tank Boss</h4>
+        <ul>
+          <li>500+ HP (scale wave)</li>
+          <li>3 đòn: Punch, Swipe, Jump Attack</li>
+          <li>Gầm toàn map cảnh báo</li>
+          <li>Boss Health Bar trên HUD</li>
+          <li>Flashlight (phím F) thiết yếu</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>📚 Journal</h4>
+        <p>Brother Journal #1-5</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: CHƯƠNG 5 -->
+<div class="slide bg-orange" data-index="11">
+  <h2>🌆 CHƯƠNG 5 — ĐÊM KHUYA</h2>
+  <div class="subtitle">Deep Night (2h) — Chung cư, Witch, Big Guy, Trận cuối</div>
+  <div class="grid grid-2" style="flex:1;">
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>👻 Witch</h4>
+        <p>60 HP. Ngồi khóc tại chỗ. Lại gần → gào thét → lao 6.5 m/s. Sát thương cao. Mất dấu → quay lại khóc</p>
+      </div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>🦍 Big Guy</h4>
+        <p>80 HP. Đứng choáng (mặc váy công chúa). Kích động → gầm → rượt chậm, đấm mạnh</p>
+      </div>
+      <div class="card">
+        <h4>🔫 Full Arsenal</h4>
+        <p>Đầy đủ 8 vũ khí. Flashlight thiết yếu</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <h4>🎯 Quest 12 — Escape Town</h4>
+        <ul>
+          <li>WaveQuestInteractable cuối</li>
+          <li>Khóa khu vực</li>
+          <li>Nhiều wave liên tiếp</li>
+          <li>Tank boss ở wave cuối</li>
+          <li>Kích hoạt bom hủy diệt</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>📚 39 Journal</h4>
+        <p>7 nhóm: Soldier (3) · Neighbor (21) · Military Record (8) · Experiment Report (3) · Doctor Journal (3) · Cure Record (4) · Brother Journal (5)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: ENDING -->
+<div class="slide bg-dark" data-index="12">
+  <h2>🎬 ENDING SEQUENCE</h2>
+  <div class="subtitle">Kết thúc hoàn chỉnh với cutscene, epilogue, credits</div>
+  <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
+    <div class="timeline" style="flex:1;">
+      <div class="tl-item">
+        <div class="time">Bước 1</div>
+        <div class="title">Bomb Explosion Cutscene</div>
+        <div class="detail">Camera tạm thời → VFX nổ hạt nhân (mushroom cloud) → SFX nổ → Fade to Black → Fade from Black</div>
+      </div>
+      <div class="tl-item">
+        <div class="time">Bước 2</div>
+        <div class="title">Epilogue Slide</div>
+        <div class="detail">"Dịch bệnh đã được kiểm soát, nhưng ai là người mang đến phương thuốc chữa — vẫn còn là một bí ẩn."</div>
+      </div>
+      <div class="tl-item">
+        <div class="time">Bước 3</div>
+        <div class="title">Credits Sequence</div>
+        <div class="detail">Credit cuộn: Dev Team, School, Resources, Cowsins Engine, Thanks — có logo trường</div>
+      </div>
+      <div class="tl-item">
+        <div class="time">Bước 4</div>
+        <div class="title">Return to Main Menu</div>
+        <div class="detail">Tự động quay về Main Menu</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      <span class="tag tag-cyan">EndingSequenceManager — Điều phối</span>
+      <span class="tag tag-cyan">BombExplosionCutscene — VFX + SFX</span>
+      <span class="tag tag-cyan">EpilogueSlide — Text kết</span>
+      <span class="tag tag-cyan">CreditsSequence — Danh sách nhóm</span>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: GAME OVER + ACHIEVEMENT -->
+<div class="slide bg-red" data-index="13">
+  <h2>🏆 GAME OVER & ACHIEVEMENT</h2>
+  <div class="subtitle">Thống kê đầy đủ + 5 thành tựu</div>
+  <div class="grid grid-2" style="flex:1;">
+    <div class="card">
+      <h4>💀 Game Over</h4>
+      <ul>
+        <li><strong>Story mode</strong>: Chapter, quest hoàn thành, journal, score</li>
+        <li><strong>Wave mode</strong>: Score, wave, kill, best score</li>
+        <li><strong>3 lựa chọn</strong>: Restart (checkpoint), Main Menu, Quit</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>🏅 5 Achievement</h4>
+      <ul>
+        <li><strong>Speedrunner</strong> — Hoàn thành 5 chương &lt;11 phút</li>
+        <li><strong>Hell Slayer</strong> — 130 Crook kills</li>
+        <li><strong>At Ease, Cooper</strong> — 20 kills khi wall run</li>
+        <li><strong>Tank Slayer</strong> — Hạ Tank đầu tiên</li>
+        <li><strong>Close Call</strong> — Trong bán kính 5m khi Boomer nổ</li>
+      </ul>
+      <p style="margin-top:8px;font-size:0.8rem;color:#888;">Persistent — lưu local + sync PlayFab</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14: VFX + AUDIO -->
+<div class="slide bg-blue" data-index="14">
+  <h2>✨ HIỆU ỨNG & ÂM THANH</h2>
+  <div class="subtitle">VFX, Audio, Shaders</div>
+  <div class="grid grid-2" style="flex:1;">
+    <div class="card">
+      <h4>🎬 Visual Effects</h4>
+      <ul>
+        <li>Muzzle Flash — Lửa nòng súng</li>
+        <li>Bullet Holes — Wood / Metal / Mud / Grass / Slash</li>
+        <li>Speed Lines — Vạch tốc độ</li>
+        <li>Loot Trail + Loot Pop — Vệt sáng + nảy</li>
+        <li>Acid Pool — Vũng acid Boomer</li>
+        <li>Boomer Explosion — Vụ nổ</li>
+        <li>Tank Jump Attack — Hiệu ứng nhảy</li>
+        <li>Camera Shake — Rung camera</li>
+        <li>Low Health Vignette — Viền đỏ</li>
+        <li>Health Flash — Nhấp nháy</li>
+        <li>Nuke VFX — Nổ hạt nhân (ending)</li>
+        <li>Outline — Highlight journal</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>🔊 Audio</h4>
+      <ul>
+        <li>Footsteps — Bước chân theo bề mặt</li>
+        <li>Weapon Sounds — Bắn, nạp, trang bị</li>
+        <li>Zombie Sounds — Gầm, tấn công, hit, chết</li>
+        <li>Boss Sounds — Tank, Boomer, Witch, Big Guy</li>
+        <li>Boomer Scream — Tiếng kêu sắp nổ</li>
+        <li>Tank Roar — Gầm toàn map (2D)</li>
+        <li>UI Sounds — Nút bấm</li>
+        <li>Journal Voice Logs — Giọng đọc nhật ký</li>
+        <li>Flashlight Toggle — Bật/tắt đèn</li>
+        <li>Explosion SFX — Âm nổ</li>
+        <li>Audio Mixer — Groups volume</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15: SCREENSHOTS GALLERY -->
+<div class="slide bg-dark" data-index="15">
+  <h2>📸 SCREENSHOTS GALLERY</h2>
+  <div class="subtitle">Hình ảnh từ trong game</div>
+  <div class="screenshot-gallery" style="flex:1; align-content:start;">
+    <img src="Assets/Screenshots/slide_mainmenu.png" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Main Menu">
+    <img src="Assets/Screenshots/slide_gameplay2.png" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Gameplay">
+    <img src="Assets/Screenshots/slide_combat.png" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Combat">
+    <img src="Assets/Screenshots/slide_hud.png" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="HUD">
+    <img src="Assets/Screenshots/slide_weapon.png" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Weapons">
+    <img src="Assets/Screenshots/slide_scene.png" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Scene View">
+    <img src="Assets/Screenshots/slide_scene2.png" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Scene View 2">
+  </div>
+</div>
+
+<!-- SLIDE 16: KỸ THUẬT -->
+<div class="slide bg-dark" data-index="16">
+  <h2>🛠️ THÀNH PHẦN KỸ THUẬT</h2>
+  <div class="subtitle">Công nghệ sử dụng trong dự án</div>
+  <div style="display:flex; gap:12px; flex:1;">
+    <div style="flex:2;">
+      <div class="grid grid-3">
+        <div class="card"><h4>🎮 Unity Engine</h4><p>Nền tảng phát triển chính</p></div>
+        <div class="card"><h4>💻 C#</h4><p>Ngôn ngữ lập trình — 80+ scripts</p></div>
+        <div class="card"><h4>⚙️ Cowsins Engine</h4><p>Hệ thống vũ khí, di chuyển, camera</p></div>
+        <div class="card"><h4>☁️ PlayFab</h4><p>Cloud save, login, leaderboard</p></div>
+        <div class="card"><h4>🧭 NavMesh</h4><p>AI pathfinding cho zombie</p></div>
+        <div class="card"><h4>🎨 Shader: Outline</h4><p>Hiệu ứng viền highlight</p></div>
+        <div class="card"><h4>🌐 ScriptableObject</h4><p>Quest, Journal, Weapon definitions</p></div>
+        <div class="card"><h4>📦 Object Pooling</h4><p>Tối ưu spawn zombie</p></div>
+        <div class="card"><h4>🎞️ Animator</h4><p>15+ animation controllers</p></div>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+      <img src="Assets/Screenshots/slide_scene.png" style="width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Scene View">
+      <img src="Assets/Screenshots/slide_scene2.png" style="width:100%; border-radius:8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="document.getElementById('lightboxImg').src=this.src;document.getElementById('lightbox').classList.add('show');" alt="Scene View 2">
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 17: TỔNG KẾT -->
+<div class="slide bg-green" data-index="17">
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+    <div style="text-align:center; margin-bottom:30px;">
+      <h2>📊 TỔNG KẾT DỰ ÁN</h2>
+    </div>
+    <div class="stat-grid" style="max-width:700px; margin:0 auto 30px;">
+      <div class="stat-box"><div class="stat-number">5</div><div class="stat-label">Chương</div></div>
+      <div class="stat-box"><div class="stat-number">12+</div><div class="stat-label">Main Quest</div></div>
+      <div class="stat-box"><div class="stat-number">8</div><div class="stat-label">Side Quest</div></div>
+      <div class="stat-box"><div class="stat-number">39</div><div class="stat-label">Journal (7 nhóm)</div></div>
+      <div class="stat-box"><div class="stat-number">7</div><div class="stat-label">Loại Zombie</div></div>
+      <div class="stat-box"><div class="stat-number">8</div><div class="stat-label">Vũ Khí</div></div>
+      <div class="stat-box"><div class="stat-number">15</div><div class="stat-label">Skill Node</div></div>
+      <div class="stat-box"><div class="stat-number">5</div><div class="stat-label">Achievement</div></div>
+      <div class="stat-box"><div class="stat-number">80+</div><div class="stat-label">Scripts C#</div></div>
+      <div class="stat-box"><div class="stat-number">15+</div><div class="stat-label">Animation Ctrl</div></div>
+      <div class="stat-box"><div class="stat-number">28+</div><div class="stat-label">Zombie Variants</div></div>
+      <div class="stat-box"><div class="stat-number">1</div><div class="stat-label">PlayFab Cloud</div></div>
+    </div>
+    <div style="text-align:center; font-size:1.1rem; color:#aaa; line-height:1.8;">
+      <p><strong>Một tựa game FPS Survival hoàn chỉnh</strong></p>
+      <p style="font-size:0.9rem; color:#888;">
+      Cốt truyện 5 chương · 8 vũ khí thu thập dần · 7 loại zombie với AI<br>
+      Skill Tree 3 nhánh · 39 journal · Wave System · Cutscene kết thúc · PlayFab Cloud
+      </p>
+    </div>
+    <div style="text-align:center; margin-top:30px; font-size:1.5rem;">
+      🧟‍♂️ 🔫 💥
+    </div>
+    <div style="text-align:center; margin-top:16px;">
+      <p style="color:#666; font-size:0.85rem;">Cảm ơn thầy cô và các bạn đã theo dõi!</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('show')">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<!-- Navigation -->
+<div class="nav" id="nav"></div>
+<button class="arrow arrow-left" id="prevBtn">◀</button>
+<button class="arrow arrow-right" id="nextBtn">▶</button>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+function update() {
+  slides.forEach((s, i) => {
+    s.classList.toggle('active', i === current);
+  });
+
+  const dots = document.querySelectorAll('.nav-btn');
+  dots.forEach((d, i) => d.classList.toggle('active', i === current));
+
+  document.getElementById('progressBar').style.width = ((current + 1) / total * 100) + '%';
+}
+
+function buildNav() {
+  const nav = document.getElementById('nav');
+  for (let i = 0; i < total; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'nav-btn' + (i === 0 ? ' active' : '');
+    btn.onclick = () => { current = i; update(); };
+    nav.appendChild(btn);
+  }
+}
+
+document.getElementById('nextBtn').onclick = () => {
+  if (current < total - 1) { current++; update(); }
+};
+
+document.getElementById('prevBtn').onclick = () => {
+  if (current > 0) { current--; update(); }
+};
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (current < total - 1) { current++; update(); } }
+  if (e.key === 'ArrowLeft') { if (current > 0) { current--; update(); } }
+});
+
+buildNav();
+update();
+</script>
+
+</body>
+</html>
