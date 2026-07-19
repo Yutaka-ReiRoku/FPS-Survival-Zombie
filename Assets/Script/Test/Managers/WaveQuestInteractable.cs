@@ -424,7 +424,24 @@ public class WaveQuestInteractable : Interactable
             {
                 trackedBoss = go.GetComponent<cowsins.ISpecialEnemy>();
                 if (trackedBoss != null)
+                {
                     Debug.Log($"[WaveQuestInteractable] Tracking boss {go.name} for wave completion (requireBossKill).");
+
+                    // Companion skip hook: if the player accepted the companion's
+                    // stage-2 dialogue, the boss spawns with reduced HP.
+                    if (CompanionBossSkipHook.PendingReducedBossHP > 0)
+                    {
+                        var tankAI = go.GetComponent<TankBossAI>();
+                        if (tankAI != null)
+                        {
+                            int newHP = CompanionBossSkipHook.PendingReducedBossHP;
+                            tankAI.maxHealth = newHP;
+                            tankAI.currentHealth = newHP; // TankBossAI.Start() also sets this = maxHealth.
+                            Debug.Log($"[WaveQuestInteractable] Companion skip: Tank boss HP reduced to {newHP}.");
+                        }
+                        CompanionBossSkipHook.PendingReducedBossHP = 0; // Consume.
+                    }
+                }
             }
         }
     }
