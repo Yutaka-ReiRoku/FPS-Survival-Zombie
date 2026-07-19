@@ -57,11 +57,11 @@ public static class StoryChapter3Builder
             QuestFolder + "/Quest_07_StartGenerator.asset",
             questId: 7, chapter: 3,
             title: "Khởi động máy phát điện",
-            description: "Khởi động máy phát điện để mở cửa sang khu dân cư. Tiếng máy thu hút hàng chục zombie — 3 wave cực khó (20 + 25 + 30 + Boomer). KHÔNG THỂ THOÁT khi đã bắt đầu! Wave 3 có Boomer boss.",
-            objective: "Khởi động máy phát điện và sống sót qua 3 wave (76 zombie + Boomer)",
+            description: "Khởi động máy phát điện để mở cửa sang khu dân cư. Tiếng máy thu hút hàng chục zombie — 2 wave (20 + 25). KHÔNG THỂ THOÁT khi đã bắt đầu!",
+            objective: "Khởi động máy phát điện và sống sót qua 2 wave (45 zombie)",
             expReward: 500f,
             journalReward: brotherJournal01,
-            notification: "Máy phát điện đã khởi động! Sống sót qua 3 wave zombie. Nhận Nhật ký anh trai #1. Mở khóa khu dân cư.");
+            notification: "Máy phát điện đã khởi động! Sống sót qua 2 wave zombie. Nhận Nhật ký anh trai #1. Mở khóa khu dân cư.");
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -188,8 +188,8 @@ public static class StoryChapter3Builder
         PlaceShotgunAmmo(ch3, new Vector3(-5f, 1f, 50f), 3);
         PlaceShotgunAmmo(ch3, new Vector3(5f, 1f, 50f), 4);
 
-        // 6) Wire Q7_Generator as a WaveQuestInteractable — 3 EXTREME waves,
-        //    wave 3 has a Boomer boss. Player is locked inside Ch3 during waves.
+        // 6) Wire Q7_Generator as a WaveQuestInteractable — 2 waves,
+        //    Player is locked inside Ch3 during waves.
         var q7GO = FindChild(ch3, "Q7_Generator");
         if (q7GO == null)
         {
@@ -224,7 +224,7 @@ public static class StoryChapter3Builder
         // Intro cutscene warning before the generator starts and zombies spawn.
         var q7Cutscene = GetOrAdd<CutscenePlayer>(q7GO);
         q7Cutscene.title = "Máy phát điện";
-        q7Cutscene.body = "Tiếng máy gầm vang lên. Hàng chục zombie nghe thấy và đang kéo đến... 3 wave! Không thể thoát!";
+        q7Cutscene.body = "Tiếng máy gầm vang lên. Hàng chục zombie nghe thấy và đang kéo đến... 2 wave! Không thể thoát!";
         q7Cutscene.fadeIn = 0.5f;
         q7Cutscene.hold = 4f;
         q7Cutscene.fadeOut = 0.8f;
@@ -241,10 +241,9 @@ public static class StoryChapter3Builder
         q7Wave.initialDelay = 1.5f;
         q7Wave.suppressChapterSpawners = true; // Only wave spawns count toward kills.
 
-        // 3 EXTREME waves: 20 + 25 + 30 + Boomer = 76 enemies total.
+        // 2 waves: 20 + 25 = 45 enemies total.
         var w1Prefabs = LoadWavePrefabs(20, includeBoss: false, toughRatio: 0.2f);
         var w2Prefabs = LoadWavePrefabs(25, includeBoss: false, toughRatio: 0.4f);
-        var w3Prefabs = LoadWavePrefabs(30, includeBoss: true, toughRatio: 0.5f);
 
         q7Wave.waves = new WaveQuestInteractable.Wave[]
         {
@@ -260,22 +259,14 @@ public static class StoryChapter3Builder
             {
                 prefabs = w2Prefabs,
                 killsRequired = w2Prefabs.Length,
-                waveTitle = "WAVE 2 — 25 ZOMBIE",
-                waveSubtitle = "Đông hơn! Cẩn thận — không thể chạy!",
-                breatherDelay = 5f,
-            },
-            new WaveQuestInteractable.Wave
-            {
-                prefabs = w3Prefabs,
-                killsRequired = w3Prefabs.Length,
-                waveTitle = "WAVE 3 — BOSS + 30 ZOMBIE",
-                waveSubtitle = "BOOMER xuất hiện! Tiêu diệt tất cả để thoát!",
-                breatherDelay = 0f, // No breather after the final wave.
+                waveTitle = "",
+                waveSubtitle = "",
+                breatherDelay = 0f, // Final wave — no breather after.
             },
         };
 
         EditorUtility.SetDirty(q7GO);
-        Debug.Log($"[StoryChapter3Builder] Q7_Generator wired (EXTREME: 3 waves, {w1Prefabs.Length}+{w2Prefabs.Length}+{w3Prefabs.Length} enemies, Boomer in wave 3, player locked in).");
+        Debug.Log($"[StoryChapter3Builder] Q7_Generator wired (2 waves, {w1Prefabs.Length}+{w2Prefabs.Length} enemies, player locked in).");
 
         // 7) Wire ChapterBoundary for Ch3 + lock boundary reference for Q7.
         var boundary = ch3.GetComponent<ChapterBoundary>();
