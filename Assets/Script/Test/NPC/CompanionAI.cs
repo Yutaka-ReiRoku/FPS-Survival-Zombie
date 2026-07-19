@@ -38,7 +38,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     public float followDistance = 4f;
     public float repathInterval = 0.25f;
     [Tooltip("How long the companion stops to shoot before resuming movement (L4D2 style).")]
-    public float shootStopDuration = 0.6f;
+    public float shootStopDuration = 1.2f;
     [Tooltip("Smooth time for Speed animator parameter.")]
     public float speedSmoothTime = 0.15f;
     [Tooltip("If player is farther than this, companion abandons combat to catch up (L4D2 style).")]
@@ -47,7 +47,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     [Header("Combat — Shotgun")]
     [Tooltip("Range at which the companion can detect and shoot enemies.")]
     public float detectRange = 15f;
-    public float shootCooldown = 1.5f;
+    public float shootCooldown = 2.0f;
     public int shotgunPellets = 5;
     public float shotgunSpreadDeg = 15f;
     public float shotgunRange = 15f;

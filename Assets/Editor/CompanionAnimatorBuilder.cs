@@ -111,12 +111,14 @@ public static class CompanionAnimatorBuilder
         // ===== TRANSITIONS =====
 
         // ---- Shoot -> Idle (return after shoot, via exitTime) ----
+        // exitTime=1.0 lets the full 0.27s Firing Rifle clip play before
+        // transitioning; duration=0.3 gives a smooth blend back to idle.
         var t = shootState.AddTransition(idleState);
-        t.hasExitTime = true; t.exitTime = 0.8f; t.duration = 0.2f;
+        t.hasExitTime = true; t.exitTime = 1.0f; t.duration = 0.3f;
 
         // ---- Hit -> Idle (return after hit) ----
         t = hitState.AddTransition(idleState);
-        t.hasExitTime = true; t.exitTime = 0.7f; t.duration = 0.2f;
+        t.hasExitTime = true; t.exitTime = 0.9f; t.duration = 0.3f;
 
         // ---- Downed (AnyState, only when Downed bool is true) ----
         var anyToDowned = sm.AddAnyStateTransition(downedState);
