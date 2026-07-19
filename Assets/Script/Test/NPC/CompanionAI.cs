@@ -304,10 +304,11 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
             }
         }
 
-        // Smooth Speed parameter for smooth animation transitions.
-        float targetSpeed = _agent.isStopped ? 0f : _agent.velocity.magnitude / followSpeed;
-        _currentAnimSpeed = Mathf.SmoothDamp(_currentAnimSpeed, targetSpeed, ref _speedVelocity, speedSmoothTime);
-        SetAnimSpeed(_currentAnimSpeed);
+        // Set Speed parameter directly from agent velocity for snappy response.
+        // SmoothDamp was too slow — agent reaches full speed in ~0.1s but the
+        // smoothed Speed parameter lagged behind by several seconds.
+        float targetSpeed = _agent.isStopped ? 0f : Mathf.Clamp01(_agent.velocity.magnitude / followSpeed);
+        SetAnimSpeed(targetSpeed);
     }
 
     private Transform FindNearestEnemy()
@@ -344,14 +345,21 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         Vector3 origin = transform.position + Vector3.up * 1.5f;
         Vector3 baseDir = (target.position + Vector3.up * 1f - origin).normalized;
 
+        // Build a layer mask that excludes the player and the companion itself
+        // so pellets don't get blocked by friendly colliders.
+        int shootMask = ~0;
+        int playerLayer = LayerMask.NameToLayer("Player");
+        if (playerLayer >= 0) shootMask &= ~(1 << playerLayer);
+        int companionLayer = gameObject.layer;
+        shootMask &= ~(1 << companionLayer);
+
         for (int i = 0; i < shotgunPellets; i++)
         {
             Vector3 dir = ApplySpread(baseDir, shotgunSpreadDeg);
-            if (Physics.Raycast(origin, dir, out var hit, shotgunRange, ~0, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(origin, dir, out var hit, shotgunRange, shootMask, QueryTriggerInteraction.Ignore))
             {
-                // Don't hit the player or self.
-                if (hit.collider.CompareTag("Player")) continue;
-                if (hit.collider.transform == transform) continue;
+                // Don't hit self (child colliders).
+                if (hit.collider.transform.IsChildOf(transform)) continue;
 
                 var dmg = hit.collider.GetComponent<IDamageable>();
                 if (dmg != null)
@@ -436,7 +444,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     {
         _agent.isStopped = false;
         _agent.SetDestination(deadEndPoint);
-        SetAnimSpeed(_agent.velocity.magnitude / followSpeed);
+        SetAnimSpeed(Mathf.Clamp01(_agent.velocity.magnitude / followSpeed));
 
         float dist = Vector3.Distance(transform.position, deadEndPoint);
         if (dist <= destroyDistance)
