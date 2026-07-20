@@ -125,11 +125,27 @@ public class DialogueBubble : MonoBehaviour
     {
         if (!_choiceActive) return;
 
-        if (Input.GetKeyDown(KeyCode.Y))
+        // Read Y/N via the Input System (Keyboard.current) when available,
+        // falling back to the legacy Input Manager. The project uses "Input
+        // System Package Only" mode, so Input.GetKeyDown does NOT work.
+        bool yPressed, nPressed;
+        var kb = UnityEngine.InputSystem.Keyboard.current;
+        if (kb != null)
+        {
+            yPressed = kb.yKey.wasPressedThisFrame;
+            nPressed = kb.nKey.wasPressedThisFrame;
+        }
+        else
+        {
+            yPressed = Input.GetKeyDown(KeyCode.Y);
+            nPressed = Input.GetKeyDown(KeyCode.N);
+        }
+
+        if (yPressed)
         {
             ResolveChoice(true);
         }
-        else if (Input.GetKeyDown(KeyCode.N))
+        else if (nPressed)
         {
             ResolveChoice(false);
         }

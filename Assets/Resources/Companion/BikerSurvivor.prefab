@@ -296,7 +296,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CompanionAI
   enemyTag: Enemy
   maxHealth: 150
-  followSpeed: 3.5
+  followSpeed: 8
   followDistance: 4
   repathInterval: 0.25
   shootStopDuration: 1.2

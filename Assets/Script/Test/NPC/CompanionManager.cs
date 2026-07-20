@@ -34,6 +34,15 @@ public class CompanionManager : MonoBehaviour
     [Tooltip("Tank boss max HP when the player accepts stage 2 (skip path).")]
     public int skippedTankMaxHealth = 250;
 
+    [Header("Skip Cutscene (played between Ch4 and Ch5 skip)")]
+    [Tooltip("Title of the cutscene shown when the player accepts the skip path.")]
+    public string skipCutsceneTitle = "Tìm thấy kíp nổ";
+    [Tooltip("Body text of the skip cutscene.")]
+    [TextArea(3, 8)]
+    public string skipCutsceneBody = "Sau nhiều giờ tìm kiếm, cuối cùng người chơi cũng đã tìm thấy kíp nổ... Đã đến lúc kết thúc mọi thứ.";
+    [Tooltip("How long (seconds) the skip cutscene holds after typing completes.")]
+    public float skipCutsceneHold = 3f;
+
     // ---- Runtime state ----
     public GameObject CompanionInstance { get; private set; }
     public CompanionAI CompanionAI { get; private set; }
@@ -102,6 +111,17 @@ public class CompanionManager : MonoBehaviour
         {
             Debug.Log("[CompanionManager] Update fallback: CurrentChapter >= 3, spawning companion.");
             SpawnCompanion();
+        }
+
+        // Fallback: arm stage 2 dialogue when already at Chapter 4 with stage 1
+        // accepted but stage 2 not armed. HandleChapterChanged only fires on
+        // chapter transitions, so if the game starts directly at Ch4 (e.g. for
+        // testing), the event is missed and stage 2 never arms.
+        if (Spawned && AcceptedStage1 && sm.CurrentChapter >= 4 && !_stage2Armed && DialogueTrigger != null)
+        {
+            _stage2Armed = true;
+            DialogueTrigger.ResetForStage(2);
+            Debug.Log("[CompanionManager] Update fallback: armed stage 2 dialogue (already at Chapter 4).");
         }
     }
 
@@ -239,26 +259,31 @@ public class CompanionManager : MonoBehaviour
         var sm = StoryManager.Instance;
         if (sm == null) yield break;
 
-        // Skip remaining Chapter 4 quests (Quest 9) silently.
+        // 1) Skip remaining Chapter 4 quests (Quest 9) silently.
         while (sm.CurrentChapter == 4 && sm.ActiveQuest != null)
         {
             sm.CompleteActiveQuest();
             yield return null;
         }
 
-        // After Ch4 completes, the chapter advances to 5 with PendingChapterEntry.
-        // We need to force-activate the pending chapter quest so we can skip Ch5 quests.
+        // 2) Play the skip cutscene as a narrative bridge between Ch4 and Ch5.
+        //    This explains how the player found the detonator without collecting
+        //    all the journals, so the skip path doesn't feel abrupt.
+        yield return PlaySkipCutscene();
+
+        // 3) After Ch4 completes, the chapter advances to 5 with PendingChapterEntry.
+        //    Force-activate the pending chapter quest so we can skip Ch5 quests.
         if (sm.PendingChapterEntry)
         {
             sm.ActivatePendingChapterQuest();
             yield return null;
         }
 
-        // Skip Chapter 5 quests until Quest 11 is active.
-        // Q11 is the boss-fight quest — the second-to-last quest in Ch5
-        // (index ch5.Length - 2 in the chapter5Quests array).
-        // We skip Q10 (collect documents) but STOP at Q11 so the player still
-        // fights the Tank boss (with reduced HP via CompanionBossSkipHook).
+        // 4) Skip Chapter 5 quests until Quest 11 is active.
+        //    Q11 is the boss-fight quest — the second-to-last quest in Ch5
+        //    (index ch5.Length - 2 in the chapter5Quests array).
+        //    We skip Q10 (collect documents) but STOP at Q11 so the player still
+        //    fights the Tank boss (with reduced HP via CompanionBossSkipHook).
         while (sm.CurrentChapter == 5 && sm.ActiveQuest != null)
         {
             var ch5 = sm.chapter5Quests;
@@ -274,6 +299,36 @@ public class CompanionManager : MonoBehaviour
             }
         }
 
-        Debug.Log("[CompanionManager] Skip logic complete. Player should now fight Tank boss with reduced HP.");
+        // 5) Set the reduced boss HP so the next Tank spawned by
+        //    WaveQuestInteractable has reduced health (consumed on spawn).
+        CompanionBossSkipHook.PendingReducedBossHP = skippedTankMaxHealth;
+        Debug.Log($"[CompanionManager] Skip logic complete. Player should now fight Tank boss with reduced HP ({skippedTankMaxHealth}).");
+    }
+
+    /// <summary>
+    /// Plays the skip-path cutscene ("Tìm thấy kíp nổ") as a narrative bridge
+    /// between Chapter 4 and Chapter 5. Creates a transient CutscenePlayer,
+    /// plays it, and yields until it completes.
+    /// </summary>
+    private System.Collections.IEnumerator PlaySkipCutscene()
+    {
+        var go = new GameObject("CompanionSkipCutscene");
+        // Parent under the manager so it doesn't get destroyed prematurely.
+        go.transform.SetParent(transform, false);
+        var cutscene = go.AddComponent<CutscenePlayer>();
+        cutscene.title = skipCutsceneTitle;
+        cutscene.body = skipCutsceneBody;
+        cutscene.hold = skipCutsceneHold;
+        cutscene.fadeIn = 0.6f;
+        cutscene.fadeOut = 1.0f;
+
+        bool done = false;
+        cutscene.Play(() => done = true);
+
+        // Wait until the cutscene finishes (it pauses Time.timeScale internally).
+        while (!done) yield return null;
+
+        // Clean up the transient cutscene GameObject.
+        Destroy(go);
     }
 }
