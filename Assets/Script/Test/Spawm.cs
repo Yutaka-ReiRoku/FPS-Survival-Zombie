@@ -555,9 +555,13 @@ public class Spawm : MonoBehaviour
         if (WaveManager.Instance == null)
             return maxZombie;
 
+        int perWaveStep = GameModeManager.CurrentMode == GameMode.Endless
+            ? WaveManager.Instance.endlessZombiesPerWave
+            : 5;
+
         return
             WaveManager.Instance.baseZombieCount +
-            (WaveManager.Instance.currentWave * 5);
+            (WaveManager.Instance.currentWave * perWaveStep);
     }
 
 }
