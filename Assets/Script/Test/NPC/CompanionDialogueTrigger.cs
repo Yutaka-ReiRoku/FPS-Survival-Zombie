@@ -43,6 +43,7 @@ public class CompanionDialogueTrigger : Interactable
     private DialogueBubble _bubble;
     private bool _consumed;
     private Transform _player;
+    private cowsins.InputManager _playerInput;
 
     private void Awake()
     {
@@ -70,11 +71,23 @@ public class CompanionDialogueTrigger : Interactable
         if (_consumed || _bubble == null || _bubble.IsChoiceActive) return;
         if (ActiveStage <= 0) return;
 
+        // Disable dialogue while the companion is Downed — E is used for rescue,
+        // not for opening a dialogue choice.
+        var ai = GetComponent<CompanionAI>();
+        if (ai != null && ai.CurrentState == CompanionAI.State.Downed) return;
+
         if (_player == null) FindPlayer();
         if (_player == null) return;
 
+        // Read the Interacting action via the player's InputManager (Input
+        // System). Fallback to Input.GetKeyDown for Input Manager mode.
+        ResolvePlayerInput();
+        bool ePressed = _playerInput != null
+            ? _playerInput.StartInteraction
+            : Input.GetKeyDown(proximityKey);
+
         float dist = Vector3.Distance(transform.position, _player.position);
-        if (dist <= proximityDistance && Input.GetKeyDown(proximityKey))
+        if (dist <= proximityDistance && ePressed)
         {
             TriggerDialogue();
         }
@@ -84,6 +97,19 @@ public class CompanionDialogueTrigger : Interactable
     {
         var playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO != null) _player = playerGO.transform;
+        ResolvePlayerInput();
+    }
+
+    private void ResolvePlayerInput()
+    {
+        if (_playerInput != null) return;
+        if (_player == null) return;
+        var p = _player.gameObject;
+        _playerInput = p.GetComponentInParent<cowsins.InputManager>();
+        if (_playerInput == null && p.transform.parent != null)
+            _playerInput = p.transform.parent.GetComponentInChildren<cowsins.InputManager>();
+        if (_playerInput == null)
+            _playerInput = p.GetComponentInChildren<cowsins.InputManager>();
     }
 
     public override void Interact(Transform player)
@@ -92,7 +118,23 @@ public class CompanionDialogueTrigger : Interactable
         if (_consumed) return;
         if (_bubble == null || _bubble.IsChoiceActive) return;
         if (ActiveStage <= 0) return;
+        // Disable dialogue while the companion is Downed — E is used for rescue.
+        var ai = GetComponent<CompanionAI>();
+        if (ai != null && ai.CurrentState == CompanionAI.State.Downed) return;
         TriggerDialogue();
+    }
+
+    /// <summary>
+    /// While the companion is Downed, block the cowsins InteractManager from
+    /// treating this as a normal interactable. This prevents the "Nói chuyện"
+    /// prompt from appearing and stops InteractManager from consuming the E key
+    /// (which must be free for the rescue hold in CompanionAI.UpdateDowned).
+    /// </summary>
+    public override bool IsForbiddenInteraction(IWeaponReferenceProvider weaponController)
+    {
+        var ai = GetComponent<CompanionAI>();
+        if (ai != null && ai.CurrentState == CompanionAI.State.Downed) return true;
+        return base.IsForbiddenInteraction(weaponController);
     }
 
     private void TriggerDialogue()

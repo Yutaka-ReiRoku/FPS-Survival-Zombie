@@ -61,6 +61,21 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     public float downedDuration = 30f;
     public float reviveHealthFraction = 0.5f;
 
+    [Header("Rescue by Player (hold E)")]
+    [Tooltip("How long the player must hold E near the downed companion to revive it.")]
+    public float rescueHoldDuration = 3f;
+    [Tooltip("Maximum distance from the downed companion within which the player can rescue.")]
+    public float rescueMaxDistance = 3f;
+    [Tooltip("Key the player must hold to rescue the downed companion.")]
+    public KeyCode rescueKey = KeyCode.E;
+    [Tooltip("Health fraction restored when the player rescues the companion (1 = full HP).")]
+    public float rescueHealthFraction = 1f;
+    [Tooltip("Dialogue line spoken by the companion after being rescued.")]
+    [TextArea(1, 3)]
+    public string rescuedThankLine = "Cảm ơn vì đã cứu tôi.";
+    [Tooltip("How long (seconds) the thank-you dialogue stays visible before fading.")]
+    public float rescuedThankHoldDuration = 2f;
+
     [Header("Walking Away (refused)")]
     [Tooltip("Destination the companion walks to when the player refuses.")]
     public Vector3 deadEndPoint = new Vector3(60.62f, 0f, -21.49f);
@@ -81,6 +96,8 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     public float HealthFraction => maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f;
     public event System.Action<float> OnHealthChanged;
     public event System.Action<State> OnStateChanged;
+    /// <summary>Raised with normalized 0..1 progress while the player holds E to rescue. 0 = stopped, 1 = complete.</summary>
+    public event System.Action<float> OnRescueProgressChanged;
 
     public State CurrentState
     {
@@ -102,6 +119,10 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     private float _enemyDamageTimer;
     private float _downedTimer;
     private float _shootStopTimer; // Stops movement while shooting (L4D2 style)
+    private float _rescueProgress; // 0..rescueHoldDuration — accumulated while player holds E near downed companion
+    private DialogueBubble _bubble; // Cached for rescue thank-you dialogue
+    private Collider _interactCollider; // Trigger collider on layer Interactable — disabled while Downed so InteractManager ignores the companion
+    private cowsins.InputManager _playerInput; // Cached player InputManager (Input System) for reading the Interacting action
     private float _speedVelocity; // SmoothDamp velocity for Speed parameter
     private float _currentAnimSpeed; // Current smoothed Speed value
     private Transform _rootBone; // Skeleton root bone (for fixing sink issue)
@@ -120,7 +141,14 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     {
         _agent = GetComponent<NavMeshAgent>();
         _audio = GetComponent<AudioSource>();
+        _bubble = GetComponent<DialogueBubble>();
         if (animator == null) animator = GetComponentInChildren<Animator>();
+
+        // Cache the trigger collider on the Interactable layer. This is what
+        // InteractManager raycasts against to show the "Nói chuyện" prompt.
+        // We disable it while Downed so InteractManager completely ignores the
+        // companion (no prompt, no E consumption) — leaving E free for rescue.
+        _interactCollider = GetComponent<Collider>();
         // CRITICAL: Disable root motion — NavMeshAgent controls position.
         // Root motion from Mixamo animations causes the model to sink into the ground.
         if (animator != null) animator.applyRootMotion = false;
@@ -197,6 +225,25 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         if (_player != null) return;
         var p = GameObject.FindGameObjectWithTag("Player");
         if (p != null) _player = p.transform;
+        ResolvePlayerInput();
+    }
+
+    /// <summary>
+    /// Resolves the player's InputManager (Input System). The InputManager is a
+    /// sibling of the tagged "Player" object under the same parent (e.g.
+    /// "Player/InputManager" vs "Player/Player"), so we search the root parent's
+    /// children. Safe to call repeatedly — returns early once found.
+    /// </summary>
+    private void ResolvePlayerInput()
+    {
+        if (_playerInput != null) return;
+        if (_player == null) return;
+        var p = _player.gameObject;
+        _playerInput = p.GetComponentInParent<cowsins.InputManager>();
+        if (_playerInput == null && p.transform.parent != null)
+            _playerInput = p.transform.parent.GetComponentInChildren<cowsins.InputManager>();
+        if (_playerInput == null)
+            _playerInput = p.GetComponentInChildren<cowsins.InputManager>();
     }
 
     private void Update()
@@ -416,18 +463,68 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     {
         _agent.isStopped = true;
         SetAnimSpeed(0f);
+
+        // ---- Player rescue (hold E) ----
+        // Runs in parallel with the auto-revive timer. If the player holds E
+        // within rescueMaxDistance for rescueHoldDuration seconds, the companion
+        // is revived at rescueHealthFraction (default full HP). If the timer
+        // expires first, auto-revive kicks in at reviveHealthFraction (50%).
+        bool rescuing = false;
+        if (_player != null)
+        {
+            // Re-resolve the InputManager if it wasn't found yet (e.g. it was
+            // not ready during Start).
+            ResolvePlayerInput();
+            float dist = Vector3.Distance(transform.position, _player.position);
+            // Read the Interacting action from the player's InputManager (Input
+            // System). Fallback to Input.GetKey for Input Manager mode.
+            bool eHeld = _playerInput != null
+                ? _playerInput.Interacting
+                : Input.GetKey(rescueKey);
+            if (dist <= rescueMaxDistance && eHeld)
+            {
+                rescuing = true;
+                _rescueProgress += Time.deltaTime;
+                float normalized = Mathf.Clamp01(_rescueProgress / rescueHoldDuration);
+                OnRescueProgressChanged?.Invoke(normalized);
+                if (_rescueProgress >= rescueHoldDuration)
+                {
+                    OnRescueProgressChanged?.Invoke(0f); // Reset UI before revive
+                    Revive(rescueHealthFraction, byPlayer: true);
+                    return;
+                }
+            }
+        }
+        if (!rescuing && _rescueProgress > 0f)
+        {
+            // Player released E or walked away — reset progress.
+            _rescueProgress = 0f;
+            OnRescueProgressChanged?.Invoke(0f);
+        }
+
+        // ---- Auto-revive timer ----
         _downedTimer -= Time.deltaTime;
         if (_downedTimer <= 0f)
         {
-            Revive();
+            OnRescueProgressChanged?.Invoke(0f);
+            Revive(reviveHealthFraction, byPlayer: false);
         }
     }
 
-    private void Revive()
+    /// <summary>
+    /// Revives the companion from the Downed state.
+    /// </summary>
+    /// <param name="healthFraction">Fraction of maxHealth to restore (0.5 = 50%, 1 = full).</param>
+    /// <param name="byPlayer">If true, the companion thanks the player via DialogueBubble.</param>
+    private void Revive(float healthFraction, bool byPlayer = false)
     {
-        currentHealth = Mathf.RoundToInt(maxHealth * reviveHealthFraction);
+        _rescueProgress = 0f;
+        currentHealth = Mathf.RoundToInt(maxHealth * Mathf.Clamp01(healthFraction));
         OnHealthChanged?.Invoke(HealthFraction);
         CurrentState = State.Following;
+        // Re-enable the interaction collider so the player can talk to the
+        // companion again (dialogue prompt reappears).
+        if (_interactCollider != null) _interactCollider.enabled = true;
         if (animator != null)
         {
             // Reset Downed bool FIRST so AnyState transition stops firing.
@@ -435,7 +532,16 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
             // Then trigger Revive to play revive animation.
             animator.SetTrigger(ReviveHash);
         }
-        Debug.Log("[CompanionAI] Revived.");
+        if (byPlayer && _bubble != null && !string.IsNullOrEmpty(rescuedThankLine))
+        {
+            // Show thank-you dialogue, auto-hide after rescuedThankHoldDuration.
+            _bubble.ShowSpeech(rescuedThankLine, rescuedThankHoldDuration);
+            Debug.Log("[CompanionAI] Rescued by player. Revived at " + (healthFraction * 100f) + "% HP.");
+        }
+        else
+        {
+            Debug.Log("[CompanionAI] Auto-revived at " + (healthFraction * 100f) + "% HP.");
+        }
     }
 
     // ---- Walking Away (refused) ----
@@ -502,6 +608,12 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         CurrentState = State.Downed;
         _downedTimer = downedDuration;
         _shootStopTimer = 0f;
+        _rescueProgress = 0f;
+        OnRescueProgressChanged?.Invoke(0f);
+        // Disable the interaction collider so InteractManager stops detecting
+        // the companion (no "Nói chuyện" prompt, no E consumption). This frees
+        // the E key for the rescue hold in UpdateDowned.
+        if (_interactCollider != null) _interactCollider.enabled = false;
         if (animator != null)
         {
             // Reset ALL triggers to prevent stale transitions.

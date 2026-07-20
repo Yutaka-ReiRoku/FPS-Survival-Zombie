@@ -302,13 +302,24 @@ public class ChapterBoundary : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         // The wall collider (non-trigger) blocks the player from re-entering a
-        // locked/completed chapter. When they hit it, show a notification so
-        // they understand why they can't go back.
+        // locked/completed chapter OR from entering a future chapter they haven't
+        // reached yet. Show a contextual notification so they understand why.
         if (!collision.collider.CompareTag("Player")) return;
-        if (!_locked) return;
 
-        SimpleNotification.Show("Khu vực này mình đã khám phá rồi...");
-        Debug.Log($"[ChapterBoundary] Ch{chapter} player hit locked wall — showed 'already explored' notification.");
+        var sm = StoryManager.Instance;
+
+        if (_locked)
+        {
+            // Already explored (one-way lock after completing the chapter).
+            SimpleNotification.Show("Khu vực này mình đã khám phá rồi...");
+            Debug.Log($"[ChapterBoundary] Ch{chapter} player hit locked wall — showed 'already explored' notification.");
+        }
+        else if (sm != null && chapter > sm.CurrentChapter)
+        {
+            // Future chapter — not yet unlocked. Player must finish the current area first.
+            SimpleNotification.Show("Tôi cần khám phá xong khu vực trước.");
+            Debug.Log($"[ChapterBoundary] Ch{chapter} player hit future-chapter wall — showed 'finish current area first' notification.");
+        }
     }
 
     /// <summary>

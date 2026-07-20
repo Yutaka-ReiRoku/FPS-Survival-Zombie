@@ -126,6 +126,10 @@ public static class CompanionPrefabBuilder
         if (tempGO.GetComponent<CompanionHealthBar>() == null)
             tempGO.AddComponent<CompanionHealthBar>();
 
+        // CompanionRescueUI (world-space prompt + progress bar shown while Downed).
+        if (tempGO.GetComponent<CompanionRescueUI>() == null)
+            tempGO.AddComponent<CompanionRescueUI>();
+
         // Create a simple muzzle flash + tracer VFX prefab and assign it.
         var muzzlePrefab = CreateMuzzleFlashPrefab();
         ai.muzzleFlashPrefab = muzzlePrefab;

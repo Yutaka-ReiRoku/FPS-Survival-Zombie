@@ -139,11 +139,17 @@ public class DialogueBubble : MonoBehaviour
 
     public void ShowSpeech(string line)
     {
+        ShowSpeech(line, fadeIn + speechHoldDuration);
+    }
+
+    /// <summary>Show a single speech line that auto-hides after <paramref name="holdDuration"/> seconds (fade-in not included).</summary>
+    public void ShowSpeech(string line, float holdDuration)
+    {
         if (_lineLabel != null) _lineLabel.text = line;
         if (_choiceLabel != null) _choiceLabel.style.display = DisplayStyle.None;
         Show();
         if (_routine != null) StopCoroutine(_routine);
-        _routine = StartCoroutine(HideAfter(fadeIn + speechHoldDuration));
+        _routine = StartCoroutine(HideAfter(fadeIn + holdDuration));
     }
 
     // ---- Choice mode ----
