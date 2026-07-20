@@ -185,7 +185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee97ca2e6657d5643b73d1c60895d53e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GiftBox
-  uniqueID: 678eeb38-92d2-48f6-bc97-3e6c365c653e
+  uniqueID: afbe0839-d5d6-4c6f-b5e1-faa910ffb1f5
   interactable: 0
   interactText: Open Gift Box
   instantInteraction: 0

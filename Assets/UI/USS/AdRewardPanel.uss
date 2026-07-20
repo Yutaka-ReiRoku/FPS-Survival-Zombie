@@ -78,6 +78,37 @@
     background-color: var(--color-surface-hover);
 }
 
+@keyframes ad-pulse {
+    0%   { opacity: 1; }
+    50%  { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+#AdRewardPanel #AdContent.ad-playing .ad-placeholder-icon {
+    animation-name: ad-pulse;
+    animation-duration: 1.2s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+
+#AdRewardPanel #AdContent.ad-playing .ad-playing-overlay {
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.6);
+    border-radius: var(--radius-s);
+}
+
+#AdRewardPanel #AdContent.ad-playing .ad-playing-overlay .ad-placeholder-label {
+    color: var(--color-accent-cyan-light);
+}
+
 #AdRewardPanel .ad-placeholder {
     width: 100%;
     height: 120px;

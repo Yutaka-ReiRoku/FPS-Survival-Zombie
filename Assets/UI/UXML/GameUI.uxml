@@ -408,7 +408,12 @@
                 <ui:VisualElement name="AdDivider" />
                 <ui:VisualElement name="AdContent">
                     <ui:VisualElement class="ad-placeholder">
+                        <ui:VisualElement class="ad-placeholder-icon" />
                         <ui:Label name="AdTimer" class="ad-placeholder-label" text="Nhấn XEM để nhận thưởng" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="AdPlayingOverlay" class="ad-playing-overlay" style="display: none;">
+                        <ui:VisualElement class="ad-placeholder-icon" />
+                        <ui:Label class="ad-placeholder-label" text="ĐANG PHÁT QUẢNG CÁO..." />
                     </ui:VisualElement>
                     <ui:Button name="WatchAdButton" text="XEM QUẢNG CÁO" class="gameover-button" />
                     <ui:Label name="AdRewardText" text="" />

@@ -23,6 +23,7 @@ public class AdRewardManager : MonoBehaviour
     private Label _timerLabel;
     private Label _rewardLabel;
     private VisualElement _adContainer;
+    private VisualElement _adPlayingOverlay;
     private Button _watchButton;
     private Button _closeButton;
     private bool _ready;
@@ -90,6 +91,7 @@ public class AdRewardManager : MonoBehaviour
         _timerLabel = _panel.Q<Label>("AdTimer");
         _rewardLabel = _panel.Q<Label>("AdRewardText");
         _adContainer = _panel.Q("AdContent");
+        _adPlayingOverlay = _panel.Q("AdPlayingOverlay");
         _watchButton = _panel.Q<Button>("WatchAdButton");
         _closeButton = _panel.Q<Button>("AdCloseButton");
 
@@ -218,20 +220,20 @@ public class AdRewardManager : MonoBehaviour
         }
         if (_closeButton != null) _closeButton.style.display = DisplayStyle.None;
         if (_adContainer != null) _adContainer.RemoveFromClassList("ad-playing");
+        if (_adPlayingOverlay != null) _adPlayingOverlay.style.display = DisplayStyle.None;
     }
 
     private void StartAd()
     {
-#if UNITY_EDITOR
         if (_watchButton != null) _watchButton.style.display = DisplayStyle.None;
         if (_adContainer != null) _adContainer.AddToClassList("ad-playing");
+        if (_adPlayingOverlay != null) _adPlayingOverlay.style.display = DisplayStyle.Flex;
+
+#if UNITY_EDITOR
         StartCoroutine(EditorSimulateAd());
 #else
         if (_isAdReady && _rewardedAd != null && _rewardedAd.CanShowAd())
         {
-            if (_watchButton != null) _watchButton.style.display = DisplayStyle.None;
-            if (_adContainer != null) _adContainer.AddToClassList("ad-playing");
-
             _rewardedAd.Show(reward =>
             {
                 GrantRandomReward();
@@ -277,8 +279,7 @@ public class AdRewardManager : MonoBehaviour
 
     private IEnumerator EditorSimulateAd()
     {
-        if (_timerLabel != null) _timerLabel.text = "Quảng cáo kết thúc sau 3s";
-        float timer = 3f;
+        float timer = 5f;
         while (timer > 0)
         {
             if (_timerLabel != null)
@@ -286,7 +287,8 @@ public class AdRewardManager : MonoBehaviour
             timer -= Time.unscaledDeltaTime;
             yield return null;
         }
-        if (_timerLabel != null) _timerLabel.text = "Hoàn tất!";
+        if (_timerLabel != null) _timerLabel.text = "";
+        if (_adPlayingOverlay != null) _adPlayingOverlay.style.display = DisplayStyle.None;
         GrantRandomReward();
         if (_closeButton != null) _closeButton.style.display = DisplayStyle.Flex;
     }
