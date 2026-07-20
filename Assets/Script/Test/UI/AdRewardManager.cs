@@ -208,19 +208,18 @@ public class AdRewardManager : MonoBehaviour
         if (_timerLabel != null)
         {
             if (_isAdReady)
-                _timerLabel.text = "Nhấn XEM để nhận thưởng";
+                _timerLabel.text = "Đang phát quảng cáo...";
             else
                 _timerLabel.text = "Đang tải quảng cáo...";
         }
         if (_rewardLabel != null) _rewardLabel.text = "";
-        if (_watchButton != null)
-        {
-            _watchButton.style.display = DisplayStyle.Flex;
-            _watchButton.SetEnabled(true);
-        }
+        _watchButton.style.display = DisplayStyle.None;
         if (_closeButton != null) _closeButton.style.display = DisplayStyle.None;
         if (_adContainer != null) _adContainer.RemoveFromClassList("ad-playing");
         if (_adPlayingOverlay != null) _adPlayingOverlay.style.display = DisplayStyle.None;
+
+        // Auto-play ad
+        StartAd();
     }
 
     private void StartAd()
