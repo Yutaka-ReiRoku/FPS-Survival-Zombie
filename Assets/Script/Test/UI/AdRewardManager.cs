@@ -2,10 +2,20 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 using cowsins;
+using GoogleMobileAds.Api;
 
 public class AdRewardManager : MonoBehaviour
 {
-    public static AdRewardManager Instance { get; private set; }
+    private static AdRewardManager _instance;
+    public static AdRewardManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = FindFirstObjectByType<AdRewardManager>();
+            return _instance;
+        }
+    }
 
     private UIDocument _doc;
     private VisualElement _panel;
@@ -20,9 +30,11 @@ public class AdRewardManager : MonoBehaviour
     private PlayerControl _playerControl;
     private float _previousTimeScale = 1f;
 
-    [Header("Ad Settings")]
-    [Tooltip("Thời lượng quảng cáo giả lập (giây).")]
-    public float adDuration = 5f;
+    [Header("AdMob Settings")]
+    [Tooltip("AdMob Rewarded Ad Unit ID cho Android.")]
+    public string androidAdUnitId = "ca-app-pub-3940256099942544/5224354917";
+    [Tooltip("AdMob Rewarded Ad Unit ID cho iOS.")]
+    public string iosAdUnitId = "ca-app-pub-3940256099942544/1712485313";
 
     [Header("Reward Amounts")]
     public int coinAmount = 150;
@@ -30,12 +42,25 @@ public class AdRewardManager : MonoBehaviour
     public int ammoMagazines = 2;
     public int healthAmount = 40;
 
-    private bool _isAdPlaying;
+    private RewardedAd _rewardedAd;
+    private bool _isAdLoading;
+    private bool _isAdReady;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(this); return; }
-        Instance = this;
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+        _instance = this;
+        InitializeAdMob();
+    }
+
+    private void OnDestroy()
+    {
+        if (_instance == this)
+            _instance = null;
     }
 
     private void OnEnable() { SetupUI(); }
@@ -44,7 +69,7 @@ public class AdRewardManager : MonoBehaviour
     {
         if (_watchButton != null) _watchButton.clicked -= StartAd;
         if (_closeButton != null) _closeButton.clicked -= ClosePanel;
-        StopAllCoroutines();
+        DestroyAd();
     }
 
     private void SetupUI()
@@ -76,36 +101,184 @@ public class AdRewardManager : MonoBehaviour
         _ready = true;
     }
 
+    private void InitializeAdMob()
+    {
+        try
+        {
+            MobileAds.Initialize(initStatus =>
+            {
+                Debug.Log("AdMob initialized: " + initStatus);
+                LoadRewardedAd();
+            });
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("AdMob init failed (expected in Editor): " + e.Message);
+        }
+    }
+
+    private string GetAdUnitId()
+    {
+#if UNITY_ANDROID
+        return androidAdUnitId;
+#elif UNITY_IOS
+        return iosAdUnitId;
+#else
+        return androidAdUnitId;
+#endif
+    }
+
+    public void LoadRewardedAd()
+    {
+        if (_isAdLoading) return;
+        _isAdLoading = true;
+
+        DestroyAd();
+
+        var adRequest = new AdRequest();
+
+        RewardedAd.Load(GetAdUnitId(), adRequest, (RewardedAd ad, LoadAdError error) =>
+        {
+            _isAdLoading = false;
+
+            if (error != null || ad == null)
+            {
+                Debug.LogError("Rewarded ad failed to load: " + error);
+                _isAdReady = false;
+                return;
+            }
+
+            _rewardedAd = ad;
+            _isAdReady = true;
+            Debug.Log("Rewarded ad loaded.");
+
+            _rewardedAd.OnAdFullScreenContentClosed += () =>
+            {
+                Debug.Log("Rewarded ad closed.");
+                _isAdReady = false;
+                _rewardedAd = null;
+            };
+
+            _rewardedAd.OnAdFullScreenContentFailed += (adError) =>
+            {
+                Debug.LogError("Rewarded ad failed to show: " + adError);
+                _isAdReady = false;
+                _rewardedAd = null;
+                ClosePanel();
+            };
+        });
+    }
+
     public void ShowAd(Transform player)
     {
-        if (!_ready) return;
+        Debug.Log("[AdReward] ShowAd called. Player=" + (player != null ? player.name : "null") + " _ready=" + _ready);
+
         _currentPlayer = player;
         _playerControl = player != null ? player.GetComponentInChildren<PlayerControl>() : null;
 
-        PauseGame();
+        if (!_ready)
+        {
+            SetupUI();
+            if (!_ready) return;
+        }
 
-        _panel.style.display = DisplayStyle.Flex;
+        // Use PanelManager to properly register the panel and handle pause/control/cursor
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.OpenPanel("AdReward", _panel, null, () =>
+            {
+                Debug.Log("[AdReward] Panel close callback triggered.");
+            });
+        }
+        else
+        {
+            // Fallback if PanelManager not available
+            _panel.style.display = DisplayStyle.Flex;
+            _previousTimeScale = Time.timeScale;
+            Time.timeScale = 0f;
+            if (_playerControl != null) _playerControl.LoseControl();
+            PauseMenu.isPaused = true;
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+        }
+
         if (_titleLabel != null) _titleLabel.text = "QUẢNG CÁO";
-        if (_timerLabel != null) _timerLabel.text = "Nhấn XEM để nhận thưởng";
+        if (_timerLabel != null)
+        {
+            if (_isAdReady)
+                _timerLabel.text = "Nhấn XEM để nhận thưởng";
+            else
+                _timerLabel.text = "Đang tải quảng cáo...";
+        }
         if (_rewardLabel != null) _rewardLabel.text = "";
-        if (_watchButton != null) _watchButton.style.display = DisplayStyle.Flex;
+        if (_watchButton != null)
+        {
+            _watchButton.style.display = DisplayStyle.Flex;
+            _watchButton.SetEnabled(true);
+        }
         if (_closeButton != null) _closeButton.style.display = DisplayStyle.None;
         if (_adContainer != null) _adContainer.RemoveFromClassList("ad-playing");
     }
 
     private void StartAd()
     {
-        if (_isAdPlaying) return;
+#if UNITY_EDITOR
         if (_watchButton != null) _watchButton.style.display = DisplayStyle.None;
         if (_adContainer != null) _adContainer.AddToClassList("ad-playing");
-        StartCoroutine(PlayAdCoroutine());
+        StartCoroutine(EditorSimulateAd());
+#else
+        if (_isAdReady && _rewardedAd != null && _rewardedAd.CanShowAd())
+        {
+            if (_watchButton != null) _watchButton.style.display = DisplayStyle.None;
+            if (_adContainer != null) _adContainer.AddToClassList("ad-playing");
+
+            _rewardedAd.Show(reward =>
+            {
+                GrantRandomReward();
+                if (_closeButton != null) _closeButton.style.display = DisplayStyle.Flex;
+            });
+        }
+        else
+        {
+            if (_timerLabel != null) _timerLabel.text = "Đang tải quảng cáo...";
+            if (_watchButton != null) _watchButton.SetEnabled(false);
+            if (!_isAdLoading) LoadRewardedAd();
+            StartCoroutine(WaitForAdThenShow());
+        }
+#endif
     }
 
-    private IEnumerator PlayAdCoroutine()
+    private IEnumerator WaitForAdThenShow()
     {
-        _isAdPlaying = true;
-        float timer = adDuration;
+        float timeout = 15f;
+        while (!_isAdReady && timeout > 0f)
+        {
+            timeout -= Time.unscaledDeltaTime;
+            yield return null;
+        }
 
+        if (_isAdReady && _rewardedAd != null && _rewardedAd.CanShowAd())
+        {
+            if (_watchButton != null) _watchButton.style.display = DisplayStyle.None;
+            if (_adContainer != null) _adContainer.AddToClassList("ad-playing");
+
+            _rewardedAd.Show(reward =>
+            {
+                GrantRandomReward();
+                if (_closeButton != null) _closeButton.style.display = DisplayStyle.Flex;
+            });
+        }
+        else
+        {
+            if (_timerLabel != null) _timerLabel.text = "Không thể tải quảng cáo!";
+            if (_closeButton != null) _closeButton.style.display = DisplayStyle.Flex;
+        }
+    }
+
+    private IEnumerator EditorSimulateAd()
+    {
+        if (_timerLabel != null) _timerLabel.text = "Quảng cáo kết thúc sau 3s";
+        float timer = 3f;
         while (timer > 0)
         {
             if (_timerLabel != null)
@@ -113,11 +286,9 @@ public class AdRewardManager : MonoBehaviour
             timer -= Time.unscaledDeltaTime;
             yield return null;
         }
-
         if (_timerLabel != null) _timerLabel.text = "Hoàn tất!";
         GrantRandomReward();
         if (_closeButton != null) _closeButton.style.display = DisplayStyle.Flex;
-        _isAdPlaying = false;
     }
 
     private void GrantRandomReward()
@@ -175,35 +346,45 @@ public class AdRewardManager : MonoBehaviour
                 }
                 break;
         }
-    }
 
-    private void PauseGame()
-    {
-        _previousTimeScale = Time.timeScale;
-        Time.timeScale = 0f;
-        if (_playerControl != null)
-            _playerControl.LoseControl();
-        UnityEngine.Cursor.lockState = CursorLockMode.None;
-        UnityEngine.Cursor.visible = true;
-    }
-
-    private void ResumeGame()
-    {
-        Time.timeScale = _previousTimeScale > 0f ? _previousTimeScale : 1f;
-        if (_playerControl != null)
-            _playerControl.GrantControl();
-        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-        UnityEngine.Cursor.visible = false;
+        LoadRewardedAd();
     }
 
     private void ClosePanel()
     {
-        if (_panel != null)
-            _panel.style.display = DisplayStyle.None;
-        StopAllCoroutines();
-        _isAdPlaying = false;
-        ResumeGame();
+        if (_isAdReady && _rewardedAd != null)
+            _rewardedAd.Destroy();
+        _isAdReady = false;
+        _rewardedAd = null;
+
+        // Use PanelManager to properly close and restore state
+        if (PanelManager.Instance != null)
+        {
+            PanelManager.Instance.ClosePanel("AdReward", _panel, null);
+        }
+        else
+        {
+            // Fallback
+            if (_panel != null)
+                _panel.style.display = DisplayStyle.None;
+            Time.timeScale = _previousTimeScale > 0f ? _previousTimeScale : 1f;
+            if (_playerControl != null) _playerControl.GrantControl();
+            PauseMenu.isPaused = false;
+            UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+            UnityEngine.Cursor.visible = false;
+        }
+
         _currentPlayer = null;
         _playerControl = null;
+    }
+
+    private void DestroyAd()
+    {
+        if (_rewardedAd != null)
+        {
+            _rewardedAd.Destroy();
+            _rewardedAd = null;
+        }
+        _isAdReady = false;
     }
 }
