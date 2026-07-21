@@ -4,13 +4,17 @@ using cowsins;
 
 public class EndlessAirdropManager : MonoBehaviour
 {
+    public static EndlessAirdropManager Instance;
+
     [Header("Airdrop Settings")]
     public float spawnInterval = 300f;
+    [Range(0f, 1f)]
+    public float intervalRandomRange = 0.2f;
     public float spawnRadius = 50f;
     public float minSpawnDistance = 15f;
     public float dropHeight = 80f;
     public float markerDuration = 5f;
-    public GameObject lootboxPrefab;
+    public GameObject[] lootboxPrefabs;
 
     [Header("Marker")]
     public bool showMarker = true;
@@ -21,10 +25,26 @@ public class EndlessAirdropManager : MonoBehaviour
     private bool _dropPending;
     private Vector3 _landingPos;
 
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
+
     private void Start()
     {
-        _timer = spawnInterval;
+        ResetTimer();
         FindPlayer();
+    }
+
+    private void ResetTimer()
+    {
+        float range = spawnInterval * intervalRandomRange;
+        _timer = spawnInterval + Random.Range(-range, range);
     }
 
     private void FindPlayer()
@@ -46,7 +66,7 @@ public class EndlessAirdropManager : MonoBehaviour
         _timer -= Time.deltaTime;
         if (_timer <= 0f)
         {
-            _timer = spawnInterval;
+            ResetTimer();
             StartAirdrop();
         }
     }
@@ -73,7 +93,7 @@ public class EndlessAirdropManager : MonoBehaviour
 
     private void SpawnLootbox()
     {
-        if (lootboxPrefab == null || _player == null)
+        if (lootboxPrefabs == null || lootboxPrefabs.Length == 0 || _player == null)
         {
             _dropPending = false;
             return;
@@ -81,7 +101,8 @@ public class EndlessAirdropManager : MonoBehaviour
 
         Vector3 spawnPos = _landingPos + Vector3.up * dropHeight;
 
-        GameObject lootbox = Instantiate(lootboxPrefab, spawnPos, Quaternion.identity);
+        GameObject selectedPrefab = lootboxPrefabs[Random.Range(0, lootboxPrefabs.Length)];
+        GameObject lootbox = Instantiate(selectedPrefab, spawnPos, Quaternion.identity);
         Debug.Log("[Airdrop] Lootbox airdrop dropped!");
 
         Rigidbody rb = lootbox.GetComponent<Rigidbody>();
