@@ -37,8 +37,23 @@ public class CompanionManager : MonoBehaviour
     public int requiredAmmoToFollow = 40;
 
     [Header("Boss Skip")]
-    [Tooltip("Tank boss max HP when the player accepts stage 2 (skip path).")]
+    [Tooltip("Tank boss max HP when the player accepts the stage 4 skip path (≥3 honest answers).")]
     public int skippedTankMaxHealth = 250;
+
+    [Header("Stage 4 — 5 Questions (after Chapter 3)")]
+    [Tooltip("5 yes/no questions asked by the follower after Chapter 3. The player answers each with Y/N. If the player answers YES to at least 'honestThreshold' questions, the follower trusts the player and helps skip Chapter 4 (finds the detonator). Otherwise the follower stays but does not help skip — the player must complete all Ch4 quests normally.")]
+    [TextArea(2, 4)]
+    public string[] stage4Questions = new string[]
+    {
+        "Anh đến thành phố này để tìm người thân, đúng không?",
+        "Anh đang mang theo một thứ gì đó quan trọng, phải không?",
+        "Anh từng là quân nhân, đúng không?",
+        "Anh biết gì đó về vụ bùng phát dịch bệnh, đúng không?",
+        "Anh đang tìm cách phá hủy nguồn gốc của dịch bệnh, đúng không?"
+    };
+
+    [Tooltip("Minimum number of YES answers required for the follower to trust the player and help skip Chapter 4.")]
+    public int honestThreshold = 3;
 
     [Header("Skip Cutscene (played between Ch4 and Ch5 skip)")]
     [Tooltip("Title of the cutscene shown when the player accepts the skip path.")]
@@ -70,6 +85,11 @@ public class CompanionManager : MonoBehaviour
     private bool _stage3Armed;   // Stage 3 dialogue armed (after siege completed)
     private bool _stage4Armed;   // Stage 4 dialogue armed (on Ch4 entry)
     private bool _subscribed;
+
+    // Stage 4 interrogation (5 yes/no questions after Ch3).
+    private bool _stage4InProgress;
+    private int _stage4QuestionIndex;
+    private int _stage4YesCount;
 
     // Shop supplies collection (Stage 2 → siege).
     private int _shopSuppliesCollected; // 0..2 (2 shops to loot)
@@ -316,17 +336,112 @@ public class CompanionManager : MonoBehaviour
         }
         else if (stage == 4)
         {
-            // Stage 4 (cũ Stage 2): skip Ch4 offer
+            // Stage 4 is now handled by StartStage4Interrogation (5 questions).
+            // This branch should not be reached via HandleDialogueChoice anymore,
+            // but kept as a safety fallback: treat 'accepted' as a single yes.
+            Debug.LogWarning("[CompanionManager] HandleDialogueChoice(4) called directly — use StartStage4Interrogation instead. Falling back to single-question behavior.");
             AcceptedStage4 = accepted;
             if (accepted)
             {
-                Debug.Log("[CompanionManager] Player ACCEPTED stage 4. Applying skip logic.");
+                Debug.Log("[CompanionManager] Player ACCEPTED stage 4 (fallback). Applying skip logic.");
                 StartCoroutine(SkipToQuest11WithReducedBoss());
             }
             else
             {
-                Debug.Log("[CompanionManager] Player REFUSED stage 4. Companion keeps following; player must complete all quests normally.");
+                Debug.Log("[CompanionManager] Player REFUSED stage 4 (fallback). Companion keeps following; player must complete all quests normally.");
             }
+        }
+    }
+
+    // ---- Stage 4: 5-question interrogation ----
+
+    /// <summary>
+    /// Starts the 5-question interrogation sequence. Called by
+    /// CompanionDialogueTrigger when the player interacts with the companion
+    /// while Stage 4 is armed. Each question is shown via DialogueBubble as a
+    /// Y/N choice; after 5 answers, the result is evaluated:
+    ///   ≥ honestThreshold YES → follower trusts player → SkipToQuest11
+    ///   &lt; honestThreshold YES → follower stays but does not help skip
+    /// </summary>
+    public void StartStage4Interrogation()
+    {
+        if (_stage4InProgress) return;
+        if (stage4Questions == null || stage4Questions.Length == 0)
+        {
+            Debug.LogWarning("[CompanionManager] stage4Questions is empty — skipping interrogation, applying skip directly.");
+            AcceptedStage4 = true;
+            StartCoroutine(SkipToQuest11WithReducedBoss());
+            return;
+        }
+
+        _stage4InProgress = true;
+        _stage4QuestionIndex = 0;
+        _stage4YesCount = 0;
+        AskNextStage4Question();
+    }
+
+    private void AskNextStage4Question()
+    {
+        if (CompanionAI == null)
+        {
+            Debug.LogWarning("[CompanionManager] CompanionAI null during interrogation — aborting.");
+            _stage4InProgress = false;
+            return;
+        }
+        var bubble = CompanionAI.GetComponent<DialogueBubble>();
+        if (bubble == null)
+        {
+            Debug.LogWarning("[CompanionManager] DialogueBubble null during interrogation — aborting.");
+            _stage4InProgress = false;
+            return;
+        }
+
+        string question = stage4Questions[_stage4QuestionIndex];
+        Debug.Log($"[CompanionManager] Stage 4 interrogation: Q{_stage4QuestionIndex + 1}/{stage4Questions.Length}: \"{question}\"");
+        bubble.ShowChoice($"({_stage4QuestionIndex + 1}/{stage4Questions.Length}) {question}", OnStage4Answer);
+    }
+
+    private void OnStage4Answer(bool yes)
+    {
+        if (yes) _stage4YesCount++;
+        Debug.Log($"[CompanionManager] Stage 4 Q{_stage4QuestionIndex + 1}: {(yes ? "YES" : "NO")} (running yes count: {_stage4YesCount})");
+
+        _stage4QuestionIndex++;
+        if (_stage4QuestionIndex < stage4Questions.Length)
+        {
+            // Small delay before next question so the bubble can fade out/in.
+            CompanionAI.StartCoroutine(DelayNextQuestion(0.4f));
+        }
+        else
+        {
+            EvaluateStage4Result();
+        }
+    }
+
+    private System.Collections.IEnumerator DelayNextQuestion(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        AskNextStage4Question();
+    }
+
+    private void EvaluateStage4Result()
+    {
+        _stage4InProgress = false;
+        bool trusted = _stage4YesCount >= honestThreshold;
+        Debug.Log($"[CompanionManager] Stage 4 interrogation complete: {_stage4YesCount}/{stage4Questions.Length} YES → trusted={trusted}");
+
+        if (trusted)
+        {
+            AcceptedStage4 = true;
+            SimpleNotification.Show($"Anh ấy tin bạn ({_stage4YesCount}/{stage4Questions.Length} câu thật lòng). Anh ấy sẽ giúp bạn tìm kíp nổ!");
+            Debug.Log("[CompanionManager] Player trusted by follower. Applying skip logic.");
+            StartCoroutine(SkipToQuest11WithReducedBoss());
+        }
+        else
+        {
+            AcceptedStage4 = false;
+            SimpleNotification.Show($"Anh ấy không tin bạn ({_stage4YesCount}/{stage4Questions.Length} câu thật lòng). Bạn phải tự hoàn thành Chapter 4.");
+            Debug.Log("[CompanionManager] Player NOT trusted by follower. Companion keeps following; player must complete all quests normally.");
         }
     }
 

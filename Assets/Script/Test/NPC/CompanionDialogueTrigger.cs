@@ -150,6 +150,18 @@ public class CompanionDialogueTrigger : Interactable
         if (_consumed || _bubble == null || _bubble.IsChoiceActive) return;
         if (ActiveStage <= 0) return;
 
+        // Stage 4 is a 5-question interrogation handled by CompanionManager,
+        // not a single ShowChoice call here.
+        if (ActiveStage == 4)
+        {
+            if (CompanionManager.Instance != null)
+            {
+                _consumed = true;
+                CompanionManager.Instance.StartStage4Interrogation();
+            }
+            return;
+        }
+
         string line = GetDialogueLineForStage(ActiveStage);
         _bubble.ShowChoice(line, OnChoiceMade);
     }
