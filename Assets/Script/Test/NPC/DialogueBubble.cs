@@ -53,17 +53,9 @@ public class DialogueBubble : MonoBehaviour
         _doc.sortingOrder = 450; // Below SimpleNotification (500), above HUD
 
         // Borrow panel settings from an existing screen-space UIDocument
-        // (same approach as SimpleNotification).
-        UIDocument hudDoc = null;
-        var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
-        foreach (var d in allDocs)
-        {
-            if (d != _doc && d.panelSettings != null)
-            {
-                hudDoc = d;
-                break;
-            }
-        }
+        // (same approach as SimpleNotification). Must filter out
+        // WorldSpacePanelSettings — see UIPanelSettingsUtil for details.
+        var hudDoc = UIPanelSettingsUtil.FindScreenSpaceUIDocument(_doc);
         if (hudDoc != null)
             _doc.panelSettings = hudDoc.panelSettings;
         else
@@ -81,6 +73,12 @@ public class DialogueBubble : MonoBehaviour
         _root.style.alignItems = Align.Center;
         _root.style.justifyContent = Justify.Center;
         _root.style.opacity = 0f; // Hidden by default
+        // The root is a full-screen overlay. It must NOT block input to other
+        // UI (e.g. GameOver panel, Pause menu) when hidden or visible — the
+        // dialogue only displays text, the player interacts via keyboard (Y/N),
+        // not by clicking on the bubble. Without Ignore, an opacity:0 root
+        // still picks input and blocks clicks on lower-sortingOrder UIs.
+        _root.pickingMode = PickingMode.Ignore;
 
         // Semi-transparent scrim behind the text.
         _scrim = new VisualElement();
@@ -197,12 +195,23 @@ public class DialogueBubble : MonoBehaviour
 
     private void Show()
     {
-        if (_root != null) _root.style.opacity = 1f;
+        if (_root != null)
+        {
+            _root.style.display = DisplayStyle.Flex;
+            _root.style.opacity = 1f;
+        }
     }
 
     private void Hide()
     {
-        if (_root != null) _root.style.opacity = 0f;
+        if (_root != null)
+        {
+            _root.style.opacity = 0f;
+            // Also hide display so the full-screen overlay doesn't intercept
+            // layout/input even after fading out. Combined with pickingMode =
+            // Ignore this guarantees the bubble never blocks other UI.
+            _root.style.display = DisplayStyle.None;
+        }
     }
 
     private IEnumerator HideAfter(float delay)

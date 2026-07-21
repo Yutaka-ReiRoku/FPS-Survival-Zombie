@@ -61,24 +61,16 @@ public class EpilogueSlide : MonoBehaviour
         var doc = _docGO.GetComponent<UIDocument>();
         doc.sortingOrder = 1500;
 
-        // Copy panelSettings from an existing UIDocument so the panel actually renders.
-        var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
-        foreach (var d in allDocs)
+        // Copy panelSettings from an existing screen-space UIDocument so the panel actually renders.
+        // Must filter out WorldSpacePanelSettings — see UIPanelSettingsUtil for details.
+        var ssDoc = UIPanelSettingsUtil.FindScreenSpaceUIDocument(doc);
+        if (ssDoc != null)
         {
-            if (d != doc && d.panelSettings != null)
-            {
-                doc.panelSettings = d.panelSettings;
-                break;
-            }
+            doc.panelSettings = ssDoc.panelSettings;
         }
         if (doc.panelSettings == null)
         {
-            var allPS = Resources.FindObjectsOfTypeAll(typeof(PanelSettings));
-            foreach (var ps in allPS)
-            {
-                doc.panelSettings = ps as PanelSettings;
-                break;
-            }
+            doc.panelSettings = UIPanelSettingsUtil.FindScreenSpacePanelSettingsAsset();
         }
 
         var asset = Resources.Load<VisualTreeAsset>("EpilogueSlide");

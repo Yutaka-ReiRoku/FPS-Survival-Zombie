@@ -373,8 +373,11 @@ public class CompanionManager : MonoBehaviour
         CompanionBossSkipHook.PendingReducedBossHP = skippedTankMaxHealth;
 
         // 9) Teleport the player + companion to the skip teleport position
-        //    (near Q11_BombObjective) and set the save checkpoint there so a
-        //    death respawns the player at the boss fight, not back in Ch4.
+        //    (near Q11_BombObjective). The save checkpoint is set to SaveRoom_Ch5
+        //    (not the teleport position) so a death during the boss fight respawns
+        //    the player at the Chapter 5 save zone — the player can heal and
+        //    re-prepare before retrying the Tank boss, instead of respawning
+        //    right on top of the fight.
         //    TeleportPlayerAndCompanion also restores timeScale if it's 0.
 
         // Temporarily disable chapter-transition cutscenes so SaveRoom_Ch5
@@ -385,7 +388,12 @@ public class CompanionManager : MonoBehaviour
         sm.playChapterTransitionCutscene = false;
 
         TeleportPlayerAndCompanion(skipTeleportPosition);
-        SaveRoom.LastCheckpoint = skipTeleportPosition;
+
+        // Set checkpoint to SaveRoom_Ch5's position so death respawns the
+        // player at the save zone (heal + re-prepare) instead of at the
+        // boss-fight teleport spot.
+        var ch5Checkpoint = ResolveChapter5SaveRoomCheckpoint();
+        SaveRoom.LastCheckpoint = ch5Checkpoint;
         SaveRoom.LastCheckpointRotation = Quaternion.identity;
 
         // 10) Safety net: after teleport, ChapterBoundary / SaveRoom triggers
@@ -399,7 +407,7 @@ public class CompanionManager : MonoBehaviour
         // Re-enable chapter-transition cutscenes for future chapters.
         sm.playChapterTransitionCutscene = prevChapterCutsceneFlag;
 
-        Debug.Log($"[CompanionManager] Skip logic complete. Player teleported to {skipTeleportPosition}, should now fight Tank boss with reduced HP ({skippedTankMaxHealth}).");
+        Debug.Log($"[CompanionManager] Skip logic complete. Player teleported to {skipTeleportPosition}, checkpoint set to SaveRoom_Ch5 ({ch5Checkpoint}), should now fight Tank boss with reduced HP ({skippedTankMaxHealth}).");
     }
 
     /// <summary>
@@ -458,7 +466,7 @@ public class CompanionManager : MonoBehaviour
     /// <summary>
     /// Marks the SaveRoom_Ch4 chapter-transition cutscene as already played so
     /// re-entering the save room doesn't replay the "CHƯƠNG 4" banner. The
-    /// checkpoint is NOT set here — it is set later to the teleport position.
+    /// checkpoint is NOT set here — it is set later to SaveRoom_Ch5's position.
     /// </summary>
     private void MarkSaveRoomCh4CutscenePlayed()
     {
@@ -470,6 +478,41 @@ public class CompanionManager : MonoBehaviour
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         if (field != null) field.SetValue(sr, true);
         Debug.Log("[CompanionManager] Marked SaveRoom_Ch4 cutscene as played (no re-trigger on re-enter).");
+    }
+
+    /// <summary>
+    /// Resolves the Chapter 5 SaveRoom's checkpoint position — the position
+    /// the player should respawn at after dying during the Ch5 boss fight.
+    /// Used by the skip flow so death respawns the player at the save zone
+    /// (where they can heal + re-prepare) instead of at the boss-fight
+    /// teleport spot.
+    ///
+    /// Falls back to skipTeleportPosition if SaveRoom_Ch5 is not found, so
+    /// the checkpoint is always set to a sane value.
+    /// </summary>
+    private Vector3 ResolveChapter5SaveRoomCheckpoint()
+    {
+        var saveRoomGO = GameObject.Find("=== WORLD ===/StoryZones/Ch5_ApartmentBridge/SaveRoom_Ch5");
+        if (saveRoomGO != null)
+        {
+            var sr = saveRoomGO.GetComponent<SaveRoom>();
+            if (sr != null)
+            {
+                // SaveRoom.CheckpointPosition returns _checkpointPos, which is
+                // set in Start() to respawnPoint.position (or transform.position
+                // if respawnPoint is null). At runtime (after Start), this is
+                // the correct respawn position.
+                var cp = sr.CheckpointPosition;
+                if (cp != Vector3.zero)
+                {
+                    Debug.Log($"[CompanionManager] Skip checkpoint set to SaveRoom_Ch5 at {cp}.");
+                    return cp;
+                }
+            }
+        }
+        // Fallback: use the teleport position if SaveRoom_Ch5 isn't found.
+        Debug.LogWarning("[CompanionManager] SaveRoom_Ch5 not found; falling back to skipTeleportPosition for checkpoint.");
+        return skipTeleportPosition;
     }
 
     /// <summary>

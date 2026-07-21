@@ -35,6 +35,21 @@ public class CutscenePlayer : MonoBehaviour
 
     public bool IsPlaying => _routine != null;
 
+    /// <summary>
+    /// Returns true if the given PanelSettings is configured for world-space
+    /// rendering (as opposed to screen-space overlay). Detected by name since
+    /// PanelSettings doesn't expose a public "worldSpace" flag. The project's
+    /// world-space panel is named "WorldSpacePanelSettings" (see
+    /// CompanionRescueUI / CompanionHealthBar).
+    /// </summary>
+    private static bool IsWorldSpacePanelSettings(PanelSettings ps)
+    {
+        if (ps == null) return false;
+        // World-space panels in this project are named with "WorldSpace".
+        // This covers WorldSpacePanelSettings and any future variants.
+        return ps.name.IndexOf("WorldSpace", System.StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
     private void Build()
     {
         if (_root != null) return;
@@ -43,17 +58,12 @@ public class CutscenePlayer : MonoBehaviour
         go.transform.SetParent(transform, false);
         _doc = go.GetComponent<UIDocument>();
 
-        UIDocument hudDoc = null;
-        var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
-        foreach (var d in allDocs)
-        {
-            if (d != _doc && d.panelSettings != null)
-            {
-                hudDoc = d;
-                break;
-            }
-        }
-
+        // Borrow panel settings from an existing screen-space UIDocument.
+        // IMPORTANT: must skip WorldSpacePanelSettings — otherwise the cutscene
+        // would render in world space at this GameObject's world position
+        // (e.g. at the quest trigger's position "outside the map") instead of
+        // on the camera screen. See UIPanelSettingsUtil for details.
+        var hudDoc = UIPanelSettingsUtil.FindScreenSpaceUIDocument(_doc);
         if (hudDoc != null)
         {
             _doc.panelSettings = hudDoc.panelSettings;

@@ -48,16 +48,7 @@ public class SimpleNotification : MonoBehaviour
         _doc = go.GetComponent<UIDocument>();
         _doc.sortingOrder = 500;
 
-        UIDocument hudDoc = null;
-        var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
-        foreach (var d in allDocs)
-        {
-            if (d != _doc && d.panelSettings != null)
-            {
-                hudDoc = d;
-                break;
-            }
-        }
+        var hudDoc = UIPanelSettingsUtil.FindScreenSpaceUIDocument(_doc);
         if (hudDoc != null) _doc.panelSettings = hudDoc.panelSettings;
 
         _root = new VisualElement();
