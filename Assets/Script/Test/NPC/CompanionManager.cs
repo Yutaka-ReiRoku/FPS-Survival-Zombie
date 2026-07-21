@@ -30,6 +30,12 @@ public class CompanionManager : MonoBehaviour
     [Header("Walk-Away Position (if refused at stage 1)")]
     public Vector3 deadEndPoint = new Vector3(60.62f, 0f, -21.49f);
 
+    [Header("Ammo Cost (stage 1 accept)")]
+    [Tooltip("Number of reserve bullets (totalBullets) the player must give the companion " +
+             "for it to follow. If the current weapon's reserve ammo is below this, " +
+             "the companion refuses to follow and the player can retry later.")]
+    public int requiredAmmoToFollow = 40;
+
     [Header("Boss Skip")]
     [Tooltip("Tank boss max HP when the player accepts stage 2 (skip path).")]
     public int skippedTankMaxHealth = 250;
@@ -230,14 +236,29 @@ public class CompanionManager : MonoBehaviour
     {
         if (stage == 1)
         {
-            AcceptedStage1 = accepted;
             if (accepted)
             {
-                if (CompanionAI != null) CompanionAI.StartFollowing();
-                Debug.Log("[CompanionManager] Player ACCEPTED stage 1. Companion now follows.");
+                // Check if the player has enough reserve ammo to "pay" the
+                // companion. If not, the companion stays put and the player
+                // can retry after finding more ammo.
+                if (TryConsumeAmmo(requiredAmmoToFollow))
+                {
+                    AcceptedStage1 = true;
+                    if (CompanionAI != null) CompanionAI.StartFollowing();
+                    Debug.Log($"[CompanionManager] Player ACCEPTED stage 1 and paid {requiredAmmoToFollow} bullets. Companion now follows.");
+                }
+                else
+                {
+                    // Not enough ammo — re-arm the trigger so the player can
+                    // come back later with more ammo and try again.
+                    if (DialogueTrigger != null) DialogueTrigger.ResetForStage(1);
+                    SimpleNotification.Show($"Bạn không đủ {requiredAmmoToFollow} viên đạn dự trữ. Follower không thể đi theo.");
+                    Debug.Log($"[CompanionManager] Player ACCEPTED stage 1 but lacks {requiredAmmoToFollow} reserve bullets. Companion stays. Trigger reset for retry.");
+                }
             }
             else
             {
+                AcceptedStage1 = false;
                 if (CompanionAI != null) CompanionAI.WalkAway(deadEndPoint);
                 Debug.Log("[CompanionManager] Player REFUSED stage 1. Companion walks away to " + deadEndPoint);
             }
@@ -255,6 +276,33 @@ public class CompanionManager : MonoBehaviour
                 Debug.Log("[CompanionManager] Player REFUSED stage 2. Companion keeps following; player must complete all quests normally.");
             }
         }
+    }
+
+    /// <summary>
+    /// Attempts to consume <paramref name="amount"/> reserve bullets from the
+    /// player's currently-equipped weapon. Only <c>totalBullets</c> (reserve
+    /// ammo) is considered — bullets already in the magazine are NOT touched.
+    /// Returns true and deducts the ammo if the current weapon has enough
+    /// reserve bullets; returns false and leaves ammo unchanged otherwise.
+    /// </summary>
+    private bool TryConsumeAmmo(int amount)
+    {
+        if (amount <= 0) return true;
+        var wc = FindAnyObjectByType<cowsins.WeaponController>();
+        if (wc == null || wc.Id == null)
+        {
+            Debug.LogWarning("[CompanionManager] WeaponController not found; cannot consume ammo.");
+            return false;
+        }
+        int reserve = wc.Id.totalBullets;
+        if (reserve < amount)
+        {
+            Debug.Log($"[CompanionManager] Not enough reserve ammo: have {reserve}, need {amount}.");
+            return false;
+        }
+        wc.Id.totalBullets = reserve - amount;
+        Debug.Log($"[CompanionManager] Consumed {amount} reserve bullets. Remaining: {wc.Id.totalBullets}.");
+        return true;
     }
 
     // ---- Skip logic ----

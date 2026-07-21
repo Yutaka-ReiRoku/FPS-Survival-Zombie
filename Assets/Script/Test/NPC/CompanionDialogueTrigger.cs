@@ -149,12 +149,26 @@ public class CompanionDialogueTrigger : Interactable
     private void OnChoiceMade(bool accepted)
     {
         _consumed = true;
+        // Remember the stage before HandleDialogueChoice may reset it.
+        int stageBefore = ActiveStage;
         if (CompanionManager.Instance != null)
         {
             CompanionManager.Instance.HandleDialogueChoice(ActiveStage, accepted);
         }
-        // After a one-shot dialogue, disable further interactions.
-        interactable = false;
+        // Only disable further interactions if HandleDialogueChoice did NOT
+        // reset the trigger (e.g. stage 1 accept with insufficient ammo calls
+        // ResetForStage to allow retry — in that case interactable stays true).
+        if (ActiveStage == stageBefore && !_consumedWasReset())
+            interactable = false;
+    }
+
+    /// <summary>Returns true if ResetForStage was called during the last
+    /// HandleDialogueChoice (i.e. _consumed was reset back to false).</summary>
+    private bool _consumedWasReset()
+    {
+        // After ResetForStage, _consumed is false. If we set it to true at the
+        // start of OnChoiceMade and it's now false, ResetForStage ran.
+        return _consumed == false;
     }
 
     /// <summary>Re-enables the trigger for a new stage (called by CompanionManager).</summary>
