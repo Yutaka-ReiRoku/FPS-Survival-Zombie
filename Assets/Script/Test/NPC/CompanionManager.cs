@@ -43,6 +43,11 @@ public class CompanionManager : MonoBehaviour
     [Tooltip("How long (seconds) the skip cutscene holds after typing completes.")]
     public float skipCutsceneHold = 3f;
 
+    [Header("Skip Teleport")]
+    [Tooltip("World position the player + companion are teleported to after the skip cutscene. " +
+             "Defaults to near Q11_BombObjective so the player lands right at the Tank boss fight.")]
+    public Vector3 skipTeleportPosition = new Vector3(1.71f, 0f, 14.99f);
+
     // ---- Runtime state ----
     public GameObject CompanionInstance { get; private set; }
     public CompanionAI CompanionAI { get; private set; }
@@ -266,12 +271,28 @@ public class CompanionManager : MonoBehaviour
             yield return null;
         }
 
-        // 2) Play the skip cutscene as a narrative bridge between Ch4 and Ch5.
+        // 2) Side quests Ch4: unlock + auto-complete (grant rewards).
+        //    The skip path assumes the player "already explored" Ch4, so all
+        //    side quests are considered done with their rewards granted.
+        AutoCompleteChapter4SideQuests();
+
+        // 3) Collect (and hide) all Ch4 collectibles (journals).
+        //    This both removes them from the world and registers them in
+        //    CollectibleManager so the journal gallery reflects them.
+        CollectAllChapter4Collectibles();
+
+        // 4) Mark SaveRoom_Ch4 cutscene as played (so re-entering doesn't
+        //    replay the "CHƯƠNG 4" banner). The checkpoint itself is set in
+        //    step 7 to the teleport position (near Q11) so a death respawns
+        //    the player near the boss fight, not back in Ch4.
+        MarkSaveRoomCh4CutscenePlayed();
+
+        // 5) Play the skip cutscene as a narrative bridge between Ch4 and Ch5.
         //    This explains how the player found the detonator without collecting
         //    all the journals, so the skip path doesn't feel abrupt.
         yield return PlaySkipCutscene();
 
-        // 3) After Ch4 completes, the chapter advances to 5 with PendingChapterEntry.
+        // 6) After Ch4 completes, the chapter advances to 5 with PendingChapterEntry.
         //    Force-activate the pending chapter quest so we can skip Ch5 quests.
         if (sm.PendingChapterEntry)
         {
@@ -279,7 +300,7 @@ public class CompanionManager : MonoBehaviour
             yield return null;
         }
 
-        // 4) Skip Chapter 5 quests until Quest 11 is active.
+        // 7) Skip Chapter 5 quests until Quest 11 is active.
         //    Q11 is the boss-fight quest — the second-to-last quest in Ch5
         //    (index ch5.Length - 2 in the chapter5Quests array).
         //    We skip Q10 (collect documents) but STOP at Q11 so the player still
@@ -299,10 +320,179 @@ public class CompanionManager : MonoBehaviour
             }
         }
 
-        // 5) Set the reduced boss HP so the next Tank spawned by
+        // 8) Set the reduced boss HP so the next Tank spawned by
         //    WaveQuestInteractable has reduced health (consumed on spawn).
         CompanionBossSkipHook.PendingReducedBossHP = skippedTankMaxHealth;
-        Debug.Log($"[CompanionManager] Skip logic complete. Player should now fight Tank boss with reduced HP ({skippedTankMaxHealth}).");
+
+        // 9) Teleport the player + companion to the skip teleport position
+        //    (near Q11_BombObjective) and set the save checkpoint there so a
+        //    death respawns the player at the boss fight, not back in Ch4.
+        //    TeleportPlayerAndCompanion also restores timeScale if it's 0.
+
+        // Temporarily disable chapter-transition cutscenes so SaveRoom_Ch5
+        // doesn't play a "CHƯƠNG 5" banner (the skip cutscene already covers
+        // the narrative bridge) AND so it doesn't capture prevTimeScale=0 and
+        // leave the game paused after the transition cutscene ends.
+        bool prevChapterCutsceneFlag = sm.playChapterTransitionCutscene;
+        sm.playChapterTransitionCutscene = false;
+
+        TeleportPlayerAndCompanion(skipTeleportPosition);
+        SaveRoom.LastCheckpoint = skipTeleportPosition;
+        SaveRoom.LastCheckpointRotation = Quaternion.identity;
+
+        // 10) Safety net: after teleport, ChapterBoundary / SaveRoom triggers
+        //     may fire (OnTriggerEnter from Physics.SyncTransforms). Wait one
+        //     frame for those triggers to settle, then force-restore timeScale.
+        yield return null;
+        if (!PauseManager.Instance.IsPaused &&
+            !(GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver))
+            Time.timeScale = 1f;
+
+        // Re-enable chapter-transition cutscenes for future chapters.
+        sm.playChapterTransitionCutscene = prevChapterCutsceneFlag;
+
+        Debug.Log($"[CompanionManager] Skip logic complete. Player teleported to {skipTeleportPosition}, should now fight Tank boss with reduced HP ({skippedTankMaxHealth}).");
+    }
+
+    /// <summary>
+    /// Unlocks and auto-completes every Chapter 4 side quest, granting their
+    /// rewards (EXP + journal). Used by the skip path so the player doesn't
+    /// miss out on side quest rewards when skipping Ch4.
+    /// </summary>
+    private void AutoCompleteChapter4SideQuests()
+    {
+        var sqm = SideQuestManager.Instance;
+        if (sqm == null)
+        {
+            Debug.LogWarning("[CompanionManager] SideQuestManager not found; cannot auto-complete Ch4 side quests.");
+            return;
+        }
+        var quests = sqm.GetChapterSideQuests(4);
+        if (quests == null) return;
+        foreach (var q in quests)
+        {
+            if (q == null) continue;
+            if (sqm.IsCompleted(q)) continue;
+            // Unlock first (so CompleteSideQuest sees it as active), then complete.
+            if (!sqm.IsActive(q)) sqm.UnlockChapterPublic(4);
+            sqm.CompleteSideQuest(q);
+        }
+        Debug.Log($"[CompanionManager] Auto-completed {quests.Length} Chapter 4 side quests (rewards granted).");
+    }
+
+    /// <summary>
+    /// Collects and hides every Collectible under Ch4_Residential so the skip
+    /// path doesn't leave uncollected journals visible in the world. Each
+    /// collectible is registered in CollectibleManager (so the journal gallery
+    /// reflects it) and its GameObject is deactivated.
+    /// </summary>
+    private void CollectAllChapter4Collectibles()
+    {
+        var ch4 = GameObject.Find("=== WORLD ===/StoryZones/Ch4_Residential");
+        if (ch4 == null)
+        {
+            Debug.LogWarning("[CompanionManager] Ch4_Residential not found; cannot collect Ch4 collectibles.");
+            return;
+        }
+        int count = 0;
+        for (int i = 0; i < ch4.transform.childCount; i++)
+        {
+            var col = ch4.transform.GetChild(i).GetComponent<Collectible>();
+            if (col != null && !col.IsPicked)
+            {
+                col.Collect();
+                count++;
+            }
+        }
+        Debug.Log($"[CompanionManager] Collected {count} Ch4 collectibles (journals registered + hidden).");
+    }
+
+    /// <summary>
+    /// Marks the SaveRoom_Ch4 chapter-transition cutscene as already played so
+    /// re-entering the save room doesn't replay the "CHƯƠNG 4" banner. The
+    /// checkpoint is NOT set here — it is set later to the teleport position.
+    /// </summary>
+    private void MarkSaveRoomCh4CutscenePlayed()
+    {
+        var saveRoomGO = GameObject.Find("=== WORLD ===/StoryZones/Ch4_Residential/SaveRoom_Ch4");
+        if (saveRoomGO == null) return;
+        var sr = saveRoomGO.GetComponent<SaveRoom>();
+        if (sr == null) return;
+        var field = typeof(SaveRoom).GetField("_cutscenePlayed",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        if (field != null) field.SetValue(sr, true);
+        Debug.Log("[CompanionManager] Marked SaveRoom_Ch4 cutscene as played (no re-trigger on re-enter).");
+    }
+
+    /// <summary>
+    /// Teleports the player and companion to the given world position. The
+    /// player is warped via a combination of PlayerStats.Respawn (heals + fires
+    /// OnRespawn event), direct Rigidbody positioning, and Transform sync.
+    /// The companion is warped via CompanionAI.TeleportNearPlayer.
+    ///
+    /// NOTE: Time.timeScale MUST be > 0 for the Rigidbody→Transform sync to
+    /// happen on the next physics step. This method temporarily restores
+    /// timeScale if it's 0 (e.g. right after a cutscene).
+    /// </summary>
+    private void TeleportPlayerAndCompanion(Vector3 position)
+    {
+        var playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO == null)
+        {
+            Debug.LogWarning("[CompanionManager] Player not found; cannot teleport.");
+            return;
+        }
+
+        // Restore timeScale if it's 0 — the Rigidbody→Transform sync needs a
+        // physics step, which only runs when timeScale > 0.
+        if (Time.timeScale == 0f)
+        {
+            bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+            bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+            if (!pauseOpen && !gameOver) Time.timeScale = 1f;
+        }
+
+        // 1) Try PlayerStats.Respawn (fires OnRespawn event → PlayerMovement.TeleportPlayer).
+        var ps = playerGO.GetComponentInParent<PlayerStats>();
+        if (ps == null) ps = playerGO.GetComponentInChildren<PlayerStats>();
+        if (ps != null)
+        {
+            ps.Respawn(position);
+            Debug.Log($"[CompanionManager] Player teleported to {position} via PlayerStats.Respawn.");
+        }
+
+        // 2) Direct warp on the Rigidbody's GameObject. The Rigidbody is
+        //    typically on the tagged "Player" child (not the root), so we set
+        //    both rb.position and the transform of the rb's GameObject.
+        var rb = playerGO.GetComponentInParent<Rigidbody>();
+        if (rb == null) rb = playerGO.GetComponentInChildren<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.position = position;
+            // Also set the transform of the GameObject that owns the Rigidbody
+            // so it syncs immediately (without waiting for a physics step).
+            rb.transform.position = position;
+        }
+        else
+        {
+            // No Rigidbody — just set the transform directly.
+            playerGO.transform.position = position;
+        }
+
+        // 3) Sync transforms so the hierarchy reflects the new positions
+        //    immediately (critical when timeScale was just restored from 0).
+        Physics.SyncTransforms();
+
+        Debug.Log($"[CompanionManager] Player direct-warp to {position} (rb+transform+sync).");
+
+        // 4) Teleport the companion near the player.
+        if (CompanionAI != null)
+        {
+            CompanionAI.TeleportNearPlayer(2.5f);
+            Debug.Log("[CompanionManager] Companion teleported near player.");
+        }
     }
 
     /// <summary>
@@ -321,6 +511,16 @@ public class CompanionManager : MonoBehaviour
         cutscene.hold = skipCutsceneHold;
         cutscene.fadeIn = 0.6f;
         cutscene.fadeOut = 1.0f;
+
+        // Ensure timeScale is 1 before the cutscene starts so CutscenePlayer
+        // captures prevTimeScale=1 and restores it to 1 (not 0) when done.
+        // The dialogue bubble / ResolveChoice path may have left it at 0.
+        if (Time.timeScale == 0f)
+        {
+            bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+            bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+            if (!pauseOpen && !gameOver) Time.timeScale = 1f;
+        }
 
         bool done = false;
         cutscene.Play(() => done = true);

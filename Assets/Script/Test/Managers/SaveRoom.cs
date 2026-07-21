@@ -51,8 +51,8 @@ public class SaveRoom : MonoBehaviour
     /// Used by GameOverManager to respawn the player at the save room instead
     /// of reloading the whole scene (which would lose quest/zombie progress).
     /// </summary>
-    public static Vector3? LastCheckpoint { get; private set; }
-    public static Quaternion LastCheckpointRotation { get; private set; }
+    public static Vector3? LastCheckpoint { get; set; }
+    public static Quaternion LastCheckpointRotation { get; set; }
 
     private void SaveCheckpoint()
     {

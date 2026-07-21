@@ -155,6 +155,13 @@ public class SideQuestManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Public wrapper around UnlockChapter for external callers (e.g. the
+    /// CompanionManager skip path needs to unlock Ch4 side quests before
+    /// auto-completing them).
+    /// </summary>
+    public void UnlockChapterPublic(int chapter) => UnlockChapter(chapter);
+
     /// <summary>Unlocks every side quest in every chapter (used when story is complete).</summary>
     private void UnlockAll()
     {
