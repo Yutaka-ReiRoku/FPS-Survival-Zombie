@@ -10,9 +10,11 @@ using cowsins;
 /// and presses E (KeyCode.E), the dialogue triggers even without aiming directly
 /// at the NPC. This makes interaction much easier in tight spaces.
 ///
-/// Two dialogue stages are supported:
-///   Stage 1 (after Chapter 2): "Này anh bạn, tôi cần ít đạn..."
-///   Stage 2 (Chapter 4 save room): "Tôi có thể giúp anh tìm công thức thuốc..."
+/// Four dialogue stages are supported (Ch3 follower recruitment arc):
+///   Stage 1 (Ch3 spawn):       "Tôi cần 40 viên đạn"
+///   Stage 2 (after Stage 1):   "Giúp tôi vào 2 tiệm lấy nhu yếu phẩm"
+///   Stage 3 (after siege):     "Đưa nhu yếu phẩm cho tôi"
+///   Stage 4 (Ch4 save room):   "Tôi có thể giúp anh tìm công thức thuốc..."
 ///
 /// The active stage is set by CompanionManager based on story progress.
 /// </summary>
@@ -22,13 +24,19 @@ public class CompanionDialogueTrigger : Interactable
 {
     [Header("Dialogue Lines")]
     [TextArea(2, 4)]
-    public string stage1Line = "Này anh bạn, tôi cần ít đạn. Anh có dư nhiều không?";
+    public string stage1Line = "Này anh bạn, tôi cần ít đạn. Anh có dư 40 viên không?";
     [TextArea(2, 4)]
-    public string stage2Line = "Tôi có thể giúp anh tìm công thức thuốc, nhưng với điều kiện là anh phải cho tôi đi cùng.";
+    public string stage2Line = "Cảm ơn đạn. Giờ tôi cần anh giúp — vào 2 tiệm kia tìm nhu yếu phẩm giúp tôi. Tôi bị thương không đi được.";
+    [TextArea(2, 4)]
+    public string stage3Line = "Anh lấy được nhu yếu phẩm rồi à? Đưa cho tôi, rồi tôi sẽ đi cùng anh.";
+    [TextArea(2, 4)]
+    public string stage4Line = "Tôi có thể giúp anh tìm công thức thuốc, nhưng với điều kiện là anh phải cho tôi đi cùng.";
 
     [Header("Interact Text")]
     public string stage1InteractText = "Nói chuyện";
     public string stage2InteractText = "Nói chuyện";
+    public string stage3InteractText = "Nói chuyện";
+    public string stage4InteractText = "Nói chuyện";
 
     [Header("Proximity Fallback")]
     [Tooltip("If the player is within this distance and presses E, the dialogue triggers even without aiming at the NPC.")]
@@ -37,7 +45,7 @@ public class CompanionDialogueTrigger : Interactable
     [Tooltip("Key to press for proximity interaction.")]
     public KeyCode proximityKey = KeyCode.E;
 
-    /// <summary>0 = no dialogue available, 1 = stage 1, 2 = stage 2.</summary>
+    /// <summary>0 = no dialogue available, 1..4 = active stage.</summary>
     public int ActiveStage { get; set; } = 1;
 
     private DialogueBubble _bubble;
@@ -64,7 +72,7 @@ public class CompanionDialogueTrigger : Interactable
     private void Update()
     {
         // Update interact text based on stage.
-        string target = ActiveStage == 2 ? stage2InteractText : stage1InteractText;
+        string target = GetInteractTextForStage(ActiveStage);
         if (interactText != target) interactText = target;
 
         // Proximity fallback: check E key press when near the NPC.
@@ -142,8 +150,30 @@ public class CompanionDialogueTrigger : Interactable
         if (_consumed || _bubble == null || _bubble.IsChoiceActive) return;
         if (ActiveStage <= 0) return;
 
-        string line = ActiveStage == 2 ? stage2Line : stage1Line;
+        string line = GetDialogueLineForStage(ActiveStage);
         _bubble.ShowChoice(line, OnChoiceMade);
+    }
+
+    private string GetDialogueLineForStage(int stage)
+    {
+        switch (stage)
+        {
+            case 2: return stage2Line;
+            case 3: return stage3Line;
+            case 4: return stage4Line;
+            default: return stage1Line;
+        }
+    }
+
+    private string GetInteractTextForStage(int stage)
+    {
+        switch (stage)
+        {
+            case 2: return stage2InteractText;
+            case 3: return stage3InteractText;
+            case 4: return stage4InteractText;
+            default: return stage1InteractText;
+        }
     }
 
     private void OnChoiceMade(bool accepted)

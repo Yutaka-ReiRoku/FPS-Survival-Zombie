@@ -45,6 +45,18 @@ public class QuestBeacon : MonoBehaviour
              "(typically green to distinguish from main-quest gold beacons).")]
     public QuestData showOnSideQuest;
 
+    [Header("Follower Recruitment (Ch3)")]
+    [Tooltip("If > 0, this beacon is manually activated/deactivated by CompanionManager " +
+             "based on the follower recruitment arc stage. 2 = show while shop supplies " +
+             "are being collected (Stage 2 active), 3 = show during zombie siege. " +
+             "CompanionManager calls SetFollowerActive(true/false) to toggle. " +
+             "Ignored if 0.")]
+    public int showOnFollowerStage = 0;
+
+    [Tooltip("Manual override flag set by CompanionManager. When true (and showOnFollowerStage > 0), " +
+             "the beacon shows regardless of quest/chapter state. Read-only at runtime.")]
+    public bool followerActive = false;
+
     [Tooltip("If true, hide the beacon once the player gets within this distance.")]
     public bool hideWhenClose = true;
 
@@ -231,6 +243,15 @@ public class QuestBeacon : MonoBehaviour
         var sm = StoryManager.Instance;
         if (sm == null) { SetActive(false); return; }
 
+        // Follower recruitment arc: manual override via followerActive flag.
+        // When CompanionManager sets followerActive = true, show the beacon
+        // regardless of quest/chapter state.
+        if (showOnFollowerStage > 0)
+        {
+            SetActive(followerActive);
+            return;
+        }
+
         // Priority: side quest > main quest > chapter
         if (showOnSideQuest != null)
         {
@@ -255,6 +276,17 @@ public class QuestBeacon : MonoBehaviour
         {
             SetActive(false);
         }
+    }
+
+    /// <summary>
+    /// Manually activates/deactivates this beacon for the follower recruitment arc.
+    /// Only effective if showOnFollowerStage > 0. Called by CompanionManager.
+    /// </summary>
+    public void SetFollowerActive(bool active)
+    {
+        if (showOnFollowerStage <= 0) return;
+        followerActive = active;
+        EvaluateActivation();
     }
 
     private void SetActive(bool active)

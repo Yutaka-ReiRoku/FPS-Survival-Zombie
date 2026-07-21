@@ -60,11 +60,22 @@ public class CompanionManager : MonoBehaviour
     public CompanionDialogueTrigger DialogueTrigger { get; private set; }
 
     public bool AcceptedStage1 { get; private set; }
-    public bool AcceptedStage2 { get; private set; }
+    public bool AcceptedStage2 { get; private set; } // Stage 2 = "giúp vào tiệm"
+    public bool AcceptedStage3 { get; private set; } // Stage 3 = "đưa nhu yếu phẩm"
+    public bool AcceptedStage4 { get; private set; } // Stage 4 = skip Ch4 (cũ stage 2)
     public bool Spawned { get; private set; }
 
-    private bool _stage2Armed;
+    // Follower recruitment arc state (Ch3).
+    private bool _stage2Armed;   // Stage 2 dialogue armed (after Stage 1 accept)
+    private bool _stage3Armed;   // Stage 3 dialogue armed (after siege completed)
+    private bool _stage4Armed;   // Stage 4 dialogue armed (on Ch4 entry)
     private bool _subscribed;
+
+    // Shop supplies collection (Stage 2 → siege).
+    private int _shopSuppliesCollected; // 0..2 (2 shops to loot)
+    private int _shopSuppliesRequired = 2;
+    private bool _siegeStarted;
+    private bool _siegeCompleted;
 
     private void Awake()
     {
@@ -124,15 +135,15 @@ public class CompanionManager : MonoBehaviour
             SpawnCompanion();
         }
 
-        // Fallback: arm stage 2 dialogue when already at Chapter 4 with stage 1
-        // accepted but stage 2 not armed. HandleChapterChanged only fires on
-        // chapter transitions, so if the game starts directly at Ch4 (e.g. for
-        // testing), the event is missed and stage 2 never arms.
-        if (Spawned && AcceptedStage1 && sm.CurrentChapter >= 4 && !_stage2Armed && DialogueTrigger != null)
+        // Fallback: arm stage 4 dialogue when already at Chapter 4 with stage 3
+        // accepted (follower joined) but stage 4 not armed. HandleChapterChanged
+        // only fires on chapter transitions, so if the game starts directly at
+        // Ch4 (e.g. for testing), the event is missed and stage 4 never arms.
+        if (Spawned && AcceptedStage3 && sm.CurrentChapter >= 4 && !_stage4Armed && DialogueTrigger != null)
         {
-            _stage2Armed = true;
-            DialogueTrigger.ResetForStage(2);
-            Debug.Log("[CompanionManager] Update fallback: armed stage 2 dialogue (already at Chapter 4).");
+            _stage4Armed = true;
+            DialogueTrigger.ResetForStage(4);
+            Debug.Log("[CompanionManager] Update fallback: armed stage 4 dialogue (already at Chapter 4).");
         }
     }
 
@@ -182,18 +193,19 @@ public class CompanionManager : MonoBehaviour
             }
 
             // Teleport companion near the player on every chapter change.
-            if (Spawned && CompanionAI != null && AcceptedStage1)
+            // Only if the follower has joined (Stage 3 accepted).
+            if (Spawned && CompanionAI != null && AcceptedStage3)
             {
                 CompanionAI.TeleportNearPlayer();
             }
 
-            // Arm stage 2 dialogue when entering Chapter 4.
-            if (newChapter == 4 && Spawned && AcceptedStage1 && !_stage2Armed)
+            // Arm stage 4 dialogue when entering Chapter 4 (skip-Ch4 offer).
+            if (newChapter == 4 && Spawned && AcceptedStage3 && !_stage4Armed)
             {
-                _stage2Armed = true;
+                _stage4Armed = true;
                 if (DialogueTrigger != null)
-                    DialogueTrigger.ResetForStage(2);
-                Debug.Log("[CompanionManager] Stage 2 dialogue armed (Chapter 4).");
+                    DialogueTrigger.ResetForStage(4);
+                Debug.Log("[CompanionManager] Stage 4 dialogue armed (Chapter 4).");
             }
         }
         catch (System.Exception e)
@@ -244,8 +256,12 @@ public class CompanionManager : MonoBehaviour
                 if (TryConsumeAmmo(requiredAmmoToFollow))
                 {
                     AcceptedStage1 = true;
-                    if (CompanionAI != null) CompanionAI.StartFollowing();
-                    Debug.Log($"[CompanionManager] Player ACCEPTED stage 1 and paid {requiredAmmoToFollow} bullets. Companion now follows.");
+                    // Do NOT StartFollowing yet — Stage 2 (shop supplies) must
+                    // be completed first. Arm Stage 2 dialogue.
+                    _stage2Armed = true;
+                    if (DialogueTrigger != null) DialogueTrigger.ResetForStage(2);
+                    SimpleNotification.Show("Đã đưa đạn. Follower nhờ bạn vào tiệm lấy nhu yếu phẩm.");
+                    Debug.Log($"[CompanionManager] Player ACCEPTED stage 1 and paid {requiredAmmoToFollow} bullets. Armed stage 2 (shop supplies).");
                 }
                 else
                 {
@@ -265,15 +281,51 @@ public class CompanionManager : MonoBehaviour
         }
         else if (stage == 2)
         {
+            // Stage 2: "Giúp tôi vào 2 tiệm lấy nhu yếu phẩm"
             AcceptedStage2 = accepted;
             if (accepted)
             {
-                Debug.Log("[CompanionManager] Player ACCEPTED stage 2. Applying skip logic.");
+                // Activate the two shop triggers so the player can loot them.
+                EnableShopTriggers(true);
+                SimpleNotification.Show("Vào 2 tiệm và nhấn [E] để lấy nhu yếu phẩm.");
+                Debug.Log("[CompanionManager] Player ACCEPTED stage 2. Shop triggers activated.");
+            }
+            else
+            {
+                // Refused — companion walks away permanently.
+                if (CompanionAI != null) CompanionAI.WalkAway(deadEndPoint);
+                Debug.Log("[CompanionManager] Player REFUSED stage 2. Companion walks away permanently.");
+            }
+        }
+        else if (stage == 3)
+        {
+            // Stage 3: "Đưa nhu yếu phẩm cho tôi" (after siege completed)
+            AcceptedStage3 = accepted;
+            if (accepted)
+            {
+                if (CompanionAI != null) CompanionAI.StartFollowing();
+                SimpleNotification.Show("Follower đã đồng hành cùng bạn!");
+                Debug.Log("[CompanionManager] Player ACCEPTED stage 3. Companion now follows.");
+            }
+            else
+            {
+                // Refused — companion walks away permanently.
+                if (CompanionAI != null) CompanionAI.WalkAway(deadEndPoint);
+                Debug.Log("[CompanionManager] Player REFUSED stage 3. Companion walks away permanently.");
+            }
+        }
+        else if (stage == 4)
+        {
+            // Stage 4 (cũ Stage 2): skip Ch4 offer
+            AcceptedStage4 = accepted;
+            if (accepted)
+            {
+                Debug.Log("[CompanionManager] Player ACCEPTED stage 4. Applying skip logic.");
                 StartCoroutine(SkipToQuest11WithReducedBoss());
             }
             else
             {
-                Debug.Log("[CompanionManager] Player REFUSED stage 2. Companion keeps following; player must complete all quests normally.");
+                Debug.Log("[CompanionManager] Player REFUSED stage 4. Companion keeps following; player must complete all quests normally.");
             }
         }
     }
@@ -303,6 +355,109 @@ public class CompanionManager : MonoBehaviour
         wc.Id.totalBullets = reserve - amount;
         Debug.Log($"[CompanionManager] Consumed {amount} reserve bullets. Remaining: {wc.Id.totalBullets}.");
         return true;
+    }
+
+    // ---- Stage 2: Shop supplies collection ----
+
+    /// <summary>
+    /// Enables/disables all CompanionShopTrigger colliders in the scene. Called
+    /// when the player accepts Stage 2 (enable) so they can loot the shops.
+    /// Also toggles the follower-stage QuestBeacons on the shops so the player
+    /// can see where to go.
+    /// </summary>
+    private void EnableShopTriggers(bool enable)
+    {
+        var shops = FindObjectsByType<CompanionShopTrigger>(FindObjectsSortMode.None);
+        foreach (var shop in shops)
+        {
+            shop.SetAvailable(enable);
+        }
+        Debug.Log($"[CompanionManager] {(enable ? "Enabled" : "Disabled")} {shops.Length} CompanionShopTrigger(s).");
+
+        // Toggle shop beacons (showOnFollowerStage == 2).
+        var beacons = FindObjectsByType<QuestBeacon>(FindObjectsSortMode.None);
+        int toggled = 0;
+        foreach (var b in beacons)
+        {
+            if (b.showOnFollowerStage == 2)
+            {
+                b.SetFollowerActive(enable);
+                toggled++;
+            }
+        }
+        Debug.Log($"[CompanionManager] Toggled {toggled} shop beacon(s) ({(enable ? "on" : "off")}).");
+    }
+
+    /// <summary>
+    /// Called by CompanionShopTrigger when the player presses E inside a shop
+    /// and collects the supplies. When all required shops are looted, starts
+    /// the zombie siege event.
+    /// </summary>
+    public void OnShopSuppliesCollected()
+    {
+        _shopSuppliesCollected++;
+        Debug.Log($"[CompanionManager] Shop supplies collected: {_shopSuppliesCollected}/{_shopSuppliesRequired}.");
+
+        if (_shopSuppliesCollected >= _shopSuppliesRequired && !_siegeStarted)
+        {
+            _siegeStarted = true;
+            // Turn off all shop beacons (Stage 2) — both shops looted.
+            SetFollowerBeacons(2, false);
+            // Turn on the siege beacon (Stage 3) so the player knows where the
+            // siege is happening (if a siege beacon is placed).
+            SetFollowerBeacons(3, true);
+            SimpleNotification.Show("Zombie đang bao vây! Tiêu diệt 10 con để sống sót!");
+            var siege = FindAnyObjectByType<CompanionZombieSiege>();
+            if (siege != null)
+            {
+                siege.StartSiege(OnZombieSiegeCompleted);
+                Debug.Log("[CompanionManager] Zombie siege started.");
+            }
+            else
+            {
+                Debug.LogWarning("[CompanionManager] CompanionZombieSiege not found in scene — skipping siege, arming stage 3 directly.");
+                OnZombieSiegeCompleted();
+            }
+        }
+        else
+        {
+            SimpleNotification.Show($"Đã lấy nhu yếu phẩm {_shopSuppliesCollected}/{_shopSuppliesRequired}. Còn {_shopSuppliesRequired - _shopSuppliesCollected} tiệm nữa.");
+        }
+    }
+
+    /// <summary>
+    /// Called by CompanionZombieSiege when the player has killed the required
+    /// number of zombies. Arms Stage 3 dialogue so the player can hand over
+    /// the supplies and recruit the follower.
+    /// </summary>
+    private void OnZombieSiegeCompleted()
+    {
+        _siegeCompleted = true;
+        _stage3Armed = true;
+        // Turn off the siege beacon (Stage 3).
+        SetFollowerBeacons(3, false);
+        if (DialogueTrigger != null) DialogueTrigger.ResetForStage(3);
+        SimpleNotification.Show("Đã tiêu diệt hết zombie! Quay lại nói chuyện với follower.");
+        Debug.Log("[CompanionManager] Zombie siege completed. Stage 3 dialogue armed.");
+    }
+
+    /// <summary>
+    /// Toggles all QuestBeacons with showOnFollowerStage == stage on/off.
+    /// Used to guide the player to the shops (stage 2) and the siege (stage 3).
+    /// </summary>
+    private void SetFollowerBeacons(int stage, bool active)
+    {
+        var beacons = FindObjectsByType<QuestBeacon>(FindObjectsSortMode.None);
+        int count = 0;
+        foreach (var b in beacons)
+        {
+            if (b.showOnFollowerStage == stage)
+            {
+                b.SetFollowerActive(active);
+                count++;
+            }
+        }
+        Debug.Log($"[CompanionManager] SetFollowerBeacons(stage={stage}, active={active}): toggled {count} beacon(s).");
     }
 
     // ---- Skip logic ----
