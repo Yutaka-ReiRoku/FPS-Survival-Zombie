@@ -50,6 +50,23 @@ public class CompanionZombieSiege : MonoBehaviour
     [Tooltip("Banner subtitle shown when the siege starts.")]
     public string bannerSubtitle = "Tiêu diệt 10 con zombie!";
 
+    [Header("Boundary Lock")]
+    [Tooltip("Optional ChapterBoundary to lock while the siege is active, preventing the player from leaving the chapter area. Unlocked when the siege is cleared or aborted. Leave null if you want to use lockZone instead (a custom trigger zone like 'Follower zone').")]
+    public ChapterBoundary lockBoundary;
+
+    [Tooltip("If true, also disable the chapter's continuous spawners while the siege is active so only the siege-spawned zombies count toward the kill goal.")]
+    public bool suppressChapterSpawners = true;
+
+    [Header("Zone Lock (alternative to lockBoundary)")]
+    [Tooltip("Optional trigger collider that defines the area the player is locked inside during the siege. " +
+             "When the player exits this trigger, they are teleported back to their last position inside the zone. " +
+             "Use this when the siege area is a sub-region of the chapter (e.g. 'Follower zone' around the market). " +
+             "If set, this takes precedence over lockBoundary.")]
+    public Collider lockZone;
+
+    [Tooltip("How far above the lockZone center to teleport the player back when they exit (prevents clipping into the ground).")]
+    public float lockZoneTeleportYOffset = 1f;
+
     private readonly List<GameObject> _spawnedZombies = new List<GameObject>();
     private bool _siegeActive;
     private int _startKills;
@@ -57,8 +74,71 @@ public class CompanionZombieSiege : MonoBehaviour
     private System.Action _onCompleted;
     private Coroutine _siegeRoutine;
 
+    // Zone lock state (for lockZone mode).
+    private Transform _player;
+    private Rigidbody _playerRb;
+    private Vector3 _lastInsidePos;
+    private bool _playerInsideZone = true;
+
     /// <summary>True while the siege is in progress (spawning + waiting for kills).</summary>
     public bool IsSiegeActive => _siegeActive;
+
+    private void FindPlayer()
+    {
+        if (_player != null) return;
+        var playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO != null)
+        {
+            _player = playerGO.transform;
+            _playerRb = playerGO.GetComponentInParent<Rigidbody>();
+            if (_playerRb == null) _playerRb = playerGO.GetComponentInChildren<Rigidbody>();
+        }
+    }
+
+    private void Update()
+    {
+        if (!_siegeActive || lockZone == null) return;
+        if (_player == null) { FindPlayer(); return; }
+
+        // Check if the player is inside the lock zone. Use the closest point
+        // on the zone's bounds to determine "inside" — if the player's position
+        // is outside the bounds, teleport them back.
+        var bounds = lockZone.bounds;
+        bool inside = bounds.Contains(_player.position);
+
+        if (inside)
+        {
+            // Track the last known inside position (slightly above ground).
+            _lastInsidePos = _player.position;
+            _playerInsideZone = true;
+        }
+        else if (_playerInsideZone)
+        {
+            // Player just exited the zone — teleport back to last inside position.
+            Debug.Log($"[CompanionZombieSiege] Player exited lock zone — teleporting back to {_lastInsidePos}");
+            TeleportPlayerBack();
+            _playerInsideZone = false;
+        }
+        else
+        {
+            // Still outside — keep teleporting back each frame until inside.
+            TeleportPlayerBack();
+        }
+    }
+
+    private void TeleportPlayerBack()
+    {
+        if (_player == null) return;
+        Vector3 back = _lastInsidePos;
+        back.y += lockZoneTeleportYOffset;
+        if (_playerRb != null)
+        {
+            _playerRb.position = back;
+            _playerRb.linearVelocity = Vector3.zero;
+        }
+        _player.position = back;
+        UnityEngine.Physics.SyncTransforms();
+    }
 
     /// <summary>
     /// Starts the siege. Spawns zombies and waits for the player to kill the
@@ -70,6 +150,43 @@ public class CompanionZombieSiege : MonoBehaviour
         if (_siegeActive) return;
         _siegeActive = true;
         _onCompleted = onCompleted;
+
+        // Lock the player inside the siege area. Two modes:
+        //   1) lockZone (preferred): a custom trigger collider (e.g. "Follower zone")
+        //      that defines a sub-region of the chapter. The player is teleported
+        //      back when they exit.
+        //   2) lockBoundary (fallback): the whole ChapterBoundary.
+        if (lockZone != null)
+        {
+            FindPlayer();
+            if (_player != null)
+            {
+                var bounds = lockZone.bounds;
+                if (bounds.Contains(_player.position))
+                {
+                    _lastInsidePos = _player.position;
+                    _playerInsideZone = true;
+                }
+                else
+                {
+                    // Player is outside the zone when the siege starts — teleport
+                    // them to the zone center so they start inside.
+                    _lastInsidePos = bounds.center;
+                    _lastInsidePos.y = lockZone.transform.position.y + lockZoneTeleportYOffset;
+                    _playerInsideZone = true;
+                    TeleportPlayerBack();
+                    Debug.Log($"[CompanionZombieSiege] Player was outside lock zone — teleported to zone center {_lastInsidePos}");
+                }
+                Debug.Log($"[CompanionZombieSiege] Zone lock active — player locked inside {lockZone.name}. Last inside pos: {_lastInsidePos}");
+            }
+        }
+        else if (lockBoundary != null)
+        {
+            lockBoundary.LockExternal();
+            if (suppressChapterSpawners) lockBoundary.SetSpawnersActive(false);
+            Debug.Log("[CompanionZombieSiege] Boundary locked — player cannot leave until siege is cleared.");
+        }
+
         _siegeRoutine = StartCoroutine(SiegeRoutine());
     }
 
@@ -115,6 +232,9 @@ public class CompanionZombieSiege : MonoBehaviour
         // Clean up any remaining spawned zombies (in case some were killed by
         // other means or are still alive).
         CleanupSpawnedZombies();
+
+        // Unlock the boundary so the player can move freely after the siege.
+        UnlockBoundary();
 
         _siegeActive = false;
         _siegeRoutine = null;
@@ -214,6 +334,25 @@ public class CompanionZombieSiege : MonoBehaviour
         }
         _siegeActive = false;
         CleanupSpawnedZombies();
+        UnlockBoundary();
+    }
+
+    /// <summary>Releases the boundary/zone lock and restores chapter spawners.</summary>
+    private void UnlockBoundary()
+    {
+        if (lockZone != null)
+        {
+            // Zone lock mode — just clear the state. No explicit unlock needed
+            // since the lock is enforced by Update() polling.
+            _playerInsideZone = true;
+            Debug.Log("[CompanionZombieSiege] Zone lock released — player can leave.");
+        }
+        if (lockBoundary != null)
+        {
+            lockBoundary.UnlockExternal();
+            if (suppressChapterSpawners) lockBoundary.SetSpawnersActive(true);
+            Debug.Log("[CompanionZombieSiege] Boundary unlocked — player can leave.");
+        }
     }
 
     private void OnDestroy()

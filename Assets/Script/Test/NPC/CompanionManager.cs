@@ -55,6 +55,13 @@ public class CompanionManager : MonoBehaviour
     [Tooltip("Minimum number of YES answers required for the follower to trust the player and help skip Chapter 4.")]
     public int honestThreshold = 3;
 
+    [Tooltip("Intro line shown as a speech bubble before the 5 questions begin, so the player understands the context.")]
+    [TextArea(2, 4)]
+    public string stage4IntroLine = "Tôi muốn biết rõ anh hơn trước khi đi cùng. Hãy trả lời thật lòng 5 câu hỏi của tôi.";
+
+    [Tooltip("How long (seconds) the intro line stays on screen before the first question appears.")]
+    public float stage4IntroHold = 3f;
+
     [Header("Skip Cutscene (played between Ch4 and Ch5 skip)")]
     [Tooltip("Title of the cutscene shown when the player accepts the skip path.")]
     public string skipCutsceneTitle = "Tìm thấy kíp nổ";
@@ -312,9 +319,38 @@ public class CompanionManager : MonoBehaviour
             }
             else
             {
-                // Refused — companion walks away permanently.
+                // Refused — show a confirmation warning before walking away
+                // permanently. The player might have pressed N by accident.
+                if (CompanionAI != null)
+                {
+                    var bubble = CompanionAI.GetComponent<DialogueBubble>();
+                    if (bubble != null && !bubble.IsChoiceActive)
+                    {
+                        bubble.ShowChoice(
+                            "Bạn có chắc không giúp? Follower sẽ bỏ đi vĩnh viễn.",
+                            confirmed =>
+                            {
+                                if (confirmed)
+                                {
+                                    // Player confirmed the refusal — walk away.
+                                    CompanionAI.WalkAway(deadEndPoint);
+                                    Debug.Log("[CompanionManager] Player CONFIRMED refusal of stage 2. Companion walks away permanently.");
+                                }
+                                else
+                                {
+                                    // Player changed their mind — treat as accept.
+                                    AcceptedStage2 = true;
+                                    EnableShopTriggers(true);
+                                    SimpleNotification.Show("Cảm ơn đã đổi ý! Vào 2 tiệm và nhấn [E] để lấy nhu yếu phẩm.");
+                                    Debug.Log("[CompanionManager] Player changed mind on stage 2 refusal. Shop triggers activated.");
+                                }
+                            });
+                        return;
+                    }
+                }
+                // Fallback if bubble/CompanionAI missing — walk away directly.
                 if (CompanionAI != null) CompanionAI.WalkAway(deadEndPoint);
-                Debug.Log("[CompanionManager] Player REFUSED stage 2. Companion walks away permanently.");
+                Debug.Log("[CompanionManager] Player REFUSED stage 2 (no confirmation UI). Companion walks away permanently.");
             }
         }
         else if (stage == 3)
@@ -377,6 +413,32 @@ public class CompanionManager : MonoBehaviour
         _stage4InProgress = true;
         _stage4QuestionIndex = 0;
         _stage4YesCount = 0;
+
+        // Show an intro speech line first so the player understands the context
+        // before the Y/N questions begin. After the hold duration, the first
+        // question is shown.
+        if (CompanionAI != null)
+        {
+            var bubble = CompanionAI.GetComponent<DialogueBubble>();
+            if (bubble != null && !string.IsNullOrEmpty(stage4IntroLine))
+            {
+                bubble.ShowSpeech(stage4IntroLine, stage4IntroHold);
+                Debug.Log("[CompanionManager] Stage 4 intro line shown.");
+                if (CompanionAI != null)
+                {
+                    CompanionAI.StartCoroutine(DelayFirstQuestion(stage4IntroHold));
+                }
+                return;
+            }
+        }
+
+        // Fallback: no intro, ask first question immediately.
+        AskNextStage4Question();
+    }
+
+    private System.Collections.IEnumerator DelayFirstQuestion(float delay)
+    {
+        yield return new WaitForSeconds(delay + 0.3f);
         AskNextStage4Question();
     }
 
