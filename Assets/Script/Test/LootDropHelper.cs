@@ -58,6 +58,24 @@ public static class LootDropHelper
         }
     }
 
+    public static GameObject SharedGiftBoxPrefab;
+
+    public static void TryDropGiftBox(Vector3 position, float heightOffset, GameObject giftBoxPrefab, float giftBoxDropChance)
+    {
+        if (GameModeManager.CurrentMode != GameMode.Endless) return;
+        if (giftBoxDropChance <= 0f) return;
+
+        GameObject prefab = giftBoxPrefab != null ? giftBoxPrefab : SharedGiftBoxPrefab;
+        if (prefab == null) return;
+
+        if (Random.Range(0f, 100f) <= giftBoxDropChance)
+        {
+            Vector3 dropPos = position;
+            dropPos.y += heightOffset;
+            Object.Instantiate(prefab, dropPos, Quaternion.identity);
+        }
+    }
+
     static void SpawnLoot(
         GameObject prefab,
         Vector3 position,

@@ -123,6 +123,11 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
     [Tooltip("Configuration for trail + glow particle effect when loot flies.")]
     public LootTrailSettings lootTrailSettings = new LootTrailSettings();
 
+    [Header("GiftBox (Endless Mode)")]
+    public GameObject giftBoxPrefab;
+    [Range(0, 100)]
+    public float giftBoxDropChance = 5f;
+
     [Header("Quest")]
     [Tooltip("QuestTrigger (Manual mode) will be completed when the Witch dies. Leave null if not using quests.")]
     public QuestTrigger questTriggerOnDeath;
@@ -810,6 +815,12 @@ public class WitchAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthRe
             lootPopUpwardSpeed,
             lootPopHorizontalSpeed,
             lootTrailSettings);
+
+        LootDropHelper.TryDropGiftBox(
+            transform.position,
+            dropHeightOffset,
+            giftBoxPrefab,
+            giftBoxDropChance);
 
         // Complete the quest (if a QuestTrigger is assigned) — Manual mode.
         if (questTriggerOnDeath != null)

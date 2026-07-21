@@ -88,6 +88,11 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealt
     [Tooltip("Cấu hình vệt trail + glow particle khi loot bay. Chỉnh trực tiếp trên tank boss.")]
     public LootTrailSettings lootTrailSettings = new LootTrailSettings();
 
+    [Header("GiftBox (Endless Mode)")]
+    public GameObject giftBoxPrefab;
+    [Range(0, 100)]
+    public float giftBoxDropChance = 5f;
+
     private Animator animator;
     private NavMeshAgent agent;
     private Rigidbody rb;
@@ -763,6 +768,12 @@ public class TankBossAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealt
             lootPopUpwardSpeed,
             lootPopHorizontalSpeed,
             lootTrailSettings);
+
+        LootDropHelper.TryDropGiftBox(
+            transform.position,
+            dropHeightOffset,
+            giftBoxPrefab,
+            giftBoxDropChance);
 
         Destroy(
             gameObject,

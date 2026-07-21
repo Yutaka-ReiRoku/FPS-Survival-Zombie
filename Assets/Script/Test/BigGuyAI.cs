@@ -113,6 +113,11 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     [Tooltip("Configuration for trail + glow particle effect when loot flies.")]
     public LootTrailSettings lootTrailSettings = new LootTrailSettings();
 
+    [Header("GiftBox (Endless Mode)")]
+    public GameObject giftBoxPrefab;
+    [Range(0, 100)]
+    public float giftBoxDropChance = 5f;
+
     [Header("Rewards")]
     public float experienceReward = 120f;
     public int coinReward = 50;
@@ -711,6 +716,12 @@ public class BigGuyAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
             lootPopUpwardSpeed,
             lootPopHorizontalSpeed,
             lootTrailSettings);
+
+        LootDropHelper.TryDropGiftBox(
+            transform.position,
+            dropHeightOffset,
+            giftBoxPrefab,
+            giftBoxDropChance);
 
         Destroy(gameObject, cleanupDelay);
     }

@@ -93,6 +93,11 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
     [Tooltip("Cấu hình vệt trail + glow particle khi loot bay. Chỉnh trực tiếp trên boomer.")]
     public LootTrailSettings lootTrailSettings = new LootTrailSettings();
 
+    [Header("GiftBox (Endless Mode)")]
+    public GameObject giftBoxPrefab;
+    [Range(0, 100)]
+    public float giftBoxDropChance = 5f;
+
     [Header("Self-Contained Timing (independent of animation events)")]
     [Tooltip("Delay after the Explode trigger before the blast actually fires.")]
     public float explodeFxDelay = 0.25f;
@@ -794,6 +799,12 @@ public class BoomerAI : MonoBehaviour, IDamageable, ISpecialEnemy, IEnemyHealthR
                 lootPopUpwardSpeed,
                 lootPopHorizontalSpeed,
                 lootTrailSettings);
+
+            LootDropHelper.TryDropGiftBox(
+                transform.position,
+                dropHeightOffset,
+                giftBoxPrefab,
+                giftBoxDropChance);
         }
 
         if (prefab != null)

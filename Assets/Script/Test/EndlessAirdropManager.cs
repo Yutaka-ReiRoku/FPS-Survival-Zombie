@@ -12,9 +12,13 @@ public class EndlessAirdropManager : MonoBehaviour
     public float intervalRandomRange = 0.2f;
     public float spawnRadius = 50f;
     public float minSpawnDistance = 15f;
-    public float dropHeight = 80f;
+    public float dropHeight = 15f;
     public float markerDuration = 5f;
     public GameObject[] lootboxPrefabs;
+
+    [Header("GiftBox Drop (Endless Mode)")]
+    [Tooltip("GiftBox prefab mà zombie có thể drop khi chết. Chỉ cần gán ở đây, tất cả enemy tự dùng chung.")]
+    public GameObject giftBoxPrefab;
 
     [Header("Marker")]
     public bool showMarker = true;
@@ -33,6 +37,9 @@ public class EndlessAirdropManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        if (giftBoxPrefab != null)
+            LootDropHelper.SharedGiftBoxPrefab = giftBoxPrefab;
     }
 
     private void Start()
@@ -99,16 +106,20 @@ public class EndlessAirdropManager : MonoBehaviour
             return;
         }
 
-        Vector3 spawnPos = _landingPos + Vector3.up * dropHeight;
+        Vector3 landPos = _landingPos;
+        float dropFrom = Mathf.Min(dropHeight, 15f);
+        Vector3 spawnPos = landPos + Vector3.up * dropFrom;
 
         GameObject selectedPrefab = lootboxPrefabs[Random.Range(0, lootboxPrefabs.Length)];
         GameObject lootbox = Instantiate(selectedPrefab, spawnPos, Quaternion.identity);
-        Debug.Log("[Airdrop] Lootbox airdrop dropped!");
+        lootbox.layer = 8;
 
         Rigidbody rb = lootbox.GetComponent<Rigidbody>();
         if (rb == null)
             rb = lootbox.AddComponent<Rigidbody>();
 
+        rb.isKinematic = false;
+        rb.useGravity = true;
         rb.mass = 50f;
         rb.linearDamping = 0.5f;
         rb.angularDamping = 0.5f;
@@ -119,6 +130,7 @@ public class EndlessAirdropManager : MonoBehaviour
         if (lb != null)
             lb.Price = 0;
 
+        Debug.Log($"[Airdrop] Dropped {selectedPrefab.name} at {landPos}");
         _dropPending = false;
     }
 

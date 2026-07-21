@@ -169,6 +169,11 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
     [Tooltip("Cấu hình vệt trail + glow particle khi loot bay. Chỉnh trực tiếp trên zombie.")]
     public LootTrailSettings lootTrailSettings = new LootTrailSettings();
 
+    [Header("GiftBox (Endless Mode)")]
+    public GameObject giftBoxPrefab;
+    [Range(0, 100)]
+    public float giftBoxDropChance = 5f;
+
     [Header("Rewards")]
     public float experienceReward = 10f;
     public float headshotBonusExperience = 5f;
@@ -922,6 +927,12 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             lootPopUpwardSpeed,
             lootPopHorizontalSpeed,
             lootTrailSettings);
+
+        LootDropHelper.TryDropGiftBox(
+            transform.position,
+            dropHeightOffset,
+            giftBoxPrefab,
+            giftBoxDropChance);
     }
 
     //==================================================
