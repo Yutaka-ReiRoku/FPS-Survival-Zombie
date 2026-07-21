@@ -6,6 +6,7 @@ namespace cowsins
     public class Lootbox : Interactable
     {
         [Title("LOOTBOX", upMargin: 8),SerializeField, Min(0)] private int price;
+        public int Price { set { price = value; } }
 
         [SerializeField] private GameObject[] loot;
 

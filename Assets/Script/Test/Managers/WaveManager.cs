@@ -16,6 +16,8 @@ public class WaveManager : MonoBehaviour
     [Header("Endless Mode")]
     [Tooltip("Extra zombies added per wave beyond wave 1 for endless mode. Overrides the default +5 when higher.")]
     public int endlessZombiesPerWave = 8;
+
+    [Header("Boss Wave")]
     [Tooltip("Every Nth wave is a boss wave (Boomer/Tank guaranteed spawn). 0 = disabled.")]
     public int bossWaveInterval = 5;
 

@@ -561,7 +561,7 @@ public class Spawm : MonoBehaviour
 
         return
             WaveManager.Instance.baseZombieCount +
-            (WaveManager.Instance.currentWave * perWaveStep);
+            ((WaveManager.Instance.currentWave - 1) * perWaveStep);
     }
 
 }

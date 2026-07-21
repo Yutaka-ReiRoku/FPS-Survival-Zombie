@@ -24,15 +24,21 @@ public class EndlessAirdropManager : MonoBehaviour
     private void Start()
     {
         _timer = spawnInterval;
+        FindPlayer();
+    }
+
+    private void FindPlayer()
+    {
+        GameObject p = GameObject.FindGameObjectWithTag("Player");
+        if (p != null) _player = p.transform;
     }
 
     private void Update()
     {
         if (_player == null)
         {
-            GameObject p = GameObject.FindGameObjectWithTag("Player");
-            if (p != null) _player = p.transform;
-            else return;
+            FindPlayer();
+            if (_player == null) return;
         }
 
         if (_dropPending) return;
@@ -90,13 +96,7 @@ public class EndlessAirdropManager : MonoBehaviour
 
         var lb = lootbox.GetComponent<Lootbox>();
         if (lb != null)
-        {
-            var field = typeof(Lootbox).GetField("price",
-                System.Reflection.BindingFlags.Instance |
-                System.Reflection.BindingFlags.NonPublic);
-            if (field != null)
-                field.SetValue(lb, 0);
-        }
+            lb.Price = 0;
 
         _dropPending = false;
     }

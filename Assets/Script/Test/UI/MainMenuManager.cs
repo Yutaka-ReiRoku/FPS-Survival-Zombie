@@ -109,7 +109,7 @@ public class MainMenuManager : MonoBehaviour
         int bestEndlessWave = PlayerPrefs.GetInt("BestEndlessWave", 0);
         if (_bestEndlessLabel != null)
         {
-            _bestEndlessLabel.text = bestEndlessScore > 0
+            _bestEndlessLabel.text = bestEndlessScore > 0 || bestEndlessWave > 0
                 ? ("Best  " + bestEndlessScore + "    Wave " + bestEndlessWave)
                 : "No record yet";
         }
