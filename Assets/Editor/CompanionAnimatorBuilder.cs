@@ -7,11 +7,14 @@ using UnityEngine;
 /// the "Lite Rifle Pack" (Mixamo — created for the PolygonApocalypse Biker
 /// character, so retargeting is perfect).
 ///
-/// States (L4D2-style smooth transitions, same pattern as Zombie controller):
+/// States (7 states, L4D2-style smooth transitions, same pattern as Zombie controller):
 ///   Idle    — BlendTree: idle aiming ↔ rifle walk ↔ run forward (Speed 0..1)
+///   Move    — (covered by BlendTree at Speed 0.5)
+///   Run     — (covered by BlendTree at Speed 1.0)
 ///   Shoot   — Firing Rifle (1-shot, via CrossFade from CompanionAI)
-///   Hit     — Hit Reaction (1-shot, via CrossFade from CompanionAI)
-///   Downed  — idle crouching (loop, incapacitated)
+///   Hurt    — Hit Reaction (1-shot, via CrossFade from CompanionAI)
+///   Downed  — idle crouching (loop, incapacitated, sits down waiting for revive)
+///   Reload  — Reloading (1-shot, via CrossFade from CompanionAI)
 ///   Revive  — turn 90 left (1-shot, stands back up)
 ///
 /// Parameters:
@@ -33,6 +36,7 @@ public static class CompanionAnimatorBuilder
     private const string ShootFbx      = "Assets/Animation/Lite Rifle Pack/Characters@Firing Rifle.fbx";
     private const string HitFbx        = "Assets/Animation/Lite Rifle Pack/Characters@Hit Reaction.fbx";
     private const string DownedFbx     = "Assets/Animation/Lite Rifle Pack/idle crouching.fbx";
+    private const string ReloadFbx     = "Assets/Animation/Lite Rifle Pack/Characters@Reloading.fbx";
     private const string ReviveFbx     = "Assets/Animation/Lite Rifle Pack/turn 90 left.fbx";
 
     [MenuItem("Tools/Story/Build Companion Animator")]
@@ -47,6 +51,7 @@ public static class CompanionAnimatorBuilder
         var shootClip      = LoadClip(ShootFbx);
         var hitClip        = LoadClip(HitFbx);
         var downedClip     = LoadClip(DownedFbx);
+        var reloadClip     = LoadClip(ReloadFbx);
         var reviveClip     = LoadClip(ReviveFbx);
 
         if (idleClip == null || walkClip == null || runForwardClip == null)
@@ -97,9 +102,13 @@ public static class CompanionAnimatorBuilder
         var hitState = sm.AddState("Hit");
         hitState.motion = hitClip != null ? hitClip : idleClip;
 
-        // ---- Downed state (loop, incapacitated) ----
+        // ---- Downed state (loop, incapacitated, sits down waiting for revive) ----
         var downedState = sm.AddState("Downed");
         downedState.motion = downedClip != null ? downedClip : idleClip;
+
+        // ---- Reload state (1-shot, triggered via CrossFade from CompanionAI) ----
+        var reloadState = sm.AddState("Reload");
+        reloadState.motion = reloadClip != null ? reloadClip : idleClip;
 
         // ---- Revive state (1-shot, stands back up) ----
         var reviveState = sm.AddState("Revive");
@@ -112,13 +121,17 @@ public static class CompanionAnimatorBuilder
 
         // ---- Shoot -> Idle (return after shoot, via exitTime) ----
         // exitTime=1.0 lets the full 0.27s Firing Rifle clip play before
-        // transitioning; duration=0.3 gives a smooth blend back to idle.
+        // transitioning; duration=0.25 gives a smooth blend back to idle.
         var t = shootState.AddTransition(idleState);
-        t.hasExitTime = true; t.exitTime = 1.0f; t.duration = 0.3f;
+        t.hasExitTime = true; t.exitTime = 1.0f; t.duration = 0.25f;
 
         // ---- Hit -> Idle (return after hit) ----
         t = hitState.AddTransition(idleState);
-        t.hasExitTime = true; t.exitTime = 0.9f; t.duration = 0.3f;
+        t.hasExitTime = true; t.exitTime = 0.9f; t.duration = 0.25f;
+
+        // ---- Reload -> Idle (return after reload) ----
+        t = reloadState.AddTransition(idleState);
+        t.hasExitTime = true; t.exitTime = 1.0f; t.duration = 0.25f;
 
         // ---- Downed (AnyState, only when Downed bool is true) ----
         var anyToDowned = sm.AddAnyStateTransition(downedState);
@@ -144,7 +157,7 @@ public static class CompanionAnimatorBuilder
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("[CompanionAnimatorBuilder] Companion AnimatorController built with 5 states + 3-child BlendTree + IK pass at: " + OutputPath);
+        Debug.Log("[CompanionAnimatorBuilder] Companion AnimatorController built with 7 states (Idle/Move/Run/Shoot/Hurt/Downed/Reload + Revive) + 3-child BlendTree + IK pass at: " + OutputPath);
     }
 
     /// <summary>Loads the non-preview AnimationClip from an FBX.</summary>

@@ -11,6 +11,8 @@ public class EpilogueSlide : MonoBehaviour
         "Dịch bệnh đã được kiểm soát, đã tìm ra phương thuốc, nhưng danh tính người đem " +
         "phương thuốc về cho các nhà khoa học vẫn là một ẩn số.";
 
+    public string titleText = "KẾT THÚC";
+
     [Tooltip("Optional illustration shown above the text. Leave empty for now — assign later.")]
     public Sprite illustration;
 
@@ -20,8 +22,8 @@ public class EpilogueSlide : MonoBehaviour
     public float fadeOut = 1f;
 
     [Header("Visuals")]
-    public Color backgroundColor = Color.black;
-    public Color textColor = new Color(0.92f, 0.92f, 0.92f, 1f);
+    public Color backgroundColor = new Color(0.031f, 0.071f, 0.125f, 1f); // dark navy blue
+    public Color textColor = new Color(0.78f, 0.82f, 0.86f, 1f);
 
     private bool _played;
     private VisualElement _root;
@@ -43,13 +45,16 @@ public class EpilogueSlide : MonoBehaviour
         float prevTimeScale = Time.timeScale;
         Time.timeScale = 0f;
 
-        _root.style.opacity = 1f;
-        yield return new WaitForSecondsRealtime(fadeIn + hold);
-        _root.style.opacity = 0f;
-        yield return new WaitForSecondsRealtime(fadeOut);
+        if (_root != null)
+        {
+            _root.style.opacity = 1f;
+            yield return new WaitForSecondsRealtime(fadeIn + hold);
+            _root.style.opacity = 0f;
+            yield return new WaitForSecondsRealtime(fadeOut);
+        }
 
         Time.timeScale = prevTimeScale > 0f ? prevTimeScale : 1f;
-        Destroy(_docGO);
+        if (_docGO != null) Destroy(_docGO);
 
         onComplete?.Invoke();
     }
@@ -84,6 +89,10 @@ public class EpilogueSlide : MonoBehaviour
 
         var bg = _root.Q("Background");
         if (bg != null) bg.style.backgroundColor = backgroundColor;
+
+        var titleEl = _root.Q<Label>("Title");
+        if (titleEl != null && !string.IsNullOrEmpty(titleText))
+            titleEl.text = titleText;
 
         _illustrationEl = _root.Q("Illustration");
         if (_illustrationEl != null && illustration != null)

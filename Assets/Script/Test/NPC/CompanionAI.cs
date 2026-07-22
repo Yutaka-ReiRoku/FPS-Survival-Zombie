@@ -92,6 +92,12 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     [Header("Animator")]
     public Animator animator;
 
+    [Header("Reload")]
+    [Tooltip("Number of shots before the companion reloads.")]
+    public int magazineSize = 8;
+    [Tooltip("Reload duration in seconds (must match Reload animation length).")]
+    public float reloadDuration = 2.5f;
+
     public EnemyType EnemyType => EnemyType.Special;
     public float HealthFraction => maxHealth > 0 ? Mathf.Clamp01((float)currentHealth / maxHealth) : 0f;
     public event System.Action<float> OnHealthChanged;
@@ -119,6 +125,8 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     private float _enemyDamageTimer;
     private float _downedTimer;
     private float _shootStopTimer; // Stops movement while shooting (L4D2 style)
+    private int _ammoRemaining; // Shots left before reload
+    private float _reloadTimer; // Counts down during reload; companion can't shoot while > 0
     private float _rescueProgress; // 0..rescueHoldDuration — accumulated while player holds E near downed companion
     private DialogueBubble _bubble; // Cached for rescue thank-you dialogue
     private Collider _interactCollider; // Trigger collider on layer Interactable — disabled while Downed so InteractManager ignores the companion
@@ -143,6 +151,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         _audio = GetComponent<AudioSource>();
         _bubble = GetComponent<DialogueBubble>();
         if (animator == null) animator = GetComponentInChildren<Animator>();
+        _ammoRemaining = magazineSize;
 
         // Cache the trigger collider on the Interactable layer. This is what
         // InteractManager raycasts against to show the "Nói chuyện" prompt.
@@ -210,7 +219,10 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         _agent.acceleration = 8f; // Smooth acceleration (L4D2 style)
         _agent.angularSpeed = 360f; // Turn quickly to face enemies
         _agent.stoppingDistance = followDistance * 0.5f;
-        _agent.updateRotation = true;
+        // Disable agent auto-rotation — we handle facing manually (like ZombieAI)
+        // so the companion faces its movement direction while chasing (not the
+        // player), preventing spine twisting when the player runs in circles.
+        _agent.updateRotation = false;
         _agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
         _agent.avoidancePriority = 50;
     }
@@ -306,16 +318,34 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         }
         else
         {
+            // Tick down reload timer — companion can't shoot while reloading.
+            if (_reloadTimer > 0f)
+            {
+                _reloadTimer -= Time.deltaTime;
+                _agent.isStopped = true;
+            }
+
             // Player is close enough — can afford to stop and shoot.
             _shootTimer -= Time.deltaTime;
-            if (_shootTimer <= 0f)
+            if (_shootTimer <= 0f && _reloadTimer <= 0f)
             {
                 var target = FindNearestEnemy();
                 if (target != null)
                 {
-                    _shootTimer = shootCooldown;
-                    _shootStopTimer = shootStopDuration; // Stop to shoot (L4D2 style)
-                    ShootAt(target);
+                    if (_ammoRemaining <= 0)
+                    {
+                        // Out of ammo — reload.
+                        _shootTimer = reloadDuration;
+                        _reloadTimer = reloadDuration;
+                        _shootStopTimer = reloadDuration;
+                        PlayReload();
+                    }
+                    else
+                    {
+                        _shootTimer = shootCooldown;
+                        _shootStopTimer = shootStopDuration; // Stop to shoot (L4D2 style)
+                        ShootAt(target);
+                    }
                 }
             }
 
@@ -325,17 +355,11 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
                 _shootStopTimer -= Time.deltaTime;
                 _agent.isStopped = true;
 
-                // Face the nearest enemy while shooting.
+                // Face the nearest enemy while shooting (like ZombieAI.FaceTarget).
                 var target = FindNearestEnemy();
                 if (target != null)
                 {
-                    Vector3 dir = (target.position - transform.position).normalized;
-                    dir.y = 0f;
-                    if (dir.sqrMagnitude > 0.001f)
-                    {
-                        Quaternion lookRot = Quaternion.LookRotation(dir);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, Time.deltaTime * 10f);
-                    }
+                    FacePosition(target.position, 10f);
                 }
             }
             else
@@ -348,6 +372,12 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
                     _repathTimer = repathInterval;
                     _agent.SetDestination(_player.position);
                 }
+
+                // Face movement direction (like ZombieAI.FaceMovementDirection)
+                // so the companion looks where it's going, not at the player.
+                // This prevents spine twisting when the player runs in circles.
+                FaceMovementDirection(8f);
+                Debug.Log($"[CompanionAI] FaceMovementDirection called. Rot Y={System.Math.Round(transform.rotation.eulerAngles.y, 1)} vel={_agent.velocity.sqrMagnitude} hasPath={_agent.hasPath}");
             }
         }
 
@@ -388,6 +418,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         // consumed without firing when multiple conditions overlap).
         if (animator != null) animator.CrossFade("Shoot", 0.1f, 0, 0f);
         if (shootClip != null) _audio.PlayOneShot(shootClip);
+        _ammoRemaining--;
 
         Vector3 origin = transform.position + Vector3.up * 1.5f;
         Vector3 baseDir = (target.position + Vector3.up * 1f - origin).normalized;
@@ -423,6 +454,14 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
             var fx = Instantiate(muzzleFlashPrefab, origin, Quaternion.LookRotation(baseDir));
             Destroy(fx, 1f);
         }
+    }
+
+    /// <summary>Plays the Reload animation and refills the magazine when complete.</summary>
+    private void PlayReload()
+    {
+        if (animator != null) animator.CrossFade("Reload", 0.15f, 0, 0f);
+        // Refill ammo immediately (the reload timer gates the next shot).
+        _ammoRemaining = magazineSize;
     }
 
     private static Vector3 ApplySpread(Vector3 dir, float spreadDeg)
@@ -659,9 +698,53 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
 
     private void SetAnimSpeed(float speed)
     {
-        // Set Speed directly — smoothing is handled by Mathf.SmoothDamp in UpdateFollowing.
-        if (animator != null)
-            animator.SetFloat(SpeedHash, speed);
+        if (animator == null) return;
+        // Skip when reloading — the Reload state should not be interrupted.
+        if (_reloadTimer > 0f) return;
+        // Smooth Speed manually (like ZombieAI's 0.15s damping) without using
+        // Animator.SetFloat's built-in damping, which can cancel pending Play
+        // / CrossFade calls made in the same frame.
+        _currentAnimSpeed = Mathf.SmoothDamp(_currentAnimSpeed, speed, ref _speedVelocity, 0.15f, float.MaxValue, Time.deltaTime);
+        animator.SetFloat(SpeedHash, _currentAnimSpeed);
+    }
+
+    /// <summary>
+    /// Smoothly rotates the companion to face the given world position.
+    /// Mirrors EnemyLocomotion.FaceTarget — used to face enemies while shooting.
+    /// </summary>
+    private void FacePosition(Vector3 worldPos, float rotSpeed)
+    {
+        Vector3 dir = worldPos - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.01f) return;
+        Quaternion rot = Quaternion.LookRotation(dir);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * rotSpeed);
+    }
+
+    /// <summary>
+    /// Smoothly rotates the companion to face its movement direction (NavMeshAgent
+    /// velocity or steering target). Mirrors EnemyLocomotion.FaceMovementDirection —
+    /// used while chasing so the companion looks where it's going, not at the
+    /// player. Prevents spine twisting when the player runs in circles.
+    /// </summary>
+    private void FaceMovementDirection(float rotSpeed)
+    {
+        Vector3 moveDir = Vector3.zero;
+        if (_agent.velocity.sqrMagnitude > 0.5f)
+            moveDir = _agent.velocity;
+        else if (_agent.hasPath)
+            moveDir = _agent.steeringTarget - transform.position;
+
+        moveDir.y = 0f;
+        if (moveDir.sqrMagnitude < 0.01f)
+        {
+            // Not moving — face the player instead (idle pose).
+            if (_player != null) FacePosition(_player.position, rotSpeed);
+            return;
+        }
+
+        Quaternion rot = Quaternion.LookRotation(moveDir.normalized);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * rotSpeed);
     }
 
     /// <summary>
