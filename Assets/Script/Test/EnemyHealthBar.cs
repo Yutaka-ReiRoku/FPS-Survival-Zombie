@@ -97,7 +97,6 @@ public class EnemyHealthBar : MonoBehaviour
         var col = _barGO.GetComponent<Collider>();
         if (col != null)
         {
-            Debug.Log($"[EnemyHealthBar] Destroying auto-generated BoxCollider on {gameObject.name}");
             Destroy(col);
         }
 
@@ -110,7 +109,6 @@ public class EnemyHealthBar : MonoBehaviour
         doc.visualTreeAsset = asset;
 
         _stretched = false;
-        Debug.Log($"[EnemyHealthBar] Programmatically built ({enemyType}) for {gameObject.name} - World Space size: {doc.worldSpaceSize}");
     }
 
     private void OnEnable()
@@ -160,7 +158,6 @@ public class EnemyHealthBar : MonoBehaviour
     private void HandleHealth(float normalizedHealth)
     {
         if (_zombie == null) return;
-        Debug.Log($"[EnemyHealthBar] HandleHealth on {gameObject.name} - Normalized Health: {normalizedHealth}");
 
         _healthFraction = normalizedHealth;
 
@@ -176,7 +173,6 @@ public class EnemyHealthBar : MonoBehaviour
         if (_barGO != null && _barGO && !_barGO.activeSelf)
         {
             _barGO.SetActive(true);
-            Debug.Log($"[EnemyHealthBar] Activating UI GameObject for {gameObject.name}");
         }
     }
 
@@ -248,7 +244,6 @@ public class EnemyHealthBar : MonoBehaviour
                 }
                 
                 _stretched = true;
-                Debug.Log($"[EnemyHealthBar] Configured dynamic {enemyType} sizes ({barSize.x}x{barSize.y}) for {gameObject.name}");
             }
         }
 

@@ -377,7 +377,6 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
                 // so the companion looks where it's going, not at the player.
                 // This prevents spine twisting when the player runs in circles.
                 FaceMovementDirection(8f);
-                Debug.Log($"[CompanionAI] FaceMovementDirection called. Rot Y={System.Math.Round(transform.rotation.eulerAngles.y, 1)} vel={_agent.velocity.sqrMagnitude} hasPath={_agent.hasPath}");
             }
         }
 
