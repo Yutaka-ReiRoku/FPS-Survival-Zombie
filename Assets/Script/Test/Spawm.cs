@@ -133,7 +133,7 @@ public class Spawm : MonoBehaviour
         var go = new GameObject("NavMeshSurface_Runtime");
         var surface = go.AddComponent<NavMeshSurface>();
         surface.collectObjects = CollectObjects.All;
-        surface.useGeometry = 0; // RenderMeshes
+        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
         surface.layerMask = ~0;
         surface.defaultArea = 0;
         surface.BuildNavMesh();
