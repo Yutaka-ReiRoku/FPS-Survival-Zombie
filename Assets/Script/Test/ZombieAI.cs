@@ -281,6 +281,9 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     void OnEnable()
     {
+        if (_chasePath == null)
+            _chasePath = new NavMeshPath();
+
         // Dynamically randomize height between 1.5m and 2.0m
         float defaultHeight = 1.8f;
         if (_collider is CapsuleCollider capCol)
@@ -320,6 +323,17 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             if (playerObj != null)
                 target = playerObj.transform;
         }
+
+        // Safety net: if the tagged Player is a static parent, resolve to the
+        // moving child that has PlayerMovement + Rigidbody.
+        if (target != null && target.GetComponent<cowsins.PlayerMovement>() == null)
+        {
+            var pm = target.GetComponentInChildren<cowsins.PlayerMovement>();
+            if (pm != null)
+                target = pm.transform;
+        }
+
+        Debug.Log($"[ZombieAI] {name} OnEnable target set: target={(target!=null?target.name:"null")} pos={(target!=null?target.position.ToString():"N/A")}");
 
         if (target != null)
         {
@@ -393,7 +407,8 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
         if (agent != null)
         {
             agent.enabled = true;
-            agent.isStopped = false;
+            if (agent.isOnNavMesh)
+                agent.isStopped = false;
             agent.speed = walkSpeed;
             agent.stoppingDistance = attackDistance * 0.5f;
             // Let the agent control rotation during Wander; ChasePlayer overrides
@@ -406,6 +421,18 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             if (locomotion != null)
             {
                 locomotion.WarpIfUnderground();
+            }
+
+            // If the agent still isn't on the NavMesh (spawn position off-mesh),
+            // try to find a valid surface nearby to prevent silent pathing failures.
+            if (!agent.isOnNavMesh)
+            {
+                NavMeshHit navHit;
+                if (NavMesh.SamplePosition(transform.position, out navHit, 5f, NavMesh.AllAreas))
+                {
+                    agent.Warp(navHit.position);
+                    transform.position = navHit.position;
+                }
             }
         }
 
@@ -450,12 +477,48 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     void Update()
     {
-        if (isDead || target == null)
+        if (isDead)
+            return;
+
+        // Re-acquire player reference if lost (e.g. scene transitions, pooling edge cases)
+        if (target == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                target = playerObj.transform;
+            }
+        }
+        // Safety net: if the tagged Player is a static parent, resolve to the
+        // moving child that has PlayerMovement + Rigidbody.
+        if (target != null && target.GetComponent<cowsins.PlayerMovement>() == null)
+        {
+            var pm = target.GetComponentInChildren<cowsins.PlayerMovement>();
+            if (pm != null)
+                target = pm.transform;
+        }
+        if (target != null)
+        {
+            _targetDamageable = target.GetComponent<IDamageable>();
+            _targetStats = target.GetComponent<PlayerStats>();
+        }
+        if (target == null)
             return;
 
         if (locomotion != null)
         {
             locomotion.target = target;
+        }
+
+        if (agent != null && !agent.isOnNavMesh)
+        {
+            NavMeshHit navHit;
+            if (NavMesh.SamplePosition(transform.position, out navHit, 10f, NavMesh.AllAreas))
+            {
+                agent.Warp(navHit.position);
+                transform.position = navHit.position;
+            }
+            return;
         }
 
         attackTimer += Time.deltaTime;
@@ -544,9 +607,24 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
 
     private float pathTimer = 0f;
     private Vector3 _lastSetDestination = Vector3.zero;
+    private NavMeshPath _chasePath;
 
     void ChasePlayer(float distance)
     {
+        if (agent == null || !agent.isOnNavMesh)
+        {
+            Debug.LogWarning($"[ZombieAI] {name} ChasePlayer skipped: agent={(agent!=null?"ok":"null")} isOnNavMesh={(agent!=null?agent.isOnNavMesh.ToString():"N/A")}");
+            return;
+        }
+
+        if (target == null)
+        {
+            Debug.LogWarning($"[ZombieAI] {name} ChasePlayer skipped: target is null");
+            return;
+        }
+
+        Debug.Log($"[ZombieAI] {name} ChasePlayer: dist={distance:F1} target.name={target.name} target.pos={target.position}");
+
         if (!hasDetectedPlayer)
         {
             PlaySound(growlClip);
@@ -688,6 +766,23 @@ public class ZombieAI : MonoBehaviour, IDamageable, ICrookEnemy, IEnemyHealthRea
             {
                 // Disable jitter when close to attack range to prevent flip-flop.
                 Vector3 dest = target.position;
+                // Sample to the ground-level NavMesh near the player so
+                // zombies path to reachable terrain even when the player is
+                // standing on a disconnected raised surface (car roof, etc.).
+                NavMeshHit navHit;
+                if (NavMesh.SamplePosition(new Vector3(dest.x, 0f, dest.z), out navHit, 2f, NavMesh.AllAreas))
+                    dest = navHit.position;
+                // If the destination is still unreachable (partial path),
+                // use the nearest reachable NavMesh corner so the zombie
+                // at least advances toward the player's vicinity instead
+                // of cycling pathPending deadlocks.
+                _chasePath.ClearCorners();
+                if (NavMesh.CalculatePath(agent.transform.position, dest, NavMesh.AllAreas, _chasePath)
+                    && _chasePath.status == NavMeshPathStatus.PathPartial
+                    && _chasePath.corners.Length > 1)
+                {
+                    dest = _chasePath.corners[_chasePath.corners.Length - 1];
+                }
                 if (distance > attackDistance + chaseJitterRadius + 1f)
                     dest += chaseJitterOffset;
 
