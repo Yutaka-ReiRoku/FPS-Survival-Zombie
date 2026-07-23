@@ -21,7 +21,7 @@ public class EndlessAirdropManager : MonoBehaviour
     public GameObject giftBoxPrefab;
 
     [Header("Marker")]
-    public bool showMarker = true;
+    public bool showMarker = false;
     public GameObject markerPrefab;
 
     private float _timer;
