@@ -1,6 +1,6 @@
 using UnityEngine;
-using UnityEngine.AI;
 using cowsins;
+using System.Collections.Generic;
 
 public class EndlessAirdropManager : MonoBehaviour
 {
@@ -10,24 +10,20 @@ public class EndlessAirdropManager : MonoBehaviour
     public float spawnInterval = 300f;
     [Range(0f, 1f)]
     public float intervalRandomRange = 0.2f;
-    public float spawnRadius = 50f;
-    public float minSpawnDistance = 15f;
     public float dropHeight = 15f;
-    public float markerDuration = 5f;
     public GameObject[] lootboxPrefabs;
 
     [Header("GiftBox Drop (Endless Mode)")]
     [Tooltip("GiftBox prefab mà zombie có thể drop khi chết. Chỉ cần gán ở đây, tất cả enemy tự dùng chung.")]
     public GameObject giftBoxPrefab;
 
-    [Header("Marker")]
-    public bool showMarker = false;
-    public GameObject markerPrefab;
+    [Header("Airdrop Markers in Scene")]
+    [Tooltip("Các AirdropMarker có sẵn trong scene. Lootbox sẽ rơi ngay tại vị trí các marker này.")]
+    public GameObject[] airdropMarkers;
 
     private float _timer;
     private Transform _player;
     private bool _dropPending;
-    private Vector3 _landingPos;
 
     private void Awake()
     {
@@ -46,6 +42,23 @@ public class EndlessAirdropManager : MonoBehaviour
     {
         ResetTimer();
         FindPlayer();
+        FindAirdropMarkers();
+    }
+
+    private void FindAirdropMarkers()
+    {
+        if (airdropMarkers == null || airdropMarkers.Length == 0)
+        {
+            GameObject[] found = GameObject.FindGameObjectsWithTag("Untagged");
+            var list = new List<GameObject>();
+            foreach (var go in found)
+            {
+                if (go.name.StartsWith("AirdropMarker"))
+                    list.Add(go);
+            }
+            airdropMarkers = list.ToArray();
+        }
+        Debug.Log($"[Airdrop] Found {airdropMarkers.Length} airdrop markers in scene.");
     }
 
     private void ResetTimer()
@@ -80,39 +93,23 @@ public class EndlessAirdropManager : MonoBehaviour
 
     private void StartAirdrop()
     {
-        _landingPos = FindLandingPosition();
-        if (_landingPos == Vector3.zero)
+        GameObject marker = GetAvailableMarker();
+        if (marker == null)
         {
-            Debug.LogWarning("[Airdrop] No valid landing position found!");
+            Debug.LogWarning("[Airdrop] No available AirdropMarker found!");
             return;
         }
 
         _dropPending = true;
+        Vector3 markerPos = marker.transform.position;
+        marker.SetActive(false);
 
-        if (showMarker && markerPrefab != null)
-        {
-            GameObject marker = Instantiate(markerPrefab, _landingPos, Quaternion.identity);
-            Destroy(marker, markerDuration);
-        }
-
-        Invoke(nameof(SpawnLootbox), markerDuration);
-    }
-
-    private void SpawnLootbox()
-    {
-        if (lootboxPrefabs == null || lootboxPrefabs.Length == 0 || _player == null)
-        {
-            _dropPending = false;
-            return;
-        }
-
-        Vector3 landPos = _landingPos;
         float dropFrom = Mathf.Min(dropHeight, 15f);
-        Vector3 spawnPos = landPos + Vector3.up * dropFrom;
+        Vector3 spawnPos = markerPos + Vector3.up * dropFrom;
 
         GameObject selectedPrefab = lootboxPrefabs[Random.Range(0, lootboxPrefabs.Length)];
         GameObject lootbox = Instantiate(selectedPrefab, spawnPos, Quaternion.identity);
-        lootbox.layer = 8;
+        lootbox.layer = LayerMask.NameToLayer("Interactable");
 
         Rigidbody rb = lootbox.GetComponent<Rigidbody>();
         if (rb == null)
@@ -130,36 +127,31 @@ public class EndlessAirdropManager : MonoBehaviour
         if (lb != null)
             lb.Price = 0;
 
-        Debug.Log($"[Airdrop] Dropped {selectedPrefab.name} at {landPos}");
+        Debug.Log($"[Airdrop] Dropped {selectedPrefab.name} at {markerPos}");
+
         _dropPending = false;
     }
 
-    private Vector3 FindLandingPosition()
+    private GameObject GetAvailableMarker()
     {
-        if (_player == null) return Vector3.zero;
-
-        for (int i = 0; i < 30; i++)
+        foreach (var marker in airdropMarkers)
         {
-            Vector2 random2D = Random.insideUnitCircle * spawnRadius;
-            Vector3 candidate = _player.position + new Vector3(random2D.x, 0f, random2D.y);
-
-            if (Vector3.Distance(candidate, _player.position) < minSpawnDistance)
-                continue;
-
-            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 5f, NavMesh.AllAreas))
-                return hit.position;
+            if (marker != null && marker.activeInHierarchy)
+                return marker;
         }
-
-        NavMeshHit fallbackHit;
-        if (NavMesh.SamplePosition(_player.position + Random.insideUnitSphere * spawnRadius, out fallbackHit, spawnRadius, NavMesh.AllAreas))
-            return fallbackHit.position;
-
-        return _player.position;
+        return null;
     }
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(1f, 0.3f, 0f, 0.2f);
-        Gizmos.DrawSphere(transform.position, spawnRadius);
+        if (airdropMarkers != null)
+        {
+            foreach (var marker in airdropMarkers)
+            {
+                if (marker != null)
+                    Gizmos.DrawSphere(marker.transform.position, 1f);
+            }
+        }
     }
 }
