@@ -36,6 +36,7 @@ public class DialogueBubble : MonoBehaviour
     private Coroutine _routine;
     private bool _choiceActive;
     private System.Action<bool> _choiceCallback;
+    private float _prevTimeScale = 1f;
 
     public bool IsVisible => _panelGO != null && _root != null && _root.resolvedStyle.opacity > 0f;
     public bool IsChoiceActive => _choiceActive;
@@ -200,6 +201,17 @@ public class DialogueBubble : MonoBehaviour
             _root.style.display = DisplayStyle.Flex;
             _root.style.opacity = 1f;
         }
+        // Pause the game while the dialogue is visible so zombies don't
+        // attack the player while they're reading / choosing. Skip if the
+        // pause menu or game-over screen is already open (they manage
+        // timeScale themselves).
+        bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+        bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+        if (!pauseOpen && !gameOver && Time.timeScale > 0f)
+        {
+            _prevTimeScale = Time.timeScale;
+            Time.timeScale = 0f;
+        }
     }
 
     private void Hide()
@@ -212,6 +224,14 @@ public class DialogueBubble : MonoBehaviour
             // Ignore this guarantees the bubble never blocks other UI.
             _root.style.display = DisplayStyle.None;
         }
+        // Restore timeScale — but only if we were the one who paused it,
+        // and the pause menu / game-over screen isn't currently open.
+        bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+        bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+        if (!pauseOpen && !gameOver && Time.timeScale == 0f)
+        {
+            Time.timeScale = _prevTimeScale > 0f ? _prevTimeScale : 1f;
+        }
     }
 
     private IEnumerator HideAfter(float delay)
@@ -223,6 +243,15 @@ public class DialogueBubble : MonoBehaviour
 
     private void OnDestroy()
     {
+        // Safety: if the dialogue is destroyed while still visible (e.g. scene
+        // unload), restore timeScale so the game doesn't stay frozen.
+        if (Time.timeScale == 0f)
+        {
+            bool pauseOpen = PauseManager.Instance != null && PauseManager.Instance.IsPaused;
+            bool gameOver = GameOverManager.Instance != null && GameOverManager.Instance.IsGameOver;
+            if (!pauseOpen && !gameOver)
+                Time.timeScale = _prevTimeScale > 0f ? _prevTimeScale : 1f;
+        }
         if (_panelGO != null)
         {
             if (_doc != null && _doc.rootVisualElement != null)

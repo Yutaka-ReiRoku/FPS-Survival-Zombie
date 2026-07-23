@@ -40,8 +40,12 @@ public class BombExplosionCutscene : MonoBehaviour
     public float vfxLifetime = 20f;
 
     private bool _played;
+    private bool _playing;
     private VisualElement _fadeRoot;
     private GameObject _fadeDocGO;
+
+    /// <summary>True while the bomb explosion cutscene sequence is running.</summary>
+    public bool IsPlaying => _playing;
 
     public void Play(System.Action onComplete = null)
     {
@@ -52,6 +56,7 @@ public class BombExplosionCutscene : MonoBehaviour
 
     private IEnumerator PlaySequence(System.Action onComplete)
     {
+        _playing = true;
         BuildFadeOverlay();
 
         float prevTimeScale = Time.timeScale;
@@ -163,6 +168,7 @@ public class BombExplosionCutscene : MonoBehaviour
         yield return new WaitForSecondsRealtime(fadeDuration);
 
         Destroy(_fadeDocGO);
+        _playing = false;
         Debug.Log("[BombExplosionCutscene] Sequence complete.");
         onComplete?.Invoke();
     }

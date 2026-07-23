@@ -266,7 +266,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         switch (_state)
         {
             case State.Waiting:
-                _agent.isStopped = true;
+                SetAgentStopped(true);
                 SetAnimSpeed(0f);
                 break;
             case State.Following:
@@ -308,7 +308,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         {
             // Player is too far — stop shooting, follow player immediately.
             _shootStopTimer = 0f;
-            _agent.isStopped = false;
+            SetAgentStopped(false);
             _repathTimer -= Time.deltaTime;
             if (_repathTimer <= 0f)
             {
@@ -322,7 +322,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
             if (_reloadTimer > 0f)
             {
                 _reloadTimer -= Time.deltaTime;
-                _agent.isStopped = true;
+                SetAgentStopped(true);
             }
 
             // Player is close enough — can afford to stop and shoot.
@@ -353,7 +353,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
             if (_shootStopTimer > 0f)
             {
                 _shootStopTimer -= Time.deltaTime;
-                _agent.isStopped = true;
+                SetAgentStopped(true);
 
                 // Face the nearest enemy while shooting (like ZombieAI.FaceTarget).
                 var target = FindNearestEnemy();
@@ -365,7 +365,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
             else
             {
                 // Resume following player.
-                _agent.isStopped = false;
+                SetAgentStopped(false);
                 _repathTimer -= Time.deltaTime;
                 if (_repathTimer <= 0f)
                 {
@@ -383,7 +383,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         // Set Speed parameter directly from agent velocity for snappy response.
         // SmoothDamp was too slow — agent reaches full speed in ~0.1s but the
         // smoothed Speed parameter lagged behind by several seconds.
-        float targetSpeed = _agent.isStopped ? 0f : Mathf.Clamp01(_agent.velocity.magnitude / followSpeed);
+        float targetSpeed = (_agent != null && _agent.isOnNavMesh && _agent.isStopped) ? 0f : Mathf.Clamp01(_agent.velocity.magnitude / followSpeed);
         SetAnimSpeed(targetSpeed);
     }
 
@@ -499,7 +499,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
 
     private void UpdateDowned()
     {
-        _agent.isStopped = true;
+        SetAgentStopped(true);
         SetAnimSpeed(0f);
 
         // ---- Player rescue (hold E) ----
@@ -586,7 +586,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
 
     private void UpdateWalkingAway()
     {
-        _agent.isStopped = false;
+        SetAgentStopped(false);
         _agent.SetDestination(deadEndPoint);
         SetAnimSpeed(Mathf.Clamp01(_agent.velocity.magnitude / followSpeed));
 
@@ -691,8 +691,21 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         else
             transform.position = behind;
         _agent.enabled = true;
-        _agent.isStopped = true;
+        SetAgentStopped(true);
         _repathTimer = 0.5f; // Brief pause before re-pathing.
+    }
+
+    /// <summary>
+    /// Safely sets _agent.isStopped — only when the agent is active and on a
+    /// NavMesh. Setting isStopped on an agent not placed on a NavMesh throws
+    /// "Stop can only be called on an active agent that has been placed on a
+    /// NavMesh" (e.g. right after TeleportNearPlayer re-enables the agent but
+    /// before it has sampled a position on the NavMesh).
+    /// </summary>
+    private void SetAgentStopped(bool stopped)
+    {
+        if (_agent == null || !_agent.enabled || !_agent.isOnNavMesh) return;
+        _agent.isStopped = stopped;
     }
 
     private void SetAnimSpeed(float speed)

@@ -35,6 +35,8 @@ public class JournalUI : MonoBehaviour
     private PlayerControl _playerControl;
     private Coroutine _typewriterCoroutine;
     private Coroutine _closeCoroutine;
+    private Coroutine _deferCoroutine;
+    private JournalData _pendingJournal;
     private bool _open;
 
     public bool IsOpen => _open;
@@ -110,6 +112,39 @@ public class JournalUI : MonoBehaviour
     }
 
     public void Show(JournalData journal)
+    {
+        // If a cutscene is currently playing, defer showing the journal until
+        // the cutscene finishes. This prevents the journal UI and cutscene
+        // from fighting over Time.timeScale — the cutscene sets timeScale=0,
+        // and when the player closes the journal, PanelManager would restore
+        // timeScale=1 while the cutscene is still running.
+        if (CutscenePlayer.IsAnyPlaying)
+        {
+            _pendingJournal = journal;
+            if (_deferCoroutine != null) StopCoroutine(_deferCoroutine);
+            _deferCoroutine = StartCoroutine(ShowAfterCutscene());
+            return;
+        }
+
+        ShowInternal(journal);
+    }
+
+    private System.Collections.IEnumerator ShowAfterCutscene()
+    {
+        // Wait until no cutscene is playing. CutscenePlayer uses
+        // WaitForSecondsRealtime so it runs even when timeScale=0.
+        while (CutscenePlayer.IsAnyPlaying)
+            yield return null;
+
+        var journal = _pendingJournal;
+        _pendingJournal = null;
+        _deferCoroutine = null;
+
+        if (journal != null)
+            ShowInternal(journal);
+    }
+
+    private void ShowInternal(JournalData journal)
     {
         if (PanelManager.Instance != null)
         {

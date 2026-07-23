@@ -36,6 +36,26 @@ public class CutscenePlayer : MonoBehaviour
     public bool IsPlaying => _routine != null;
 
     /// <summary>
+    /// True if ANY CutscenePlayer or BombExplosionCutscene in the scene is
+    /// currently playing. Used by other systems (e.g. JournalUI) to defer
+    /// their UI until the cutscene finishes, so the two don't overlap and
+    /// fight over Time.timeScale.
+    /// </summary>
+    public static bool IsAnyPlaying
+    {
+        get
+        {
+            var all = FindObjectsByType<CutscenePlayer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var cp in all)
+                if (cp.IsPlaying) return true;
+            var bombs = FindObjectsByType<BombExplosionCutscene>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var b in bombs)
+                if (b.IsPlaying) return true;
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Returns true if the given PanelSettings is configured for world-space
     /// rendering (as opposed to screen-space overlay). Detected by name since
     /// PanelSettings doesn't expose a public "worldSpace" flag. The project's
