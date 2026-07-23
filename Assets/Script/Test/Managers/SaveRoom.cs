@@ -40,6 +40,12 @@ public class SaveRoom : MonoBehaviour
              "Set to 2 on SaveRoom_Ch2, 3 on SaveRoom_Ch3, etc. 0 = no cutscene.")]
     public int chapterTransitionOnEnter = 0;
 
+    [Header("Chapter")]
+    [Tooltip("Chapter number this save room belongs to (1-5). Used to determine " +
+             "whether spawners should be re-enabled when the player leaves: if the " +
+             "chapter is already completed, spawners stay off permanently.")]
+    public int chapter = 0;
+
     private PlayerStats _playerStats;
     private bool _inside;
     private bool _cutscenePlayed;
@@ -148,10 +154,27 @@ public class SaveRoom : MonoBehaviour
     private void SetSpawners(bool active)
     {
         if (spawnersToSuppress == null) return;
+        // Never re-enable spawners for a completed chapter. Once the player
+        // has advanced past this chapter, the area should stay zombie-free
+        // even if they re-enter the save room and leave again.
+        if (active && IsChapterCompleted())
+        {
+            Debug.Log($"[SaveRoom] Ch{chapter} is completed — keeping spawners OFF.");
+            active = false;
+        }
         foreach (var s in spawnersToSuppress)
         {
             if (s != null) s.enabled = active;
         }
+    }
+
+    /// <summary>True if this save room's chapter has been completed (player advanced past it).</summary>
+    private bool IsChapterCompleted()
+    {
+        if (chapter <= 0) return false;
+        var sm = StoryManager.Instance;
+        if (sm == null) return false;
+        return sm.CurrentChapter > chapter;
     }
 
     /// <summary>Checkpoint position for external respawn systems.</summary>

@@ -28,6 +28,12 @@ public class SpawnOnPlayerEnter : MonoBehaviour
     [Tooltip("Delay (seconds) after cutscene ends before the prefab spawns. 0 = instant.")]
     public float delayAfterCutscene = 0.5f;
 
+    [Header("Chapter Guard")]
+    [Tooltip("Chapter number this spawner belongs to. If the player has already " +
+             "completed this chapter (CurrentChapter > chapter), the spawner will " +
+             "NOT fire even if the player enters the trigger. 0 = no guard (always fires).")]
+    public int chapter = 0;
+
     private bool _fired;
     private static Transform _runtimeContainer;
 
@@ -43,6 +49,16 @@ public class SpawnOnPlayerEnter : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
         if (_fired && oneShot) return;
+
+        // Don't spawn if this chapter has already been completed (player is
+        // re-exploring a finished area — no new enemies should appear).
+        if (chapter > 0 && StoryManager.Instance != null
+            && StoryManager.Instance.CurrentChapter > chapter)
+        {
+            Debug.Log($"[SpawnOnPlayerEnter] {name}: Ch{chapter} already completed — skipping spawn.");
+            return;
+        }
+
         _fired = true;
 
         if (cutscene != null)
