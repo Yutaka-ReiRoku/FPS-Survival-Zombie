@@ -107,12 +107,131 @@ public class StoryManager : MonoBehaviour
         QuestsCompletedThisChapter = 0;
         StoryComplete = false;
         PendingChapterEntry = false; // Player starts inside Ch1 — no pending entry.
+
+        // If starting at a chapter > 1, auto-complete all quests from previous
+        // chapters so the story state is consistent (triggers won't re-fire,
+        // rewards are granted, completed-quest checks pass). This is the
+        // "chapter select / debug skip" path.
+        if (startingChapter > 1)
+        {
+            SkipPreviousChapters(startingChapter);
+        }
     }
 
     private void Start()
     {
         // Set the first quest of the starting chapter as active.
         SetActiveQuest(GetCurrentQuest());
+
+        // If we skipped to a chapter > 1, teleport the player to that
+        // chapter's save room and set it as the respawn checkpoint. Start()
+        // runs after all Awake calls, so SaveRoom.Start() has already run
+        // and computed checkpoint positions.
+        if (startingChapter > 1)
+        {
+            TeleportPlayerToChapterSaveRoom(startingChapter);
+        }
+    }
+
+    /// <summary>
+    /// Auto-completes all quests in chapters 1..(targetChapter-1) without
+    /// firing events or playing cutscenes. Marks them as completed in
+    /// <see cref="_completedQuests"/> so <see cref="IsQuestCompleted"/> returns
+    /// true. Does NOT grant rewards (skip = no free EXP/journals). Sets
+    /// <see cref="QuestsCompletedThisChapter"/> to 0 for the target chapter.
+    ///
+    /// Called from Awake when startingChapter > 1.
+    /// </summary>
+    private void SkipPreviousChapters(int targetChapter)
+    {
+        for (int ch = 1; ch < targetChapter; ch++)
+        {
+            var quests = GetChapterQuests(ch);
+            if (quests == null) continue;
+            foreach (var q in quests)
+            {
+                if (q != null) _completedQuests.Add(q);
+            }
+        }
+        Debug.Log($"[StoryManager] SkipPreviousChapters({targetChapter}): auto-completed {_completedQuests.Count} quests from chapters 1..{targetChapter - 1}.");
+    }
+
+    /// <summary>Returns the quest array for the given chapter (1-5), or null.</summary>
+    private QuestData[] GetChapterQuests(int ch)
+    {
+        switch (ch)
+        {
+            case 1: return chapter1Quests;
+            case 2: return chapter2Quests;
+            case 3: return chapter3Quests;
+            case 4: return chapter4Quests;
+            case 5: return chapter5Quests;
+            default: return null;
+        }
+    }
+
+    /// <summary>
+    /// Teleports the player to the save room of the target chapter and sets
+    /// it as the respawn checkpoint. Also disables zombie spawners in all
+    /// chapters before the target (they're completed — no zombies there).
+    /// Called from Start when startingChapter > 1.
+    /// </summary>
+    private void TeleportPlayerToChapterSaveRoom(int targetChapter)
+    {
+        // Find the SaveRoom for the target chapter. SaveRoom names follow the
+        // convention "SaveRoom_ChN".
+        var saveRooms = FindObjectsByType<SaveRoom>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        SaveRoom target = null;
+        foreach (var sr in saveRooms)
+        {
+            if (sr.gameObject.name == $"SaveRoom_Ch{targetChapter}")
+            {
+                target = sr;
+                break;
+            }
+        }
+
+        if (target == null)
+        {
+            Debug.LogWarning($"[StoryManager] TeleportPlayerToChapterSaveRoom: SaveRoom_Ch{targetChapter} not found. Player stays at default position.");
+            return;
+        }
+
+        // Set the respawn checkpoint to this save room. Use
+        // EffectiveRespawnPosition which works even before SaveRoom.Start()
+        // has computed _checkpointPos.
+        Vector3 checkpointPos = target.EffectiveRespawnPosition;
+        SaveRoom.LastCheckpoint = checkpointPos;
+        SaveRoom.LastCheckpointRotation = target.transform.rotation;
+        Debug.Log($"[StoryManager] Set respawn checkpoint to {checkpointPos} (SaveRoom_Ch{targetChapter}).");
+
+        // Teleport the player to the checkpoint.
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            var rb = player.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+            player.transform.position = checkpointPos;
+            Debug.Log($"[StoryManager] Teleported player to {checkpointPos} (SaveRoom_Ch{targetChapter}).");
+        }
+
+        // Disable spawners in all chapters before the target — they're
+        // completed and should have no zombies. The ChapterBoundary for
+        // each completed chapter will also keep spawners off when the player
+        // is outside, but we force-disable them here for safety.
+        var boundaries = FindObjectsByType<ChapterBoundary>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var b in boundaries)
+        {
+            if (b.chapter < targetChapter)
+            {
+                b.SetSpawnersActive(false);
+                Debug.Log($"[StoryManager] Disabled spawners for Ch{b.chapter} (completed, skip mode).");
+            }
+        }
     }
 
     /// <summary>The quest list for the current chapter.</summary>

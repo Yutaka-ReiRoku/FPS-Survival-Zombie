@@ -180,6 +180,9 @@ public class CompanionZombieSiege : MonoBehaviour
                 Debug.Log($"[CompanionZombieSiege] Zone lock active — player locked inside {lockZone.name}. Last inside pos: {_lastInsidePos}");
             }
         }
+        // Note: lockZone mode uses teleport-back (Update polling) only — no
+        // physical walls. This lets the player shoot zombies outside the zone
+        // boundary without bullets being blocked by invisible colliders.
         else if (lockBoundary != null)
         {
             lockBoundary.LockExternal();
@@ -342,8 +345,8 @@ public class CompanionZombieSiege : MonoBehaviour
     {
         if (lockZone != null)
         {
-            // Zone lock mode — just clear the state. No explicit unlock needed
-            // since the lock is enforced by Update() polling.
+            // Zone lock mode — just clear the state. No walls to destroy.
+            // The teleport-back in Update() is disabled by _siegeActive=false.
             _playerInsideZone = true;
             Debug.Log("[CompanionZombieSiege] Zone lock released — player can leave.");
         }

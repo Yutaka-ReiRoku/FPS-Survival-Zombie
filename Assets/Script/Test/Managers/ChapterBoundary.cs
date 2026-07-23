@@ -2,23 +2,24 @@ using UnityEngine;
 
 /// <summary>
 /// Marks a chapter's playable area and gates the player's progress using a
-/// trigger volume plus a hard physical wall (no visible walls needed). The
+/// trigger volume plus a hard physical wall for FUTURE chapters only. The
 /// boundary:
 /// - Activates the chapter's zombie spawners when the player enters, and
 ///   deactivates them when the player leaves.
 /// - Activates the pending chapter's first quest when the player enters (see
 ///   StoryManager.PendingChapterEntry).
-/// - Enforces ONE-WAY progression: once the player has completed this chapter
-///   and left, the boundary locks — a physical (non-trigger) wall collider is
-///   enabled, hard-blocking re-entry. No push-back, no oscillation.
 /// - Enforces LINEAR progression: future chapters have their wall enabled from
 ///   the start. The player physically cannot enter a chapter they haven't
 ///   reached yet. When the chapter becomes current, the wall is disabled.
+/// - COMPLETED chapters are NOT locked: the player can freely re-explore
+///   them. Spawners stay OFF (no new zombies), quests don't re-trigger
+///   (QuestTrigger.oneShot), but the player can walk around freely.
 ///
 /// Place one ChapterBoundary per chapter, sized to cover that chapter's area.
 /// The boundary's primary collider should be a trigger (BoxCollider) covering
-/// the full chapter zone. A second non-trigger BoxCollider (the "wall") is
-/// created at runtime and enabled/disabled as needed.
+/// the full chapter zone. Four thin, tall non-trigger BoxColliders (the
+/// "walls") are created at runtime at the boundary edges and enabled only for
+/// future (unreached) chapters.
 /// </summary>
 [RequireComponent(typeof(Collider))]
 public class ChapterBoundary : MonoBehaviour
@@ -34,11 +35,15 @@ public class ChapterBoundary : MonoBehaviour
     [Header("Debug")]
     public Color gizmoColor = new Color(0.2f, 0.8f, 0.3f, 0.25f);
 
-    /// <summary>True once the player has left this chapter after completing it (one-way lock).</summary>
-    private bool _locked;
+    /// <summary>True if this chapter has not been reached yet (wall is up).</summary>
+    private bool _isFutureChapter;
     private Collider _triggerCol;
-    /// <summary>Runtime-created physical (non-trigger) wall collider. Enabled when the chapter is locked or is a future chapter.</summary>
-    private BoxCollider _wallCol;
+    /// <summary>Runtime-created physical (non-trigger) wall colliders — 4 thin
+    /// tall walls at the boundary edges. Enabled only for future (unreached)
+    /// chapters to prevent the player from skipping ahead. Completed chapters
+    /// have no walls — the player can freely re-explore them.</summary>
+    private BoxCollider[] _wallCols;
+    private GameObject[] _wallGOs;
     /// <summary>True while an external system (e.g. WaveQuestInteractable) has locked the player in. Prevents OnTriggerExit from re-locking.</summary>
     private bool _externallyLocked;
     /// <summary>Last known position of the player while inside this boundary (for teleport-back on external lock).</summary>
@@ -78,26 +83,80 @@ public class ChapterBoundary : MonoBehaviour
     }
 
     /// <summary>
-    /// Creates a second BoxCollider (non-trigger) matching the trigger's
-    /// dimensions. This is the "wall" that hard-blocks entry when the chapter
-    /// is locked or is a future chapter. Disabled by default.
+    /// Creates 4 thin, tall non-trigger BoxColliders at the boundary edges
+    /// (X-, X+, Z-, Z+). These are the "walls" that hard-block entry when the
+    /// chapter is locked or is a future chapter. Disabled by default.
+    ///
+    /// Using 4 edge walls instead of a single solid box prevents the player
+    /// from wall-running on a nearby building, wall-jumping + double-jumping
+    /// over the boundary height, and landing on an invisible "ceiling" above
+    /// the chapter. The walls are tall (80+ units) so they cannot be cleared
+    /// by any combination of jump / wall-jump / double-jump, and thin (1 unit)
+    /// so they don't create a walkable surface above the chapter.
     /// </summary>
     private void SetupWallCollider()
     {
-        _wallCol = gameObject.AddComponent<BoxCollider>();
-        _wallCol.isTrigger = false;
+        Vector3 size, center;
         if (_triggerCol is BoxCollider triggerBox)
         {
-            _wallCol.size = triggerBox.size;
-            _wallCol.center = triggerBox.center;
+            size = triggerBox.size;
+            center = triggerBox.center;
         }
         else
         {
             // Fallback for non-box triggers: use a 60x20x60 default.
-            _wallCol.size = new Vector3(60f, 20f, 60f);
-            _wallCol.center = Vector3.zero;
+            size = new Vector3(60f, 20f, 60f);
+            center = Vector3.zero;
         }
-        _wallCol.enabled = false;
+
+        float wallHeight = Mathf.Max(size.y + 100f, 150f);
+        const float wallThickness = 1f;
+
+        // 4 walls: X-, X+, Z-, Z+
+        Vector3[] wallCenters = {
+            new Vector3(center.x - size.x / 2f, center.y, center.z),
+            new Vector3(center.x + size.x / 2f, center.y, center.z),
+            new Vector3(center.x, center.y, center.z - size.z / 2f),
+            new Vector3(center.x, center.y, center.z + size.z / 2f),
+        };
+        Vector3[] wallSizes = {
+            new Vector3(wallThickness, wallHeight, size.z + wallThickness),
+            new Vector3(wallThickness, wallHeight, size.z + wallThickness),
+            new Vector3(size.x + wallThickness, wallHeight, wallThickness),
+            new Vector3(size.x + wallThickness, wallHeight, wallThickness),
+        };
+        string[] wallNames = { "Wall_X-", "Wall_X+", "Wall_Z-", "Wall_Z+" };
+
+        _wallCols = new BoxCollider[4];
+        _wallGOs = new GameObject[4];
+
+        for (int i = 0; i < 4; i++)
+        {
+            var wallGO = new GameObject($"Ch{chapter}_Boundary_{wallNames[i]}");
+            wallGO.transform.SetParent(transform, false);
+            wallGO.transform.localPosition = wallCenters[i];
+            var col = wallGO.AddComponent<BoxCollider>();
+            col.isTrigger = false;
+            col.size = wallSizes[i];
+            col.center = Vector3.zero;
+            col.enabled = false;
+            // Forward collision events to this ChapterBoundary so it can show
+            // notifications when the player hits a wall.
+            var forwarder = wallGO.AddComponent<WallCollisionForwarder>();
+            forwarder.owner = this;
+            _wallGOs[i] = wallGO;
+            _wallCols[i] = col;
+        }
+    }
+
+    /// <summary>Enable/disable all 4 edge walls at once.</summary>
+    private void SetWallsEnabled(bool enabled)
+    {
+        if (_wallCols == null) return;
+        foreach (var col in _wallCols)
+        {
+            if (col != null) col.enabled = enabled;
+        }
     }
 
     private void Start()
@@ -110,13 +169,14 @@ public class ChapterBoundary : MonoBehaviour
         var sm = StoryManager.Instance;
         var player = GetPlayer();
 
-        // If this is a future chapter, enable the wall from the start — but
-        // only if the player is NOT inside (safety: don't trap the player).
-        if (sm != null && chapter > sm.CurrentChapter)
+        // If this is a future chapter (not yet reached), enable the wall from
+        // the start — but only if the player is NOT inside (safety: don't trap).
+        _isFutureChapter = sm != null && chapter > sm.CurrentChapter;
+        if (_isFutureChapter)
         {
             if (player == null || _triggerCol == null || !_triggerCol.bounds.Contains(player.transform.position))
             {
-                _wallCol.enabled = true;
+                SetWallsEnabled(true);
             }
         }
 
@@ -200,9 +260,10 @@ public class ChapterBoundary : MonoBehaviour
                     _isPlayerInside = isInside;
                     if (_isPlayerInside)
                     {
-                        // Enable spawners if the chapter is current
+                        // Enable spawners only if this is the current chapter
+                        // (not a future chapter and not a completed chapter).
                         var sm = StoryManager.Instance;
-                        if (!_locked && (sm == null || chapter <= sm.CurrentChapter))
+                        if (sm == null || sm.CurrentChapter == chapter)
                         {
                             SetSpawnersActive(true);
                             if (sm != null && sm.CurrentChapter == chapter && sm.PendingChapterEntry)
@@ -213,15 +274,10 @@ public class ChapterBoundary : MonoBehaviour
                     }
                     else
                     {
-                        // Disable spawners when player leaves
+                        // Disable spawners when player leaves. Completed
+                        // chapters are NOT locked — the player can re-enter
+                        // freely, but spawners stay off (no new zombies).
                         SetSpawnersActive(false);
-                        var sm = StoryManager.Instance;
-                        bool done = sm != null && (sm.CurrentChapter > chapter || IsChapterComplete(sm));
-                        if (done)
-                        {
-                            _locked = true;
-                            _wallCol.enabled = true;
-                        }
                     }
                 }
             }
@@ -233,12 +289,14 @@ public class ChapterBoundary : MonoBehaviour
     private void HandleChapterChanged(int oldChapter, int newChapter)
     {
         // When this chapter becomes current, disable the wall so the player
-        // can enter. Reset the lock in case of replay.
+        // can enter. Mark as no longer future.
         if (newChapter == chapter)
         {
-            _wallCol.enabled = false;
-            _locked = false;
+            SetWallsEnabled(false);
+            _isFutureChapter = false;
         }
+        // If the player advanced PAST this chapter, it's now a completed
+        // chapter — no wall, no lock. The player can re-explore freely.
     }
 
     private void OnTriggerEnter(Collider other)
@@ -247,14 +305,19 @@ public class ChapterBoundary : MonoBehaviour
 
         var sm = StoryManager.Instance;
 
-        // If the player somehow enters a locked or future chapter (the wall
-        // should prevent this, but just in case), don't activate anything.
-        if (_locked || (sm != null && chapter > sm.CurrentChapter))
+        // If the player somehow enters a future chapter (the wall should
+        // prevent this, but just in case), don't activate anything.
+        if (sm != null && chapter > sm.CurrentChapter)
         {
             return;
         }
 
-        SetSpawnersActive(true);
+        // Only enable spawners for the CURRENT chapter. Completed chapters
+        // (chapter < CurrentChapter) stay quiet — no new zombies.
+        if (sm == null || sm.CurrentChapter == chapter)
+        {
+            SetSpawnersActive(true);
+        }
 
         // Activate pending quest if this is the current chapter.
         if (sm != null && sm.CurrentChapter == chapter && sm.PendingChapterEntry)
@@ -277,49 +340,32 @@ public class ChapterBoundary : MonoBehaviour
         if (!other.CompareTag("Player")) return;
 
         // If an external system (e.g. WaveQuestInteractable) has locked the
-        // player in, teleport them back inside — do NOT enable the full-area
-        // wall collider (that would trap the player inside a solid box).
+        // player in, teleport them back inside.
         if (_externallyLocked)
         {
             TeleportPlayerBack(other);
             return;
         }
 
+        // Disable spawners when the player leaves. Completed chapters are
+        // NOT locked — the player can re-enter freely. Spawners stay off.
         SetSpawnersActive(false);
-
-        // Lock this chapter once the player leaves AND it's completed (or the
-        // player has advanced past it). Enable the hard wall to prevent re-entry.
-        var sm = StoryManager.Instance;
-        bool done = sm != null && (sm.CurrentChapter > chapter || IsChapterComplete(sm));
-        if (done)
-        {
-            _locked = true;
-            _wallCol.enabled = true;
-            Debug.Log($"[ChapterBoundary] Ch{chapter} locked — hard wall enabled after player left.");
-        }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    /// <summary>
+    /// Called by <see cref="WallCollisionForwarder"/> when the player hits one
+    /// of the 4 edge wall colliders. These walls only exist for future
+    /// (unreached) chapters, so we always show the "finish current area first"
+    /// notification.
+    /// </summary>
+    public void OnWallHit(Collision collision)
     {
-        // The wall collider (non-trigger) blocks the player from re-entering a
-        // locked/completed chapter OR from entering a future chapter they haven't
-        // reached yet. Show a contextual notification so they understand why.
         if (!collision.collider.CompareTag("Player")) return;
 
-        var sm = StoryManager.Instance;
-
-        if (_locked)
-        {
-            // Already explored (one-way lock after completing the chapter).
-            SimpleNotification.Show("Khu vực này mình đã khám phá rồi...");
-            Debug.Log($"[ChapterBoundary] Ch{chapter} player hit locked wall — showed 'already explored' notification.");
-        }
-        else if (sm != null && chapter > sm.CurrentChapter)
-        {
-            // Future chapter — not yet unlocked. Player must finish the current area first.
-            SimpleNotification.Show("Tôi cần khám phá xong khu vực trước.");
-            Debug.Log($"[ChapterBoundary] Ch{chapter} player hit future-chapter wall — showed 'finish current area first' notification.");
-        }
+        // Wall only exists for future chapters — tell the player to finish
+        // the current area first.
+        SimpleNotification.Show("Tôi cần khám phá xong khu vực trước.");
+        Debug.Log($"[ChapterBoundary] Ch{chapter} player hit future-chapter wall — showed 'finish current area first' notification.");
     }
 
     /// <summary>
@@ -393,7 +439,8 @@ public class ChapterBoundary : MonoBehaviour
     public void ReevaluateState(Vector3 playerPosition)
     {
         var sm = StoryManager.Instance;
-        if (_locked || (sm != null && chapter > sm.CurrentChapter))
+        // Future chapter — wall is up, player shouldn't be here.
+        if (sm != null && chapter > sm.CurrentChapter)
         {
             _isPlayerInside = false;
             SetSpawnersActive(false);
@@ -403,10 +450,14 @@ public class ChapterBoundary : MonoBehaviour
         if (_triggerCol != null && _triggerCol.bounds.Contains(playerPosition))
         {
             _isPlayerInside = true;
-            SetSpawnersActive(true);
-            if (sm != null && sm.CurrentChapter == chapter && sm.PendingChapterEntry)
+            // Only enable spawners for the current chapter (not completed ones).
+            if (sm == null || sm.CurrentChapter == chapter)
             {
-                sm.ActivatePendingChapterQuest();
+                SetSpawnersActive(true);
+                if (sm != null && sm.CurrentChapter == chapter && sm.PendingChapterEntry)
+                {
+                    sm.ActivatePendingChapterQuest();
+                }
             }
             Debug.Log($"[ChapterBoundary] Ch{chapter} ReevaluateState: Player is inside. Activated spawners.");
         }
@@ -432,5 +483,21 @@ public class ChapterBoundary : MonoBehaviour
             Gizmos.matrix = transform.localToWorldMatrix;
             Gizmos.DrawSphere(sc.center, sc.radius);
         }
+    }
+}
+
+/// <summary>
+/// Tiny component placed on each edge wall child GameObject to forward
+/// collision events to the parent <see cref="ChapterBoundary"/>. Needed
+/// because the walls are on separate child GameObjects (Unity does not allow
+/// two BoxColliders on the same GameObject).
+/// </summary>
+public class WallCollisionForwarder : MonoBehaviour
+{
+    public ChapterBoundary owner;
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (owner != null) owner.OnWallHit(collision);
     }
 }

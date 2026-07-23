@@ -157,6 +157,13 @@ public class SaveRoom : MonoBehaviour
     /// <summary>Checkpoint position for external respawn systems.</summary>
     public Vector3 CheckpointPosition => _checkpointPos;
 
+    /// <summary>
+    /// The effective respawn position, accessible even before Start() runs.
+    /// Uses respawnPoint if assigned, otherwise this transform's position.
+    /// </summary>
+    public Vector3 EffectiveRespawnPosition =>
+        respawnPoint != null ? respawnPoint.position : transform.position;
+
     public void ReevaluateState(Vector3 playerPosition)
     {
         var trigger = GetComponent<Collider>();
