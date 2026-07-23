@@ -124,13 +124,19 @@ public class StoryManager : MonoBehaviour
         SetActiveQuest(GetCurrentQuest());
 
         // If we skipped to a chapter > 1, teleport the player to that
-        // chapter's save room and set it as the respawn checkpoint. Start()
-        // runs after all Awake calls, so SaveRoom.Start() has already run
-        // and computed checkpoint positions.
+        // chapter's save room and set it as the respawn checkpoint. We use
+        // a coroutine that waits one frame so that PlayerMovement.Start()
+        // (which may reset the rigidbody) has already run.
         if (startingChapter > 1)
         {
-            TeleportPlayerToChapterSaveRoom(startingChapter);
+            StartCoroutine(TeleportPlayerNextFrame(startingChapter));
         }
+    }
+
+    private System.Collections.IEnumerator TeleportPlayerNextFrame(int targetChapter)
+    {
+        yield return null; // Wait one frame for all Start() calls to finish.
+        TeleportPlayerToChapterSaveRoom(targetChapter);
     }
 
     /// <summary>
@@ -205,17 +211,27 @@ public class StoryManager : MonoBehaviour
         SaveRoom.LastCheckpointRotation = target.transform.rotation;
         Debug.Log($"[StoryManager] Set respawn checkpoint to {checkpointPos} (SaveRoom_Ch{targetChapter}).");
 
-        // Teleport the player to the checkpoint.
+        // Teleport the player to the checkpoint. Use PlayerMovement.TeleportPlayer
+        // if available (it handles rigidbody + camera + state reset properly),
+        // otherwise fall back to direct position set.
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
-            var rb = player.GetComponent<Rigidbody>();
-            if (rb != null)
+            var pm = player.GetComponent<PlayerMovement>();
+            if (pm != null)
             {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
+                pm.TeleportPlayer(checkpointPos, target.transform.rotation, true, true);
             }
-            player.transform.position = checkpointPos;
+            else
+            {
+                var rb = player.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
+                player.transform.position = checkpointPos;
+            }
             Debug.Log($"[StoryManager] Teleported player to {checkpointPos} (SaveRoom_Ch{targetChapter}).");
         }
 
