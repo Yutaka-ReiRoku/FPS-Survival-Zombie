@@ -68,6 +68,7 @@ public class CompanionZombieSiege : MonoBehaviour
     public float lockZoneTeleportYOffset = 1f;
 
     private readonly List<GameObject> _spawnedZombies = new List<GameObject>();
+    private readonly List<GameObject> _zoneWalls = new List<GameObject>();
     private bool _siegeActive;
     private int _startKills;
     private int _targetKills;
@@ -140,6 +141,92 @@ public class CompanionZombieSiege : MonoBehaviour
         UnityEngine.Physics.SyncTransforms();
     }
 
+    private void BuildZoneWalls()
+    {
+        if (lockZone == null) return;
+        DestroyZoneWalls();
+
+        float wallHeight = 150f;
+        const float thickness = 1f;
+
+        if (lockZone is BoxCollider box)
+        {
+            Vector3 center = box.center;
+            Vector3 size = box.size;
+
+            var centers = new Vector3[] {
+                new Vector3(center.x - size.x / 2f, 0f, center.z),
+                new Vector3(center.x + size.x / 2f, 0f, center.z),
+                new Vector3(center.x, 0f, center.z - size.z / 2f),
+                new Vector3(center.x, 0f, center.z + size.z / 2f),
+            };
+            var wallSizes = new Vector3[] {
+                new Vector3(thickness, wallHeight, size.z + thickness),
+                new Vector3(thickness, wallHeight, size.z + thickness),
+                new Vector3(size.x + thickness, wallHeight, thickness),
+                new Vector3(size.x + thickness, wallHeight, thickness),
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                var go = new GameObject($"SiegeWall_{i}");
+                go.transform.SetParent(lockZone.transform, false);
+                go.transform.localPosition = centers[i];
+                go.layer = lockZone.gameObject.layer;
+
+                var col = go.AddComponent<BoxCollider>();
+                col.isTrigger = false;
+                col.size = wallSizes[i];
+                col.center = Vector3.zero;
+
+                _zoneWalls.Add(go);
+            }
+        }
+        else
+        {
+            // Non-box collider: surround with a simple box-based cage.
+            var bounds = lockZone.bounds;
+            Vector3 c = bounds.center;
+            Vector3 s = bounds.size;
+
+            var centers = new Vector3[] {
+                new Vector3(c.x - s.x / 2f, c.y, c.z),
+                new Vector3(c.x + s.x / 2f, c.y, c.z),
+                new Vector3(c.x, c.y, c.z - s.z / 2f),
+                new Vector3(c.x, c.y, c.z + s.z / 2f),
+            };
+            var wallSizes = new Vector3[] {
+                new Vector3(thickness, wallHeight, s.z + thickness * 2),
+                new Vector3(thickness, wallHeight, s.z + thickness * 2),
+                new Vector3(s.x + thickness * 2, wallHeight, thickness),
+                new Vector3(s.x + thickness * 2, wallHeight, thickness),
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                var go = new GameObject($"SiegeWall_{i}");
+                go.transform.position = centers[i];
+                go.layer = lockZone.gameObject.layer;
+
+                var col = go.AddComponent<BoxCollider>();
+                col.isTrigger = false;
+                col.size = wallSizes[i];
+                col.center = Vector3.zero;
+
+                _zoneWalls.Add(go);
+            }
+        }
+    }
+
+    private void DestroyZoneWalls()
+    {
+        foreach (var w in _zoneWalls)
+        {
+            if (w != null) Destroy(w);
+        }
+        _zoneWalls.Clear();
+    }
+
     /// <summary>
     /// Starts the siege. Spawns zombies and waits for the player to kill the
     /// required number. When complete, invokes <paramref name="onCompleted"/>
@@ -158,6 +245,8 @@ public class CompanionZombieSiege : MonoBehaviour
         //   2) lockBoundary (fallback): the whole ChapterBoundary.
         if (lockZone != null)
         {
+            // Build physical walls around the zone so the player can't climb over.
+            BuildZoneWalls();
             FindPlayer();
             if (_player != null)
             {
@@ -180,9 +269,6 @@ public class CompanionZombieSiege : MonoBehaviour
                 Debug.Log($"[CompanionZombieSiege] Zone lock active — player locked inside {lockZone.name}. Last inside pos: {_lastInsidePos}");
             }
         }
-        // Note: lockZone mode uses teleport-back (Update polling) only — no
-        // physical walls. This lets the player shoot zombies outside the zone
-        // boundary without bullets being blocked by invisible colliders.
         else if (lockBoundary != null)
         {
             lockBoundary.LockExternal();
@@ -343,10 +429,9 @@ public class CompanionZombieSiege : MonoBehaviour
     /// <summary>Releases the boundary/zone lock and restores chapter spawners.</summary>
     private void UnlockBoundary()
     {
+        DestroyZoneWalls();
         if (lockZone != null)
         {
-            // Zone lock mode — just clear the state. No walls to destroy.
-            // The teleport-back in Update() is disabled by _siegeActive=false.
             _playerInsideZone = true;
             Debug.Log("[CompanionZombieSiege] Zone lock released — player can leave.");
         }
