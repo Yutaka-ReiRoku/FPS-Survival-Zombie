@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.AI;
-using Unity.AI.Navigation;
 
 public class Spawm : MonoBehaviour
 {
@@ -67,8 +66,6 @@ public class Spawm : MonoBehaviour
 
     private void Start()
     {
-        Invoke(nameof(BuildNavMeshAtRuntime), 0.5f);
-
         if (player == null)
         {
             GameObject p = GameObject.FindGameObjectWithTag("Player");
@@ -106,37 +103,6 @@ public class Spawm : MonoBehaviour
                 poolDictionary[prefab].Add(zombie);
             }
         }
-    }
-
-    private void BuildNavMeshAtRuntime()
-    {
-        Debug.Log("[Spawm] BuildNavMeshAtRuntime starting...");
-
-        // Disable the scene's built-in NavMeshSurface (Volume mode) to prevent conflict
-        var oldSurface = FindObjectsByType<NavMeshSurface>(FindObjectsSortMode.None);
-        Debug.Log($"[Spawm] Found {oldSurface.Length} NavMeshSurface(s) to disable");
-        foreach (var s in oldSurface)
-            s.gameObject.SetActive(false);
-
-        NavMesh.RemoveAllNavMeshData();
-
-        foreach (var renderer in FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
-        {
-            if (renderer.GetComponent<NavMeshModifier>() == null)
-            {
-                var modifier = renderer.gameObject.AddComponent<NavMeshModifier>();
-                modifier.overrideArea = true;
-                modifier.area = 0;
-            }
-        }
-
-        var go = new GameObject("NavMeshSurface_Runtime");
-        var surface = go.AddComponent<NavMeshSurface>();
-        surface.collectObjects = CollectObjects.All;
-        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-        surface.layerMask = ~0;
-        surface.defaultArea = 0;
-        surface.BuildNavMesh();
     }
 
     private GameObject GetPooledZombie(GameObject prefab)

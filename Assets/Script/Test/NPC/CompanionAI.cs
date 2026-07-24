@@ -38,7 +38,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     public float followDistance = 4f;
     public float repathInterval = 0.25f;
     [Tooltip("How long the companion stops to shoot before resuming movement (L4D2 style).")]
-    public float shootStopDuration = 1.2f;
+    public float shootStopDuration = 0.35f;
     [Tooltip("Smooth time for Speed animator parameter.")]
     public float speedSmoothTime = 0.15f;
     [Tooltip("If player is farther than this, companion abandons combat to catch up (L4D2 style).")]
@@ -46,14 +46,16 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
 
     [Header("Combat — Shotgun")]
     [Tooltip("Range at which the companion can detect and shoot enemies.")]
-    public float detectRange = 15f;
-    public float shootCooldown = 2.0f;
-    public int shotgunPellets = 5;
-    public float shotgunSpreadDeg = 15f;
-    public float shotgunRange = 15f;
-    public int shotgunDamagePerRay = 15;
-    [Tooltip("Muzzle flash / tracer effect prefab (optional).")]
+    public float detectRange = 20f;
+    public float shootCooldown = 1.5f;
+    public int shotgunPellets = 8;
+    public float shotgunSpreadDeg = 8f;
+    public float shotgunRange = 20f;
+    public int shotgunDamagePerRay = 18;
+    [Tooltip("Muzzle flash effect prefab (spawned at gun barrel, once per shot).")]
     public GameObject muzzleFlashPrefab;
+    [Tooltip("Impact effect prefab (spawned at each hit point). Optional — runtime sparks used as fallback.")]
+    public GameObject impactPrefab;
     [Tooltip("Audio clip played when firing.")]
     public AudioClip shootClip;
 
@@ -133,6 +135,7 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     private cowsins.InputManager _playerInput; // Cached player InputManager (Input System) for reading the Interacting action
     private float _speedVelocity; // SmoothDamp velocity for Speed parameter
     private float _currentAnimSpeed; // Current smoothed Speed value
+    private float _ikWeight; // Smoothed IK weight for left hand grip
     private Transform _rootBone; // Skeleton root bone (for fixing sink issue)
     private Transform _leftHandGrip; // Grip target on the shotgun forestock (for IK)
     private Collider[] _enemyBuffer = new Collider[32];
@@ -413,17 +416,21 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
 
     private void ShootAt(Transform target)
     {
-        // Use Play() directly for reliable state transition (triggers can be
-        // consumed without firing when multiple conditions overlap).
         if (animator != null) animator.CrossFade("Shoot", 0.1f, 0, 0f);
         if (shootClip != null) _audio.PlayOneShot(shootClip);
         _ammoRemaining--;
 
         Vector3 origin = transform.position + Vector3.up * 1.5f;
-        Vector3 baseDir = (target.position + Vector3.up * 1f - origin).normalized;
 
-        // Build a layer mask that excludes the player and the companion itself
-        // so pellets don't get blocked by friendly colliders.
+        var targetCollider = target.GetComponent<Collider>();
+        Vector3 aimPoint;
+        if (targetCollider != null)
+            aimPoint = targetCollider.bounds.center;
+        else
+            aimPoint = target.position + Vector3.up * 1f;
+
+        Vector3 baseDir = (aimPoint - origin).normalized;
+
         int shootMask = ~0;
         int playerLayer = LayerMask.NameToLayer("Player");
         if (playerLayer >= 0) shootMask &= ~(1 << playerLayer);
@@ -433,26 +440,83 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
         for (int i = 0; i < shotgunPellets; i++)
         {
             Vector3 dir = ApplySpread(baseDir, shotgunSpreadDeg);
-            if (Physics.Raycast(origin, dir, out var hit, shotgunRange, shootMask, QueryTriggerInteraction.Ignore))
-            {
-                // Don't hit self (child colliders).
-                if (hit.collider.transform.IsChildOf(transform)) continue;
+            bool hasHit = false;
+            Vector3 hitPoint = origin + dir * shotgunRange;
 
-                var dmg = hit.collider.GetComponent<IDamageable>();
+            if (targetCollider != null && targetCollider.Raycast(new Ray(origin, dir), out var targetHit, shotgunRange))
+            {
+                hasHit = true;
+                hitPoint = targetHit.point;
+                var dmg = targetHit.collider.GetComponent<IDamageable>();
                 if (dmg != null)
                 {
-                    bool headshot = hit.collider.CompareTag("Critical");
+                    bool headshot = targetHit.collider.CompareTag("Critical");
                     dmg.Damage(shotgunDamagePerRay, headshot);
                 }
             }
+            else if (Physics.Raycast(origin, dir, out var hit, shotgunRange, shootMask, QueryTriggerInteraction.Ignore))
+            {
+                if (!hit.collider.transform.IsChildOf(transform))
+                {
+                    hasHit = true;
+                    hitPoint = hit.point;
+                    var dmg = hit.collider.GetComponent<IDamageable>();
+                    if (dmg != null)
+                    {
+                        bool headshot = hit.collider.CompareTag("Critical");
+                        dmg.Damage(shotgunDamagePerRay, headshot);
+                    }
+                }
+            }
+
+            SpawnTracer(origin, hitPoint);
+            if (hasHit) SpawnImpact(hitPoint);
         }
 
-        // Optional muzzle flash VFX at origin.
+        // Muzzle flash at the gun barrel (once per shot).
         if (muzzleFlashPrefab != null)
         {
             var fx = Instantiate(muzzleFlashPrefab, origin, Quaternion.LookRotation(baseDir));
             Destroy(fx, 1f);
         }
+    }
+
+    private void SpawnTracer(Vector3 from, Vector3 to)
+    {
+        var go = new GameObject("Tracer");
+        var lr = go.AddComponent<LineRenderer>();
+        lr.startWidth = 0.04f;
+        lr.endWidth = 0.01f;
+        lr.positionCount = 2;
+        lr.SetPositions(new Vector3[] { from, to });
+        lr.material = new Material(Shader.Find("Sprites/Default"));
+        lr.startColor = new Color(1f, 0.9f, 0.4f, 0.8f);
+        lr.endColor = new Color(1f, 0.6f, 0f, 0f);
+        lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        lr.receiveShadows = false;
+        Destroy(go, 0.15f);
+    }
+
+    private void SpawnImpact(Vector3 point)
+    {
+        if (impactPrefab != null)
+        {
+            var impact = Instantiate(impactPrefab, point, Quaternion.identity);
+            Destroy(impact, 1.5f);
+            return;
+        }
+
+        // Runtime spark effect (fallback).
+        var spark = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        spark.transform.position = point;
+        spark.transform.localScale = Vector3.one * 0.08f;
+        Destroy(spark.GetComponent<SphereCollider>());
+        var mr = spark.GetComponent<MeshRenderer>();
+        mr.material = new Material(Shader.Find("Sprites/Default"));
+        mr.material.color = new Color(1f, 0.8f, 0.2f, 1f);
+        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        mr.receiveShadows = false;
+        Destroy(spark, 0.3f);
     }
 
     /// <summary>Plays the Reload animation and refills the magazine when complete.</summary>
@@ -711,12 +775,8 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     private void SetAnimSpeed(float speed)
     {
         if (animator == null) return;
-        // Skip when reloading — the Reload state should not be interrupted.
-        if (_reloadTimer > 0f) return;
-        // Smooth Speed manually (like ZombieAI's 0.15s damping) without using
-        // Animator.SetFloat's built-in damping, which can cancel pending Play
-        // / CrossFade calls made in the same frame.
-        _currentAnimSpeed = Mathf.SmoothDamp(_currentAnimSpeed, speed, ref _speedVelocity, 0.15f, float.MaxValue, Time.deltaTime);
+        float dt = Mathf.Max(Time.deltaTime, 0.0001f);
+        _currentAnimSpeed = Mathf.SmoothDamp(_currentAnimSpeed, speed, ref _speedVelocity, speedSmoothTime, float.MaxValue, dt);
         animator.SetFloat(SpeedHash, _currentAnimSpeed);
     }
 
@@ -767,18 +827,14 @@ public class CompanionAI : MonoBehaviour, IDamageable, IEnemyHealthReadout
     {
         if (animator == null || _leftHandGrip == null) return;
 
-        // Don't apply IK when downed (character is incapacitated, not holding gun).
-        if (_state == State.Downed)
+        float targetWeight = (_state == State.Downed) ? 0f : 1f;
+        _ikWeight = Mathf.MoveTowards(_ikWeight, targetWeight, Time.deltaTime * 8f);
+        animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, _ikWeight);
+        animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, _ikWeight);
+        if (_ikWeight > 0.01f)
         {
-            animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0f);
-            animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0f);
-            return;
+            animator.SetIKPosition(AvatarIKGoal.LeftHand, _leftHandGrip.position);
+            animator.SetIKRotation(AvatarIKGoal.LeftHand, _leftHandGrip.rotation);
         }
-
-        // Pin left hand to the forestock grip (both position and rotation).
-        animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1f);
-        animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1f);
-        animator.SetIKPosition(AvatarIKGoal.LeftHand, _leftHandGrip.position);
-        animator.SetIKRotation(AvatarIKGoal.LeftHand, _leftHandGrip.rotation);
     }
 }
